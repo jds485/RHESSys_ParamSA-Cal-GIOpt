@@ -12,7 +12,7 @@ import numpy as np
 import string
 
 #%% Set working directory
-os.chdir('C:\\Users\\jsmif\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\RHESSysFilePreparation\\defs\\MorrisSampleLocs')
+os.chdir('/scratch/js4yd/MorrisSA/RHESSysRuns')
 
 #%% Set parameters
 roundTol = 10
@@ -23,33 +23,33 @@ MorrisSample_df = pd.read_csv('MorrisSamples_AfterProcessing.csv')
 
 #%% Make the definition files from the Morris sample locations and place them in new directories by replicate ID
 #Load original def files. Use object dtype because the parameters each have different types.
-basin = pd.read_table('C:\\Users\\jsmif\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\RHESSysFilePreparation\\defs\\basin_basin.def', delim_whitespace=True, header=None, dtype = 'object')
-zone = pd.read_table('C:\\Users\\jsmif\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\RHESSysFilePreparation\\defs\\zone_zone.def', delim_whitespace=True, header=None, dtype = 'object')
-hill = pd.read_table('C:\\Users\\jsmif\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\RHESSysFilePreparation\\defs\\hillslope_hillslope.def', delim_whitespace=True, header=None, dtype = 'object')
-soil_loam = pd.read_table('C:\\Users\\jsmif\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\RHESSysFilePreparation\\defs\\soil_loam.def', delim_whitespace=True, header=None, dtype = 'object')
-soil_cloam = pd.read_table('C:\\Users\\jsmif\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\RHESSysFilePreparation\\defs\\soil_loam_compact.def', delim_whitespace=True, header=None, dtype = 'object')
-soil_sloam = pd.read_table('C:\\Users\\jsmif\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\RHESSysFilePreparation\\defs\\soil_silt_loam.def', delim_whitespace=True, header=None, dtype = 'object')
-soil_csloam = pd.read_table('C:\\Users\\jsmif\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\RHESSysFilePreparation\\defs\\soil_silt_loam_compact.def', delim_whitespace=True, header=None, dtype = 'object')
-land_grass = pd.read_table('C:\\Users\\jsmif\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\RHESSysFilePreparation\\defs\\landuse_grass.def', delim_whitespace=True, header=None, dtype = 'object')
-land_undev = pd.read_table('C:\\Users\\jsmif\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\RHESSysFilePreparation\\defs\\landuse_undeveloped.def', delim_whitespace=True, header=None, dtype = 'object')
-land_urban = pd.read_table('C:\\Users\\jsmif\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\RHESSysFilePreparation\\defs\\landuse_urban.def', delim_whitespace=True, header=None, dtype = 'object')
-land_septic = pd.read_table('C:\\Users\\jsmif\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\RHESSysFilePreparation\\defs\\landuse_urbanSeptic.def', delim_whitespace=True, header=None, dtype = 'object')
-veg_Tree = pd.read_table('C:\\Users\\jsmif\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\RHESSysFilePreparation\\defs\\stratum_deciduousBES.def', delim_whitespace=True, header=None, dtype = 'object')
-veg_grass = pd.read_table('C:\\Users\\jsmif\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\RHESSysFilePreparation\\defs\\stratum_grass.def', delim_whitespace=True, header=None, dtype = 'object')
-veg_NonVeg = pd.read_table('C:\\Users\\jsmif\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\RHESSysFilePreparation\\defs\\stratum_nonveg.def', delim_whitespace=True, header=None, dtype = 'object')
+basin = pd.read_table('/scratch/js4yd/MorrisSA/RHESSys_Baisman30m_g74/defs/basin_basin.def', delim_whitespace=True, header=None, dtype = 'object')
+zone = pd.read_table('/scratch/js4yd/MorrisSA/RHESSys_Baisman30m_g74/defs/zone_zone.def', delim_whitespace=True, header=None, dtype = 'object')
+hill = pd.read_table('/scratch/js4yd/MorrisSA/RHESSys_Baisman30m_g74/defs/hillslope_hillslope.def', delim_whitespace=True, header=None, dtype = 'object')
+soil_loam = pd.read_table('/scratch/js4yd/MorrisSA/RHESSys_Baisman30m_g74/defs/soil_loam.def', delim_whitespace=True, header=None, dtype = 'object')
+soil_cloam = pd.read_table('/scratch/js4yd/MorrisSA/RHESSys_Baisman30m_g74/defs/soil_loam_compact.def', delim_whitespace=True, header=None, dtype = 'object')
+soil_sloam = pd.read_table('/scratch/js4yd/MorrisSA/RHESSys_Baisman30m_g74/defs/soil_silt_loam.def', delim_whitespace=True, header=None, dtype = 'object')
+soil_csloam = pd.read_table('/scratch/js4yd/MorrisSA/RHESSys_Baisman30m_g74/defs/soil_silt_loam_compact.def', delim_whitespace=True, header=None, dtype = 'object')
+land_grass = pd.read_table('/scratch/js4yd/MorrisSA/RHESSys_Baisman30m_g74/defs/landuse_grass.def', delim_whitespace=True, header=None, dtype = 'object')
+land_undev = pd.read_table('/scratch/js4yd/MorrisSA/RHESSys_Baisman30m_g74/defs/landuse_undeveloped.def', delim_whitespace=True, header=None, dtype = 'object')
+land_urban = pd.read_table('/scratch/js4yd/MorrisSA/RHESSys_Baisman30m_g74/defs/landuse_urban.def', delim_whitespace=True, header=None, dtype = 'object')
+land_septic = pd.read_table('/scratch/js4yd/MorrisSA/RHESSys_Baisman30m_g74/defs/landuse_urbanSeptic.def', delim_whitespace=True, header=None, dtype = 'object')
+veg_Tree = pd.read_table('/scratch/js4yd/MorrisSA/RHESSys_Baisman30m_g74/defs/stratum_deciduousBES.def', delim_whitespace=True, header=None, dtype = 'object')
+veg_grass = pd.read_table('/scratch/js4yd/MorrisSA/RHESSys_Baisman30m_g74/defs/stratum_grass.def', delim_whitespace=True, header=None, dtype = 'object')
+veg_NonVeg = pd.read_table('/scratch/js4yd/MorrisSA/RHESSys_Baisman30m_g74/defs/stratum_nonveg.def', delim_whitespace=True, header=None, dtype = 'object')
 
 #for i in range(len(MorrisSample_df.iloc[:,0])):
 for i in [int(sys.argv[1])]:
     #Save original wd
     od = os.getcwd()
-    #Make new directory for the replicate.
-    os.mkdir(od+'\\Run'+str(i))
+    #Make new directory for the replicate. This is the directory where code to run GIS2RHESSys pre-processing will be
+    os.mkdir(od+'/Run'+str(i))
     #Make the directory in which the RHESSys simulation will be run
-    os.mkdir(od+'\\Run'+str(i)+'\\RHESSys_Baisman30m_g74')
+    os.mkdir(od+'/Run'+str(i)+'/RHESSys_Baisman30m_g74')
     #Make new directory for the def files in that folder
-    os.mkdir(od+'\\Run'+str(i)+'\\RHESSys_Baisman30m_g74'+'\\defs')
+    os.mkdir(od+'/Run'+str(i)+'/RHESSys_Baisman30m_g74'+'/defs')
     #Change into that directory
-    os.chdir(od+'\\Run'+str(i)+'\\RHESSys_Baisman30m_g74'+'\\defs')
+    os.chdir(od+'/Run'+str(i)+'/RHESSys_Baisman30m_g74'+'/defs')
     
     #%% Zone
     #Edit the zone file with the variables generated
@@ -476,7 +476,7 @@ for i in [int(sys.argv[1])]:
     v102.loc[:,0][v102.loc[:,1] == 'epc.deadwood_flig'] = '%.10f' % (1. - float(v102.loc[:,0][v102.loc[:,1] == 'epc.deadwood_fcel']))
     
     #Ensure that the sum of these two variables = 1 because rounding has now been completed.
-    if ((float(v102.loc[:,0][v102.loc[:,1] == 'epc.deadwood_flig']) + float(v102.loc[:,0][v102.loc[:,1] == 'epc.deadwood_fcel'])) != 1.0):
+    if (float('%.10f' % (float(v102.loc[:,0][v102.loc[:,1] == 'epc.deadwood_flig']) + float(v102.loc[:,0][v102.loc[:,1] == 'epc.deadwood_fcel']))) != 1.0):
         sys.exit('Vegetation tree epc.deadwood_flig + epc.deadwood_fcel != 1 for Replicate = %s' % str(i))
     
     #Write new file
@@ -539,15 +539,15 @@ for i in [int(sys.argv[1])]:
     v3.loc[:,0][v3.loc[:,1] == 'K_reflectance'] = '%.10f' % (1. - float(v3.loc[:,0][v3.loc[:,1] == 'K_absorptance']) - float(v3.loc[:,0][v3.loc[:,1] == 'K_transmittance']))
     
     #Ensure that the sum of these variables = 1 because rounding has now been completed.
-    if ((float(v3.loc[:,0][v3.loc[:,1] == 'K_reflectance']) + float(v3.loc[:,0][v3.loc[:,1] == 'K_absorptance']) + float(v3.loc[:,0][v3.loc[:,1] == 'K_transmittance'])) != 1.0):
+    if (float('%.10f' % (float(v3.loc[:,0][v3.loc[:,1] == 'K_reflectance']) + float(v3.loc[:,0][v3.loc[:,1] == 'K_absorptance']) + float(v3.loc[:,0][v3.loc[:,1] == 'K_transmittance']))) != 1.0):
         sys.exit('Vegetation tree K reflectance + K absorptance + K transmittance != 1 for Replicate = %s' % str(i))
 
-    if ((float(v3.loc[:,0][v3.loc[:,1] == 'PAR_reflectance']) + float(v3.loc[:,0][v3.loc[:,1] == 'PAR_absorptance']) + float(v3.loc[:,0][v3.loc[:,1] == 'PAR_transmittance'])) != 1.0):
+    if (float('%.10f' % (float(v3.loc[:,0][v3.loc[:,1] == 'PAR_reflectance']) + float(v3.loc[:,0][v3.loc[:,1] == 'PAR_absorptance']) + float(v3.loc[:,0][v3.loc[:,1] == 'PAR_transmittance']))) != 1.0):
         sys.exit('Vegetation tree PAR reflectance + PAR absorptance + PAR transmittance != 1 for Replicate = %s' % str(i))
         
     #Write new file
     v3.to_csv('stratum_grass.def', sep=' ', index=False, header=False, encoding='utf-8')
-    del v3, v102, Indv3, defName, v, ck, checkVals
+    del v3, v102, Indv3, defName, v, ck, checkVals, checkVals2
     
     #v4 - non-vegetation   
     #Edit the land file with the variables generated
@@ -588,12 +588,12 @@ for i in [int(sys.argv[1])]:
     v4.loc[:,0][v4.loc[:,1] == 'K_absorptance'] = '%.10f' % (1. - float(v4.loc[:,0][v4.loc[:,1] == 'K_reflectance']) - float(v4.loc[:,0][v4.loc[:,1] == 'K_transmittance']))
     
     #Ensure that the sum of these three variables = 1 because rounding has now been completed.
-    if ((float(v4.loc[:,0][v4.loc[:,1] == 'K_reflectance']) + float(v4.loc[:,0][v4.loc[:,1] == 'K_absorptance']) + float(v4.loc[:,0][v4.loc[:,1] == 'K_transmittance'])) != 1.0):
+    if (float('%.10f' % (float(v4.loc[:,0][v4.loc[:,1] == 'K_reflectance']) + float(v4.loc[:,0][v4.loc[:,1] == 'K_absorptance']) + float(v4.loc[:,0][v4.loc[:,1] == 'K_transmittance']))) != 1.0):
         sys.exit('Vegetation nonveg K reflectance + K absorptance + K transmittance != 1 for Replicate = %s' % str(i))
     
     #Write new file
     v4.to_csv('stratum_nonveg.def', sep=' ', index=False, header=False, encoding='utf-8')
-    del v4, Indv4, defName, v, ck, checkVals
+    del v4, Indv4, defName, v, ck, checkVals, checkVals2
     
     #Copy the basin def file, too
     basin.to_csv('basin_basin.def', sep=' ', index=False, header=False, encoding='utf-8')
