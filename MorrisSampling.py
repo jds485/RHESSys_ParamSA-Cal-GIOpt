@@ -23,7 +23,7 @@ import random as rd
 import string
 
 #%% Set working directory
-os.chdir('C:\\Users\\jsmif\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\RHESSysFilePreparation\\defs\\MorrisSampleLocs')
+os.chdir('/scratch/js4yd/MorrisSA/RHESSysRuns')
 
 #Set the random seed for randomly generated values
 rd.seed(1349)
@@ -49,10 +49,10 @@ ProbFile = pd.read_csv('BaismanMorrisSamplingProblemFile_Full.csv')
 
 #Check that the lower bounds are all less than the upper bounds
 if not all(ProbFile.iloc[:,2] < ProbFile.iloc[:,3]):
-    sys.exit('For parameters, all lower bounds are not less than the upper bounds')
+    sys.exit('PyERROR: For parameters, all lower bounds are not less than the upper bounds')
 
 #Save that file into a new file with no headers
-ProbFile.drop('DefParameter', axis = 1).to_csv('BaismanMorrisSamplingProblemFile_ForSA.csv', header=False, index=False) 
+#ProbFile.drop('DefParameter', axis = 1).to_csv('BaismanMorrisSamplingProblemFile_ForSA.csv', header=False, index=False) 
 
 #use the SALib function to read that file
 #SAProbFile = read_param_file('BaismanMorrisSamplingProblemFile_ForSA.csv')
@@ -120,7 +120,7 @@ for i in range(len(MorrisSample_df.filter(regex='silt$').columns)):
                 #Check if this will make clay greater than upper bound on clay
                 if ((clay[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_clay'].index[0],3])):
                     #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('The sum of clay, silt, and sand cannot be 1 for Replicate = %s' % str(j))
+                    sys.exit('PyERROR: The sum of clay, silt, and sand cannot be 1 for Replicate = %s' % str(j))
                 else:
                     clay[j] += delta
             elif ((clay[j] + delta/2) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_clay'].index[0],3])):
@@ -131,7 +131,7 @@ for i in range(len(MorrisSample_df.filter(regex='silt$').columns)):
                 #Check if this will make silt greater than upper bound on silt
                 if ((silt[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_silt'].index[0],3])):
                     #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('The sum of clay, silt, and sand cannot be 1 for Replicate = %s' % str(j))
+                    sys.exit('PyERROR: The sum of clay, silt, and sand cannot be 1 for Replicate = %s' % str(j))
                 else:
                     silt[j] += delta
             else:
@@ -154,7 +154,7 @@ for i in range(len(MorrisSample_df.filter(regex='silt$').columns)):
                 #Check if this will make clay less than lower bound on clay
                 if ((clay[j] + delta) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_clay'].index[0],2])):
                     #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('The sum of clay, silt, and sand cannot be 1 for Replicate = %s' % str(j))
+                    sys.exit('PyERROR: The sum of clay, silt, and sand cannot be 1 for Replicate = %s' % str(j))
                 else:
                     clay[j] += delta
             elif ((clay[j] + delta/2) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_clay'].index[0],2])):
@@ -165,7 +165,7 @@ for i in range(len(MorrisSample_df.filter(regex='silt$').columns)):
                 #Check if this will make silt less than lower bound on silt
                 if ((silt[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_silt'].index[0],2])):
                     #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('The sum of clay, silt, and sand cannot be 1 for Replicate = %s' % str(j))
+                    sys.exit('PyERROR: The sum of clay, silt, and sand cannot be 1 for Replicate = %s' % str(j))
                 else:
                     silt[j] += delta
             else:
@@ -186,7 +186,7 @@ for i in range(len(MorrisSample_df.filter(regex='silt$').columns)):
                 #Check if this will make clay greater than upper bound on clay
                 if ((clay[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_clay'].index[0],3])):
                     #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('The sum of clay, silt, and sand cannot be 1 for Replicate = %s' % str(j))
+                    sys.exit('PyERROR: The sum of clay, silt, and sand cannot be 1 for Replicate = %s' % str(j))
                 else:
                     clay[j] += delta
             elif ((clay[j] + delta/2) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_clay'].index[0],3])):
@@ -197,7 +197,7 @@ for i in range(len(MorrisSample_df.filter(regex='silt$').columns)):
                 #Check if this will make sand greater than upper bound on sand
                 if ((sand[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_sand'].index[0],3])):
                     #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('The sum of clay, silt, and sand cannot be 1 for Replicate = %s' % str(j))
+                    sys.exit('PyERROR: The sum of clay, silt, and sand cannot be 1 for Replicate = %s' % str(j))
                 else:
                     sand[j] += delta
             else:
@@ -220,7 +220,7 @@ for i in range(len(MorrisSample_df.filter(regex='silt$').columns)):
                 #Check if this will make clay less than lower bound on clay
                 if ((clay[j] + delta) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_clay'].index[0],2])):
                     #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('The sum of clay, silt, and sand cannot be 1 for Replicate = %s' % str(j))
+                    sys.exit('PyERROR: The sum of clay, silt, and sand cannot be 1 for Replicate = %s' % str(j))
                 else:
                     clay[j] += delta
             elif ((clay[j] + delta/2) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_clay'].index[0],2])):
@@ -231,7 +231,7 @@ for i in range(len(MorrisSample_df.filter(regex='silt$').columns)):
                 #Check if this will make sand less than lower bound on sand
                 if ((sand[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_sand'].index[0],2])):
                     #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('The sum of clay, silt, and sand cannot be 1 for Replicate = %s' % str(j))
+                    sys.exit('PyERROR: The sum of clay, silt, and sand cannot be 1 for Replicate = %s' % str(j))
                 else:
                     sand[j] += delta
             else:
@@ -253,7 +253,7 @@ for i in range(len(MorrisSample_df.filter(regex='silt$').columns)):
                 #Check if this will make silt greater than upper bound on silt
                 if ((silt[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_silt'].index[0],3])):
                     #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('The sum of clay, silt, and sand cannot be 1 for Replicate = %s' % str(j))
+                    sys.exit('PyERROR: The sum of clay, silt, and sand cannot be 1 for Replicate = %s' % str(j))
                 else:
                     silt[j] += delta
             elif ((silt[j] + delta/2) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_silt'].index[0],3])):
@@ -264,7 +264,7 @@ for i in range(len(MorrisSample_df.filter(regex='silt$').columns)):
                 #Check if this will make sand greater than upper bound on sand
                 if ((sand[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_sand'].index[0],3])):
                     #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('The sum of clay, silt, and sand cannot be 1 for Replicate = %s' % str(j))
+                    sys.exit('PyERROR: The sum of clay, silt, and sand cannot be 1 for Replicate = %s' % str(j))
                 else:
                     sand[j] += delta
             else:
@@ -287,7 +287,7 @@ for i in range(len(MorrisSample_df.filter(regex='silt$').columns)):
                 #Check if this will make silt less than lower bound on silt
                 if ((silt[j] + delta) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_silt'].index[0],2])):
                     #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('The sum of clay, silt, and sand cannot be 1 for Replicate = %s' % str(j))
+                    sys.exit('PyERROR: The sum of clay, silt, and sand cannot be 1 for Replicate = %s' % str(j))
                 else:
                     silt[j] += delta
             elif ((silt[j] + delta/2) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_silt'].index[0],2])):
@@ -298,7 +298,7 @@ for i in range(len(MorrisSample_df.filter(regex='silt$').columns)):
                 #Check if this will make sand less than lower bound on sand
                 if ((sand[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_sand'].index[0],2])):
                     #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('The sum of clay, silt, and sand cannot be 1 for Replicate = %s' % str(j))
+                    sys.exit('PyERROR: The sum of clay, silt, and sand cannot be 1 for Replicate = %s' % str(j))
                 else:
                     sand[j] += delta
             else:
@@ -326,7 +326,7 @@ for i in range(len(MorrisSample_df.filter(regex='silt$').columns)):
             elif (clay[j] + f) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_clay'].index[0],3]):
                 clay[j] += f
             else:
-                sys.exit('Sum of clay + silt + sand != 1, and cannot be rounded to 1 for Replicate = %s' % str(j))
+                sys.exit('PyERROR: Sum of clay + silt + sand != 1, and cannot be rounded to 1 for Replicate = %s' % str(j))
         elif f < 0:
             #Check for being greater than lower bound. Add to first of sand, silt, clay
             if (sand[j] + f) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_sand'].index[0],2]):
@@ -336,7 +336,7 @@ for i in range(len(MorrisSample_df.filter(regex='silt$').columns)):
             elif (clay[j] + f) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_clay'].index[0],2]):
                 clay[j] += f
             else:
-                sys.exit('Sum of clay + silt + sand != 1, and cannot be rounded to 1 for Replicate = %s' % str(j))    
+                sys.exit('PyERROR: Sum of clay + silt + sand != 1, and cannot be rounded to 1 for Replicate = %s' % str(j))    
     
     #Save the new column of values to track what was changed.
     MorrisSample_df.loc[:, ind + '_silt'] = silt
@@ -347,13 +347,13 @@ del i, j, clay, silt, sand, delta, ind, f
 
 #Check sums
 if any((MorrisSample_df.loc[:, 's8_silt'] + MorrisSample_df.loc[:, 's8_sand'] + MorrisSample_df.loc[:, 's8_clay']).round(roundTol) != 1.0000):
-    sys.exit('Sum of sand + silt + clay != 1 for s8')
+    sys.exit('PyERROR: Sum of sand + silt + clay != 1 for s8')
 if any((MorrisSample_df.loc[:, 's108_silt'] + MorrisSample_df.loc[:, 's108_sand'] + MorrisSample_df.loc[:, 's108_clay']).round(roundTol) != 1.0000):
-    sys.exit('Sum of sand + silt + clay != 1 for s108')
+    sys.exit('PyERROR: Sum of sand + silt + clay != 1 for s108')
 if any((MorrisSample_df.loc[:, 's9_silt'] + MorrisSample_df.loc[:, 's9_sand'] + MorrisSample_df.loc[:, 's9_clay']).round(roundTol) != 1.0000):
-    sys.exit('Sum of sand + silt + clay != 1 for s9')
+    sys.exit('PyERROR: Sum of sand + silt + clay != 1 for s9')
 if any((MorrisSample_df.loc[:, 's109_silt'] + MorrisSample_df.loc[:, 's109_sand'] + MorrisSample_df.loc[:, 's109_clay']).round(roundTol) != 1.0000):
-    sys.exit('Sum of sand + silt + clay != 1 for s109')
+    sys.exit('PyERROR: Sum of sand + silt + clay != 1 for s109')
 
 #%%
 #4 parameters for compacted soil must be <= values for uncompacted soil
@@ -480,9 +480,9 @@ del compare, i, ind1, ind2, j, mu, mc, trajChange, inds
 
 #Check sums
 if sum(MorrisSample_df.loc[:,'s109_Ksat_0'] > MorrisSample_df.loc[:,'s9_Ksat_0']) != 0:
-    sys.exit('s109 Ksat not < s9 Ksat')
+    sys.exit('PyERROR: s109 Ksat not < s9 Ksat')
 if sum(MorrisSample_df.loc[:,'s108_Ksat_0'] > MorrisSample_df.loc[:,'s8_Ksat_0']):
-    sys.exit('s108 Ksat not < s8 Ksat')
+    sys.exit('PyERROR: s108 Ksat not < s8 Ksat')
     
 #%% Next make sure that vertical Ksat < Ksat for each soil
 #Ksat_0_v < Ksat_0
@@ -570,13 +570,13 @@ del compare, i, ind, j, vKsat, Ksat, trajChange, inds
 
 #Check sums
 if sum(MorrisSample_df.loc[:,'s109_Ksat_0_v'] > MorrisSample_df.loc[:,'s109_Ksat_0']) != 0:
-    sys.exit('s109 vKsat not < s109 Ksat')
+    sys.exit('PyERROR: s109 vKsat not < s109 Ksat')
 if sum(MorrisSample_df.loc[:,'s9_Ksat_0_v'] > MorrisSample_df.loc[:,'s9_Ksat_0']) != 0:
-    sys.exit('s9 vKsat not < s9 Ksat')
+    sys.exit('PyERROR: s9 vKsat not < s9 Ksat')
 if sum(MorrisSample_df.loc[:,'s108_Ksat_0_v'] > MorrisSample_df.loc[:,'s108_Ksat_0']) != 0:
-    sys.exit('s108 vKsat not < s108 Ksat')
+    sys.exit('PyERROR: s108 vKsat not < s108 Ksat')
 if sum(MorrisSample_df.loc[:,'s8_Ksat_0_v'] > MorrisSample_df.loc[:,'s8_Ksat_0']) != 0:
-    sys.exit('s8 vKsat not < s8 Ksat')
+    sys.exit('PyERROR: s8 vKsat not < s8 Ksat')
 
 #%%
 #Finally, make sure that vKsat compacted < vKsat uncompacted
@@ -692,9 +692,9 @@ for i in range(len(MorrisSample_df.filter(regex='_Ksat_0_v$').columns)):
 del compare, i, ind1, ind2, j, mu, mc, trajChange, inds
 
 if sum(MorrisSample_df.loc[:,'s109_Ksat_0_v'] > MorrisSample_df.loc[:,'s9_Ksat_0_v']) != 0:
-    sys.exit('s109 vKsat not < s9 Ksat')
+    sys.exit('PyERROR: s109 vKsat not < s9 Ksat')
 if sum(MorrisSample_df.loc[:,'s108_Ksat_0_v'] > MorrisSample_df.loc[:,'s8_Ksat_0_v']) != 0:
-    sys.exit('s108 vKsat not < s8 Ksat')
+    sys.exit('PyERROR: s108 vKsat not < s8 Ksat')
 
 #%%
 #m uncompacted >= m compacted for each soil type:
@@ -811,9 +811,9 @@ for i in range(len(MorrisSample_df.filter(regex='_m$').columns)):
 del compare, i, ind1, ind2, j, mu, mc, trajChange, inds
 
 if sum(MorrisSample_df.loc[:,'s109_m'] > MorrisSample_df.loc[:,'s9_m']) != 0:
-    sys.exit('s109 m not < s9 m')
+    sys.exit('PyERROR: s109 m not < s9 m')
 if sum(MorrisSample_df.loc[:,'s108_m'] > MorrisSample_df.loc[:,'s8_m']) != 0:
-    sys.exit('s108 m not < s8 m')
+    sys.exit('PyERROR: s108 m not < s8 m')
     
 #%% Porosity
 #porosity uncompacted >= porosity compacted for each soil type:
@@ -930,9 +930,9 @@ for i in range(len(MorrisSample_df.filter(regex='_porosity_0$').columns)):
 del compare, i, ind1, ind2, j, pu, pc, trajChange, inds
 
 if sum(MorrisSample_df.loc[:,'s109_porosity_0'] > MorrisSample_df.loc[:,'s9_porosity_0']) != 0:
-    sys.exit('s109 porosity_0 not < s9 porosity_0')
+    sys.exit('PyERROR: s109 porosity_0 not < s9 porosity_0')
 if sum(MorrisSample_df.loc[:,'s108_porosity_0'] > MorrisSample_df.loc[:,'s8_porosity_0']) != 0:
-    sys.exit('s108 porosity_0 not < s8 porosity_0')
+    sys.exit('PyERROR: s108 porosity_0 not < s8 porosity_0')
 
 #%% Vegetation
 #%% K_absorptance + K_reflectance + K_transmittance = 1 - round check
@@ -978,7 +978,7 @@ for i in range(len(MorrisSample_df.filter(regex='102_K_absorptance$').columns)):
                 #Check if this will make Kt greater than upper bound on Kt
                 if ((Kt[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_transmittance'].index[0],3])):
                     #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
+                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
                 else:
                     Kt[j] += delta
             elif ((Kt[j] + delta/2) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_transmittance'].index[0],3])):
@@ -989,7 +989,7 @@ for i in range(len(MorrisSample_df.filter(regex='102_K_absorptance$').columns)):
                 #Check if this will make Ka greater than upper bound on Ka
                 if ((Ka[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_absorptance'].index[0],3])):
                     #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
+                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
                 else:
                     Ka[j] += delta
             else:
@@ -1012,7 +1012,7 @@ for i in range(len(MorrisSample_df.filter(regex='102_K_absorptance$').columns)):
                 #Check if this will make Kt less than lower bound on Kt
                 if ((Kt[j] + delta) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_transmittance'].index[0],2])):
                     #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
+                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
                 else:
                     Kt[j] += delta
             elif ((Kt[j] + delta/2) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_transmittance'].index[0],2])):
@@ -1023,7 +1023,7 @@ for i in range(len(MorrisSample_df.filter(regex='102_K_absorptance$').columns)):
                 #Check if this will make Ka less than lower bound on Ka
                 if ((Ka[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_absorptance'].index[0],2])):
                     #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
+                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
                 else:
                     Ka[j] += delta
             else:
@@ -1044,7 +1044,7 @@ for i in range(len(MorrisSample_df.filter(regex='102_K_absorptance$').columns)):
                 #Check if this will make Kt greater than upper bound on Kt
                 if ((Kt[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_transmittance'].index[0],3])):
                     #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
+                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
                 else:
                     Kt[j] += delta
             elif ((Kt[j] + delta/2) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_transmittance'].index[0],3])):
@@ -1055,7 +1055,7 @@ for i in range(len(MorrisSample_df.filter(regex='102_K_absorptance$').columns)):
                 #Check if this will make Kr greater than upper bound on Kr
                 if ((Kr[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_reflectance'].index[0],3])):
                     #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
+                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
                 else:
                     Kr[j] += delta
             else:
@@ -1078,7 +1078,7 @@ for i in range(len(MorrisSample_df.filter(regex='102_K_absorptance$').columns)):
                 #Check if this will make Kt less than lower bound on Kt
                 if ((Kt[j] + delta) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_transmittance'].index[0],2])):
                     #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
+                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
                 else:
                     Kt[j] += delta
             elif ((Kt[j] + delta/2) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_transmittance'].index[0],2])):
@@ -1089,7 +1089,7 @@ for i in range(len(MorrisSample_df.filter(regex='102_K_absorptance$').columns)):
                 #Check if this will make Kr less than lower bound on Kr
                 if ((Kr[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_reflectance'].index[0],2])):
                     #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
+                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
                 else:
                     Kr[j] += delta
             else:
@@ -1111,7 +1111,7 @@ for i in range(len(MorrisSample_df.filter(regex='102_K_absorptance$').columns)):
                 #Check if this will make Ka greater than upper bound on Ka
                 if ((Ka[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_absorptance'].index[0],3])):
                     #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
+                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
                 else:
                     Ka[j] += delta
             elif ((Ka[j] + delta/2) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_absorptance'].index[0],3])):
@@ -1122,7 +1122,7 @@ for i in range(len(MorrisSample_df.filter(regex='102_K_absorptance$').columns)):
                 #Check if this will make Kr greater than upper bound on Kr
                 if ((Kr[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_reflectance'].index[0],3])):
                     #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
+                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
                 else:
                     Kr[j] += delta
             else:
@@ -1145,7 +1145,7 @@ for i in range(len(MorrisSample_df.filter(regex='102_K_absorptance$').columns)):
                 #Check if this will make Ka less than lower bound on Ka
                 if ((Ka[j] + delta) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_absorptance'].index[0],2])):
                     #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
+                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
                 else:
                     Ka[j] += delta
             elif ((Ka[j] + delta/2) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_absorptance'].index[0],2])):
@@ -1156,7 +1156,7 @@ for i in range(len(MorrisSample_df.filter(regex='102_K_absorptance$').columns)):
                 #Check if this will make Kr less than lower bound on Kr
                 if ((Kr[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_reflectance'].index[0],2])):
                     #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
+                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
                 else:
                     Kr[j] += delta
             else:
@@ -1184,7 +1184,7 @@ for i in range(len(MorrisSample_df.filter(regex='102_K_absorptance$').columns)):
             elif (Kt[j] + f) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_transmittance'].index[0],3]):
                 Kt[j] += f
             else:
-                sys.exit('Sum of Kt + Ka + Kr != 1, and cannot be rounded to 1 for Replicate = %s' % str(j))
+                sys.exit('PyERROR: Sum of Kt + Ka + Kr != 1, and cannot be rounded to 1 for Replicate = %s' % str(j))
         elif f < 0:
             #Check for being greater than lower bound. Add to first of Kr, Ka, Kt
             if (Kr[j] + f) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_reflectance'].index[0],2]):
@@ -1194,7 +1194,7 @@ for i in range(len(MorrisSample_df.filter(regex='102_K_absorptance$').columns)):
             elif (Kt[j] + f) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_transmittance'].index[0],2]):
                 Kt[j] += f
             else:
-                sys.exit('Sum of Kt + Ka + Kr != 1, and cannot be rounded to 1 for Replicate = %s' % str(j))    
+                sys.exit('PyERROR: Sum of Kt + Ka + Kr != 1, and cannot be rounded to 1 for Replicate = %s' % str(j))    
     
     #Save the new column of values to track what was changed.
     MorrisSample_df.loc[:, ind + '_K_absorptance'] = Ka
@@ -1205,7 +1205,7 @@ del i, j, Kt, Ka, Kr, delta, ind, f
 
 #Check sums
 if any((MorrisSample_df.loc[:, 'v102_K_absorptance'] + MorrisSample_df.loc[:, 'v102_K_reflectance'] + MorrisSample_df.loc[:, 'v102_K_transmittance']).round(roundTol) != 1.0000):
-    sys.exit('Sum of K absorptance, reflectance, transmittance != 1 for v102')
+    sys.exit('PyERROR: Sum of K absorptance, reflectance, transmittance != 1 for v102')
 
 #%% PAR_absorptance + PAR_reflectance + PAR_transmittance = 1 - round check
 #The only venetation for SA that is changed is #102 - trees. Other two are 1 - values assigned randomly.
@@ -1250,7 +1250,7 @@ for i in range(len(MorrisSample_df.filter(regex='102_PAR_absorptance$').columns)
                 #Check if this will make Kt greater than upper bound on Kt
                 if ((Kt[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_transmittance'].index[0],3])):
                     #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
+                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
                 else:
                     Kt[j] += delta
             elif ((Kt[j] + delta/2) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_transmittance'].index[0],3])):
@@ -1261,7 +1261,7 @@ for i in range(len(MorrisSample_df.filter(regex='102_PAR_absorptance$').columns)
                 #Check if this will make Ka greater than upper bound on Ka
                 if ((Ka[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_absorptance'].index[0],3])):
                     #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
+                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
                 else:
                     Ka[j] += delta
             else:
@@ -1284,7 +1284,7 @@ for i in range(len(MorrisSample_df.filter(regex='102_PAR_absorptance$').columns)
                 #Check if this will make Kt less than lower bound on Kt
                 if ((Kt[j] + delta) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_transmittance'].index[0],2])):
                     #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
+                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
                 else:
                     Kt[j] += delta
             elif ((Kt[j] + delta/2) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_transmittance'].index[0],2])):
@@ -1295,7 +1295,7 @@ for i in range(len(MorrisSample_df.filter(regex='102_PAR_absorptance$').columns)
                 #Check if this will make Ka less than lower bound on Ka
                 if ((Ka[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_absorptance'].index[0],2])):
                     #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
+                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
                 else:
                     Ka[j] += delta
             else:
@@ -1316,7 +1316,7 @@ for i in range(len(MorrisSample_df.filter(regex='102_PAR_absorptance$').columns)
                 #Check if this will make Kt greater than upper bound on Kt
                 if ((Kt[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_transmittance'].index[0],3])):
                     #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
+                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
                 else:
                     Kt[j] += delta
             elif ((Kt[j] + delta/2) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_transmittance'].index[0],3])):
@@ -1327,7 +1327,7 @@ for i in range(len(MorrisSample_df.filter(regex='102_PAR_absorptance$').columns)
                 #Check if this will make Kr greater than upper bound on Kr
                 if ((Kr[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_reflectance'].index[0],3])):
                     #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
+                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
                 else:
                     Kr[j] += delta
             else:
@@ -1350,7 +1350,7 @@ for i in range(len(MorrisSample_df.filter(regex='102_PAR_absorptance$').columns)
                 #Check if this will make Kt less than lower bound on Kt
                 if ((Kt[j] + delta) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_transmittance'].index[0],2])):
                     #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
+                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
                 else:
                     Kt[j] += delta
             elif ((Kt[j] + delta/2) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_transmittance'].index[0],2])):
@@ -1361,7 +1361,7 @@ for i in range(len(MorrisSample_df.filter(regex='102_PAR_absorptance$').columns)
                 #Check if this will make Kr less than lower bound on Kr
                 if ((Kr[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_reflectance'].index[0],2])):
                     #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
+                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
                 else:
                     Kr[j] += delta
             else:
@@ -1383,7 +1383,7 @@ for i in range(len(MorrisSample_df.filter(regex='102_PAR_absorptance$').columns)
                 #Check if this will make Ka greater than upper bound on Ka
                 if ((Ka[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_absorptance'].index[0],3])):
                     #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
+                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
                 else:
                     Ka[j] += delta
             elif ((Ka[j] + delta/2) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_absorptance'].index[0],3])):
@@ -1394,7 +1394,7 @@ for i in range(len(MorrisSample_df.filter(regex='102_PAR_absorptance$').columns)
                 #Check if this will make Kr greater than upper bound on Kr
                 if ((Kr[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_reflectance'].index[0],3])):
                     #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
+                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
                 else:
                     Kr[j] += delta
             else:
@@ -1417,7 +1417,7 @@ for i in range(len(MorrisSample_df.filter(regex='102_PAR_absorptance$').columns)
                 #Check if this will make Ka less than lower bound on Ka
                 if ((Ka[j] + delta) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_absorptance'].index[0],2])):
                     #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
+                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
                 else:
                     Ka[j] += delta
             elif ((Ka[j] + delta/2) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_absorptance'].index[0],2])):
@@ -1428,7 +1428,7 @@ for i in range(len(MorrisSample_df.filter(regex='102_PAR_absorptance$').columns)
                 #Check if this will make Kr less than lower bound on Kr
                 if ((Kr[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_reflectance'].index[0],2])):
                     #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
+                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
                 else:
                     Kr[j] += delta
             else:
@@ -1456,7 +1456,7 @@ for i in range(len(MorrisSample_df.filter(regex='102_PAR_absorptance$').columns)
             elif (Kt[j] + f) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_transmittance'].index[0],3]):
                 Kt[j] += f
             else:
-                sys.exit('Sum of Kt + Ka + Kr != 1, and cannot be rounded to 1 for Replicate = %s' % str(j))
+                sys.exit('PyERROR: Sum of Kt + Ka + Kr != 1, and cannot be rounded to 1 for Replicate = %s' % str(j))
         elif f < 0:
             #Check for being greater than lower bound. Add to first of Kr, Ka, Kt
             if (Kr[j] + f) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_reflectance'].index[0],2]):
@@ -1466,7 +1466,7 @@ for i in range(len(MorrisSample_df.filter(regex='102_PAR_absorptance$').columns)
             elif (Kt[j] + f) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_transmittance'].index[0],2]):
                 Kt[j] += f
             else:
-                sys.exit('Sum of Kt + Ka + Kr != 1, and cannot be rounded to 1 for Replicate = %s' % str(j))    
+                sys.exit('PyERROR: Sum of Kt + Ka + Kr != 1, and cannot be rounded to 1 for Replicate = %s' % str(j))    
     
     #Save the new column of values to track what was changed.
     MorrisSample_df.loc[:, ind + '_PAR_absorptance'] = Ka
@@ -1477,7 +1477,7 @@ del i, j, Kt, Ka, Kr, delta, ind, f
 
 #Check sums
 if any((MorrisSample_df.loc[:, 'v102_PAR_absorptance'] + MorrisSample_df.loc[:, 'v102_PAR_reflectance'] + MorrisSample_df.loc[:, 'v102_PAR_transmittance']).round(roundTol) != 1.0000):
-    sys.exit('Sum of PAR absorptance, reflectance, transmittance != 1 for v102')
+    sys.exit('PyERROR: Sum of PAR absorptance, reflectance, transmittance != 1 for v102')
 
 #%% epc.frootlitr_fcel + epc.frootlitr_flab + epc.frootlitr_flig = 1 - round check
 #The only venetation for SA that is changed is #102 - trees and #3 - grass. Other is not random.
@@ -1521,7 +1521,7 @@ for i in range(len(MorrisSample_df.filter(regex='epc.frootlitr_fcel$').columns))
                 #Check if this will make Kt greater than upper bound on Kt
                 if ((Kt[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_flig'].index[0],3])):
                     #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
+                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
                 else:
                     Kt[j] += delta
             elif ((Kt[j] + delta/2) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_flig'].index[0],3])):
@@ -1532,7 +1532,7 @@ for i in range(len(MorrisSample_df.filter(regex='epc.frootlitr_fcel$').columns))
                 #Check if this will make Ka greater than upper bound on Ka
                 if ((Ka[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_fcel'].index[0],3])):
                     #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
+                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
                 else:
                     Ka[j] += delta
             else:
@@ -1555,7 +1555,7 @@ for i in range(len(MorrisSample_df.filter(regex='epc.frootlitr_fcel$').columns))
                 #Check if this will make Kt less than lower bound on Kt
                 if ((Kt[j] + delta) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_flig'].index[0],2])):
                     #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
+                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
                 else:
                     Kt[j] += delta
             elif ((Kt[j] + delta/2) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_flig'].index[0],2])):
@@ -1566,7 +1566,7 @@ for i in range(len(MorrisSample_df.filter(regex='epc.frootlitr_fcel$').columns))
                 #Check if this will make Ka less than lower bound on Ka
                 if ((Ka[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_fcel'].index[0],2])):
                     #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
+                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
                 else:
                     Ka[j] += delta
             else:
@@ -1587,7 +1587,7 @@ for i in range(len(MorrisSample_df.filter(regex='epc.frootlitr_fcel$').columns))
                 #Check if this will make Kt greater than upper bound on Kt
                 if ((Kt[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_flig'].index[0],3])):
                     #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
+                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
                 else:
                     Kt[j] += delta
             elif ((Kt[j] + delta/2) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_flig'].index[0],3])):
@@ -1598,7 +1598,7 @@ for i in range(len(MorrisSample_df.filter(regex='epc.frootlitr_fcel$').columns))
                 #Check if this will make Kr greater than upper bound on Kr
                 if ((Kr[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_flab'].index[0],3])):
                     #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
+                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
                 else:
                     Kr[j] += delta
             else:
@@ -1621,7 +1621,7 @@ for i in range(len(MorrisSample_df.filter(regex='epc.frootlitr_fcel$').columns))
                 #Check if this will make Kt less than lower bound on Kt
                 if ((Kt[j] + delta) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_flig'].index[0],2])):
                     #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
+                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
                 else:
                     Kt[j] += delta
             elif ((Kt[j] + delta/2) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_flig'].index[0],2])):
@@ -1632,7 +1632,7 @@ for i in range(len(MorrisSample_df.filter(regex='epc.frootlitr_fcel$').columns))
                 #Check if this will make Kr less than lower bound on Kr
                 if ((Kr[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_flab'].index[0],2])):
                     #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
+                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
                 else:
                     Kr[j] += delta
             else:
@@ -1654,7 +1654,7 @@ for i in range(len(MorrisSample_df.filter(regex='epc.frootlitr_fcel$').columns))
                 #Check if this will make Ka greater than upper bound on Ka
                 if ((Ka[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_fcel'].index[0],3])):
                     #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
+                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
                 else:
                     Ka[j] += delta
             elif ((Ka[j] + delta/2) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_fcel'].index[0],3])):
@@ -1665,7 +1665,7 @@ for i in range(len(MorrisSample_df.filter(regex='epc.frootlitr_fcel$').columns))
                 #Check if this will make Kr greater than upper bound on Kr
                 if ((Kr[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_flab'].index[0],3])):
                     #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
+                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
                 else:
                     Kr[j] += delta
             else:
@@ -1688,7 +1688,7 @@ for i in range(len(MorrisSample_df.filter(regex='epc.frootlitr_fcel$').columns))
                 #Check if this will make Ka less than lower bound on Ka
                 if ((Ka[j] + delta) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_fcel'].index[0],2])):
                     #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
+                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
                 else:
                     Ka[j] += delta
             elif ((Ka[j] + delta/2) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_fcel'].index[0],2])):
@@ -1699,7 +1699,7 @@ for i in range(len(MorrisSample_df.filter(regex='epc.frootlitr_fcel$').columns))
                 #Check if this will make Kr less than lower bound on Kr
                 if ((Kr[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_flab'].index[0],2])):
                     #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
+                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
                 else:
                     Kr[j] += delta
             else:
@@ -1727,7 +1727,7 @@ for i in range(len(MorrisSample_df.filter(regex='epc.frootlitr_fcel$').columns))
             elif (Kt[j] + f) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_flig'].index[0],3]):
                 Kt[j] += f
             else:
-                sys.exit('Sum of Kt + Ka + Kr != 1, and cannot be rounded to 1 for Replicate = %s' % str(j))
+                sys.exit('PyERROR: Sum of Kt + Ka + Kr != 1, and cannot be rounded to 1 for Replicate = %s' % str(j))
         elif f < 0:
             #Check for being greater than lower bound. Add to first of Kr, Ka, Kt
             if (Kr[j] + f) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_flab'].index[0],2]):
@@ -1737,7 +1737,7 @@ for i in range(len(MorrisSample_df.filter(regex='epc.frootlitr_fcel$').columns))
             elif (Kt[j] + f) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_flig'].index[0],2]):
                 Kt[j] += f
             else:
-                sys.exit('Sum of Kt + Ka + Kr != 1, and cannot be rounded to 1 for Replicate = %s' % str(j))    
+                sys.exit('PyERROR: Sum of Kt + Ka + Kr != 1, and cannot be rounded to 1 for Replicate = %s' % str(j))    
     
     #Save the new column of values to track what was changed.
     MorrisSample_df.loc[:, ind + '_epc.frootlitr_fcel'] = Ka
@@ -1748,9 +1748,9 @@ del i, j, Kt, Ka, Kr, delta, ind, f
 
 #Check sums
 if any((MorrisSample_df.loc[:, 'v102_epc.frootlitr_fcel'] + MorrisSample_df.loc[:, 'v102_epc.frootlitr_flab'] + MorrisSample_df.loc[:, 'v102_epc.frootlitr_flig']).round(roundTol) != 1.0000):
-    sys.exit('Sum of frootlitr_fcel, flab, flig != 1 for v102')
+    sys.exit('PyERROR: Sum of frootlitr_fcel, flab, flig != 1 for v102')
 if any((MorrisSample_df.loc[:, 'v3_epc.frootlitr_fcel'] + MorrisSample_df.loc[:, 'v3_epc.frootlitr_flab'] + MorrisSample_df.loc[:, 'v3_epc.frootlitr_flig']).round(roundTol) != 1.0000):
-    sys.exit('Sum of frootlitr_fcel, flab, flig != 1 for v3')
+    sys.exit('PyERROR: Sum of frootlitr_fcel, flab, flig != 1 for v3')
     
 #%% epc.leaflitr_fcel + epc.leaflitr_flab + epc.leaflitr_flig = 1 - round check
 #The only venetation for SA that is changed is #102 - trees and #3 - grass. Other is not random.
@@ -1794,7 +1794,7 @@ for i in range(len(MorrisSample_df.filter(regex='epc.leaflitr_fcel$').columns)):
                 #Check if this will make Kt greater than upper bound on Kt
                 if ((Kt[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_flig'].index[0],3])):
                     #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
+                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
                 else:
                     Kt[j] += delta
             elif ((Kt[j] + delta/2) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_flig'].index[0],3])):
@@ -1805,7 +1805,7 @@ for i in range(len(MorrisSample_df.filter(regex='epc.leaflitr_fcel$').columns)):
                 #Check if this will make Ka greater than upper bound on Ka
                 if ((Ka[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_fcel'].index[0],3])):
                     #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
+                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
                 else:
                     Ka[j] += delta
             else:
@@ -1828,7 +1828,7 @@ for i in range(len(MorrisSample_df.filter(regex='epc.leaflitr_fcel$').columns)):
                 #Check if this will make Kt less than lower bound on Kt
                 if ((Kt[j] + delta) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_flig'].index[0],2])):
                     #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
+                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
                 else:
                     Kt[j] += delta
             elif ((Kt[j] + delta/2) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_flig'].index[0],2])):
@@ -1839,7 +1839,7 @@ for i in range(len(MorrisSample_df.filter(regex='epc.leaflitr_fcel$').columns)):
                 #Check if this will make Ka less than lower bound on Ka
                 if ((Ka[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_fcel'].index[0],2])):
                     #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
+                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
                 else:
                     Ka[j] += delta
             else:
@@ -1860,7 +1860,7 @@ for i in range(len(MorrisSample_df.filter(regex='epc.leaflitr_fcel$').columns)):
                 #Check if this will make Kt greater than upper bound on Kt
                 if ((Kt[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_flig'].index[0],3])):
                     #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
+                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
                 else:
                     Kt[j] += delta
             elif ((Kt[j] + delta/2) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_flig'].index[0],3])):
@@ -1871,7 +1871,7 @@ for i in range(len(MorrisSample_df.filter(regex='epc.leaflitr_fcel$').columns)):
                 #Check if this will make Kr greater than upper bound on Kr
                 if ((Kr[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_flab'].index[0],3])):
                     #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
+                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
                 else:
                     Kr[j] += delta
             else:
@@ -1894,7 +1894,7 @@ for i in range(len(MorrisSample_df.filter(regex='epc.leaflitr_fcel$').columns)):
                 #Check if this will make Kt less than lower bound on Kt
                 if ((Kt[j] + delta) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_flig'].index[0],2])):
                     #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
+                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
                 else:
                     Kt[j] += delta
             elif ((Kt[j] + delta/2) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_flig'].index[0],2])):
@@ -1905,7 +1905,7 @@ for i in range(len(MorrisSample_df.filter(regex='epc.leaflitr_fcel$').columns)):
                 #Check if this will make Kr less than lower bound on Kr
                 if ((Kr[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_flab'].index[0],2])):
                     #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
+                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
                 else:
                     Kr[j] += delta
             else:
@@ -1927,7 +1927,7 @@ for i in range(len(MorrisSample_df.filter(regex='epc.leaflitr_fcel$').columns)):
                 #Check if this will make Ka greater than upper bound on Ka
                 if ((Ka[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_fcel'].index[0],3])):
                     #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
+                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
                 else:
                     Ka[j] += delta
             elif ((Ka[j] + delta/2) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_fcel'].index[0],3])):
@@ -1938,7 +1938,7 @@ for i in range(len(MorrisSample_df.filter(regex='epc.leaflitr_fcel$').columns)):
                 #Check if this will make Kr greater than upper bound on Kr
                 if ((Kr[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_flab'].index[0],3])):
                     #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
+                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
                 else:
                     Kr[j] += delta
             else:
@@ -1961,7 +1961,7 @@ for i in range(len(MorrisSample_df.filter(regex='epc.leaflitr_fcel$').columns)):
                 #Check if this will make Ka less than lower bound on Ka
                 if ((Ka[j] + delta) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_fcel'].index[0],2])):
                     #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
+                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
                 else:
                     Ka[j] += delta
             elif ((Ka[j] + delta/2) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_fcel'].index[0],2])):
@@ -1972,7 +1972,7 @@ for i in range(len(MorrisSample_df.filter(regex='epc.leaflitr_fcel$').columns)):
                 #Check if this will make Kr less than lower bound on Kr
                 if ((Kr[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_flab'].index[0],2])):
                     #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
+                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
                 else:
                     Kr[j] += delta
             else:
@@ -2000,7 +2000,7 @@ for i in range(len(MorrisSample_df.filter(regex='epc.leaflitr_fcel$').columns)):
             elif (Kt[j] + f) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_flig'].index[0],3]):
                 Kt[j] += f
             else:
-                sys.exit('Sum of Kt + Ka + Kr != 1, and cannot be rounded to 1 for Replicate = %s' % str(j))
+                sys.exit('PyERROR: Sum of Kt + Ka + Kr != 1, and cannot be rounded to 1 for Replicate = %s' % str(j))
         elif f < 0:
             #Check for being greater than lower bound. Add to first of Kr, Ka, Kt
             if (Kr[j] + f) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_flab'].index[0],2]):
@@ -2010,7 +2010,7 @@ for i in range(len(MorrisSample_df.filter(regex='epc.leaflitr_fcel$').columns)):
             elif (Kt[j] + f) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_flig'].index[0],2]):
                 Kt[j] += f
             else:
-                sys.exit('Sum of Kt + Ka + Kr != 1, and cannot be rounded to 1 for Replicate = %s' % str(j))    
+                sys.exit('PyERROR: Sum of Kt + Ka + Kr != 1, and cannot be rounded to 1 for Replicate = %s' % str(j))    
     
     #Save the new column of values to track what was changed.
     MorrisSample_df.loc[:, ind + '_epc.leaflitr_fcel'] = Ka
@@ -2021,9 +2021,9 @@ del i, j, Kt, Ka, Kr, delta, ind, f
 
 #Check sums
 if any((MorrisSample_df.loc[:, 'v102_epc.leaflitr_fcel'] + MorrisSample_df.loc[:, 'v102_epc.leaflitr_flab'] + MorrisSample_df.loc[:, 'v102_epc.leaflitr_flig']).round(roundTol) != 1.0000):
-    sys.exit('Sum of leaflitr_fcel, flab, flig != 1 for v102')
+    sys.exit('PyERROR: Sum of leaflitr_fcel, flab, flig != 1 for v102')
 if any((MorrisSample_df.loc[:, 'v3_epc.leaflitr_fcel'] + MorrisSample_df.loc[:, 'v3_epc.leaflitr_flab'] + MorrisSample_df.loc[:, 'v3_epc.leaflitr_flig']).round(roundTol) != 1.0000):
-    sys.exit('Sum of leaflitr_fcel, flab, flig != 1 for v3')
+    sys.exit('PyERROR: Sum of leaflitr_fcel, flab, flig != 1 for v3')
 #%% epc.topt <= epc.tmax
 #If epc.tmax is not greater, simulate a random value less than epc.tmax for epc.topt
 for i in range(len(MorrisSample_df.filter(regex='epc.topt$').columns)):
@@ -2108,9 +2108,9 @@ del compare, i, ind, j, vKsat, Ksat, trajChange, inds
 
 #Check sums
 if sum(MorrisSample_df.loc[:,'v102_epc.topt'] > MorrisSample_df.loc[:,'v102_epc.tmax']) != 0:
-    sys.exit('topt not < tmax for v102')
+    sys.exit('PyERROR: topt not < tmax for v102')
 if sum(MorrisSample_df.loc[:,'v3_epc.topt'] > MorrisSample_df.loc[:,'v3_epc.tmax']) != 0:
-    sys.exit('topt not < tmax for v3')
+    sys.exit('PyERROR: topt not < tmax for v3')
 
 #%% Leaf litter CN >= leaf CN
 #If epc.leaflitr_cn is not greater, simulate a random value less than epc.leaflitr_cn for epc.leaf_cn
@@ -2196,9 +2196,9 @@ del compare, i, ind, j, vKsat, Ksat, trajChange, inds
 
 #Check sums
 if sum(MorrisSample_df.loc[:,'v102_epc.leaf_cn'] > MorrisSample_df.loc[:,'v102_epc.leaflitr_cn']):
-    sys.exit('leaf_cn not < leaflitr_cn for v102')
+    sys.exit('PyERROR: leaf_cn not < leaflitr_cn for v102')
 if sum(MorrisSample_df.loc[:,'v3_epc.leaf_cn'] > MorrisSample_df.loc[:,'v3_epc.leaflitr_cn']):
-    sys.exit('leaf_cn not < leaflitr_cn for v3')
+    sys.exit('PyERROR: leaf_cn not < leaflitr_cn for v3')
 
 #%% Check all sums once more to make sure nothing odd happened
 if (any((MorrisSample_df.loc[:, 's8_silt'] + MorrisSample_df.loc[:, 's8_sand'] + MorrisSample_df.loc[:, 's8_clay']).round(roundTol) != 1.0000) | \
@@ -2211,7 +2211,7 @@ any((MorrisSample_df.loc[:, 'v102_epc.frootlitr_fcel'] + MorrisSample_df.loc[:, 
 any((MorrisSample_df.loc[:, 'v3_epc.frootlitr_fcel'] + MorrisSample_df.loc[:, 'v3_epc.frootlitr_flab'] + MorrisSample_df.loc[:, 'v3_epc.frootlitr_flig']).round(roundTol) != 1.0000) | \
 any((MorrisSample_df.loc[:, 'v102_epc.leaflitr_fcel'] + MorrisSample_df.loc[:, 'v102_epc.leaflitr_flab'] + MorrisSample_df.loc[:, 'v102_epc.leaflitr_flig']).round(roundTol) != 1.0000) | \
 any((MorrisSample_df.loc[:, 'v3_epc.leaflitr_fcel'] + MorrisSample_df.loc[:, 'v3_epc.leaflitr_flab'] + MorrisSample_df.loc[:, 'v3_epc.leaflitr_flig']).round(roundTol) != 1.0000)):
-    sys.exit('One of the sums used to be correct, but after other function manipulations is now incorrect. This is a function bug that should be reported.')
+    sys.exit('PyERROR: One of the sums used to be correct, but after other function manipulations is now incorrect. This is a function bug that should be reported.')
 
 if (sum(MorrisSample_df.loc[:,'s109_Ksat_0'] > MorrisSample_df.loc[:,'s9_Ksat_0']) + \
 sum(MorrisSample_df.loc[:,'s108_Ksat_0'] > MorrisSample_df.loc[:,'s8_Ksat_0']) + \
@@ -2231,42 +2231,7 @@ sum(MorrisSample_df.loc[:,'v102_epc.topt'] > MorrisSample_df.loc[:,'v102_epc.tma
 sum(MorrisSample_df.loc[:,'v3_epc.topt'] > MorrisSample_df.loc[:,'v3_epc.tmax']) + \
 sum(MorrisSample_df.loc[:,'v102_epc.leaf_cn'] > MorrisSample_df.loc[:,'v102_epc.leaflitr_cn']) + \
 sum(MorrisSample_df.loc[:,'v3_epc.leaf_cn'] > MorrisSample_df.loc[:,'v3_epc.leaflitr_cn'])) != 0:
-    sys.exit('One of the inequalities used to be correct, but after other function manipulations is now incorrect. This is a function bug that should be reported.')
+    sys.exit('PyERROR: One of the inequalities used to be correct, but after other function manipulations is now incorrect. This is a function bug that should be reported.')
 
 #%% Write the resulting MorrisSample_df to a csv file
 MorrisSample_df.round(roundTol).to_csv('MorrisSamples_AfterProcessing.csv', index = False)
-
-#%% Test loading that file in and that the tests pass
-
-MorrisSample_test = pd.read_csv('MorrisSamples_AfterProcessing.csv')
-if (any((MorrisSample_test.loc[:, 's8_silt'] + MorrisSample_test.loc[:, 's8_sand'] + MorrisSample_test.loc[:, 's8_clay']).round(roundTol) != 1.0000) | \
-any((MorrisSample_test.loc[:, 's108_silt'] + MorrisSample_test.loc[:, 's108_sand'] + MorrisSample_test.loc[:, 's108_clay']).round(roundTol) != 1.0000) | \
-any((MorrisSample_test.loc[:, 's9_silt'] + MorrisSample_test.loc[:, 's9_sand'] + MorrisSample_test.loc[:, 's9_clay']).round(roundTol) != 1.0000) | \
-any((MorrisSample_test.loc[:, 's109_silt'] + MorrisSample_test.loc[:, 's109_sand'] + MorrisSample_test.loc[:, 's109_clay']).round(roundTol) != 1.0000) | \
-any((MorrisSample_test.loc[:, 'v102_K_absorptance'] + MorrisSample_test.loc[:, 'v102_K_reflectance'] + MorrisSample_test.loc[:, 'v102_K_transmittance']).round(roundTol) != 1.0000) | \
-any((MorrisSample_test.loc[:, 'v102_PAR_absorptance'] + MorrisSample_test.loc[:, 'v102_PAR_reflectance'] + MorrisSample_test.loc[:, 'v102_PAR_transmittance']).round(roundTol) != 1.0000) | \
-any((MorrisSample_test.loc[:, 'v102_epc.frootlitr_fcel'] + MorrisSample_test.loc[:, 'v102_epc.frootlitr_flab'] + MorrisSample_test.loc[:, 'v102_epc.frootlitr_flig']).round(roundTol) != 1.0000) | \
-any((MorrisSample_test.loc[:, 'v3_epc.frootlitr_fcel'] + MorrisSample_test.loc[:, 'v3_epc.frootlitr_flab'] + MorrisSample_test.loc[:, 'v3_epc.frootlitr_flig']).round(roundTol) != 1.0000) | \
-any((MorrisSample_test.loc[:, 'v102_epc.leaflitr_fcel'] + MorrisSample_test.loc[:, 'v102_epc.leaflitr_flab'] + MorrisSample_test.loc[:, 'v102_epc.leaflitr_flig']).round(roundTol) != 1.0000) | \
-any((MorrisSample_test.loc[:, 'v3_epc.leaflitr_fcel'] + MorrisSample_test.loc[:, 'v3_epc.leaflitr_flab'] + MorrisSample_test.loc[:, 'v3_epc.leaflitr_flig']).round(roundTol) != 1.0000)):
-    sys.exit('Upon loading csv file, one of the sums that was correct when it saved is now incorrect. This is a function bug that should be reported.')
-
-if (sum(MorrisSample_test.loc[:,'s109_Ksat_0'] > MorrisSample_test.loc[:,'s9_Ksat_0']) + \
-sum(MorrisSample_test.loc[:,'s108_Ksat_0'] > MorrisSample_test.loc[:,'s8_Ksat_0']) + \
-sum(MorrisSample_test.loc[:,'s109_Ksat_0_v'] > MorrisSample_test.loc[:,'s109_Ksat_0']) + \
-sum(MorrisSample_test.loc[:,'s9_Ksat_0_v'] > MorrisSample_test.loc[:,'s9_Ksat_0']) + \
-sum(MorrisSample_test.loc[:,'s108_Ksat_0_v'] > MorrisSample_test.loc[:,'s108_Ksat_0']) + \
-sum(MorrisSample_test.loc[:,'s8_Ksat_0_v'] > MorrisSample_test.loc[:,'s8_Ksat_0']) + \
-sum(MorrisSample_test.loc[:,'s109_Ksat_0_v'] > MorrisSample_test.loc[:,'s9_Ksat_0_v']) + \
-sum(MorrisSample_test.loc[:,'s108_Ksat_0_v'] > MorrisSample_test.loc[:,'s8_Ksat_0_v']) + \
-sum(MorrisSample_test.loc[:,'s109_m'] > MorrisSample_test.loc[:,'s9_m']) + \
-sum(MorrisSample_test.loc[:,'s108_m'] > MorrisSample_test.loc[:,'s8_m']) + \
-sum(MorrisSample_test.loc[:,'s108_porosity_0'] > MorrisSample_test.loc[:,'s8_porosity_0']) + \
-sum(MorrisSample_test.loc[:,'s109_porosity_0'] > MorrisSample_test.loc[:,'s9_porosity_0']) + \
-sum(MorrisSample_test.loc[:,'v102_epc.topt'] > MorrisSample_test.loc[:,'v102_epc.tmax']) + \
-sum(MorrisSample_test.loc[:,'v3_epc.topt'] > MorrisSample_test.loc[:,'v3_epc.tmax']) + \
-sum(MorrisSample_test.loc[:,'v102_epc.topt'] > MorrisSample_test.loc[:,'v102_epc.tmax']) + \
-sum(MorrisSample_test.loc[:,'v3_epc.topt'] > MorrisSample_test.loc[:,'v3_epc.tmax']) + \
-sum(MorrisSample_test.loc[:,'v102_epc.leaf_cn'] > MorrisSample_test.loc[:,'v102_epc.leaflitr_cn']) + \
-sum(MorrisSample_test.loc[:,'v3_epc.leaf_cn'] > MorrisSample_test.loc[:,'v3_epc.leaflitr_cn'])) != 0:
-    sys.exit('Upon loading csv file, one of the inequalities that was correct when it saved is now incorrect. This is a function bug that should be reported.')
