@@ -396,7 +396,7 @@ rm(f, fo, d, fs_def, fs_Rdef, i, v)
 
 print(paste("Input def files match output def files."))
 
-#Loop through all of the folders and extract the data needed----
+#Loop through all of the folders (SA replicates) and extract the data needed----
 temp_out = list.files(paste0(getwd(), '/', fs[1], '/output'))
 tempb = read.table(paste0(getwd(), '/', fs[1], '/output/', temp_out[grep(temp_out, pattern = 'basin.daily')]), stringsAsFactors = FALSE, header = TRUE)
 BasinStreamflow = BasinSatDef = matrix(NA, nrow = length(fs), ncol = (1 + nrow(tempb)))
@@ -1168,97 +1168,13 @@ for (h in 1:length(uhills)){
 dev.off()
 rm(h)
 
-#Estimate the nitrogen timeseries using WRTDS----
-#Load the streamflow data into WRTDS format
-Daily = readUserDaily(filePath = "C:\\Users\\jsmif\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\RHESSysFilePreparation\\obs", fileName = 'BaismanStreamflow_Cal.txt', hasHeader = TRUE, separator = '\t', qUnit = 1, verbose = FALSE)
-#Read the TN data
-Sample = readUserSample(filePath = "C:\\Users\\jsmif\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\RHESSysFilePreparation\\obs", fileName = 'TN_Cal_WRTDS.txt', hasHeader = TRUE, separator = '\t', verbose = FALSE)
-#Set the required information
-INFO = readUserInfo(filePath = "C:\\Users\\jsmif\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\RHESSysFilePreparation\\obs", fileName = 'WRTDS_INFO.csv', interactive = FALSE)
-eList = mergeReport(INFO = INFO, Daily = Daily, Sample = Sample)
-saveResults("C:\\Users\\jsmif\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\RHESSysFilePreparation\\obs\\", eList)
+#Estimate the nitrogen timeseries for each replicate using WRTDS----
 
-WRTDSmod = modelEstimation(eList = eList, windowY = 7, windowQ = 2, windowS = .5, minNumObs = 100, minNumUncen = 50, edgeAdjust = TRUE)
 
-setwd("C:\\Users\\jsmif\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\RHESSysFilePreparation\\obs\\")
-png('ConcFluxTime.png', res = 300, units ='in', width = 12, height = 6)
-layout(rbind(c(1,2)))
-plotConcTimeDaily(WRTDSmod)
-plotFluxTimeDaily(WRTDSmod)
-dev.off()
-
-png('ConcFluxTimeErrs.png', res = 300, units ='in', width = 12, height = 6)
-layout(rbind(c(1,2)))
-plotConcPred(WRTDSmod)
-plotFluxPred(WRTDSmod)
-dev.off()
-
-plotResidPred(WRTDSmod)
-plotResidQ(WRTDSmod)
-plotResidTime(WRTDSmod)
-boxResidMonth(WRTDSmod)
-boxConcThree(WRTDSmod)
-boxQTwice(WRTDSmod)
-plotFluxHist(WRTDSmod)
-plotConcHist(WRTDSmod)
-
-png('BiasPlot.png', res = 300, units ='in', width = 12, height = 12)
-fluxBiasMulti(WRTDSmod, cex.axis = 1.5, cex.main = 1.5, cex.lab=1.5)
-dev.off()
-
-png('ContourPlotMean.png', res = 300, units ='in', width = 6, height = 6)
-plotContours(WRTDSmod, yearStart = 1999, yearEnd = 2011, contourLevels=seq(0,.8,0.05),qUnit=1, qBottom = 0.01, qTop = 100, whatSurface = 1)
-dev.off()
-
-png('ContourPlotErr.png', res = 300, units ='in', width = 6, height = 6)
-plotContours(WRTDSmod, yearStart = 1999, yearEnd = 2011, contourLevels=seq(0,.3,0.05),qUnit=1, qBottom = 0.01, qTop = 100, whatSurface = 2)
-dev.off()
-
-estSurfaces(eList, windowY = windowY, windowQ = windowQ, windowS = windowS, minNumObs = minNumObs, minNumUncen = minNumUncen, edgeAdjust = edgeAdjust, verbose = verbose, run.parallel = run.parallel)
-estDailyFromSurfaces
-checkSurfaceSpan(eList)
-
-#Model#2 WRTDS
-WRTDSmod2 = modelEstimation(eList = eList, windowY = 3, windowQ = 2, windowS = .5, minNumObs = 60, minNumUncen = 50, edgeAdjust = TRUE)
-
-setwd("C:\\Users\\jsmif\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\RHESSysFilePreparation\\obs\\")
-png('ConcFluxTime.png', res = 300, units ='in', width = 12, height = 6)
-layout(rbind(c(1,2)))
-plotConcTimeDaily(WRTDSmod2)
-plotFluxTimeDaily(WRTDSmod2)
-dev.off()
-
-png('ConcFluxTimeErrs.png', res = 300, units ='in', width = 12, height = 6)
-layout(rbind(c(1,2)))
-plotConcPred(WRTDSmod2)
-plotFluxPred(WRTDSmod2)
-dev.off()
-
-plotResidPred(WRTDSmod2)
-plotResidQ(WRTDSmod2)
-plotResidTime(WRTDSmod2)
-boxResidMonth(WRTDSmod2)
-boxConcThree(WRTDSmod2)
-boxQTwice(WRTDSmod2)
-plotFluxHist(WRTDSmod2)
-plotConcHist(WRTDSmod2)
-
-png('BiasPlot.png', res = 300, units ='in', width = 12, height = 12)
-fluxBiasMulti(WRTDSmod2, cex.axis = 1.5, cex.main = 1.5, cex.lab=1.5)
-dev.off()
-
-png('ContourPlotMean.png', res = 300, units ='in', width = 6, height = 6)
-plotContours(WRTDSmod2, yearStart = 1999, yearEnd = 2011, contourLevels=seq(0,2,0.4),qUnit=1, qBottom = 0.01, qTop = 100, whatSurface = 1)
-dev.off()
-
-png('ContourPlotErr.png', res = 300, units ='in', width = 6, height = 6)
-plotContours(WRTDSmod2, yearStart = 1999, yearEnd = 2011, contourLevels=seq(0,.4,0.05),qUnit=1, qBottom = 0.01, qTop = 100, whatSurface = 2)
-dev.off()
-
-#Will want to get all replicates for SA using a metric of choice
+#Will want to get all replicates for SA using a metric of choice----
 sensitivity::pcc()
 sensitivity::plot3d.morris()
 ?sensitivity::morrisMultOut()
 ?sensitivity::morris()
 
-#Show SA metrics for the basin and for each hillslope - ranks, and maps for hillslope
+#Show SA metrics for the basin and for each hillslope - ranks, and maps for hillslope----
