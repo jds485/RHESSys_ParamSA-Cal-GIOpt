@@ -399,8 +399,8 @@ print(paste("Input def files match output def files."))
 #Loop through all of the folders and extract the data needed----
 temp_out = list.files(paste0(getwd(), '/', fs[1], '/output'))
 tempb = read.table(paste0(getwd(), '/', fs[1], '/output/', temp_out[grep(temp_out, pattern = 'basin.daily')]), stringsAsFactors = FALSE, header = TRUE)
-BasinStreamflow = matrix(NA, nrow = length(fs), ncol = (1 + nrow(tempb)))
-HillStreamflow = matrix(NA, nrow = length(fs)*length(uhills), ncol = (2 + nrow(tempb)))
+BasinStreamflow = BasinSatDef = matrix(NA, nrow = length(fs), ncol = (1 + nrow(tempb)))
+HillStreamflow = HillSatDef = matrix(NA, nrow = length(fs)*length(uhills), ncol = (2 + nrow(tempb)))
 rm(temp_out, tempb)
 
 MakeFigs = FALSE
@@ -903,37 +903,270 @@ for (i in 1:length(fs)){
   
   #Save basin and hillslope timeseries----
   BasinStreamflow[i,] = c(i, bs$streamflow*conversion_b)
+  BasinSatDef[i,] = c(i, bs$sat_def)
   for (h in 1:length(uhills)){
-    HillStreamflow[i + length(fs)*(uhills[h]-1),] = c(i, uhills[h], hs$streamflow[hs$hillID == uhills[h]]*conversion_h[conversion_h[,1] == uhills[h], 2]) 
+    HillStreamflow[i + length(fs)*(uhills[h]-1),] = c(i, uhills[h], hs$streamflow[hs$hillID == uhills[h]]*conversion_h[conversion_h[,1] == uhills[h], 2])
+    HillSatDef[i + length(fs)*(uhills[h]-1),] = c(i, uhills[h], hs$sat_def[hs$hillID == uhills[h]])
   }
   rm(h)
   
   setwd(od)
 }
 
-#Make basin and hillslope matrices into dataframes
+#Make basin and hillslope matrices into dataframes----
 BasinStreamflow = as.data.frame(BasinStreamflow)
-colnames(BasinStreamflow) = c('Replicate', as.character(bs$Date))
+BasinSatDef = as.data.frame(BasinSatDef)
+colnames(BasinStreamflow) = colnames(BasinSatDef) = c('Replicate', as.character(bs$Date))
 HillStreamflow = as.data.frame(HillStreamflow)
-colnames(HillStreamflow) = c('Replicate', 'HillID', as.character(bs$Date))
+HillSatDef = as.data.frame(HillSatDef)
+colnames(HillStreamflow) = colnames(HillSatDef) = c('Replicate', 'HillID', as.character(bs$Date))
 
 rm(i, fs_out, bs, hs)
 
-#Make a plot of the streamflow quantile observed across the SA runs
-png(paste0('streamflowRepsBasin.png'), res = 300, height = 5, width=5, units = 'in')
-matplot(x = as.Date(colnames(BasinStreamflow)[-1]), y = t(BasinStreamflow[,-1]), col = grey(level = 0.1, alpha = 0.4), xlab = 'Year', ylab = 'Streamflow (cfs)', type = 'l', ylim = c(0,10))
+#Make plots of the streamflow and saturation deficit observed across the SA runs----
+#Basin----
+png(paste0('streamflowRepsBasin_Med.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(colnames(BasinStreamflow)[-1]), y = t(BasinStreamflow[,-1]), col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'Streamflow (cfs)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,50,2), labels = TRUE, cex.axis = 1.5)
+#Add quantiles
+quants = apply(X = BasinStreamflow[,-1], MARGIN = 2, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+qlty = c(3,2,1,2,3)
+par(new=TRUE)
+plot(x = as.Date(colnames(BasinStreamflow)[-1]), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, 
+     xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
 dev.off()
 
-png(paste0('streamflowRepsHillslope.png'), res = 300, height = 10, width=10, units = 'in')
+png(paste0('streamflowRepsBasin_Cut1yr_Med.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(colnames(BasinStreamflow)[-seq(1,414,1)]), y = t(BasinStreamflow[,-seq(1,414,1)]), col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'Streamflow (cfs)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,50,2), labels = TRUE, cex.axis = 1.5)
+#Add quantiles
+quants = apply(X = BasinStreamflow[,-seq(1,414,1)], MARGIN = 2, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+qlty = c(3,2,1,2,3)
+par(new=TRUE)
+plot(x = as.Date(colnames(BasinStreamflow)[-seq(1,414,1)]), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1,
+     xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+dev.off()
+
+png(paste0('streamflowRepsBasin_Cut1yr_Quants.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(colnames(BasinStreamflow)[-seq(1,414,1)]), y = t(BasinStreamflow[,-seq(1,414,1)]), col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'Streamflow (cfs)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,50,2), labels = TRUE, cex.axis = 1.5)
+#Add quantiles
+quants = apply(X = BasinStreamflow[,-seq(1,414,1)], MARGIN = 2, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+qlty = c(3,2,1,2,3)
+for (q in 1:nrow(quants)){
+  par(new=TRUE)
+  plot(x = as.Date(colnames(BasinStreamflow)[-seq(1,414,1)]), y = quants[q,], col = 'red', lty = qlty[q], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1,
+       xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+}
+dev.off()
+
+png(paste0('streamflowRepsBasin_2007_Med.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(colnames(BasinStreamflow)[seq(2606,2606+365,1)]), y = t(BasinStreamflow[,seq(2606,2606+365,1)]), col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'Streamflow (cfs)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%b %Y"), cex.axis = 1.5)
+axis(2, at = seq(0,50,2), labels = TRUE, cex.axis = 1.5)
+#Add quantiles
+quants = apply(X = BasinStreamflow[,seq(2606,2606+365,1)], MARGIN = 2, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+qlty = c(3,2,1,2,3)
+par(new=TRUE)
+plot(x = as.Date(colnames(BasinStreamflow)[seq(2606,2606+365,1)]), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1,
+     xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+dev.off()
+
+png(paste0('satDefRepsBasin_Med.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(colnames(BasinSatDef)[-1]), y = t(BasinSatDef[,-1]), col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'Saturation Deficit (mm)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,20000,500), labels = TRUE, cex.axis = 1.5)
+#Add quantiles
+quants = apply(X = BasinSatDef[,-1], MARGIN = 2, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+qlty = c(3,2,1,2,3)
+par(new=TRUE)
+plot(x = as.Date(colnames(BasinSatDef)[-1]), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, 
+     xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+dev.off()
+
+png(paste0('satDefRepsBasin_Quants.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(colnames(BasinSatDef)[-1]), y = t(BasinSatDef[,-1]), col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'Saturation Deficit (mm)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,20000,500), labels = TRUE, cex.axis = 1.5)
+#Add quantiles
+quants = apply(X = BasinSatDef[,-1], MARGIN = 2, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+qlty = c(3,2,1,2,3)
+for (q in 1:nrow(quants)){
+  par(new=TRUE)
+  plot(x = as.Date(colnames(BasinSatDef)[-1]), y = quants[q,], col = 'red', lty = qlty[q], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1,
+       xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+}
+legend('bottomright', title = 'Quantiles', legend = seq(0,1,0.25), lty = qlty, col = 'red')
+dev.off()
+
+png(paste0('satDefRepsBasin_2007_Med.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(colnames(BasinSatDef)[seq(2606,2606+365,1)]), y = t(BasinSatDef[,seq(2606,2606+365,1)]), col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'Saturation Deficit (mm)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%b %Y"), cex.axis = 1.5)
+axis(2, at = seq(0,20000,500), labels = TRUE, cex.axis = 1.5)
+#Add quantiles
+quants = apply(X = BasinSatDef[,seq(2606,2606+365,1)], MARGIN = 2, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+qlty = c(3,2,1,2,3)
+for (q in 1:nrow(quants)){
+  par(new=TRUE)
+  plot(x = as.Date(colnames(BasinSatDef)[seq(2606,2606+365,1)]), y = quants[q,], col = 'red', lty = qlty[q], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1,
+       xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+}
+dev.off()
+
+#Hillslope----
+png(paste0('streamflowRepsHill_Med.png'), res = 300, height = 10, width=10, units = 'in')
 layout(rbind(c(1,2), c(3,4), c(5,6), c(7,8), c(9,10), c(11,12), c(13,14)))
 par(mar = c(3,3,3,0.5))
 for (h in 1:length(uhills)){
-  matplot(x = as.Date(colnames(BasinStreamflow)[-1]), y = t(HillStreamflow[seq(1+(uhills[h]-1)*length(fs), length(fs)+(uhills[h]-1)*length(fs), 1), -c(1,2)]), 
+  matplot(x = as.Date(colnames(BasinStreamflow)[-1]), y = t(HillStreamflow[seq(1+(uhills[h]-1)*length(fs), length(fs)+(uhills[h]-1)*length(fs), 1), -c(1,2)]),
           main = paste0('Hillslope ', uhills[h], ' Streamflow'), type = 'l', xlab = 'Year', ylab = 'Streamflow (cfs)',
-          col = grey(level = 0.1, alpha = 0.4))
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,50,.1), labels = TRUE, cex.axis = 1.5)
+  #Add quantiles
+  quants = apply(X = HillStreamflow[seq(1+(uhills[h]-1)*length(fs), length(fs)+(uhills[h]-1)*length(fs), 1), -c(1,2)], MARGIN = 2, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+  qlty = c(3,2,1,2,3)
+  par(new=TRUE)
+  plot(x = as.Date(colnames(BasinStreamflow)[-1]), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, 
+       xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
 }
-rm(h)
 dev.off()
+rm(h)
+
+png(paste0('streamflowRepsHill_Cut1yr_Med.png'), res = 300, height = 10, width=10, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6), c(7,8), c(9,10), c(11,12), c(13,14)))
+par(mar = c(3,3,3,0.5))
+for (h in 1:length(uhills)){
+  matplot(x = as.Date(colnames(BasinStreamflow)[-seq(1,414,1)]), y = t(HillStreamflow[seq(1+(uhills[h]-1)*length(fs), length(fs)+(uhills[h]-1)*length(fs), 1), -c(1,2)][-seq(1,413,1)]),
+          main = paste0('Hillslope ', uhills[h], ' Streamflow'), type = 'l', xlab = 'Year', ylab = 'Streamflow (cfs)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,50,.1), labels = TRUE, cex.axis = 1.5)
+  #Add quantiles
+  quants = apply(X = HillStreamflow[seq(1+(uhills[h]-1)*length(fs), length(fs)+(uhills[h]-1)*length(fs), 1), -c(1,2)][-seq(1,413,1)], MARGIN = 2, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+  qlty = c(3,2,1,2,3)
+  par(new=TRUE)
+  plot(x = as.Date(colnames(BasinStreamflow)[-seq(1,414,1)]), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, 
+       xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+}
+dev.off()
+rm(h)
+
+png(paste0('streamflowRepsHill_Cut1yr_Quants.png'), res = 300, height = 10, width=10, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6), c(7,8), c(9,10), c(11,12), c(13,14)))
+par(mar = c(3,3,3,0.5))
+for (h in 1:length(uhills)){
+  matplot(x = as.Date(colnames(BasinStreamflow)[-seq(1,414,1)]), y = t(HillStreamflow[seq(1+(uhills[h]-1)*length(fs), length(fs)+(uhills[h]-1)*length(fs), 1), -c(1,2)][-seq(1,413,1)]),
+          main = paste0('Hillslope ', uhills[h], ' Streamflow'), type = 'l', xlab = 'Year', ylab = 'Streamflow (cfs)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,50,.1), labels = TRUE, cex.axis = 1.5)
+  #Add quantiles
+  quants = apply(X = HillStreamflow[seq(1+(uhills[h]-1)*length(fs), length(fs)+(uhills[h]-1)*length(fs), 1), -c(1,2)][-seq(1,413,1)], MARGIN = 2, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+  qlty = c(3,2,1,2,3)
+  for (q in 1:nrow(quants)){
+    par(new=TRUE)
+    plot(x = as.Date(colnames(BasinStreamflow)[-seq(1,414,1)]), y = quants[q,], col = 'red', lty = qlty[q], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, 
+         xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+  }
+}
+dev.off()
+rm(h)
+
+png(paste0('streamflowRepsHill_2007_Med.png'), res = 300, height = 10, width=10, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6), c(7,8), c(9,10), c(11,12), c(13,14)))
+par(mar = c(3,3,3,0.5))
+for (h in 1:length(uhills)){
+  matplot(x = as.Date(colnames(BasinStreamflow)[seq(2606,2606+365,1)]), y = t(HillStreamflow[seq(1+(uhills[h]-1)*length(fs), length(fs)+(uhills[h]-1)*length(fs), 1), -c(1,2)][seq(2605,2605+365,1)]),
+          main = paste0('Hillslope ', uhills[h], ' Streamflow'), type = 'l', xlab = 'Year', ylab = 'Streamflow (cfs)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%b %Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,50,.1), labels = TRUE, cex.axis = 1.5)
+  #Add quantiles
+  quants = apply(X = HillStreamflow[seq(1+(uhills[h]-1)*length(fs), length(fs)+(uhills[h]-1)*length(fs), 1), -c(1,2)][seq(2605,2605+365,1)], MARGIN = 2, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+  qlty = c(3,2,1,2,3)
+  par(new=TRUE)
+  plot(x = as.Date(colnames(BasinStreamflow)[seq(2606,2606+365,1)]), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, 
+       xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+}
+dev.off()
+rm(h)
+
+png(paste0('satDefRepsHill_Med.png'), res = 300, height = 10, width=10, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6), c(7,8), c(9,10), c(11,12), c(13,14)))
+par(mar = c(3,3,3,0.5))
+for (h in 1:length(uhills)){
+  matplot(x = as.Date(colnames(BasinSatDef)[-1]), y = t(HillSatDef[seq(1+(uhills[h]-1)*length(fs), length(fs)+(uhills[h]-1)*length(fs), 1), -c(1,2)]),
+          main = paste0('Hillslope ', uhills[h], ' Saturation Deficit'), type = 'l', xlab = 'Year', ylab = 'Saturation Deficit (mm)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,20000,500), labels = TRUE, cex.axis = 1.5)
+  #Add quantiles
+  quants = apply(X = HillSatDef[seq(1+(uhills[h]-1)*length(fs), length(fs)+(uhills[h]-1)*length(fs), 1), -c(1,2)], MARGIN = 2, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+  qlty = c(3,2,1,2,3)
+  par(new=TRUE)
+  plot(x = as.Date(colnames(BasinSatDef)[-1]), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, 
+       xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+}
+dev.off()
+rm(h)
+
+png(paste0('satDefRepsHill_Quants.png'), res = 300, height = 10, width=10, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6), c(7,8), c(9,10), c(11,12), c(13,14)))
+par(mar = c(3,3,3,0.5))
+for (h in 1:length(uhills)){
+  matplot(x = as.Date(colnames(BasinSatDef)[-1]), y = t(HillSatDef[seq(1+(uhills[h]-1)*length(fs), length(fs)+(uhills[h]-1)*length(fs), 1), -c(1,2)]),
+          main = paste0('Hillslope ', uhills[h], ' Saturation Deficit'), type = 'l', xlab = 'Year', ylab = 'Saturation Deficit (mm)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,20000,500), labels = TRUE, cex.axis = 1.5)
+  #Add quantiles
+  quants = apply(X = HillSatDef[seq(1+(uhills[h]-1)*length(fs), length(fs)+(uhills[h]-1)*length(fs), 1), -c(1,2)], MARGIN = 2, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+  qlty = c(3,2,1,2,3)
+  for (q in 1:nrow(quants)){
+    par(new=TRUE)
+    plot(x = as.Date(colnames(BasinSatDef)[-1]), y = quants[q,], col = 'red', lty = qlty[q], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, 
+         xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+  }
+}
+dev.off()
+rm(h)
+
+png(paste0('satDefRepsHill_2007_Med.png'), res = 300, height = 10, width=10, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6), c(7,8), c(9,10), c(11,12), c(13,14)))
+par(mar = c(3,3,3,0.5))
+for (h in 1:length(uhills)){
+  matplot(x = as.Date(colnames(BasinSatDef)[seq(2606,2606+365,1)]), y = t(HillSatDef[seq(1+(uhills[h]-1)*length(fs), length(fs)+(uhills[h]-1)*length(fs), 1), -c(1,2)][seq(2605,2605+365,1)]),
+          main = paste0('Hillslope ', uhills[h], ' Saturation Deficit'), type = 'l', xlab = 'Year', ylab = 'Saturation Deficit (mm)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,20000,500), labels = TRUE, cex.axis = 1.5)
+  #Add quantiles
+  quants = apply(X = HillSatDef[seq(1+(uhills[h]-1)*length(fs), length(fs)+(uhills[h]-1)*length(fs), 1), -c(1,2)][seq(2605,2605+365,1)], MARGIN = 2, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+  qlty = c(3,2,1,2,3)
+  par(new=TRUE)
+  plot(x = as.Date(colnames(BasinSatDef)[seq(2606,2606+365,1)]), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, 
+       xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+}
+dev.off()
+rm(h)
 
 #Estimate the nitrogen timeseries using WRTDS----
 #Load the streamflow data into WRTDS format
@@ -981,6 +1214,9 @@ png('ContourPlotErr.png', res = 300, units ='in', width = 6, height = 6)
 plotContours(WRTDSmod, yearStart = 1999, yearEnd = 2011, contourLevels=seq(0,.3,0.05),qUnit=1, qBottom = 0.01, qTop = 100, whatSurface = 2)
 dev.off()
 
+estSurfaces(eList, windowY = windowY, windowQ = windowQ, windowS = windowS, minNumObs = minNumObs, minNumUncen = minNumUncen, edgeAdjust = edgeAdjust, verbose = verbose, run.parallel = run.parallel)
+estDailyFromSurfaces
+checkSurfaceSpan(eList)
 
 #Model#2 WRTDS
 WRTDSmod2 = modelEstimation(eList = eList, windowY = 3, windowQ = 2, windowS = .5, minNumObs = 60, minNumUncen = 50, edgeAdjust = TRUE)
