@@ -1,4 +1,6 @@
 library(EGRET)
+library(survival)
+library(pracma)
 
 modelEstimation = function (eList, windowY = 7, windowQ = 2, windowS = 0.5, minNumObs = 100, 
           minNumUncen = 50, edgeAdjust = TRUE, verbose = TRUE, run.parallel = FALSE, numTsteps=16, numQsteps=14) 
@@ -450,71 +452,60 @@ plotContours = function (eList, yearStart, yearEnd, qBottom = NA, qTop = NA,
 
 #Function to predict TN from the provided date and flow by interpolating the model parameters
 predictWRTDS = function(Date, Flow){
-  #Date is expected to be in year-mo-dy format as a character
-  #Convert to decimal year using egret function that made the table decimal years
-  DecYear = decimalDate(rawData = as.Date(Date))
-  
-  #Flow is expected in real space units in cfs
-  #Convert to log space
-  LogFlow = log(Flow*12^3*2.54^3/100^3)
-  
-  #Calculate the sin and cos of the year
-  SinDY = sin(2*pi*DecYear)
-  CosDY = cos(2*pi*DecYear)
-  
-  #Estimate the prediction using interpolation
-  #Check that the LogFlow is in the interpolation range
-  if (LogFlow > as.numeric(rownames(TabInt)[nrow(TabInt)])){
-    print('The LogFlow value is greater than the values in the interpolation table. Using the largest flow values available in the table for LogFlow.')
-    PLogFlow = as.numeric(rownames(TabInt)[nrow(TabInt)])
-  }else if (LogFlow < as.numeric(rownames(TabInt)[1])){
-    print('The LogFlow value is less than the smallest value in the interpolation table. Using the smallest flow values available in the table for LogFlow.')
-    PLogFlow = as.numeric(rownames(TabInt)[1])
+  #There are some hillslopes with 0 flows to 6 decimal places. Report 0 concentration for those flows
+  if (Flow == 0){
+    preds = rep(0,3)
+    return(preds)
   }else{
-    PLogFlow = LogFlow
+    #Date is expected to be in year-mo-dy format as a character
+    #Convert to decimal year using egret function that made the table decimal years
+    DecYear = decimalDate(rawData = as.Date(Date))
+    
+    #Flow is expected in real space units in cfs
+    #Convert to log space
+    LogFlow = log(Flow*12^3*2.54^3/100^3)
+    
+    #Calculate the sin and cos of the year
+    SinDY = sin(2*pi*DecYear)
+    CosDY = cos(2*pi*DecYear)
+    
+    #Check that the LogFlow is in the interpolation range
+    if (LogFlow > as.numeric(rownames(TabInt)[nrow(TabInt)])){
+      print('The LogFlow value is greater than the values in the interpolation table. Using the largest flow values available in the table for LogFlow.')
+      PLogFlow = as.numeric(rownames(TabInt)[nrow(TabInt)])
+    }else if (LogFlow < as.numeric(rownames(TabInt)[1])){
+      print('The LogFlow value is less than the smallest value in the interpolation table. Using the smallest flow values available in the table for LogFlow.')
+      PLogFlow = as.numeric(rownames(TabInt)[1])
+    }else{
+      PLogFlow = LogFlow
+    }
+    
+    #Check that the DecYear is in the interpolation range
+    if (DecYear > as.numeric(colnames(TabInt)[ncol(TabInt)])){
+      print('The decimal year value is greater than the values in the interpolation table. Using the largest year available in the table for DecYear.')
+      PDecYear = as.numeric(colnames(TabInt)[nrow(TabInt)])
+    }else if (DecYear < as.numeric(colnames(TabInt)[1])){
+      print('The decimal year value is less than the smallest value in the interpolation table. Using the smallest year available in the table for DecYear.')
+      PDecYear = as.numeric(colnames(TabInt)[1])
+    }else{
+      PDecYear = DecYear
+    }
+    
+    #Get the 5th, median, and 95th percentiles in log space
+    predMed = (interp2(xp = PDecYear, yp = PLogFlow, method = 'linear', Z = TabInt, y = as.numeric(rownames(TabInt)), x = as.numeric(colnames(TabInt))) + 
+                 interp2(xp = PDecYear, yp = PLogFlow, method = 'linear', Z = TabYear, y = as.numeric(rownames(TabInt)), x = as.numeric(colnames(TabInt)))*DecYear +
+                 interp2(xp = PDecYear, yp = PLogFlow, method = 'linear', Z = TabLogQ, y = as.numeric(rownames(TabInt)), x = as.numeric(colnames(TabInt)))*LogFlow +
+                 interp2(xp = PDecYear, yp = PLogFlow, method = 'linear', Z = TabSinYear, y = as.numeric(rownames(TabInt)), x = as.numeric(colnames(TabInt)))*SinDY +
+                 interp2(xp = PDecYear, yp = PLogFlow, method = 'linear', Z = TabCosYear, y = as.numeric(rownames(TabInt)), x = as.numeric(colnames(TabInt)))*CosDY)
+    e = interp2(xp = PDecYear, yp = PLogFlow, method = 'linear', Z = TabLogErr, y = as.numeric(rownames(TabInt)), x = as.numeric(colnames(TabInt)))
+    pred05 = predMed + e*-2
+    
+    pred95 = predMed + e*2
+    
+    #Convert to real space
+    preds = exp(c(pred05, predMed, pred95))
+    return(preds)
   }
-  
-  #Check that the DecYear is in the interpolation range
-  if (DecYear > as.numeric(colnames(TabInt)[nrow(TabInt)])){
-    print('The decimal year value is greater than the values in the interpolation table. Using the largest year available in the table for DecYear.')
-    PDecYear = as.numeric(colnames(TabInt)[nrow(TabInt)])
-    PSinDY = sin(2*pi*PDecYear)
-    PCosDY = cos(2*pi*PDecYear)
-  }else if (DecYear < as.numeric(colnames(TabInt)[1])){
-    print('The decimal year value is less than the smallest value in the interpolation table. Using the smallest year available in the table for DecYear.')
-    PDecYear = as.numeric(colnames(TabInt)[1])
-    PSinDY = sin(2*pi*PDecYear)
-    PCosDY = cos(2*pi*PDecYear)
-  }else{
-    PDecYear = DecYear
-    PSinDY = SinDY
-    PCosDY = CosDY
-  }
-  
-  #Get the 5th, median, and 95th percentiles in log space
-  pred05 = (interp2(xp = PDecYear, yp = PLogFlow, method = 'linear', Z = TabInt, y = as.numeric(rownames(TabInt)), x = as.numeric(colnames(TabInt))) + 
-              interp2(xp = PDecYear, yp = PLogFlow, method = 'linear', Z = TabYear, y = as.numeric(rownames(TabInt)), x = as.numeric(colnames(TabInt)))*DecYear +
-              interp2(xp = PDecYear, yp = PLogFlow, method = 'linear', Z = TabLogQ, y = as.numeric(rownames(TabInt)), x = as.numeric(colnames(TabInt)))*LogFlow +
-              interp2(xp = PDecYear, yp = PLogFlow, method = 'linear', Z = TabSinYear, y = as.numeric(rownames(TabInt)), x = as.numeric(colnames(TabInt)))*SinDY +
-              interp2(xp = PDecYear, yp = PLogFlow, method = 'linear', Z = TabCosYear, y = as.numeric(rownames(TabInt)), x = as.numeric(colnames(TabInt)))*CosDY +
-              interp2(xp = PDecYear, yp = PLogFlow, method = 'linear', Z = TabLogErr, y = as.numeric(rownames(TabInt)), x = as.numeric(colnames(TabInt)))*-2)
-  
-  predMed = (interp2(xp = PDecYear, yp = PLogFlow, method = 'linear', Z = TabInt, y = as.numeric(rownames(TabInt)), x = as.numeric(colnames(TabInt))) + 
-               interp2(xp = PDecYear, yp = PLogFlow, method = 'linear', Z = TabYear, y = as.numeric(rownames(TabInt)), x = as.numeric(colnames(TabInt)))*DecYear +
-               interp2(xp = PDecYear, yp = PLogFlow, method = 'linear', Z = TabLogQ, y = as.numeric(rownames(TabInt)), x = as.numeric(colnames(TabInt)))*LogFlow +
-               interp2(xp = PDecYear, yp = PLogFlow, method = 'linear', Z = TabSinYear, y = as.numeric(rownames(TabInt)), x = as.numeric(colnames(TabInt)))*SinDY +
-               interp2(xp = PDecYear, yp = PLogFlow, method = 'linear', Z = TabCosYear, y = as.numeric(rownames(TabInt)), x = as.numeric(colnames(TabInt)))*CosDY)
-  
-  pred95 = (interp2(xp = PDecYear, yp = PLogFlow, method = 'linear', Z = TabInt, y = as.numeric(rownames(TabInt)), x = as.numeric(colnames(TabInt))) + 
-              interp2(xp = PDecYear, yp = PLogFlow, method = 'linear', Z = TabYear, y = as.numeric(rownames(TabInt)), x = as.numeric(colnames(TabInt)))*DecYear +
-              interp2(xp = PDecYear, yp = PLogFlow, method = 'linear', Z = TabLogQ, y = as.numeric(rownames(TabInt)), x = as.numeric(colnames(TabInt)))*LogFlow +
-              interp2(xp = PDecYear, yp = PLogFlow, method = 'linear', Z = TabSinYear, y = as.numeric(rownames(TabInt)), x = as.numeric(colnames(TabInt)))*SinDY +
-              interp2(xp = PDecYear, yp = PLogFlow, method = 'linear', Z = TabCosYear, y = as.numeric(rownames(TabInt)), x = as.numeric(colnames(TabInt)))*CosDY +
-              interp2(xp = PDecYear, yp = PLogFlow, method = 'linear', Z = TabLogErr, y = as.numeric(rownames(TabInt)), x = as.numeric(colnames(TabInt)))*2)
-  
-  #Convert to real space
-  preds = exp(c(pred05, predMed, pred95))
-  return(preds)
 }
 
 #runSurvReg parameters
