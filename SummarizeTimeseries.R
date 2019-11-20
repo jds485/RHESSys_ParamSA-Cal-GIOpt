@@ -2307,9 +2307,9 @@ BasinTNMed = cbind(BasinSF[,1], BasinTN[[2]])
 BasinTN95 = cbind(BasinSF[,1], BasinTN[[3]])
 
 #Save TN timeseries
-write.table(BasinTN05, file = 'SAResults_BasinTN05.txt', row.names = FALSE, sep = '\t')
-write.table(BasinTNMed, file = 'SAResults_BasinTNMed.txt', row.names = FALSE, sep = '\t')
-write.table(BasinTN95, file = 'SAResults_BasinTN95.txt', row.names = FALSE, sep = '\t')
+write.table(round(BasinTN05,3), file = 'SAResults_BasinTN05_p3.txt', row.names = FALSE, sep = '\t')
+write.table(round(BasinTNMed,3), file = 'SAResults_BasinTNMed_p3.txt', row.names = FALSE, sep = '\t')
+write.table(round(BasinTN95,3), file = 'SAResults_BasinTN95_p3.txt', row.names = FALSE, sep = '\t')
 
 write.table(HillTN05, file = 'SAResults_HillTN05.txt', row.names = FALSE, sep = '\t')
 write.table(HillTNMed, file = 'SAResults_HillTNMed.txt', row.names = FALSE, sep = '\t')
