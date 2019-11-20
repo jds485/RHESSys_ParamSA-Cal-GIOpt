@@ -5,6 +5,23 @@ library(stringr)
 library(rgdal)
 library(GISTools)
 library(sensitivity)
+library(EGRET)
+library(survival)
+library(pracma)
+library(parallel)
+library(doParallel)
+library(foreach)
+
+#Load modified WRTDS functions and the interpolation tables for regression parameters
+setwd('C:\\Users\\js4yd\\OneDrive - University of Virginia\\RHESSys_ParameterSA')
+source('WRTDS_modifiedFunctions.R')
+setwd("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\WRTDS")
+TabInt = as.matrix(read.table(file = 'TabIntMod4.txt', sep = '\t', header = TRUE, check.names = FALSE))
+TabYear = as.matrix(read.table(file = 'TabYearMod4.txt', sep = '\t', header = TRUE, check.names = FALSE))
+TabLogQ = as.matrix(read.table(file = 'TabLogQMod4.txt', sep = '\t', header = TRUE, check.names = FALSE))
+TabSinYear = as.matrix(read.table(file = 'TabSinYearMod4.txt', sep = '\t', header = TRUE, check.names = FALSE))
+TabCosYear = as.matrix(read.table(file = 'TabCosYearMod4.txt', sep = '\t', header = TRUE, check.names = FALSE))
+TabLogErr = as.matrix(read.table(file = 'TabLogErrMod4.txt', sep = '\t', header = TRUE, check.names = FALSE))
 
 #Test smaller dataset:----
 setwd("C:\\Users\\jsmif\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\SAOutputCompare")
@@ -1908,6 +1925,8 @@ for (i in 1:length(fs)){
   }
   rm(h)
   
+  #Fixme: WRTDS calculations for this simulation----
+  
   setwd(od)
 }
 
@@ -1921,23 +1940,25 @@ colnames(HillStreamflow) = colnames(HillSatDef) = c('Replicate', 'HillID', as.ch
 
 rm(i, fs_out, bs, hs, od)
 
-#round to 3 decimal places
-BasinStreamflow[,-1] = round(BasinStreamflow[,-1], 3)
-HillStreamflow[,-c(1,2)] = round(HillStreamflow[,-c(1,2)], 3)
+#Checked that every value was non-zero when rounded. For this dataset, Basin to 3 and Hillslope to X works
+#round to 4 and 6 decimal places for streamflow
+BasinStreamflow[,-1] = round(BasinStreamflow[,-1], 4)
+HillStreamflow[,-c(1,2)] = round(HillStreamflow[,-c(1,2)], 6)
 
-BasinSatDef[,-1] = round(BasinSatDef[,-1], 3)
-HillSatDef[,-c(1,2)] = round(HillSatDef[,-c(1,2)], 3)
+#round to 1 decimal place for saturation deficit
+BasinSatDef[,-1] = round(BasinSatDef[,-1], 1)
+HillSatDef[,-c(1,2)] = round(HillSatDef[,-c(1,2)], 1)
 
 #Save the files----
-write.csv(BasinStreamflow, file = 'SAResults_BasinStreamflow.csv', row.names = FALSE)
-write.csv(BasinSatDef, file = 'SAResults_BasinSatDef.csv', row.names = FALSE)
-write.csv(HillStreamflow, file = 'SAResults_HillStreamflow.csv', row.names = FALSE)
-write.csv(HillSatDef, file = 'SAResults_HillSatDef.csv', row.names = FALSE)
+write.csv(BasinStreamflow, file = 'SAResults_BasinStreamflow_p4.csv', row.names = FALSE)
+write.csv(BasinSatDef, file = 'SAResults_BasinSatDef_p1.csv', row.names = FALSE)
+write.csv(HillStreamflow, file = 'SAResults_HillStreamflow_p6.csv', row.names = FALSE)
+write.csv(HillSatDef, file = 'SAResults_HillSatDef_p1.csv', row.names = FALSE)
 
-write.table(BasinStreamflow, file = 'SAResults_BasinStreamflow.txt', row.names = FALSE, sep = '\t')
-write.table(BasinSatDef, file = 'SAResults_BasinSatDef.txt', row.names = FALSE, sep = '\t')
-write.table(HillStreamflow, file = 'SAResults_HillStreamflow.txt', row.names = FALSE, sep = '\t')
-write.table(HillSatDef, file = 'SAResults_HillSatDef.txt', row.names = FALSE, sep = '\t')
+write.table(BasinStreamflow, file = 'SAResults_BasinStreamflow_p4.txt', row.names = FALSE, sep = '\t')
+write.table(BasinSatDef, file = 'SAResults_BasinSatDef_p1.txt', row.names = FALSE, sep = '\t')
+write.table(HillStreamflow, file = 'SAResults_HillStreamflow_p6.txt', row.names = FALSE, sep = '\t')
+write.table(HillSatDef, file = 'SAResults_HillSatDef_p1.txt', row.names = FALSE, sep = '\t')
 
 #Save R data file
 save.image("~/BaismanSA/RHESSysRuns/AllSArepData.RData")
@@ -2189,12 +2210,73 @@ rm(h)
 
 
 #Estimate the nitrogen timeseries for each replicate using WRTDS----
+setwd("C:\\Users\\js4yd\\Documents\\BaismanSA\\RHESSysRuns")
+BasinSF = read.table(file = 'SAResults_BasinStreamflow_p4.txt', sep = '\t', stringsAsFactors = FALSE, header = TRUE, check.names = FALSE)
+HillSF = read.table(file = 'SAResults_HillStreamflow_p6.txt', sep = '\t', stringsAsFactors = FALSE, header = TRUE, check.names = FALSE)
 
+#Loop over the date to fill in the new dataset
+BasinTN05 = BasinTNMed = BasinTN95 = matrix(NA, nrow=nrow(BasinSF), ncol = ncol(BasinSF))
+HillTN05 = HillTNMed = HillTN95 = matrix(NA, nrow=nrow(HillSF), ncol = ncol(HillSF))
+a = matrix(NA, nrow = 3, ncol = ncol(BasinSF)-1)
+h = matrix(NA, nrow = 3, ncol = ncol(BasinSF)-1)
+for (d in 1:(ncol(BasinSF)-1)){
+  a = apply(X = t(BasinSF[,d+1]), MARGIN = 2, FUN = predictWRTDS, Date = as.character(colnames(BasinSF)[d+1]))
+  BasinTN05[,d+1] = a[1,]
+  BasinTNMed[,d+1] = a[2,]
+  BasinTN95[,d+1] = a[3,]
+  
+  h = apply(X = t(HillSF[,d+2]), MARGIN = 2, FUN = predictWRTDS, Date = as.character(colnames(BasinSF)[d+1]))
+  HillTN05[,d+1] = a[1,]
+  HillTNMed[,d+1] = a[2,]
+  HillTN95[,d+1] = a[3,]
+}
+rm(d, a, h)
 
-#Will want to get all replicates for SA using a metric of choice----
-sensitivity::pcc()
-sensitivity::plot3d.morris()
-?sensitivity::morrisMultOut()
-?sensitivity::morris()
+BasinTN[,1] = BasinSF[,1]
+HillTN[,1] = HillSF[,1]
+HillTN[,2] = HillSF[,2]
 
-#Show SA metrics for the basin and for each hillslope - ranks, and maps for hillslope----
+tic3 = Sys.time()
+dtest = as.character(colnames(BasinSF)[d+1])
+a = apply(X = as.matrix(BasinSF[,d+1]), MARGIN = 1, FUN = predictWRTDS, Date = dtest)
+BasinTN05[,d+1] = a[1,]
+BasinTNMed[,d+1] = a[2,]
+BasinTN95[,d+1] = a[3,]
+toc3 = Sys.time()
+print(toc3-tic3)
+
+#Make parallel implementation
+BasinTN05 = BasinTNMed = BasinTN95 = matrix(NA, nrow=nrow(BasinSF), ncol = ncol(BasinSF))
+HillTN05 = HillTNMed = HillTN95 = matrix(NA, nrow=nrow(HillSF), ncol = ncol(HillSF))
+a = matrix(NA, nrow = 3, ncol = ncol(BasinSF)-1)
+h = matrix(NA, nrow = 3, ncol = ncol(BasinSF)-1)
+
+#Define a combine function for the foreach loop to return lists.
+comb <- function(x, ...) {  
+  mapply(cbind,x,...,SIMPLIFY=FALSE)
+}
+
+cl = makeCluster(detectCores()-1)
+registerDoParallel(cl)
+a=h=NULL
+#loop over the columns
+tic = Sys.time()
+test = foreach(d=1:(ncol(BasinSF)-1), .packages = c('EGRET', 'survival', 'pracma'), .combine = comb) %dopar% {
+  dtest = as.character(colnames(BasinSF)[d+1])
+  #Rows in a column are returned to a. There are 3 return values for the 5th, median, and 95th percentiles
+  a = apply(X = as.matrix(BasinSF[,d+1]), MARGIN = 1, FUN = predictWRTDS, Date = dtest)
+  
+  h = apply(X = as.matrix(HillSF[,d+1]), MARGIN = 1, FUN = predictWRTDS, Date = dtest)
+  #Return those as separate lists
+  list(a[1,], a[2,], a[3,], h[1,], h[2,], h[3,])
+}
+stopCluster(cl)
+toc = Sys.time()
+print(toc-tic)
+rm(d, a, h)
+
+#Save TN timeseries
+write.table(BasinTN, file = 'SAResults_BasinTN.txt', row.names = FALSE, sep = '\t')
+write.table(HillTN, file = 'SAResults_HillTN.txt', row.names = FALSE, sep = '\t')
+write.csv(BasinTN, file = 'SAResults_BasinTN.csv', row.names = FALSE)
+write.csv(HillTN, file = 'SAResults_HillTN.csv', row.names = FALSE)
