@@ -1926,6 +1926,11 @@ for (i in 1:length(fs)){
   rm(h)
   
   #Fixme: WRTDS calculations for this simulation----
+  #dtest = as.character(colnames(BasinSF)[d+1])
+  #a = apply(X = as.matrix(BasinSF[,d+1]), MARGIN = 1, FUN = predictWRTDS, Date = dtest)
+  #BasinTN05[,d+1] = a[1,]
+  #BasinTNMed[,d+1] = a[2,]
+  #BasinTN95[,d+1] = a[3,]
   
   setwd(od)
 }
@@ -2275,8 +2280,37 @@ toc = Sys.time()
 print(toc-tic)
 rm(d, a, h)
 
+cl = makeCluster(detectCores()-1)
+registerDoParallel(cl)
+a=NULL
+#loop over the columns - 11.5 hours for Basin TN
+tic = Sys.time()
+BasinTN = foreach(d=1:(ncol(BasinSF)-1), .packages = c('EGRET', 'survival', 'pracma'), .combine = comb) %dopar% {
+  dtest = as.character(colnames(BasinSF)[d+1])
+  #Rows in a column are returned to a. There are 3 return values for the 5th, median, and 95th percentiles
+  a = apply(X = as.matrix(BasinSF[,d+1]), MARGIN = 1, FUN = predictWRTDS, Date = dtest)
+  list(a[1,], a[2,], a[3,])
+  #h = apply(X = as.matrix(HillSF[,d+1]), MARGIN = 1, FUN = predictWRTDS, Date = dtest)
+  #Return those as separate lists
+  #list(a[1,], a[2,], a[3,], h[1,], h[2,], h[3,])
+}
+stopCluster(cl)
+toc = Sys.time()
+print(toc-tic)
+rm(a)
+
+#Save R data file
+save.image("C:\\Users\\js4yd\\Documents\\BaismanSA\\RHESSysRuns\\TNSAreps_Basin.RData")
+
+BasinTN05 = cbind(BasinSF[,1], BasinTN[[1]])
+BasinTNMed = cbind(BasinSF[,1], BasinTN[[2]])
+BasinTN95 = cbind(BasinSF[,1], BasinTN[[3]])
+
 #Save TN timeseries
-write.table(BasinTN, file = 'SAResults_BasinTN.txt', row.names = FALSE, sep = '\t')
-write.table(HillTN, file = 'SAResults_HillTN.txt', row.names = FALSE, sep = '\t')
-write.csv(BasinTN, file = 'SAResults_BasinTN.csv', row.names = FALSE)
-write.csv(HillTN, file = 'SAResults_HillTN.csv', row.names = FALSE)
+write.table(BasinTN05, file = 'SAResults_BasinTN05.txt', row.names = FALSE, sep = '\t')
+write.table(BasinTNMed, file = 'SAResults_BasinTNMed.txt', row.names = FALSE, sep = '\t')
+write.table(BasinTN95, file = 'SAResults_BasinTN95.txt', row.names = FALSE, sep = '\t')
+
+write.table(HillTN05, file = 'SAResults_HillTN05.txt', row.names = FALSE, sep = '\t')
+write.table(HillTNMed, file = 'SAResults_HillTNMed.txt', row.names = FALSE, sep = '\t')
+write.table(HillTN95, file = 'SAResults_HillTN95.txt', row.names = FALSE, sep = '\t')
