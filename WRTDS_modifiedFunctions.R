@@ -492,12 +492,14 @@ predictWRTDS = function(Date, Flow){
     }
     
     #Get the 5th, median, and 95th percentiles in log space
-    predMed = (interp2(xp = PDecYear, yp = PLogFlow, method = 'linear', Z = TabInt, y = as.numeric(rownames(TabInt)), x = as.numeric(colnames(TabInt))) + 
-                 interp2(xp = PDecYear, yp = PLogFlow, method = 'linear', Z = TabYear, y = as.numeric(rownames(TabInt)), x = as.numeric(colnames(TabInt)))*DecYear +
-                 interp2(xp = PDecYear, yp = PLogFlow, method = 'linear', Z = TabLogQ, y = as.numeric(rownames(TabInt)), x = as.numeric(colnames(TabInt)))*LogFlow +
-                 interp2(xp = PDecYear, yp = PLogFlow, method = 'linear', Z = TabSinYear, y = as.numeric(rownames(TabInt)), x = as.numeric(colnames(TabInt)))*SinDY +
-                 interp2(xp = PDecYear, yp = PLogFlow, method = 'linear', Z = TabCosYear, y = as.numeric(rownames(TabInt)), x = as.numeric(colnames(TabInt)))*CosDY)
-    e = interp2(xp = PDecYear, yp = PLogFlow, method = 'linear', Z = TabLogErr, y = as.numeric(rownames(TabInt)), x = as.numeric(colnames(TabInt)))
+    rowt = as.numeric(rownames(TabInt))
+    colt = as.numeric(colnames(TabInt))
+    predMed = (interp2(xp = PDecYear, yp = PLogFlow, method = 'linear', Z = TabInt, y = rowt, x = colt) + 
+                 interp2(xp = PDecYear, yp = PLogFlow, method = 'linear', Z = TabYear, y = rowt, x = colt)*DecYear +
+                 interp2(xp = PDecYear, yp = PLogFlow, method = 'linear', Z = TabLogQ, y = rowt, x = colt)*LogFlow +
+                 interp2(xp = PDecYear, yp = PLogFlow, method = 'linear', Z = TabSinYear, y = rowt, x = colt)*SinDY +
+                 interp2(xp = PDecYear, yp = PLogFlow, method = 'linear', Z = TabCosYear, y = rowt, x = colt)*CosDY)
+    e = interp2(xp = PDecYear, yp = PLogFlow, method = 'linear', Z = TabLogErr, y = rowt, x = colt)
     pred05 = predMed + e*-2
     
     pred95 = predMed + e*2
@@ -506,6 +508,37 @@ predictWRTDS = function(Date, Flow){
     preds = exp(c(pred05, predMed, pred95))
     return(preds)
   }
+}
+
+#Fill in NAs in interpolation tables
+FillTableNAs = function(DateInd, #Date is the column index
+                        FlowInd) #Flow is the row index
+  {
+  #Fill in the NA value assuming that the table is equally spaced in columns and rows.
+  #such that inverse distance weighting will work. Treated each dimension as equally important.
+  
+  #Find the non-NA values in the tables
+  IndNotNA = which(!is.na(TempTabInt))
+  TotalDist = vector('numeric', length=length(IndNotNA))
+  #Get the weights for those indices
+  for (w in 1:length(TotalDist)){
+    #Find row distance
+    RowDist = abs((IndNotNA[w] - nrow(TempTabInt)*(ceiling(IndNotNA[w]/nrow(TempTabInt))-1)) - FlowInd)
+    #Find column distance
+    ColDist = abs(ceiling(IndNotNA[w]/nrow(TempTabInt)) - DateInd)
+    #Total distance
+    TotalDist[w] = 1/sqrt(RowDist^2 + ColDist^2)
+  }
+  weights = TotalDist/sum(TotalDist)
+  
+  NewTableVals = c(sum(TempTabInt[IndNotNA]*weights), 
+                   sum(TempTabYear[IndNotNA]*weights),
+                   sum(TempTabLogQ[IndNotNA]*weights),
+                   sum(TempTabSinYear[IndNotNA]*weights),
+                   sum(TempTabCosYear[IndNotNA]*weights), 
+                   sum(TempTabLogErr[IndNotNA]*weights))
+  
+  return(NewTableVals)
 }
 
 #runSurvReg parameters
