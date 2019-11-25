@@ -4,7 +4,6 @@ library(stringi)
 library(stringr)
 library(rgdal)
 library(GISTools)
-library(sensitivity)
 library(EGRET)
 library(survival)
 library(pracma)
@@ -16,12 +15,12 @@ library(foreach)
 setwd('C:\\Users\\js4yd\\OneDrive - University of Virginia\\RHESSys_ParameterSA')
 source('WRTDS_modifiedFunctions.R')
 setwd("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\WRTDS")
-TabInt = as.matrix(read.table(file = 'TabIntMod4.txt', sep = '\t', header = TRUE, check.names = FALSE))
-TabYear = as.matrix(read.table(file = 'TabYearMod4.txt', sep = '\t', header = TRUE, check.names = FALSE))
-TabLogQ = as.matrix(read.table(file = 'TabLogQMod4.txt', sep = '\t', header = TRUE, check.names = FALSE))
-TabSinYear = as.matrix(read.table(file = 'TabSinYearMod4.txt', sep = '\t', header = TRUE, check.names = FALSE))
-TabCosYear = as.matrix(read.table(file = 'TabCosYearMod4.txt', sep = '\t', header = TRUE, check.names = FALSE))
-TabLogErr = as.matrix(read.table(file = 'TabLogErrMod4.txt', sep = '\t', header = TRUE, check.names = FALSE))
+TabInt = as.matrix(read.table(file = 'TabIntMod4_p5.txt', sep = '\t', header = TRUE, check.names = FALSE))
+TabYear = as.matrix(read.table(file = 'TabYearMod4_p4.txt', sep = '\t', header = TRUE, check.names = FALSE))
+TabLogQ = as.matrix(read.table(file = 'TabLogQMod4_p4.txt', sep = '\t', header = TRUE, check.names = FALSE))
+TabSinYear = as.matrix(read.table(file = 'TabSinYearMod4_p4.txt', sep = '\t', header = TRUE, check.names = FALSE))
+TabCosYear = as.matrix(read.table(file = 'TabCosYearMod4_p4.txt', sep = '\t', header = TRUE, check.names = FALSE))
+TabLogErr = as.matrix(read.table(file = 'TabLogErrMod4_p5.txt', sep = '\t', header = TRUE, check.names = FALSE))
 
 #Test smaller dataset:----
 setwd("C:\\Users\\jsmif\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\SAOutputCompare")
@@ -1301,6 +1300,7 @@ dev.off()
 
 #Go through results folders----
 #Folder list. These all have results and input files in them.
+setwd("C:\\Users\\js4yd\\Documents\\BaismanSA\\RHESSysRuns")
 fs = list.files()
 #Remove the output folder from this list
 fs = fs[-grep(fs,pattern = 'output')]
@@ -1408,8 +1408,8 @@ print(paste("Input def files checked for match to output def files."))
 #Loop through all of the folders (SA replicates) and extract the data needed----
 temp_out = list.files(paste0(getwd(), '/', fs[1], '/output'))
 tempb = read.table(paste0(getwd(), '/', fs[1], '/output/', temp_out[grep(temp_out, pattern = 'basin.daily')]), stringsAsFactors = FALSE, header = TRUE)
-BasinStreamflow = BasinSatDef = matrix(NA, nrow = length(fs), ncol = (1 + nrow(tempb)))
-HillStreamflow = HillSatDef = matrix(NA, nrow = length(fs)*length(uhills), ncol = (2 + nrow(tempb)))
+BasinStreamflow = BasinSatDef = BasinTN05 = BasinTN95 = BasinTNMed = matrix(NA, nrow = length(fs), ncol = (1 + nrow(tempb)))
+HillStreamflow = HillSatDef = HillTN05 = HillTN95 = HillTNMed = matrix(NA, nrow = length(fs)*length(uhills), ncol = (2 + nrow(tempb)))
 rm(temp_out, tempb)
 
 MakeFigs = FALSE
@@ -1945,7 +1945,7 @@ colnames(HillStreamflow) = colnames(HillSatDef) = c('Replicate', 'HillID', as.ch
 
 rm(i, fs_out, bs, hs, od)
 
-#Checked that every value was non-zero when rounded. For this dataset, Basin to 3 and Hillslope to X works
+#Checked that every value was non-zero when rounded. For this dataset, Basin to 3 and Hillslope to 6 works
 #round to 4 and 6 decimal places for streamflow
 BasinStreamflow[,-1] = round(BasinStreamflow[,-1], 4)
 HillStreamflow[,-c(1,2)] = round(HillStreamflow[,-c(1,2)], 6)
@@ -2215,7 +2215,543 @@ rm(h)
 
 
 #Estimate the nitrogen timeseries for each replicate using WRTDS----
-setwd("C:\\Users\\js4yd\\Documents\\BaismanSA\\RHESSysRuns")
+#Fixme: Streamflow only With WRTDS - same loop as earlier in code, just now with WRTDS
+# tic = Sys.time()
+# for (i in 1:length(fs)){
+#   #Make figures of the basin output----
+#   od = getwd()
+#   #Fixme: ? Could read in worldfile and plot all of the worldfile info for each run, or save info and compare for each run.
+#   
+#   if (dir.exists(paste0(od, '/', fs[i], '/RHESSys_Baisman30m_g74'))){
+#     setwd(paste0(od, '/', fs[i], '/RHESSys_Baisman30m_g74/output'))
+#   }else{
+#     setwd(paste0(od, '/', fs[i], '/output'))
+#   }
+#   
+#   #Obtain basin and hillslope data
+#   fs_out = list.files()
+#   bs = read.table(paste0(getwd(), '/', fs_out[grep(fs_out, pattern = 'basin.daily')]), stringsAsFactors = FALSE, header = TRUE)
+#   hs = read.table(paste0(getwd(), '/', fs_out[grep(fs_out, pattern = 'hillslope.daily')]), stringsAsFactors = FALSE, header = TRUE)
+#   
+#   #Make a new date column
+#   bs$Date = as.Date(paste0(bs$year, '-', bs$month, '-', bs$day))
+#   hs$Date = as.Date(paste0(hs$year, '-', hs$month, '-', hs$day))
+#   
+#   #Make figures, if requested
+#   if (MakeFigs == TRUE){
+#     #Make folders to store the figures
+#     dir.create(paste0(od, '/', fs[i], '/figures'))
+#     dir.create(paste0(od, '/', fs[i], '/figures/basin'))
+#     dir.create(paste0(od, '/', fs[i], '/figures/hillslope'))
+#     
+#     #Basin plots----
+#     setwd(paste0(od, '/', fs[i], '/figures/basin'))
+#     #Streamflow
+#     png(paste0(fs[i], '_streamflowBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$streamflow*conversion_b, main = 'Basin Streamflow', type = 'l', xlab = 'Year', ylab = 'Streamflow (cfs)')
+#     dev.off()
+#     
+#     #Baseflow
+#     png(paste0(fs[i], '_baseflowBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$baseflow*conversion_b, main = 'Basin Baseflow', type = 'l', xlab = 'Year', ylab = 'Streamflow (cfs)')
+#     dev.off()
+#     
+#     # Return flow
+#     png(paste0(fs[i], '_returnFlowBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$return*conversion_b, main = 'Basin Return Flow', type = 'l', xlab = 'Year', ylab = 'Streamflow (cfs)')
+#     dev.off()
+#     
+#     # Rain
+#     png(paste0(fs[i], '_rainBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$rain_thr, main = 'Basin Rain', type = 'l', xlab = 'Year', ylab = 'Rain')
+#     dev.off()
+#     
+#     # Snow Throughfall
+#     png(paste0(fs[i], '_snowThroughfallBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$snow_thr, main = 'Basin Snow Throughfall', type = 'l', xlab = 'Year', ylab = 'Snow')
+#     dev.off()
+#     
+#     # Sat Def z
+#     png(paste0(fs[i], '_satDefZBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$sat_def_z, main = 'Basin Saturation Deficit with Depth', type = 'l', xlab = 'Year', ylab = 'Saturation Deficit')
+#     dev.off()
+#     
+#     # Sat Def
+#     png(paste0(fs[i], '_satDefBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$sat_def, main = 'Basin Saturation Deficit', type = 'l', xlab = 'Year', ylab = 'Saturation Deficit')
+#     dev.off()
+#     
+#     # Root Zone Storage
+#     png(paste0(fs[i], '_rootStorageBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$rz_storage, main = 'Basin Root Zone Storage', type = 'l', xlab = 'Year', ylab = 'Storage')
+#     dev.off()
+#     
+#     # Root Zone Drainage
+#     png(paste0(fs[i], '_rootDrainageBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$rz_drainage, main = 'Basin Root Zone Drainage', type = 'l', xlab = 'Year', ylab = 'Drainage')
+#     dev.off()
+#     
+#     # Unsaturated Zone Storage
+#     png(paste0(fs[i], '_unsaturatedStorageBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$unsat_stor, main = 'Basin Unsaturated Storage', type = 'l', xlab = 'Year', ylab = 'Storage')
+#     dev.off()
+#     
+#     # Unsaturated Zone Drainage
+#     png(paste0(fs[i], '_unsaturatedDrainageBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$unsat_drain, main = 'Basin Unsaturated Drainage', type = 'l', xlab = 'Year', ylab = 'Drainage')
+#     dev.off()
+#     
+#     # Capillary Rise
+#     png(paste0(fs[i], '_capRiseBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$cap, main = 'Basin Capillary Rise', type = 'l', xlab = 'Year', ylab = 'Rise')
+#     dev.off()
+#     
+#     # Evaporation
+#     png(paste0(fs[i], '_evapBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$evap, main = 'Basin Evaporation', type = 'l', xlab = 'Year', ylab = 'Evaporation')
+#     dev.off()
+#     
+#     # Transpiration
+#     png(paste0(fs[i], '_transpirationBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$trans, main = 'Basin Transpiration', type = 'l', xlab = 'Year', ylab = 'Transpiration')
+#     dev.off()
+#     
+#     # Transpiration Variance
+#     png(paste0(fs[i], '_transVariabilityBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$trans_var, main = 'Basin Transpiration Spatial Variance', type = 'l', xlab = 'Year', ylab = 'Transpiration Variance')
+#     dev.off()
+#     
+#     # Net Photosynthesis
+#     png(paste0(fs[i], '_netPhotosynthesisBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$psn, main = 'Basin Net Photosynthesis', type = 'l', xlab = 'Year', ylab = 'Net Photosynthesis')
+#     dev.off()
+#     
+#     # Tree LAI
+#     png(paste0(fs[i], '_treeLAIBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$laiTREE, main = 'Basin Tree LAI', type = 'l', xlab = 'Year', ylab = 'LAI')
+#     dev.off()
+#     
+#     # GW Output
+#     png(paste0(fs[i], '_groundwaterOutBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$gw.Qout, main = 'Basin Groundwater Output', type = 'l', xlab = 'Year', ylab = 'Groundwater Flow')
+#     dev.off()
+#     
+#     # GW Storage
+#     png(paste0(fs[i], '_groundwaterStorageBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$gw.storage, main = 'Basin Groundwater Storage', type = 'l', xlab = 'Year', ylab = 'Groundwater Storage')
+#     dev.off()
+#     
+#     # Detention Storage
+#     png(paste0(fs[i], '_detentionStorageBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$detention_store, main = 'Basin Detention Storage', type = 'l', xlab = 'Year', ylab = 'Storage')
+#     dev.off()
+#     
+#     # Percent Saturated Area
+#     png(paste0(fs[i], '_pctSatAreaBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$X.sat_area, main = 'Basin Percent Saturated Area', type = 'l', xlab = 'Year', ylab = 'Percent Saturated')
+#     dev.off()
+#     
+#     # Litter Storage
+#     png(paste0(fs[i], '_litterStorageBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$litter_store, main = 'Basin Litter Storage', type = 'l', xlab = 'Year', ylab = 'Storage')
+#     dev.off()
+#     
+#     # Canopy Storage
+#     png(paste0(fs[i], '_canopyStorageBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$canopy_store, main = 'Basin Canopy Storage', type = 'l', xlab = 'Year', ylab = 'Storage')
+#     dev.off()
+#     
+#     # Percent Snow Cover
+#     png(paste0(fs[i], '_pctSnowCoverBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$X.snow_cover, main = 'Basin Percent Snow Cover', type = 'l', xlab = 'Year', ylab = 'Percent Cover')
+#     dev.off()
+#     
+#     # Snowpack
+#     png(paste0(fs[i], '_snowpackBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$snowpack, main = 'Basin Snowpack', type = 'l', xlab = 'Year', ylab = 'Snowpack')
+#     dev.off()
+#     
+#     # Snow Sublimation
+#     png(paste0(fs[i], '_snowSublimationBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$snow_subl, main = 'Basin Snow Sublimation', type = 'l', xlab = 'Year', ylab = 'Sublimation')
+#     dev.off()
+#     
+#     # Accumulated Transpiration
+#     png(paste0(fs[i], '_AccumulatedTransBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$acc_trans, main = 'Basin Accumulated Transpiration', type = 'l', xlab = 'Year', ylab = 'Transpiration')
+#     dev.off()
+#     
+#     # Accumulated Transpiration Spatial Variance
+#     png(paste0(fs[i], '_AccumulatedTransVarBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$acctransv_var, main = 'Basin Accumulated Transpiration: Spatial variance', type = 'l', xlab = 'Year', ylab = 'Variance of Transpiration')
+#     dev.off()
+#     
+#     # PET
+#     png(paste0(fs[i], '_PotentialETBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$pet, main = 'Basin Potential Evapotranspiration', type = 'l', xlab = 'Year', ylab = 'PET')
+#     dev.off()
+#     
+#     # C13 discrimination
+#     png(paste0(fs[i], '_C13DiscriminationBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$dC13, main = 'Basin C13 Discrimination', type = 'l', xlab = 'Year', ylab = 'Discrimination')
+#     dev.off()
+#     
+#     # Precipitation
+#     #Fixme: make sure this matches the input file
+#     png(paste0(fs[i], '_PrecipitationBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$precip, main = 'Basin Precipitation', type = 'l', xlab = 'Year', ylab = 'Precipitation')
+#     dev.off()
+#     
+#     # Rain+Snow throughfall
+#     png(paste0(fs[i], '_Rain+SnowBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$pcp_assim, main = 'Basin Rain+Snow', type = 'l', xlab = 'Year', ylab = 'Precipitation')
+#     dev.off()
+#     
+#     # Tree mortality fraction
+#     png(paste0(fs[i], '_TreeMortalityBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$mortf, main = 'Basin Tree Mortality', type = 'l', xlab = 'Year', ylab = 'Percent')
+#     dev.off()
+#     
+#     # Tmax
+#     #Fixme: make sure this matches the input file
+#     png(paste0(fs[i], '_TMaxBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$tmax, main = 'Basin Maximum Temperature', type = 'l', xlab = 'Year', ylab = 'Temperature')
+#     dev.off()
+#     
+#     # Tmin
+#     #Fixme: make sure this matches the input file
+#     png(paste0(fs[i], '_TMinBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$tmin, main = 'Basin Minimum Temperature', type = 'l', xlab = 'Year', ylab = 'Temperature')
+#     dev.off()
+#     
+#     # Tavg
+#     png(paste0(fs[i], '_TAvgBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$tavg, main = 'Basin Average Temperature', type = 'l', xlab = 'Year', ylab = 'Temperature')
+#     dev.off()
+#     
+#     # Vapor Pressure Deficit
+#     png(paste0(fs[i], '_VPDBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$vpd, main = 'Basin Vapor Pressure Deficit', type = 'l', xlab = 'Year', ylab = 'Vapor Pressure Deficit')
+#     dev.off()
+#     
+#     # Snowfall
+#     png(paste0(fs[i], '_SnowfallBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$snowfall, main = 'Basin Snowfall', type = 'l', xlab = 'Year', ylab = 'Snowfall')
+#     dev.off()
+#     
+#     # Soil Recharge
+#     png(paste0(fs[i], '_soilRechargeBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$recharge, main = 'Basin Soil Recharge', type = 'l', xlab = 'Year', ylab = 'Recharge')
+#     dev.off()
+#     
+#     # Gross Photosynthesis
+#     png(paste0(fs[i], '_grossPhotosynthesisBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$gpsn, main = 'Basin Gross Photosynthesis', type = 'l', xlab = 'Year', ylab = 'Gross Photosynthesis')
+#     dev.off()
+#     
+#     # Respiration
+#     png(paste0(fs[i], '_respirationBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$resp, main = 'Basin Respiration', type = 'l', xlab = 'Year', ylab = 'Respiration')
+#     dev.off()
+#     
+#     # Canopy Conductance
+#     png(paste0(fs[i], '_canopyConductanceBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$gs, main = 'Basin Canopy Conductance', type = 'l', xlab = 'Year', ylab = 'Conductance')
+#     dev.off()
+#     
+#     # Root Depth
+#     png(paste0(fs[i], '_rootDepthBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$rootdepth, main = 'Basin Root Depth', type = 'l', xlab = 'Year', ylab = 'Depth')
+#     dev.off()
+#     
+#     # Snowmelt
+#     png(paste0(fs[i], '_snowmeltBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$snowmelt, main = 'Basin Snowmelt', type = 'l', xlab = 'Year', ylab = 'Snowmelt')
+#     dev.off()
+#     
+#     # Canopy Sublimation
+#     png(paste0(fs[i], '_canopySublimationBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$canopysubl, main = 'Basin Canopy Sublimation', type = 'l', xlab = 'Year', ylab = 'Sublimation')
+#     dev.off()
+#     
+#     # Routed Streamflow
+#     png(paste0(fs[i], '_routedStreamflowBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$routedstreamflow, main = 'Basin Routed Streamflow', type = 'l', xlab = 'Year', ylab = 'Streamflow')
+#     dev.off()
+#     
+#     # Canopy Intercepted Snow
+#     png(paste0(fs[i], '_canopySnowBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$canopy_snow, main = 'Basin Canopy Intercepted Snow', type = 'l', xlab = 'Year', ylab = 'Snow')
+#     dev.off()
+#     
+#     # Canopy Height
+#     png(paste0(fs[i], '_canopyHeightBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$height, main = 'Basin Canopy Height', type = 'l', xlab = 'Year', ylab = 'Height')
+#     dev.off()
+#     
+#     # Canopy Evaporation
+#     png(paste0(fs[i], '_canopyEvapBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$evap_can, main = 'Basin Canopy Evaporation', type = 'l', xlab = 'Year', ylab = 'Evaporation')
+#     dev.off()
+#     
+#     # Litter Evaporation
+#     png(paste0(fs[i], '_litterEvapBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$evap_lit, main = 'Basin Litter Evaporation', type = 'l', xlab = 'Year', ylab = 'Evaporation')
+#     dev.off()
+#     
+#     # Soil Evaporation
+#     png(paste0(fs[i], '_soilEvapBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$evap_soil, main = 'Basin Soil Evaporation', type = 'l', xlab = 'Year', ylab = 'Evaporation')
+#     dev.off()
+#     
+#     # Litter Carbon
+#     png(paste0(fs[i], '_litterCarbonBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$litrc, main = 'Basin Litter Carbon', type = 'l', xlab = 'Year', ylab = 'Carbon')
+#     dev.off()
+#     
+#     # Downward Shortwave Radiation
+#     png(paste0(fs[i], '_KdownBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$Kdown, main = 'Basin Downward Shortwave Radiation', type = 'l', xlab = 'Year', ylab = 'Downward Shortwave Radiation')
+#     dev.off()
+#     
+#     # Downward Longwave Radiation
+#     png(paste0(fs[i], '_LdownBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$Ldown, main = 'Basin Downward Longwave Radiation', type = 'l', xlab = 'Year', ylab = 'Downward Longwave Radiation')
+#     dev.off()
+#     
+#     # Upward Shortwave Radiation
+#     png(paste0(fs[i], '_KupBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$Kup, main = 'Basin Upward Shortwave Radiation', type = 'l', xlab = 'Year', ylab = 'Upward Shortwave Radiation')
+#     dev.off()
+#     
+#     # Upward Longwave Radiation
+#     png(paste0(fs[i], '_LdownBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$Lup, main = 'Basin Upward Longwave Radiation', type = 'l', xlab = 'Year', ylab = 'Upward Longwave Radiation')
+#     dev.off()
+#     
+#     # Canopy Absorbed Shortwave Radiation
+#     png(paste0(fs[i], '_canopyAbsorbKBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$Kstar_can, main = 'Basin Canopy Absorbed Shortwave Radiation', type = 'l', xlab = 'Year', ylab = 'Radiation')
+#     dev.off()
+#     
+#     # Soil Absorbed Shortwave Radiation
+#     png(paste0(fs[i], '_soilAbsorbKBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$Kstar_soil, main = 'Basin Soil Absorbed Shortwave Radiation', type = 'l', xlab = 'Year', ylab = 'Radiation')
+#     dev.off()
+#     
+#     # Snow Absorbed Shortwave Radiation
+#     png(paste0(fs[i], '_snowAbsorbKBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$Kstar_snow, main = 'Basin Snow Absorbed Shortwave Radiation', type = 'l', xlab = 'Year', ylab = 'Radiation')
+#     dev.off()
+#     
+#     # Canopy Absorbed Longwave Radiation
+#     png(paste0(fs[i], '_canopyAbsorbLBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$Lstar_can, main = 'Basin Canopy Absorbed Longwave Radiation', type = 'l', xlab = 'Year', ylab = 'Radiation')
+#     dev.off()
+#     
+#     # Soil Absorbed Longwave Radiation
+#     png(paste0(fs[i], '_soilAbsorbLBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$Lstar_soil, main = 'Basin Soil Absorbed Longwave Radiation', type = 'l', xlab = 'Year', ylab = 'Radiation')
+#     dev.off()
+#     
+#     # Snow Absorbed Longwave Radiation
+#     png(paste0(fs[i], '_snowAbsorbLBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$Lstar_snow, main = 'Basin Snow Absorbed Longwave Radiation', type = 'l', xlab = 'Year', ylab = 'Radiation')
+#     dev.off()
+#     
+#     # Canopy Latent Heat Evaporated
+#     png(paste0(fs[i], '_canopyHeatEvapBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$LE_canopy, main = 'Basin Canopy Heat Evaporation', type = 'l', xlab = 'Year', ylab = 'Heat Evaporation')
+#     dev.off()
+#     
+#     # soil Latent Heat Evaporated
+#     png(paste0(fs[i], '_soilHeatEvapBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$LE_soil, main = 'Basin Soil Heat Evaporation', type = 'l', xlab = 'Year', ylab = 'Heat Evaporation')
+#     dev.off()
+#     
+#     # Snow Latent Heat Evaporated
+#     png(paste0(fs[i], '_snowHeatEvapBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$LE_snow, main = 'Basin Snow Heat Evaporation', type = 'l', xlab = 'Year', ylab = 'Heat Evaporation')
+#     dev.off()
+#     
+#     # ??
+#     png(paste0(fs[i], '_LstarBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$Lstar_strat, main = 'Basin ??', type = 'l', xlab = 'Year', ylab = '??')
+#     dev.off()
+#     
+#     # Canopy Drip
+#     png(paste0(fs[i], '_canopyDripBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$canopydrip, main = 'Basin Canopy Drip', type = 'l', xlab = 'Year', ylab = 'Drip')
+#     dev.off()
+#     
+#     # Aerodynamic Conductance
+#     png(paste0(fs[i], '_aerodynamicConductanceBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$ga, main = 'Basin Canopy Heat Evaporation', type = 'l', xlab = 'Year', ylab = 'Heat Evaporation')
+#     dev.off()
+#     
+#     # Stormdrain
+#     png(paste0(fs[i], '_stormdrainBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$stormdrain, main = 'Basin Storm Drainage', type = 'l', xlab = 'Year', ylab = 'Drainage')
+#     dev.off()
+#     
+#     # Stem Carbon
+#     png(paste0(fs[i], '_stemCarbonBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$stemc, main = 'Basin Stem Carbon', type = 'l', xlab = 'Year', ylab = 'Carbon')
+#     dev.off()
+#     
+#     # Plant Carbon
+#     png(paste0(fs[i], '_plantCarbonBasin.png'), res = 300, height = 5, width=5, units = 'in')
+#     plot(bs$Date, bs$plantc, main = 'Basin Plant Carbon', type = 'l', xlab = 'Year', ylab = 'Carbon')
+#     dev.off()
+#     
+#     #Hillslope plots----
+#     setwd(paste0(od, '/', fs[i], '/figures/hillslope'))
+#     
+#     #Streamflow
+#     png(paste0(fs[i], '_streamflowHillslope.png'), res = 300, height = 10, width=10, units = 'in')
+#     layout(rbind(c(1,2), c(3,4), c(5,6), c(7,8), c(9,10), c(11,12), c(13,14)))
+#     par(mar = c(3,3,3,0.5))
+#     for (h in 1:length(uhills)){
+#       plot(hs$Date[hs$hillID == uhills[h]], hs$streamflow[hs$hillID == uhills[h]]*conversion_h[conversion_h[,1] == uhills[h], 2], main = paste0('Hillslope ', uhills[h], ' Streamflow'), type = 'l', xlab = 'Year', ylab = 'Streamflow (cfs)')
+#     }
+#     rm(h)
+#     dev.off()
+#     
+#     #Streamflow - same y-axis
+#     png(paste0(fs[i], '_streamflowScaledHillslope.png'), res = 300, height = 10, width=10, units = 'in')
+#     layout(rbind(c(1,2), c(3,4), c(5,6), c(7,8), c(9,10), c(11,12), c(13,14)))
+#     par(mar = c(3,3,3,0.5))
+#     for (h in 1:length(uhills)){
+#       plot(hs$Date[hs$hillID == uhills[h]], hs$streamflow[hs$hillID == uhills[h]]*conversion_h[conversion_h[,1] == uhills[h], 2], main = paste0('Hillslope ', uhills[h], ' Streamflow'), type = 'l', xlab = 'Year', ylab = 'Streamflow (cfs)', ylim = c(0,4))
+#     }
+#     rm(h)
+#     dev.off()
+#     
+#     #Baseflow
+#     png(paste0(fs[i], '_baseflowHillslope.png'), res = 300, height = 10, width=10, units = 'in')
+#     layout(rbind(c(1,2), c(3,4), c(5,6), c(7,8), c(9,10), c(11,12), c(13,14)))
+#     par(mar = c(3,3,3,0.5))
+#     for (h in 1:length(uhills)){
+#       plot(hs$Date[hs$hillID == uhills[h]], hs$baseflow[hs$hillID == uhills[h]]*conversion_h[conversion_h[,1] == uhills[h], 2], main = paste0('Hillslope ', uhills[h], ' Baseflow'), type = 'l', xlab = 'Year', ylab = 'Streamflow (cfs)')
+#     }
+#     rm(h)
+#     dev.off()
+#     
+#     #Baseflow - same y-axis
+#     png(paste0(fs[i], '_baseflowScaledHillslope.png'), res = 300, height = 10, width=10, units = 'in')
+#     layout(rbind(c(1,2), c(3,4), c(5,6), c(7,8), c(9,10), c(11,12), c(13,14)))
+#     par(mar = c(3,3,3,0.5))
+#     for (h in 1:length(uhills)){
+#       plot(hs$Date[hs$hillID == uhills[h]], hs$baseflow[hs$hillID == uhills[h]]*conversion_h[conversion_h[,1] == uhills[h], 2], main = paste0('Hillslope ', uhills[h], ' Baseflow'), type = 'l', xlab = 'Year', ylab = 'Streamflow (cfs)', ylim = c(0,1))
+#     }
+#     rm(h)
+#     dev.off()
+#     
+#     #Return flow
+#     png(paste0(fs[i], '_returnflowHillslope.png'), res = 300, height = 10, width=10, units = 'in')
+#     layout(rbind(c(1,2), c(3,4), c(5,6), c(7,8), c(9,10), c(11,12), c(13,14)))
+#     par(mar = c(3,3,3,0.5))
+#     for (h in 1:length(uhills)){
+#       plot(hs$Date[hs$hillID == uhills[h]], hs$return[hs$hillID == uhills[h]]*conversion_h[conversion_h[,1] == uhills[h], 2], main = paste0('Hillslope ', uhills[h], ' Return Flow'), type = 'l', xlab = 'Year', ylab = 'Streamflow (cfs)')
+#     }
+#     rm(h)
+#     dev.off()
+#     
+#     #Saturation Deficit with Depth
+#     png(paste0(fs[i], '_saturationDeficitZHillslope.png'), res = 300, height = 10, width=10, units = 'in')
+#     layout(rbind(c(1,2), c(3,4), c(5,6), c(7,8), c(9,10), c(11,12), c(13,14)))
+#     par(mar = c(3,3,3,0.5))
+#     for (h in 1:length(uhills)){
+#       plot(hs$Date[hs$hillID == uhills[h]], hs$sat_def_z[hs$hillID == uhills[h]], main = paste0('Hillslope ', uhills[h], ' Saturation Deficit with Depth'), type = 'l', xlab = 'Year', ylab = 'Saturation Deficit')
+#     }
+#     rm(h)
+#     dev.off()
+#     
+#     #Saturation Deficit
+#     png(paste0(fs[i], '_saturationDeficitHillslope.png'), res = 300, height = 10, width=10, units = 'in')
+#     layout(rbind(c(1,2), c(3,4), c(5,6), c(7,8), c(9,10), c(11,12), c(13,14)))
+#     par(mar = c(3,3,3,0.5))
+#     for (h in 1:length(uhills)){
+#       plot(hs$Date[hs$hillID == uhills[h]], hs$sat_def[hs$hillID == uhills[h]], main = paste0('Hillslope ', uhills[h], ' Saturation Deficit'), type = 'l', xlab = 'Year', ylab = 'Saturation Deficit')
+#     }
+#     rm(h)
+#     dev.off()
+#     
+#     #Detention Storage
+#     png(paste0(fs[i], '_detentionStorageHillslope.png'), res = 300, height = 10, width=10, units = 'in')
+#     layout(rbind(c(1,2), c(3,4), c(5,6), c(7,8), c(9,10), c(11,12), c(13,14)))
+#     par(mar = c(3,3,3,0.5))
+#     for (h in 1:length(uhills)){
+#       plot(hs$Date[hs$hillID == uhills[h]], hs$detention_store[hs$hillID == uhills[h]], main = paste0('Hillslope ', uhills[h], ' Detention Storage'), type = 'l', xlab = 'Year', ylab = 'Saturation Deficit')
+#     }
+#     rm(h)
+#     dev.off()
+#     
+#     #Saturation Area
+#     png(paste0(fs[i], '_saturationAreaHillslope.png'), res = 300, height = 10, width=10, units = 'in')
+#     layout(rbind(c(1,2), c(3,4), c(5,6), c(7,8), c(9,10), c(11,12), c(13,14)))
+#     par(mar = c(3,3,3,0.5))
+#     for (h in 1:length(uhills)){
+#       plot(hs$Date[hs$hillID == uhills[h]], hs$sat_area[hs$hillID == uhills[h]], main = paste0('Hillslope ', uhills[h], ' Saturation Area'), type = 'l', xlab = 'Year', ylab = 'Saturation Deficit')
+#     }
+#     rm(h)
+#     dev.off()
+#     
+#     #Precipitation
+#     png(paste0(fs[i], '_precipitationHillslope.png'), res = 300, height = 10, width=10, units = 'in')
+#     layout(rbind(c(1,2), c(3,4), c(5,6), c(7,8), c(9,10), c(11,12), c(13,14)))
+#     par(mar = c(3,3,3,0.5))
+#     for (h in 1:length(uhills)){
+#       plot(hs$Date[hs$hillID == uhills[h]], hs$precip[hs$hillID == uhills[h]], main = paste0('Hillslope ', uhills[h], ' Precipitation'), type = 'l', xlab = 'Year', ylab = 'Saturation Deficit')
+#     }
+#     rm(h)
+#     dev.off()
+#     
+#     #ET
+#     png(paste0(fs[i], '_evapotranspirationHillslope.png'), res = 300, height = 10, width=10, units = 'in')
+#     layout(rbind(c(1,2), c(3,4), c(5,6), c(7,8), c(9,10), c(11,12), c(13,14)))
+#     par(mar = c(3,3,3,0.5))
+#     for (h in 1:length(uhills)){
+#       plot(hs$Date[hs$hillID == uhills[h]], hs$evap[hs$hillID == uhills[h]] + hs$trans[hs$hillID == uhills[h]], main = paste0('Hillslope ', uhills[h], ' Evapotranspiration'), type = 'l', xlab = 'Year', ylab = 'Saturation Deficit')
+#     }
+#     rm(h)
+#     dev.off()
+#   }
+#   
+#   #Save basin and hillslope timeseries----
+#   BasinStreamflow[i,] = c(i, bs$streamflow*conversion_b)
+#   for (h in 1:length(uhills)){
+#     HillStreamflow[i + length(fs)*(uhills[h]-1),] = c(i, uhills[h], hs$streamflow[hs$hillID == uhills[h]]*conversion_h[conversion_h[,1] == uhills[h], 2])
+#   }
+#   rm(h)
+#   
+#   #WRTDS calculations for this simulation----
+#   for(d in 1:nrow(bs)){
+#     a = predictWRTDS(Date = as.character(bs$Date[d]), Flow = BasinStreamflow[i,d+1])
+#     BasinTN05[i,d+1] = a[1]
+#     BasinTNMed[i,d+1] = a[2]
+#     BasinTN95[i,d+1] = a[3]
+#     for (h in 1:length(uhills)){
+#       z = predictWRTDS(Date = as.character(bs$Date[d]), Flow = HillStreamflow[i + length(fs)*(uhills[h]-1),d+2])
+#       HillTN05[i + length(fs)*(uhills[h]-1),d+2] = z[1]
+#       HillTNMed[i + length(fs)*(uhills[h]-1),d+2] = z[2]
+#       HillTN95[i + length(fs)*(uhills[h]-1),d+2] = z[3]
+#     }
+#   }
+#   BasinTN05[i,1] = i
+#   BasinTN95[i,1] = i
+#   BasinTNMed[i,1] = i
+#   HillTN05[i,c(1,2)] = HillStreamflow[i,c(1,2)]
+#   HillTN95[i,c(1,2)] = HillStreamflow[i,c(1,2)]
+#   HillTNMed5[i,c(1,2)] = HillStreamflow[i,c(1,2)]
+#   
+#   setwd(od)
+# }
+# toc = Sys.time()
+# print(toc-tic)
+
+
+setwd("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR")
 BasinSF = read.table(file = 'SAResults_BasinStreamflow_p4.txt', sep = '\t', stringsAsFactors = FALSE, header = TRUE, check.names = FALSE)
 HillSF = read.table(file = 'SAResults_HillStreamflow_p6.txt', sep = '\t', stringsAsFactors = FALSE, header = TRUE, check.names = FALSE)
 
@@ -2237,18 +2773,43 @@ for (d in 1:(ncol(BasinSF)-1)){
 }
 rm(d, a, h)
 
-BasinTN[,1] = BasinSF[,1]
-HillTN[,1] = HillSF[,1]
-HillTN[,2] = HillSF[,2]
+#Add the 1st (and 2nd) columns for basin (and hillslope) (all the same as streamflow)
+BasinTNMed[,1] = BasinTN05[,1] = BasinTN95[,1] = BasinSF[,1]
+HillTNMed[,1] = HillTN05[,1] = HillTN95[,1] = HillSF[,1]
+HillTNMed[,2] = HillTN05[,2] = HillTN95[,2] = HillSF[,2]
+
+tic2 = Sys.time()
+d = 1000
+a = matrix(NA, nrow = 3, ncol = ncol(BasinSF)-1)
+dtest = as.character(colnames(BasinSF)[d+1])
+rowt = as.numeric(rownames(TabInt))
+colt = as.numeric(colnames(TabInt))
+a = apply(X = as.matrix(BasinSF[,d+1]), MARGIN = 1, FUN = predictWRTDS, Date = dtest, rowt = rowt, colt = colt)
+BasinTN05[,d+1] = a[1,]
+BasinTNMed[,d+1] = a[2,]
+BasinTN95[,d+1] = a[3,]
+toc2 = Sys.time()
+print(toc2-tic2)
+rm(d)
 
 tic3 = Sys.time()
+d = 1000
+a = matrix(NA, nrow = 3, ncol = ncol(BasinSF)-1)
+h = matrix(NA, nrow = 3, ncol = ncol(BasinSF)-1)
 dtest = as.character(colnames(BasinSF)[d+1])
 a = apply(X = as.matrix(BasinSF[,d+1]), MARGIN = 1, FUN = predictWRTDS, Date = dtest)
 BasinTN05[,d+1] = a[1,]
 BasinTNMed[,d+1] = a[2,]
 BasinTN95[,d+1] = a[3,]
+
+h = apply(X = as.matrix(HillSF[,d+2]), MARGIN = 1, FUN = predictWRTDS, Date = dtest)
+HillTN05[,d+2] = h[1,]
+HillTNMed[,d+2] = h[2,]
+HillTN95[,d+2] = h[3,]
+
 toc3 = Sys.time()
 print(toc3-tic3)
+rm(d)
 
 #Make parallel implementation
 BasinTN05 = BasinTNMed = BasinTN95 = matrix(NA, nrow=nrow(BasinSF), ncol = ncol(BasinSF))
@@ -2271,7 +2832,7 @@ test = foreach(d=1:(ncol(BasinSF)-1), .packages = c('EGRET', 'survival', 'pracma
   #Rows in a column are returned to a. There are 3 return values for the 5th, median, and 95th percentiles
   a = apply(X = as.matrix(BasinSF[,d+1]), MARGIN = 1, FUN = predictWRTDS, Date = dtest)
   
-  h = apply(X = as.matrix(HillSF[,d+1]), MARGIN = 1, FUN = predictWRTDS, Date = dtest)
+  h = apply(X = as.matrix(HillSF[,d+2]), MARGIN = 1, FUN = predictWRTDS, Date = dtest)
   #Return those as separate lists
   list(a[1,], a[2,], a[3,], h[1,], h[2,], h[3,])
 }
@@ -2290,7 +2851,7 @@ BasinTN = foreach(d=1:(ncol(BasinSF)-1), .packages = c('EGRET', 'survival', 'pra
   #Rows in a column are returned to a. There are 3 return values for the 5th, median, and 95th percentiles
   a = apply(X = as.matrix(BasinSF[,d+1]), MARGIN = 1, FUN = predictWRTDS, Date = dtest)
   list(a[1,], a[2,], a[3,])
-  #h = apply(X = as.matrix(HillSF[,d+1]), MARGIN = 1, FUN = predictWRTDS, Date = dtest)
+  #h = apply(X = as.matrix(HillSF[,d+2]), MARGIN = 1, FUN = predictWRTDS, Date = dtest)
   #Return those as separate lists
   #list(a[1,], a[2,], a[3,], h[1,], h[2,], h[3,])
 }
@@ -2306,11 +2867,14 @@ BasinTN05 = cbind(BasinSF[,1], BasinTN[[1]])
 BasinTNMed = cbind(BasinSF[,1], BasinTN[[2]])
 BasinTN95 = cbind(BasinSF[,1], BasinTN[[3]])
 
+colnames(BasinTN05) = colnames(BasinTN95) = colnames(BasinTNMed) = colnames(BasinSF)
+colnames(HillTN05) = colnames(HillTN95) = colnames(HillTNMed) = colnames(HillSF)
+
 #Save TN timeseries
 write.table(round(BasinTN05,3), file = 'SAResults_BasinTN05_p3.txt', row.names = FALSE, sep = '\t')
 write.table(round(BasinTNMed,3), file = 'SAResults_BasinTNMed_p3.txt', row.names = FALSE, sep = '\t')
 write.table(round(BasinTN95,3), file = 'SAResults_BasinTN95_p3.txt', row.names = FALSE, sep = '\t')
 
-write.table(HillTN05, file = 'SAResults_HillTN05.txt', row.names = FALSE, sep = '\t')
-write.table(HillTNMed, file = 'SAResults_HillTNMed.txt', row.names = FALSE, sep = '\t')
-write.table(HillTN95, file = 'SAResults_HillTN95.txt', row.names = FALSE, sep = '\t')
+write.table(round(HillTN05,3), file = 'SAResults_HillTN05_p3.txt', row.names = FALSE, sep = '\t')
+write.table(round(HillTNMed,3), file = 'SAResults_HillTNMed_p3.txt', row.names = FALSE, sep = '\t')
+write.table(round(HillTN95,3), file = 'SAResults_HillTN95_p3.txt', row.names = FALSE, sep = '\t')
