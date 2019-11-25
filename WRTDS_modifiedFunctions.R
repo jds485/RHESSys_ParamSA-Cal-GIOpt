@@ -450,7 +450,7 @@ plotContours = function (eList, yearStart, yearEnd, qBottom = NA, qTop = NA,
 
 
 #Function to predict TN from the provided date and flow by interpolating the model parameters
-predictWRTDS = function(Date, Flow){
+predictWRTDS = function(Date, Flow, rowt, colt){
   #There are some hillslopes with 0 flows to 6 decimal places. Report 0 concentration for those flows
   if (Flow == 0){
     preds = rep(0,3)
@@ -461,7 +461,7 @@ predictWRTDS = function(Date, Flow){
     DecYear = decimalDate(rawData = as.Date(Date))
     
     #Flow is expected in real space units in cfs
-    #Convert to log space
+    #Convert to log space in cms units
     LogFlow = log(Flow*12^3*2.54^3/100^3)
     
     #Calculate the sin and cos of the year
@@ -469,30 +469,28 @@ predictWRTDS = function(Date, Flow){
     CosDY = cos(2*pi*DecYear)
     
     #Check that the LogFlow is in the interpolation range
-    if (LogFlow > as.numeric(rownames(TabInt)[nrow(TabInt)])){
+    if (LogFlow > rowt[length(rowt)]){
       print('The LogFlow value is greater than the values in the interpolation table. Using the largest flow values available in the table for LogFlow.')
-      PLogFlow = as.numeric(rownames(TabInt)[nrow(TabInt)])
-    }else if (LogFlow < as.numeric(rownames(TabInt)[1])){
+      PLogFlow = rowt[length(rowt)]
+    }else if (LogFlow < rowt[1]){
       print('The LogFlow value is less than the smallest value in the interpolation table. Using the smallest flow values available in the table for LogFlow.')
-      PLogFlow = as.numeric(rownames(TabInt)[1])
+      PLogFlow = rowt[1]
     }else{
       PLogFlow = LogFlow
     }
     
     #Check that the DecYear is in the interpolation range
-    if (DecYear > as.numeric(colnames(TabInt)[ncol(TabInt)])){
+    if (DecYear > colt[length(colt)]){
       print('The decimal year value is greater than the values in the interpolation table. Using the largest year available in the table for DecYear.')
-      PDecYear = as.numeric(colnames(TabInt)[nrow(TabInt)])
-    }else if (DecYear < as.numeric(colnames(TabInt)[1])){
+      PDecYear = colt[length(colt)]
+    }else if (DecYear < colt[1]){
       print('The decimal year value is less than the smallest value in the interpolation table. Using the smallest year available in the table for DecYear.')
-      PDecYear = as.numeric(colnames(TabInt)[1])
+      PDecYear = colt[1]
     }else{
       PDecYear = DecYear
     }
     
     #Get the 5th, median, and 95th percentiles in log space
-    rowt = as.numeric(rownames(TabInt))
-    colt = as.numeric(colnames(TabInt))
     predMed = (interp2(xp = PDecYear, yp = PLogFlow, method = 'linear', Z = TabInt, y = rowt, x = colt) + 
                  interp2(xp = PDecYear, yp = PLogFlow, method = 'linear', Z = TabYear, y = rowt, x = colt)*DecYear +
                  interp2(xp = PDecYear, yp = PLogFlow, method = 'linear', Z = TabLogQ, y = rowt, x = colt)*LogFlow +
