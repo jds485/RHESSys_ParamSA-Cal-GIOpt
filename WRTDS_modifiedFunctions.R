@@ -241,9 +241,8 @@ run_WRTDS = function (estY, estLQ, localSample, DecLow, DecHigh, minNumObs,
     newdf <- data.frame(DecYear = estY, LogQ = estLQ, SinDY = sin(2 * 
                                                                     pi * estY), CosDY = cos(2 * pi * estY))
     yHat <- predict(survModel, newdf)
-    #Check this - is the SD instead of SE? What dimensions does this have? should equal nrow(Sam). How can it be a scalar?
     SE <- survModel$scale
-    #This can't be correct. SE is in log space. Why divided by 2?
+    #This is not the bias! It is a term used to convert the log space mean to the real space mean (see below where it is used)
     bias <- exp((SE^2)/2)
     survReg[1] <- yHat
     survReg[2] <- SE
