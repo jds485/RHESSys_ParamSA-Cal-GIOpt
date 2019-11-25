@@ -6,7 +6,7 @@ library(pracma)
 
 #Get the arg[1] value, which is the date column number to use
 arg = commandArgs(trailingOnly = TRUE)
-d = arg[1]
+d = as.numeric(arg[1])
 
 #Load in the modified code (arg[2] is directory of file)
 setwd(arg[2])
