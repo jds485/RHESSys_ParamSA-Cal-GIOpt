@@ -2760,16 +2760,19 @@ BasinTN05 = BasinTNMed = BasinTN95 = matrix(NA, nrow=nrow(BasinSF), ncol = ncol(
 HillTN05 = HillTNMed = HillTN95 = matrix(NA, nrow=nrow(HillSF), ncol = ncol(HillSF))
 a = matrix(NA, nrow = 3, ncol = ncol(BasinSF)-1)
 h = matrix(NA, nrow = 3, ncol = ncol(BasinSF)-1)
+rowt = as.numeric(rownames(TabInt))
+colt = as.numeric(colnames(TabInt))
 for (d in 1:(ncol(BasinSF)-1)){
-  a = apply(X = t(BasinSF[,d+1]), MARGIN = 2, FUN = predictWRTDS, Date = as.character(colnames(BasinSF)[d+1]))
+  dtest = as.character(colnames(BasinSF)[d+1])
+  a = apply(X = t(BasinSF[,d+1]), MARGIN = 2, FUN = predictWRTDS, Date = dtest, rowt = rowt, colt = colt)
   BasinTN05[,d+1] = a[1,]
   BasinTNMed[,d+1] = a[2,]
   BasinTN95[,d+1] = a[3,]
   
-  h = apply(X = t(HillSF[,d+2]), MARGIN = 2, FUN = predictWRTDS, Date = as.character(colnames(BasinSF)[d+1]))
-  HillTN05[,d+1] = a[1,]
-  HillTNMed[,d+1] = a[2,]
-  HillTN95[,d+1] = a[3,]
+  h = apply(X = t(HillSF[,d+2]), MARGIN = 2, FUN = predictWRTDS, Date = dtest, rowt = rowt, colt = colt)
+  HillTN05[,d+2] = h[1,]
+  HillTNMed[,d+2] = h[2,]
+  HillTN95[,d+2] = h[3,]
 }
 rm(d, a, h)
 
@@ -2794,15 +2797,13 @@ rm(d)
 
 tic3 = Sys.time()
 d = 1000
-a = matrix(NA, nrow = 3, ncol = ncol(BasinSF)-1)
-h = matrix(NA, nrow = 3, ncol = ncol(BasinSF)-1)
 dtest = as.character(colnames(BasinSF)[d+1])
-a = apply(X = as.matrix(BasinSF[,d+1]), MARGIN = 1, FUN = predictWRTDS, Date = dtest)
+a = apply(X = as.matrix(BasinSF[,d+1]), MARGIN = 1, FUN = predictWRTDS, Date = dtest, rowt = rowt, colt = colt)
 BasinTN05[,d+1] = a[1,]
 BasinTNMed[,d+1] = a[2,]
 BasinTN95[,d+1] = a[3,]
 
-h = apply(X = as.matrix(HillSF[,d+2]), MARGIN = 1, FUN = predictWRTDS, Date = dtest)
+h = apply(X = as.matrix(HillSF[,d+2]), MARGIN = 1, FUN = predictWRTDS, Date = dtest, rowt = rowt, colt = colt)
 HillTN05[,d+2] = h[1,]
 HillTNMed[,d+2] = h[2,]
 HillTN95[,d+2] = h[3,]
@@ -2811,7 +2812,7 @@ toc3 = Sys.time()
 print(toc3-tic3)
 rm(d)
 
-#Make parallel implementation
+#Make parallel implementation----
 BasinTN05 = BasinTNMed = BasinTN95 = matrix(NA, nrow=nrow(BasinSF), ncol = ncol(BasinSF))
 HillTN05 = HillTNMed = HillTN95 = matrix(NA, nrow=nrow(HillSF), ncol = ncol(HillSF))
 a = matrix(NA, nrow = 3, ncol = ncol(BasinSF)-1)
@@ -2870,7 +2871,7 @@ BasinTN95 = cbind(BasinSF[,1], BasinTN[[3]])
 colnames(BasinTN05) = colnames(BasinTN95) = colnames(BasinTNMed) = colnames(BasinSF)
 colnames(HillTN05) = colnames(HillTN95) = colnames(HillTNMed) = colnames(HillSF)
 
-#Save TN timeseries
+#Save TN timeseries----
 write.table(round(BasinTN05,3), file = 'SAResults_BasinTN05_p3.txt', row.names = FALSE, sep = '\t')
 write.table(round(BasinTNMed,3), file = 'SAResults_BasinTNMed_p3.txt', row.names = FALSE, sep = '\t')
 write.table(round(BasinTN95,3), file = 'SAResults_BasinTN95_p3.txt', row.names = FALSE, sep = '\t')
