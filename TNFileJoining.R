@@ -12,23 +12,26 @@ fs_b = grep(list.files(), pattern = 'a_', value = TRUE)
 fs_h = grep(list.files(), pattern = 'h_', value = TRUE)
 
 #Use temporary files to extract dataframes for storing basin and hillslope information
-tempb = read.table(paste0(getwd(), '/', fs_b[1]), stringsAsFactors = FALSE, sep = '\t', nrows = 1)
-temph = read.table(paste0(getwd(), '/', fs_h[1]), stringsAsFactors = FALSE, sep = '\t', nrows = 1)
-BasinTN05 = BasinTN95 = BasinTNMed = matrix(NA, nrow = ncol(tempb), ncol = (1 + length(fs_b)))
-HillTN05 = HillTN95 = HillTNMed = matrix(NA, nrow = ncol(temph), ncol = (2 + length(fs_b)))
+tempb = scan(file = paste0(getwd(), '/', fs_b[1]), sep = '\t', what = 'numeric', blank.lines.skip = TRUE, quiet = TRUE, nlines = 1)
+temph = scan(file = paste0(getwd(), '/', fs_h[1]), sep = '\t', what = 'numeric', blank.lines.skip = TRUE, quiet = TRUE, nlines = 1)
+BasinTN05 = BasinTN95 = BasinTNMed = matrix(NA, nrow = length(tempb), ncol = (1 + length(fs_b)))
+HillTN05 = HillTN95 = HillTNMed = matrix(NA, nrow = length(temph), ncol = (2 + length(fs_b)))
 rm(temph, tempb)
 
 #Loop over files and extract----
 for (i in 1:ncol(BasinSF)){
+  #Want the column index to match the file number that is read in
+  ColInd_b = as.numeric(strsplit(strsplit(fs_b[i], split = 'a_')[[1]][2], '.txt')[[1]])
   #Get the basin file by number
-  BasinTN05[,i+1] = scan(file = paste0(getwd(), '/', fs_b[i]), sep = '\t', what = 'numeric', blank.lines.skip = TRUE, quiet = TRUE, nlines = 1)
-  BasinTNMed[,i+1] = scan(file = paste0(getwd(), '/', fs_b[i]), sep = '\t', what = 'numeric', blank.lines.skip = TRUE, quiet = TRUE, nlines = 1, skip = 1)
-  BasinTN95[,i+1] = scan(file = paste0(getwd(), '/', fs_b[i]), sep = '\t', what = 'numeric', blank.lines.skip = TRUE, quiet = TRUE, nlines = 1, skip = 2)
+  BasinTN05[,ColInd_b+1] = scan(file = paste0(getwd(), '/', fs_b[i]), sep = '\t', what = 'numeric', blank.lines.skip = TRUE, quiet = TRUE, nlines = 1)
+  BasinTNMed[,ColInd_b+1] = scan(file = paste0(getwd(), '/', fs_b[i]), sep = '\t', what = 'numeric', blank.lines.skip = TRUE, quiet = TRUE, nlines = 1, skip = 1)
+  BasinTN95[,ColInd_b+1] = scan(file = paste0(getwd(), '/', fs_b[i]), sep = '\t', what = 'numeric', blank.lines.skip = TRUE, quiet = TRUE, nlines = 1, skip = 2)
   
   #Get the hillslope file by number
-  HillTN05[,i+2] = scan(file = paste0(getwd(), '/', fs_h[i]), sep = '\t', what = 'numeric', blank.lines.skip = TRUE, quiet = TRUE, nlines = 1)
-  HillTNMed[,i+2] = scan(file = paste0(getwd(), '/', fs_h[i]), sep = '\t', what = 'numeric', blank.lines.skip = TRUE, quiet = TRUE, nlines = 1, skip = 1)
-  HillTN95[,i+2] = scan(file = paste0(getwd(), '/', fs_h[i]), sep = '\t', what = 'numeric', blank.lines.skip = TRUE, quiet = TRUE, nlines = 1, skip = 2)
+  ColInd_h = as.numeric(strsplit(strsplit(fs_h[i], split = 'h_')[[1]][2], '.txt')[[1]])
+  HillTN05[,ColInd_h+2] = scan(file = paste0(getwd(), '/', fs_h[i]), sep = '\t', what = 'numeric', blank.lines.skip = TRUE, quiet = TRUE, nlines = 1)
+  HillTNMed[,ColInd_h+2] = scan(file = paste0(getwd(), '/', fs_h[i]), sep = '\t', what = 'numeric', blank.lines.skip = TRUE, quiet = TRUE, nlines = 1, skip = 1)
+  HillTN95[,ColInd_h+2] = scan(file = paste0(getwd(), '/', fs_h[i]), sep = '\t', what = 'numeric', blank.lines.skip = TRUE, quiet = TRUE, nlines = 1, skip = 2)
 }
 
 #Add the 1st (and 2nd) columns for basin (and hillslope) (all the same as streamflow)
@@ -41,7 +44,7 @@ colnames(BasinTN05) = colnames(BasinTN95) = colnames(BasinTNMed) = colnames(Hill
 
 #Save TN timeseries----
 #Save R data file
-save.image("C:\\Users\\js4yd\\Documents\\BaismanSA\\RHESSysRuns\\TNSAreps_BasinHill.RData")
+save.image(file = "TNSAreps_BasinHill.RData", safe = FALSE)
 
 #tables
 write.table(round(BasinTN05,3), file = 'SAResults_BasinTN05_p3.txt', row.names = FALSE, sep = '\t')
