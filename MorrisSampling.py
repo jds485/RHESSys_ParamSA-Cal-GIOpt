@@ -2235,3 +2235,12 @@ sum(MorrisSample_df.loc[:,'v3_epc.leaf_cn'] > MorrisSample_df.loc[:,'v3_epc.leaf
 
 #%% Write the resulting MorrisSample_df to a csv file
 MorrisSample_df.round(roundTol).to_csv('MorrisSamples_AfterProcessing.csv', index = False)
+
+#%% All constraints have passed. Now make sure that the parameter that was supposed to change actually changed.
+#Parameters might not change as a result of how constraints affect the sampling scheme.
+#This step was missed in the 1st run completed for this analysis.
+#os.chdir('C:\Users\jsmif\OneDrive - University of Virginia\BES_Data\BES_Data\RHESSysFiles\BR&POBR\RHESSysFilePreparation\defs\MorrisSampleLocs')
+#Original file
+#OrigMorrisSample_df = pd.read_csv('MorrisSamples_BeforeProcessing.csv')
+#Modified file
+#MorrisSample_df = pd.read_csv('MorrisSamples_AfterProcessing.csv')
