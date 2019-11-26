@@ -2751,6 +2751,7 @@ rm(h)
 # print(toc-tic)
 
 
+#Make transposed streamflow data for parallel extraction----
 setwd("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR")
 BasinSF = read.table(file = 'SAResults_BasinStreamflow_p4.txt', sep = '\t', stringsAsFactors = FALSE, header = TRUE, check.names = FALSE)
 HillSF = read.table(file = 'SAResults_HillStreamflow_p6.txt', sep = '\t', stringsAsFactors = FALSE, header = TRUE, check.names = FALSE)
@@ -2759,127 +2760,128 @@ HillSF = read.table(file = 'SAResults_HillStreamflow_p6.txt', sep = '\t', string
 write.table(t(BasinSF), file = 'SAResults_BasinStreamflow_p4_t.txt', sep = '\t', row.names = colnames(BasinSF))
 write.table(t(HillSF), file = 'SAResults_HillStreamflow_p6_t.txt', sep = '\t', row.names = colnames(HillSF))
 
-#Loop over the date to fill in the new dataset
-BasinTN05 = BasinTNMed = BasinTN95 = matrix(NA, nrow=nrow(BasinSF), ncol = ncol(BasinSF))
-HillTN05 = HillTNMed = HillTN95 = matrix(NA, nrow=nrow(HillSF), ncol = ncol(HillSF))
-a = matrix(NA, nrow = 3, ncol = ncol(BasinSF)-1)
-h = matrix(NA, nrow = 3, ncol = ncol(BasinSF)-1)
-rowt = as.numeric(rownames(TabInt))
-colt = as.numeric(colnames(TabInt))
-for (d in 1:(ncol(BasinSF)-1)){
-  dtest = as.character(colnames(BasinSF)[d+1])
-  a = apply(X = t(BasinSF[,d+1]), MARGIN = 2, FUN = predictWRTDS, Date = dtest, rowt = rowt, colt = colt)
-  BasinTN05[,d+1] = a[1,]
-  BasinTNMed[,d+1] = a[2,]
-  BasinTN95[,d+1] = a[3,]
-  
-  h = apply(X = t(HillSF[,d+2]), MARGIN = 2, FUN = predictWRTDS, Date = dtest, rowt = rowt, colt = colt)
-  HillTN05[,d+2] = h[1,]
-  HillTNMed[,d+2] = h[2,]
-  HillTN95[,d+2] = h[3,]
-}
-rm(d, a, h)
-
-#Add the 1st (and 2nd) columns for basin (and hillslope) (all the same as streamflow)
-BasinTNMed[,1] = BasinTN05[,1] = BasinTN95[,1] = BasinSF[,1]
-HillTNMed[,1] = HillTN05[,1] = HillTN95[,1] = HillSF[,1]
-HillTNMed[,2] = HillTN05[,2] = HillTN95[,2] = HillSF[,2]
-
-tic2 = Sys.time()
-d = 1000
-a = matrix(NA, nrow = 3, ncol = ncol(BasinSF)-1)
-dtest = as.character(colnames(BasinSF)[d+1])
-rowt = as.numeric(rownames(TabInt))
-colt = as.numeric(colnames(TabInt))
-a = apply(X = as.matrix(BasinSF[,d+1]), MARGIN = 1, FUN = predictWRTDS, Date = dtest, rowt = rowt, colt = colt)
-BasinTN05[,d+1] = a[1,]
-BasinTNMed[,d+1] = a[2,]
-BasinTN95[,d+1] = a[3,]
-toc2 = Sys.time()
-print(toc2-tic2)
-rm(d)
-
-tic3 = Sys.time()
-d = 1000
-dtest = as.character(colnames(BasinSF)[d+1])
-a = apply(X = as.matrix(BasinSF[,d+1]), MARGIN = 1, FUN = predictWRTDS, Date = dtest, rowt = rowt, colt = colt)
-BasinTN05[,d+1] = a[1,]
-BasinTNMed[,d+1] = a[2,]
-BasinTN95[,d+1] = a[3,]
-
-h = apply(X = as.matrix(HillSF[,d+2]), MARGIN = 1, FUN = predictWRTDS, Date = dtest, rowt = rowt, colt = colt)
-HillTN05[,d+2] = h[1,]
-HillTNMed[,d+2] = h[2,]
-HillTN95[,d+2] = h[3,]
-
-toc3 = Sys.time()
-print(toc3-tic3)
-rm(d)
-
-#Make parallel implementation----
-BasinTN05 = BasinTNMed = BasinTN95 = matrix(NA, nrow=nrow(BasinSF), ncol = ncol(BasinSF))
-HillTN05 = HillTNMed = HillTN95 = matrix(NA, nrow=nrow(HillSF), ncol = ncol(HillSF))
-a = matrix(NA, nrow = 3, ncol = ncol(BasinSF)-1)
-h = matrix(NA, nrow = 3, ncol = ncol(BasinSF)-1)
-
-#Define a combine function for the foreach loop to return lists.
-comb <- function(x, ...) {  
-  mapply(cbind,x,...,SIMPLIFY=FALSE)
-}
-
-cl = makeCluster(detectCores()-1)
-registerDoParallel(cl)
-a=h=NULL
-#loop over the columns
-tic = Sys.time()
-test = foreach(d=1:(ncol(BasinSF)-1), .packages = c('EGRET', 'survival', 'pracma'), .combine = comb) %dopar% {
-  dtest = as.character(colnames(BasinSF)[d+1])
-  #Rows in a column are returned to a. There are 3 return values for the 5th, median, and 95th percentiles
-  a = apply(X = as.matrix(BasinSF[,d+1]), MARGIN = 1, FUN = predictWRTDS, Date = dtest)
-  
-  h = apply(X = as.matrix(HillSF[,d+2]), MARGIN = 1, FUN = predictWRTDS, Date = dtest)
-  #Return those as separate lists
-  list(a[1,], a[2,], a[3,], h[1,], h[2,], h[3,])
-}
-stopCluster(cl)
-toc = Sys.time()
-print(toc-tic)
-rm(d, a, h)
-
-cl = makeCluster(detectCores()-1)
-registerDoParallel(cl)
-a=NULL
-#loop over the columns - 11.5 hours for Basin TN
-tic = Sys.time()
-BasinTN = foreach(d=1:(ncol(BasinSF)-1), .packages = c('EGRET', 'survival', 'pracma'), .combine = comb) %dopar% {
-  dtest = as.character(colnames(BasinSF)[d+1])
-  #Rows in a column are returned to a. There are 3 return values for the 5th, median, and 95th percentiles
-  a = apply(X = as.matrix(BasinSF[,d+1]), MARGIN = 1, FUN = predictWRTDS, Date = dtest)
-  list(a[1,], a[2,], a[3,])
-  #h = apply(X = as.matrix(HillSF[,d+2]), MARGIN = 1, FUN = predictWRTDS, Date = dtest)
-  #Return those as separate lists
-  #list(a[1,], a[2,], a[3,], h[1,], h[2,], h[3,])
-}
-stopCluster(cl)
-toc = Sys.time()
-print(toc-tic)
-rm(a)
-
-#Save R data file
-save.image("C:\\Users\\js4yd\\Documents\\BaismanSA\\RHESSysRuns\\TNSAreps_Basin.RData")
-
-BasinTN05 = cbind(BasinSF[,1], BasinTN[[1]])
-BasinTNMed = cbind(BasinSF[,1], BasinTN[[2]])
-BasinTN95 = cbind(BasinSF[,1], BasinTN[[3]])
-
-colnames(BasinTN05) = colnames(BasinTN95) = colnames(BasinTNMed) = colnames(BasinSF)
-colnames(HillTN05) = colnames(HillTN95) = colnames(HillTNMed) = colnames(HillSF)
-
-#Save TN timeseries----
-write.table(round(BasinTN05,3), file = 'SAResults_BasinTN05_p3.txt', row.names = FALSE, sep = '\t')
-write.table(round(BasinTNMed,3), file = 'SAResults_BasinTNMed_p3.txt', row.names = FALSE, sep = '\t')
-write.table(round(BasinTN95,3), file = 'SAResults_BasinTN95_p3.txt', row.names = FALSE, sep = '\t')
-
-write.table(round(HillTN05,3), file = 'SAResults_HillTN05_p3.txt', row.names = FALSE, sep = '\t')
-write.table(round(HillTNMed,3), file = 'SAResults_HillTNMed_p3.txt', row.names = FALSE, sep = '\t')
-write.table(round(HillTN95,3), file = 'SAResults_HillTN95_p3.txt', row.names = FALSE, sep = '\t')
+#TN extraction time analysis----
+# #Loop over the date to fill in the new dataset
+# BasinTN05 = BasinTNMed = BasinTN95 = matrix(NA, nrow=nrow(BasinSF), ncol = ncol(BasinSF))
+# HillTN05 = HillTNMed = HillTN95 = matrix(NA, nrow=nrow(HillSF), ncol = ncol(HillSF))
+# a = matrix(NA, nrow = 3, ncol = ncol(BasinSF)-1)
+# h = matrix(NA, nrow = 3, ncol = ncol(BasinSF)-1)
+# rowt = as.numeric(rownames(TabInt))
+# colt = as.numeric(colnames(TabInt))
+# for (d in 1:(ncol(BasinSF)-1)){
+#   dtest = as.character(colnames(BasinSF)[d+1])
+#   a = apply(X = t(BasinSF[,d+1]), MARGIN = 2, FUN = predictWRTDS, Date = dtest, rowt = rowt, colt = colt)
+#   BasinTN05[,d+1] = a[1,]
+#   BasinTNMed[,d+1] = a[2,]
+#   BasinTN95[,d+1] = a[3,]
+#   
+#   h = apply(X = t(HillSF[,d+2]), MARGIN = 2, FUN = predictWRTDS, Date = dtest, rowt = rowt, colt = colt)
+#   HillTN05[,d+2] = h[1,]
+#   HillTNMed[,d+2] = h[2,]
+#   HillTN95[,d+2] = h[3,]
+# }
+# rm(d, a, h)
+# 
+# #Add the 1st (and 2nd) columns for basin (and hillslope) (all the same as streamflow)
+# BasinTNMed[,1] = BasinTN05[,1] = BasinTN95[,1] = BasinSF[,1]
+# HillTNMed[,1] = HillTN05[,1] = HillTN95[,1] = HillSF[,1]
+# HillTNMed[,2] = HillTN05[,2] = HillTN95[,2] = HillSF[,2]
+# 
+# tic2 = Sys.time()
+# d = 1000
+# a = matrix(NA, nrow = 3, ncol = ncol(BasinSF)-1)
+# dtest = as.character(colnames(BasinSF)[d+1])
+# rowt = as.numeric(rownames(TabInt))
+# colt = as.numeric(colnames(TabInt))
+# a = apply(X = as.matrix(BasinSF[,d+1]), MARGIN = 1, FUN = predictWRTDS, Date = dtest, rowt = rowt, colt = colt)
+# BasinTN05[,d+1] = a[1,]
+# BasinTNMed[,d+1] = a[2,]
+# BasinTN95[,d+1] = a[3,]
+# toc2 = Sys.time()
+# print(toc2-tic2)
+# rm(d)
+# 
+# tic3 = Sys.time()
+# d = 1000
+# dtest = as.character(colnames(BasinSF)[d+1])
+# a = apply(X = as.matrix(BasinSF[,d+1]), MARGIN = 1, FUN = predictWRTDS, Date = dtest, rowt = rowt, colt = colt)
+# BasinTN05[,d+1] = a[1,]
+# BasinTNMed[,d+1] = a[2,]
+# BasinTN95[,d+1] = a[3,]
+# 
+# h = apply(X = as.matrix(HillSF[,d+2]), MARGIN = 1, FUN = predictWRTDS, Date = dtest, rowt = rowt, colt = colt)
+# HillTN05[,d+2] = h[1,]
+# HillTNMed[,d+2] = h[2,]
+# HillTN95[,d+2] = h[3,]
+# 
+# toc3 = Sys.time()
+# print(toc3-tic3)
+# rm(d)
+# 
+# #Make parallel implementation----
+# BasinTN05 = BasinTNMed = BasinTN95 = matrix(NA, nrow=nrow(BasinSF), ncol = ncol(BasinSF))
+# HillTN05 = HillTNMed = HillTN95 = matrix(NA, nrow=nrow(HillSF), ncol = ncol(HillSF))
+# a = matrix(NA, nrow = 3, ncol = ncol(BasinSF)-1)
+# h = matrix(NA, nrow = 3, ncol = ncol(BasinSF)-1)
+# 
+# #Define a combine function for the foreach loop to return lists.
+# comb <- function(x, ...) {  
+#   mapply(cbind,x,...,SIMPLIFY=FALSE)
+# }
+# 
+# cl = makeCluster(detectCores()-1)
+# registerDoParallel(cl)
+# a=h=NULL
+# #loop over the columns
+# tic = Sys.time()
+# test = foreach(d=1:(ncol(BasinSF)-1), .packages = c('EGRET', 'survival', 'pracma'), .combine = comb) %dopar% {
+#   dtest = as.character(colnames(BasinSF)[d+1])
+#   #Rows in a column are returned to a. There are 3 return values for the 5th, median, and 95th percentiles
+#   a = apply(X = as.matrix(BasinSF[,d+1]), MARGIN = 1, FUN = predictWRTDS, Date = dtest)
+#   
+#   h = apply(X = as.matrix(HillSF[,d+2]), MARGIN = 1, FUN = predictWRTDS, Date = dtest)
+#   #Return those as separate lists
+#   list(a[1,], a[2,], a[3,], h[1,], h[2,], h[3,])
+# }
+# stopCluster(cl)
+# toc = Sys.time()
+# print(toc-tic)
+# rm(d, a, h)
+# 
+# cl = makeCluster(detectCores()-1)
+# registerDoParallel(cl)
+# a=NULL
+# #loop over the columns - 11.5 hours for Basin TN
+# tic = Sys.time()
+# BasinTN = foreach(d=1:(ncol(BasinSF)-1), .packages = c('EGRET', 'survival', 'pracma'), .combine = comb) %dopar% {
+#   dtest = as.character(colnames(BasinSF)[d+1])
+#   #Rows in a column are returned to a. There are 3 return values for the 5th, median, and 95th percentiles
+#   a = apply(X = as.matrix(BasinSF[,d+1]), MARGIN = 1, FUN = predictWRTDS, Date = dtest)
+#   list(a[1,], a[2,], a[3,])
+#   #h = apply(X = as.matrix(HillSF[,d+2]), MARGIN = 1, FUN = predictWRTDS, Date = dtest)
+#   #Return those as separate lists
+#   #list(a[1,], a[2,], a[3,], h[1,], h[2,], h[3,])
+# }
+# stopCluster(cl)
+# toc = Sys.time()
+# print(toc-tic)
+# rm(a)
+# 
+# #Save R data file
+# save.image("C:\\Users\\js4yd\\Documents\\BaismanSA\\RHESSysRuns\\TNSAreps_Basin.RData")
+# 
+# BasinTN05 = cbind(BasinSF[,1], BasinTN[[1]])
+# BasinTNMed = cbind(BasinSF[,1], BasinTN[[2]])
+# BasinTN95 = cbind(BasinSF[,1], BasinTN[[3]])
+# 
+# colnames(BasinTN05) = colnames(BasinTN95) = colnames(BasinTNMed) = colnames(BasinSF)
+# colnames(HillTN05) = colnames(HillTN95) = colnames(HillTNMed) = colnames(HillSF)
+# 
+# #Save TN timeseries----
+# write.table(round(BasinTN05,3), file = 'SAResults_BasinTN05_p3.txt', row.names = FALSE, sep = '\t')
+# write.table(round(BasinTNMed,3), file = 'SAResults_BasinTNMed_p3.txt', row.names = FALSE, sep = '\t')
+# write.table(round(BasinTN95,3), file = 'SAResults_BasinTN95_p3.txt', row.names = FALSE, sep = '\t')
+# 
+# write.table(round(HillTN05,3), file = 'SAResults_HillTN05_p3.txt', row.names = FALSE, sep = '\t')
+# write.table(round(HillTNMed,3), file = 'SAResults_HillTNMed_p3.txt', row.names = FALSE, sep = '\t')
+# write.table(round(HillTN95,3), file = 'SAResults_HillTN95_p3.txt', row.names = FALSE, sep = '\t')
