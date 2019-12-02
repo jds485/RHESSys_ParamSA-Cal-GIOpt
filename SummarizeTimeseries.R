@@ -2758,12 +2758,12 @@ rm(h)
 
 #Make transposed streamflow data for parallel extraction----
 setwd("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR")
-BasinSF = read.table(file = 'SAResults_BasinStreamflow_p4.txt', sep = '\t', stringsAsFactors = FALSE, header = TRUE, check.names = FALSE)
-HillSF = read.table(file = 'SAResults_HillStreamflow_p6.txt', sep = '\t', stringsAsFactors = FALSE, header = TRUE, check.names = FALSE)
+BasinSF = read.table(file = 'SAResults_BasinStreamflow_p4_CorrOrder.txt', sep = '\t', stringsAsFactors = FALSE, header = TRUE, check.names = FALSE)
+HillSF = read.table(file = 'SAResults_HillStreamflow_p6_CorrOrder.txt', sep = '\t', stringsAsFactors = FALSE, header = TRUE, check.names = FALSE)
 
 #Write also a transposed matrix that will be used for extracting TN data date by date
-write.table(t(BasinSF), file = 'SAResults_BasinStreamflow_p4_t.txt', sep = '\t', row.names = colnames(BasinSF))
-write.table(t(HillSF), file = 'SAResults_HillStreamflow_p6_t.txt', sep = '\t', row.names = colnames(HillSF))
+write.table(t(BasinSF), file = 'SAResults_BasinStreamflow_p4_t_CorrOrder.txt', sep = '\t', row.names = colnames(BasinSF))
+write.table(t(HillSF), file = 'SAResults_HillStreamflow_p6_t_CorrOrder.txt', sep = '\t', row.names = colnames(HillSF))
 
 #TN extraction time analysis----
 # #Loop over the date to fill in the new dataset
