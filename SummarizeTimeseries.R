@@ -914,6 +914,7 @@ for (i in 1:length(fs)){
   }
   
   #Save basin and hillslope timeseries----
+  #Fixme: i should be grepping the fs[i] number
   BasinStreamflow[i,] = c(i, bs$streamflow*conversion_b)
   BasinSatDef[i,] = c(i, bs$sat_def)
   for (h in 1:length(uhills)){
@@ -1194,6 +1195,7 @@ time = matrix(NA, nrow = length(ofs), ncol = 3)
 errs = as.data.frame(matrix(NA, nrow = length(ofs), ncol = 8))
 colnames(errs) = c('ind', 'Pyind', 'error', 'traceback', 'Emessage', 'Tmessage', 'Eline', 'Tline')
 for (i in 1:length(ofs)){
+  #Fixme: Change read.table to scan: scan(file = ofs[i], fill = TRUE, sep = '`', what = 'character', quiet = TRUE)
   f = read.table(file = ofs[i], header = FALSE, fill = TRUE, stringsAsFactors = FALSE, sep = '`')
   #Find the original and Python index that should be used for this variable.
   #Note that there are 2 possible stringsplit results because job arrays could not be submitted with ID numbers more than 4 digits long.
@@ -1418,7 +1420,7 @@ setwd("C:\\Users\\js4yd\\Documents\\BaismanSA\\RHESSysRuns")
 for (i in 1:length(fs)){
   #Make figures of the basin output----
   od = getwd()
-  #Fixme: ? Could read in worldfile and plot all of the worldfile info for each run, or save info and compare for each run.
+  #Fixme: Could read in worldfile and plot all of the worldfile info for each run, or save info and compare for each run.
   
   if (dir.exists(paste0(od, '/', fs[i], '/RHESSys_Baisman30m_g74'))){
     setwd(paste0(od, '/', fs[i], '/RHESSys_Baisman30m_g74/output'))
@@ -1427,6 +1429,7 @@ for (i in 1:length(fs)){
   }
   
   #Obtain basin and hillslope data
+  #Fixme: speed up using scan
   fs_out = list.files()
   bs = read.table(paste0(getwd(), '/', fs_out[grep(fs_out, pattern = 'basin.daily')]), stringsAsFactors = FALSE, header = TRUE)
   hs = read.table(paste0(getwd(), '/', fs_out[grep(fs_out, pattern = 'hillslope.daily')]), stringsAsFactors = FALSE, header = TRUE)
@@ -1917,15 +1920,17 @@ for (i in 1:length(fs)){
   }
   
   #Save basin and hillslope timeseries----
-  BasinStreamflow[i,] = c(i, bs$streamflow*conversion_b)
-  BasinSatDef[i,] = c(i, bs$sat_def)
+  IndSave = as.numeric(strsplit(x = fs[i], split = 'Run', fixed = TRUE)[[1]][2])+1
+  BasinStreamflow[IndSave,] = c(IndSave, bs$streamflow*conversion_b)
+  BasinSatDef[IndSave,] = c(IndSave, bs$sat_def)
   for (h in 1:length(uhills)){
-    HillStreamflow[i + length(fs)*(uhills[h]-1),] = c(i, uhills[h], hs$streamflow[hs$hillID == uhills[h]]*conversion_h[conversion_h[,1] == uhills[h], 2])
-    HillSatDef[i + length(fs)*(uhills[h]-1),] = c(i, uhills[h], hs$sat_def[hs$hillID == uhills[h]])
+    HillStreamflow[IndSave + length(fs)*(uhills[h]-1),] = c(IndSave, uhills[h], hs$streamflow[hs$hillID == uhills[h]]*conversion_h[conversion_h[,1] == uhills[h], 2])
+    HillSatDef[IndSave + length(fs)*(uhills[h]-1),] = c(IndSave, uhills[h], hs$sat_def[hs$hillID == uhills[h]])
   }
   rm(h)
   
   #Fixme: WRTDS calculations for this simulation----
+  #This is too large to do on my computation resources, so it's being split into a separate calculation.
   #dtest = as.character(colnames(BasinSF)[d+1])
   #a = apply(X = as.matrix(BasinSF[,d+1]), MARGIN = 1, FUN = predictWRTDS, Date = dtest)
   #BasinTN05[,d+1] = a[1,]
@@ -1945,6 +1950,9 @@ colnames(HillStreamflow) = colnames(HillSatDef) = c('Replicate', 'HillID', as.ch
 
 rm(i, fs_out, bs, hs, od)
 
+#Save R data file
+save.image("~/BaismanSA/RHESSysRuns/AllSArepData_CorrOrder.RData")
+
 #Checked that every value was non-zero when rounded. For this dataset, Basin to 3 and Hillslope to 6 works
 #round to 4 and 6 decimal places for streamflow
 BasinStreamflow[,-1] = round(BasinStreamflow[,-1], 4)
@@ -1955,18 +1963,15 @@ BasinSatDef[,-1] = round(BasinSatDef[,-1], 1)
 HillSatDef[,-c(1,2)] = round(HillSatDef[,-c(1,2)], 1)
 
 #Save the files----
-write.csv(BasinStreamflow, file = 'SAResults_BasinStreamflow_p4.csv', row.names = FALSE)
-write.csv(BasinSatDef, file = 'SAResults_BasinSatDef_p1.csv', row.names = FALSE)
-write.csv(HillStreamflow, file = 'SAResults_HillStreamflow_p6.csv', row.names = FALSE)
-write.csv(HillSatDef, file = 'SAResults_HillSatDef_p1.csv', row.names = FALSE)
+write.csv(BasinStreamflow, file = 'SAResults_BasinStreamflow_p4_CorrOrder.csv', row.names = FALSE)
+write.csv(BasinSatDef, file = 'SAResults_BasinSatDef_p1_CorrOrder.csv', row.names = FALSE)
+write.csv(HillStreamflow, file = 'SAResults_HillStreamflow_p6_CorrOrder.csv', row.names = FALSE)
+write.csv(HillSatDef, file = 'SAResults_HillSatDef_p1_CorrOrder.csv', row.names = FALSE)
 
-write.table(BasinStreamflow, file = 'SAResults_BasinStreamflow_p4.txt', row.names = FALSE, sep = '\t')
-write.table(BasinSatDef, file = 'SAResults_BasinSatDef_p1.txt', row.names = FALSE, sep = '\t')
-write.table(HillStreamflow, file = 'SAResults_HillStreamflow_p6.txt', row.names = FALSE, sep = '\t')
-write.table(HillSatDef, file = 'SAResults_HillSatDef_p1.txt', row.names = FALSE, sep = '\t')
-
-#Save R data file
-save.image("~/BaismanSA/RHESSysRuns/AllSArepData.RData")
+write.table(BasinStreamflow, file = 'SAResults_BasinStreamflow_p4_CorrOrder.txt', row.names = FALSE, sep = '\t')
+write.table(BasinSatDef, file = 'SAResults_BasinSatDef_p1_CorrOrder.txt', row.names = FALSE, sep = '\t')
+write.table(HillStreamflow, file = 'SAResults_HillStreamflow_p6_CorrOrder.txt', row.names = FALSE, sep = '\t')
+write.table(HillSatDef, file = 'SAResults_HillSatDef_p1_CorrOrder.txt', row.names = FALSE, sep = '\t')
 
 #Make plots of the streamflow and saturation deficit observed across the SA runs----
 #Basin----
