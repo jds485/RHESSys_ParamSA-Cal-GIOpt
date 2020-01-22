@@ -1,6 +1,7 @@
 #Script for calculating Morris EEs from output streamflow and TN data
 #This library may be useful for analysis, but is not used right now
 #library(sensitivity)
+source('ColorFunctions.R')
 
 #Load Morris parameter files and ranges----
 InputParams = read.csv("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\RHESSysFilePreparation\\defs\\MorrisSampleLocs\\MorrisSamples_AfterProcessing.csv", stringsAsFactors = FALSE)
@@ -329,7 +330,7 @@ EEsot_h = read.table(file = paste0(getwd(), '/EEsot_h_All.txt'), sep = '\t', hea
 EEsTN05_h = read.table(file = paste0(getwd(), '/EEsTN05_h_All.txt'), sep = '\t', header = TRUE, stringsAsFactors = FALSE) 
 EEsTNMed_h = read.table(file = paste0(getwd(), '/EEsTNMed_h_All.txt'), sep = '\t', header = TRUE, stringsAsFactors = FALSE) 
 EEsTN95_h = read.table(file = paste0(getwd(), '/EEsTN95_h_All.txt'), sep = '\t', header = TRUE, stringsAsFactors = FALSE)
-  
+
 #Fixme: Some EEs have NA values because of the sampling scheme error
 
 #Using the EE data, compute the mean, standard deviation, and absolute mean
@@ -383,6 +384,7 @@ for (h in 1:length(uhills)){
 #Make plots of the sd vs. mu----
 #One color per category
 colos = c(rainbow(12), 'black')
+colos[3] = 'gray'
 #Assign colors to the categories
 ColPlots = vector('character', length=cols)
 for (i in 1:cols){
@@ -439,8 +441,21 @@ plot(x = muEEsTNMed_b, y = sdEEsTNMed_b, pch = 16, xlab = 'Mean of the Elementar
 legend('bottomleft', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos)
 dev.off()
 
-#Make plots of the ranking for mean absolute value
+#Make plots of the ranking for mean absolute value----
 png('EE05_mua_b.png', res = 300, units = 'in', height = 7, width = 7)
+barplot(height = muaEEs05_b/max(muaEEs05_b), ylab = 'Normalized Mean Abs. Val. of Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Lower 5th Percentile of Flow', col = ColPlots, border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5)
+#Make lines separating the different classes of variables
+legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
+dev.off()
+
+png('EE05_mua_b_thresh12.png', res = 300, units = 'in', height = 7, width = 7)
+barplot(height = muaEEs05_b/max(muaEEs05_b), ylab = 'Normalized Mean Abs. Val. of Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Lower 5th Percentile of Flow', col = ColPlots, border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5)
+#Make lines separating the different classes of variables
+lines(x = c(-100,300), y = c(RanksMua05_b[12,2]/max(muaEEs05_b),RanksMua05_b[12,2]/max(muaEEs05_b)))
+legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
+dev.off()
+
+png('EE05_mua_b_lines.png', res = 300, units = 'in', height = 7, width = 7)
 barplot(height = muaEEs05_b, ylab = 'Mean Absolute Value of the Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Lower 5th Percentile of Flow', col = ColPlots, border = NA, ylim = c(0,120), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5)
 #Make lines separating the different classes of variables
 lines(x = c(-1,-1), y = c(-10,130), lty = 1, col = 'black')
@@ -461,6 +476,19 @@ legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9',
 dev.off()
 
 png('EE95_mua_b.png', res = 300, units = 'in', height = 7, width = 7)
+barplot(height = muaEEs95_b/max(muaEEs95_b), ylab = 'Normalized Mean Abs. Val. of Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Upper 5th Percentile of Flow', col = ColPlots, border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5)
+#Make lines separating the different classes of variables
+legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
+dev.off()
+
+png('EE95_mua_b_thresh12.png', res = 300, units = 'in', height = 7, width = 7)
+barplot(height = muaEEs95_b/max(muaEEs95_b), ylab = 'Normalized Mean Abs. Val. of Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Upper 5th Percentile of Flow', col = ColPlots, border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5)
+#Make lines separating the different classes of variables
+lines(x = c(-100,300), y = c(RanksMua95_b[12,2]/max(muaEEs95_b),RanksMua95_b[12,2]/max(muaEEs95_b)))
+legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
+dev.off()
+
+png('EE95_mua_b_lines.png', res = 300, units = 'in', height = 7, width = 7)
 barplot(height = muaEEs95_b, ylab = 'Mean Absolute Value of the Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Upper 5th Percentile of Flow', col = ColPlots, border = NA, ylim = c(0,120), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5)
 #Make lines separating the different classes of variables
 lines(x = c(-1,-1), y = c(-10,130), lty = 1, col = 'black')
@@ -481,6 +509,19 @@ legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9',
 dev.off()
 
 png('EEot_mua_b.png', res = 300, units = 'in', height = 7, width = 7)
+barplot(height = muaEEsot_b/max(muaEEsot_b), ylab = 'Normalized Mean Abs. Val. of Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for 5th-95th Percentile Flows', col = ColPlots, border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5)
+#Make lines separating the different classes of variables
+legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
+dev.off()
+
+png('EEot_mua_b_thresh12.png', res = 300, units = 'in', height = 7, width = 7)
+barplot(height = muaEEsot_b/max(muaEEsot_b), ylab = 'Normalized Mean Abs. Val. of Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for 5th-95th Percentile Flows', col = ColPlots, border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5)
+#Make lines separating the different classes of variables
+lines(x = c(-100,300), y = c(RanksMuaot_b[12,2]/max(muaEEsot_b),RanksMuaot_b[12,2]/max(muaEEsot_b)))
+legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
+dev.off()
+
+png('EEot_mua_b_lines.png', res = 300, units = 'in', height = 7, width = 7)
 barplot(height = muaEEsot_b, ylab = 'Mean Absolute Value of the Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for 5th-95th Percentile Flows', col = ColPlots, border = NA, ylim = c(0,3000), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5)
 #Make lines separating the different classes of variables
 lines(x = c(-1,-1), y = c(-10,3100), lty = 1, col = 'black')
@@ -501,6 +542,12 @@ legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9',
 dev.off()
 
 png('EETN05_mua_b.png', res = 300, units = 'in', height = 7, width = 7)
+barplot(height = muaEEsTN05_b/max(muaEEsTN05_b), ylab = 'Normalized Mean Abs. Val. of Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Lower 5th Quantile of TN', col = ColPlots, border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5)
+#Make lines separating the different classes of variables
+legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
+dev.off()
+
+png('EETN05_mua_b_lines.png', res = 300, units = 'in', height = 7, width = 7)
 barplot(height = muaEEsTN05_b, ylab = 'Mean Absolute Value of the Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Lower 5th Quantile of TN', col = ColPlots, border = NA, ylim = c(0,40), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5)
 #Make lines separating the different classes of variables
 lines(x = c(-1,-1), y = c(-10,130), lty = 1, col = 'black')
@@ -521,6 +568,12 @@ legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9',
 dev.off()
 
 png('EETN95_mua_b.png', res = 300, units = 'in', height = 7, width = 7)
+barplot(height = muaEEsTN95_b/max(muaEEsTN95_b), ylab = 'Normalized Mean Abs. Val. of Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Upper 5th Quantile of TN', col = ColPlots, border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5)
+#Make lines separating the different classes of variables
+legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
+dev.off()
+
+png('EETN95_mua_b_lines.png', res = 300, units = 'in', height = 7, width = 7)
 barplot(height = muaEEsTN95_b, ylab = 'Mean Absolute Value of the Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Upper 5th Quantile of TN', col = ColPlots, border = NA, ylim = c(0,20), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5)
 #Make lines separating the different classes of variables
 lines(x = c(-1,-1), y = c(-10,130), lty = 1, col = 'black')
@@ -541,6 +594,19 @@ legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9',
 dev.off()
 
 png('EETNMed_mua_b.png', res = 300, units = 'in', height = 7, width = 7)
+barplot(height = muaEEsTNMed_b/max(muaEEsTNMed_b), ylab = 'Normalized Mean Abs. Val. of Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Mean of TN', col = ColPlots, border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5)
+#Make lines separating the different classes of variables
+legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
+dev.off()
+
+png('EETNMed_mua_b_thresh12.png', res = 300, units = 'in', height = 7, width = 7)
+barplot(height = muaEEsTNMed_b/max(muaEEsTNMed_b), ylab = 'Normalized Mean Abs. Val. of Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Mean of TN', col = ColPlots, border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5)
+#Make lines separating the different classes of variables
+lines(x = c(-100,300), y = c(RanksMuaTNMed_b[12,2]/max(muaEEsTNMed_b),RanksMuaTNMed_b[12,2]/max(muaEEsTNMed_b)))
+legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
+dev.off()
+
+png('EETNMed_mua_b_lines.png', res = 300, units = 'in', height = 7, width = 7)
 barplot(height = muaEEsTNMed_b, ylab = 'Mean Absolute Value of the Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Mean of TN', col = ColPlots, border = NA, ylim = c(0,30), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5)
 #Make lines separating the different classes of variables
 lines(x = c(-1,-1), y = c(-10,3100), lty = 1, col = 'black')
@@ -560,17 +626,89 @@ lines(x = c(0.5+grep(colnames(InputParams), pattern = '^v4_')[length(grep(colnam
 legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
 dev.off()
 
-#Hillslope Plots for mua----
-
-
 #Save a list of ordered names for mua
 RanksMua05_b = data.frame(Param = colnames(InputParams)[rev(order(muaEEs05_b))], EE05_b = muaEEs05_b[rev(order(muaEEs05_b))], stringsAsFactors = FALSE)
 RanksMua95_b = data.frame(Param = colnames(InputParams)[rev(order(muaEEs95_b))], EE95_b = muaEEs95_b[rev(order(muaEEs95_b))], stringsAsFactors = FALSE)
 RanksMuaot_b = data.frame(Param = colnames(InputParams)[rev(order(muaEEsot_b))], EEot_b = muaEEsot_b[rev(order(muaEEsot_b))], stringsAsFactors = FALSE)
+RanksMuaTN05_b = data.frame(Param = colnames(InputParams)[rev(order(muaEEsTN05_b))], EETN05_b = muaEEsTN05_b[rev(order(muaEEsTN05_b))], stringsAsFactors = FALSE)
+RanksMuaTN95_b = data.frame(Param = colnames(InputParams)[rev(order(muaEEsTN95_b))], EETN95_b = muaEEsTN95_b[rev(order(muaEEsTN95_b))], stringsAsFactors = FALSE)
+RanksMuaTNMed_b = data.frame(Param = colnames(InputParams)[rev(order(muaEEsTNMed_b))], EETNMed_b = muaEEsTNMed_b[rev(order(muaEEsTNMed_b))], stringsAsFactors = FALSE)
+
+RanksMua05_h = RanksMua95_h = RanksMuaot_h = RanksMuaTN05_h = RanksMuaTN95_h = RanksMuaTNMed_h = list()
+for (h in 1:length(uhills)){
+  RanksMua05_h = c(RanksMua05_h, list(data.frame(Param = colnames(InputParams)[rev(order(muaEEs05_h[h,]))], EE05_h = muaEEs05_h[h,][rev(order(muaEEs05_h[h,]))], stringsAsFactors = FALSE)))
+  RanksMua95_h = c(RanksMua95_h, list(data.frame(Param = colnames(InputParams)[rev(order(muaEEs95_h[h,]))], EE05_h = muaEEs95_h[h,][rev(order(muaEEs95_h[h,]))], stringsAsFactors = FALSE)))
+  RanksMuaot_h = c(RanksMuaot_h, list(data.frame(Param = colnames(InputParams)[rev(order(muaEEsot_h[h,]))], EE05_h = muaEEsot_h[h,][rev(order(muaEEsot_h[h,]))], stringsAsFactors = FALSE)))
+  RanksMuaTN05_h = c(RanksMuaTN05_h, list(data.frame(Param = colnames(InputParams)[rev(order(muaEEsTN05_h[h,]))], EE05_h = muaEEsTN05_h[h,][rev(order(muaEEsTN05_h[h,]))], stringsAsFactors = FALSE)))
+  RanksMuaTN95_h = c(RanksMuaTN95_h, list(data.frame(Param = colnames(InputParams)[rev(order(muaEEsTN95_h[h,]))], EE05_h = muaEEsTN95_h[h,][rev(order(muaEEsTN95_h[h,]))], stringsAsFactors = FALSE)))
+  RanksMuaTNMed_h = c(RanksMuaTNMed_h, list(data.frame(Param = colnames(InputParams)[rev(order(muaEEsTNMed_h[h,]))], EE05_h = muaEEsTNMed_h[h,][rev(order(muaEEsTNMed_h[h,]))], stringsAsFactors = FALSE)))
+}
+names(RanksMua05_h) = names(RanksMua95_h) = names(RanksMuaot_h) = names(RanksMuaTN05_h) = names(RanksMuaTN95_h) = names(RanksMuaTNMed_h) = paste0('Hill', seq(1,14,1))
 
 #Get the unique variables from this list
-RanksMua_b = unique(c(RanksMua05_b$Param[1:40],RanksMuaot_b$Param[1:40],RanksMua95_b$Param[1:40]))
+#Top 12 because that's the top 10% of the parameters
+RanksMua_b = unique(c(RanksMua05_b$Param[1:12],RanksMuaot_b$Param[1:12],RanksMua95_b$Param[1:12]))
+RanksMuaTN_b = unique(c(RanksMuaTN05_b$Param[1:12],RanksMuaTNMed_b$Param[1:12],RanksMuaTN95_b$Param[1:12]))
 
+#Unique across basin and TN are same for top 10%
+length(unique(c(RanksMua_b, RanksMuaTN_b)))
+
+#RanksMua_h = unique(c(RanksMua05_b$Param[1:40],RanksMuaot_b$Param[1:40],RanksMua95_b$Param[1:40]))
+#RanksMuaTN_h = unique(c(RanksMuaTN05_b$Param[1:40],RanksMuaTNMed_b$Param[1:40],RanksMuaTN95_b$Param[1:40]))
+
+#Hillslope Plots for mua----
+#Testing for normalized EE value. Rank order may be better to just see if the order matters.
+
+colPal = colorRampPalette(colors = rev(c('red', 'orange', 'yellow', 'green', 'blue')))
+scaleRange = c(0, 1)
+scaleBy = 0.1
+Pal = colPal((scaleRange[2] - scaleRange[1])/scaleBy + 1)
+
+#Make a grid of the parameters in top 10% for hillslopes
+SortRanksMua_b = RanksMua_b[c(1, 11, 9, 2, 4, 8, 3, 5, 12, 14, 13, 7, 10, 6)]
+png('HillNormalizedTop12.png', res = 300, height = 6, width = 6, units = 'in')
+for (h in 1:length(uhills)){
+  #Loop over the top 10% ranks for basin
+  for (j in 1:length(SortRanksMua_b)){
+    plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,15), pch = 15, xlab = 'Hillslope ID', ylab = 'Parameter', col = colFun(RanksMua95_h[[h]]$EE05_h[RanksMua95_h[[h]]$Param == SortRanksMua_b[j]] / max(RanksMua95_h[[h]]$EE05_h)), axes = FALSE)
+    par(new=TRUE)
+  }
+}
+axis(side = 1, at = seq(1,14,1), labels = TRUE)
+axis(side = 2, at = seq(1,14,1), labels = FALSE)
+dev.off()
+
+colPal = colorRampPalette(colors = rev(c('red', 'orange', 'gray', 'green', 'blue')))
+scaleRange = c(0, 50)
+scaleBy = 15
+Pal = colPal((scaleRange[2] - scaleRange[1])/scaleBy + 1)
+Ranks=NULL
+png('HillRankTop12.png', res = 300, height = 6, width = 6, units = 'in')
+par(mar = c(1,11,0,5))
+for (h in 1:length(uhills)){
+  #Loop over the top 10% ranks for basin
+  for (j in 1:length(SortRanksMua_b)){
+    if(j == 1){
+      plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,15), pch = 15, xlab = 'Hillslope ID', ylab = 'Parameter', col = colFun(which(RanksMua95_h[[h]]$Param == SortRanksMua_b[j])), axes = FALSE, cex.lab = 1.5)
+    }else{
+      plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,15), pch = 15, xlab = '', ylab = '', col = colFun(which(RanksMua95_h[[h]]$Param == SortRanksMua_b[j])), axes = FALSE)
+    }
+    par(new=TRUE)
+    Ranks = c(Ranks,which(RanksMua95_h[[h]]$Param == SortRanksMua_b[j]))
+  }
+}
+par(new=FALSE)
+axis(side = 1, at = seq(1,14,1), labels = TRUE, pos = 0.5)
+axis(side = 2, at = seq(1,14,1), labels = SortRanksMua_b, las = 1)
+#legend('top', title = expression(bold('Parameter Sensitivity Rank')), legend = c('1 - 14', '15 - 29', '30 - 44', '45 - 60', '61 - 101'), horiz = TRUE, pch = 15, col = colFun(seq(0,60,15)), inset = -0.1, xpd = TRUE)
+legend('right', title = expression(bold('Rank')), legend = c('1 - 14', '15 - 29', '30 - 44', '45 - 60', '61 - 101'), pch = 15, col = colFun(seq(0,60,15)), inset = -0.3, xpd = TRUE)
+dev.off()
+
+#Compare the multiplier variables to see if they are different in sensitivity----
+#Using m as an example for now because it's in the top 12
+png('BasinKsatDecayEEs.png', res = 300, width = 3, height = 5, units = 'in')
+barplot(height = RanksMua05_b$EE05_b[c(grep(RanksMua05_b$Param, pattern = '9_m', fixed=TRUE, ignore.case = FALSE)[c(1,2)], grep(RanksMua05_b$Param, pattern = '8_m', fixed=TRUE, ignore.case = FALSE)[c(1,2)])]/max(RanksMua05_b$EE05_b), names.arg = c('s9_m', 's109_m', 's8_m', 's108_m'), ylab = 'Normalized Elementary Effect', ylim = c(0,1), cex.axis = 1.5, cex.lab = 1.5)
+dev.off()
 
 #Fixme: Average the EEs for variables that require it----
 
@@ -619,13 +757,23 @@ dev.off()
 #Perform heirarchical clustering for discovering variable clusters
 #https://uc-r.github.io/hc_clustering
 
-#List the variables that are highly similar (closer to 1)
+#List the variables that are highly similar
 
 
 #Compute bootstrapped samples with replacement of the EEs for each parameter (separately as opposed to by trajectory to avoid correlation in SDs of bootstrapped results)
-
-
-#Compare EEs for multiplier variables
+set.seed(12319)
+#Number of trajectory values to sample per replicate.
+num = 40
+#Draw bootstrapped samples
+Reps = replicate(expr = ceiling(runif(n = num, min = 0, max = 40)), n = 1000)
+#Extract the EEs using the indices in reps.
+FloodMat = matrix(NA, nrow = nrow(blkStart)*block, ncol = ncol(blkStart))
+for (i in 1:ncol(Reps)){
+  for (j in 1:nrow(blkStart)){
+    FloodMat[seq(((j-1)*block + 1),((j-1)*block+5),1),i] = MX$Floods23only[MX$YEAR %in% c(blkStart[j,i] + seq(0,4,1))]
+  }
+}
+rm(i,j)
 
 
 #Parameter corrleation plots
