@@ -16,7 +16,7 @@ OrdInds = order(nums)
 
 rm(fs, charnums, nums)
 
-#Test with basin streamflow data
+#Start with streamflow data
 setwd("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR")
 BasinSF = read.table(file = 'SAResults_BasinStreamflow_p4.txt', sep = '\t', stringsAsFactors = FALSE, header = TRUE, check.names = FALSE)
 HillSF = read.table(file = 'SAResults_HillStreamflow_p6.txt', sep = '\t', stringsAsFactors = FALSE, header = TRUE, check.names = FALSE)
@@ -93,3 +93,20 @@ for (h in 1:14){
 write.table(HillTN05, file = 'SAResults_HillTN05_p3_All_Reordered.txt', row.names = FALSE, sep = '\t')
 write.table(HillTNMed, file = 'SAResults_HillTNMed_p3_All_Reordered.txt', row.names = FALSE, sep = '\t')
 write.table(HillTN95, file = 'SAResults_HillTN95_p3_All_Reordered.txt', row.names = FALSE, sep = '\t')
+
+
+#Reorder likelihood results
+setwd("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR")
+Likes = read.csv(file = 'SA_Params_logL_Baisman_Flow.csv', stringsAsFactors = FALSE, check.names = FALSE)
+LikesTN = read.csv(file = 'SA_Params_logL_Baisman_TN.csv', stringsAsFactors = FALSE, check.names = FALSE)
+
+#Reorder according to the correct Morris order
+Likes = Likes[OrdInds, ]
+LikesTN = LikesTN[OrdInds, ]
+
+#Get the new replicates named correctly
+Likes$Replicate = seq(1,10880,1)
+LikesTN$Replicate = seq(1,10880,1)
+
+write.csv(Likes, file = 'SA_Params_logL_Baisman_Flow_Reordered.csv', row.names = FALSE)
+write.csv(LikesTN, file = 'SA_Params_logL_Baisman_TN_Reordered.csv', row.names = FALSE)
