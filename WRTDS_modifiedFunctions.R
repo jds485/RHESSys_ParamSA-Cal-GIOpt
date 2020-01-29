@@ -450,7 +450,7 @@ plotContours = function (eList, yearStart, yearEnd, qBottom = NA, qTop = NA,
 
 
 #Function to predict TN from the provided date and flow by interpolating the model parameters
-predictWRTDS = function(Date, Flow, rowt, colt){
+predictWRTDS = function(Date, Flow, rowt, colt, TabInt, TabYear, TabLogQ, TabSinYear, TabCosYear, TabLogErr){
   #There are some hillslopes with 0 flows to 6 decimal places. Report 0 concentration for those flows
   if (Flow == 0){
     preds = rep(0,3)
