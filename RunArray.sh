@@ -9,6 +9,8 @@
 #SBATCH --mail-user=js4yd@virginia.edu          # address for email notification
 #SBATCH --mail-type=ALL                  		    # email at Begin and End of job
 
+#This shell script moves files to a permanent storage at the end. Sounds good, but it takes a long time to do that, and it's not recommended if you have the space in the current wd.
+
 module load singularity
 
 #Set directory variables

@@ -1,3 +1,4 @@
+#This shell script is used to rename output files after they have all been generated.
 #Make output directory in the permanent storage location
 mkdir /nv/vol288/quinnlab-value/js4yd/Baisman30m_MorrisSA/output
 

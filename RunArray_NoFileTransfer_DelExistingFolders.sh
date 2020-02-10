@@ -9,6 +9,8 @@
 #SBATCH --mail-user=js4yd@virginia.edu          # address for email notification
 #SBATCH --mail-type=ALL                  		    # email at Begin and End of job
 
+#This shell script is the same as RunArray, but does not move files to a permanent storage at the end and deletes existing folders.
+
 module load singularity
 
 #Set directory variables

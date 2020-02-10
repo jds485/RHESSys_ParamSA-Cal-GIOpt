@@ -9,6 +9,8 @@
 #SBATCH --mail-user=js4yd@virginia.edu          # address for email notification
 #SBATCH --mail-type=ALL                  		    # email at Begin and End of job
 
+#This shell script is for running only RHESSys. Useful if a run fails during a RHESSys simulation.
+
 module load singularity
 
 #Set directory variables

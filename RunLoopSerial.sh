@@ -9,6 +9,8 @@
 #SBATCH --mail-user=js4yd@virginia.edu          # address for email notification
 #SBATCH --mail-type=ALL                  		    # email at Begin and End of job
 
+#This shell script is used for running one replicate at a time.
+
 module load singularity
 
 #Set directory variables
