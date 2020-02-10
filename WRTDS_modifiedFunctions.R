@@ -1,3 +1,5 @@
+#This script contains several WRTDS functions that were modified to allow for plotting all regression parameters as plots, and for prediction of values.
+
 library(EGRET)
 library(survival)
 library(pracma)
