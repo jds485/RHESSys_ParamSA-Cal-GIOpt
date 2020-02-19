@@ -584,7 +584,8 @@ predictWRTDS = function(Date, Flow, rowt, colt, TabInt, TabYear, TabLogQ, TabSin
 
 #Fill in NAs in interpolation tables
 FillTableNAs = function(DateInd, #Date is the column index
-                        FlowInd) #Flow is the row index
+                        FlowInd, #Flow is the row index
+                        QuadLogQ=FALSE) #indicator for use of quadratic flow term in WRTDS regression
   {
   #Fill in the NA value assuming that the table is equally spaced in columns and rows.
   #such that inverse distance weighting will work. Treated each dimension as equally important.
@@ -603,12 +604,22 @@ FillTableNAs = function(DateInd, #Date is the column index
   }
   weights = TotalDist/sum(TotalDist)
   
-  NewTableVals = c(sum(TempTabInt[IndNotNA]*weights), 
-                   sum(TempTabYear[IndNotNA]*weights),
-                   sum(TempTabLogQ[IndNotNA]*weights),
-                   sum(TempTabSinYear[IndNotNA]*weights),
-                   sum(TempTabCosYear[IndNotNA]*weights), 
-                   sum(TempTabLogErr[IndNotNA]*weights))
+  if (QuadLogQ){
+    NewTableVals = c(sum(TempTabInt[IndNotNA]*weights), 
+                     sum(TempTabYear[IndNotNA]*weights),
+                     sum(TempTabLogQ[IndNotNA]*weights),
+                     sum(TempTabSinYear[IndNotNA]*weights),
+                     sum(TempTabCosYear[IndNotNA]*weights), 
+                     sum(TempTabLogErr[IndNotNA]*weights),
+                     sum(TempTabLogQ2[IndNotNA]*weights))
+  }else{
+    NewTableVals = c(sum(TempTabInt[IndNotNA]*weights), 
+                     sum(TempTabYear[IndNotNA]*weights),
+                     sum(TempTabLogQ[IndNotNA]*weights),
+                     sum(TempTabSinYear[IndNotNA]*weights),
+                     sum(TempTabCosYear[IndNotNA]*weights), 
+                     sum(TempTabLogErr[IndNotNA]*weights))
+  }
   
   return(NewTableVals)
 }
