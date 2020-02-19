@@ -25,9 +25,6 @@ LOCATION_NAME="g74_$RHESSysNAME"
 MAPSET=PERMANENT
 RHESSysModelLoc="/scratch/js4yd/RHESSysEastCoast"
 
-#Directory to store output
-OUTDIR="/nv/vol288/quinnlab-value/js4yd/Baisman30m_MorrisSA"
-
 #Set the index, i, to be the task ID minus 1
 SUBONE=1
 i=$(expr ${SLURM_ARRAY_TASK_ID} - $SUBONE) 
@@ -35,7 +32,7 @@ i=$(expr ${SLURM_ARRAY_TASK_ID} - $SUBONE)
 cd "$BASEDIR"/RHESSysRuns
 #Use the MakeDefs_fn.py script to make the ith replicate directory and the defs directory with the ith def file combination
 #Execute using the version of Python in the singularity container
-singularity exec "$SINGIMAGE"/rhessys_v3.img python "$BASEDIR"/RHESSysRuns/MakeDefs_fn.py "$i"
+singularity exec "$SINGIMAGE"/rhessys_v3.img python "$BASEDIR"/RHESSysRuns/MakeDefs_fn.py "$i" "$BASEDIR"/RHESSysRuns "$BASEDIR"/"$RHESSysNAME"/defs "$RHESSysNAME"
 
 #Change into directory that was just made and copy in files needed to run RHESSys
 # full path to the project location;

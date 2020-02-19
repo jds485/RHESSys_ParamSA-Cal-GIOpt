@@ -12,8 +12,15 @@ import numpy as np
 import string
 import signal
 
+#sys.argv contains: 
+#0: unused - script call info
+#1: Integer for the row in the table to access
+#2: RHESSysRuns directory for saving replicates "$BASEDIR"/RHESSysRuns
+#3: def file directory "$BASEDIR"/"$RHESSysNAME"/defs
+#4: grass GIS folder name "$RHESSysNAME"
+
 #%% Set working directory
-os.chdir('/scratch/js4yd/MorrisSA/RHESSysRuns')
+os.chdir(sys.argv[2])
 
 #%% Set parameters
 roundTol = 10
@@ -24,20 +31,20 @@ MorrisSample_df = pd.read_csv('MorrisSamples_AfterProcessing.csv')
 
 #%% Make the definition files from the Morris sample locations and place them in new directories by replicate ID
 #Load original def files. Use object dtype because the parameters each have different types.
-basin = pd.read_table('/scratch/js4yd/MorrisSA/RHESSys_Baisman30m_g74/defs/basin_basin.def', delim_whitespace=True, header=None, dtype = 'object')
-zone = pd.read_table('/scratch/js4yd/MorrisSA/RHESSys_Baisman30m_g74/defs/zone_zone.def', delim_whitespace=True, header=None, dtype = 'object')
-hill = pd.read_table('/scratch/js4yd/MorrisSA/RHESSys_Baisman30m_g74/defs/hillslope_hillslope.def', delim_whitespace=True, header=None, dtype = 'object')
-soil_loam = pd.read_table('/scratch/js4yd/MorrisSA/RHESSys_Baisman30m_g74/defs/soil_loam.def', delim_whitespace=True, header=None, dtype = 'object')
-soil_cloam = pd.read_table('/scratch/js4yd/MorrisSA/RHESSys_Baisman30m_g74/defs/soil_loam_compact.def', delim_whitespace=True, header=None, dtype = 'object')
-soil_sloam = pd.read_table('/scratch/js4yd/MorrisSA/RHESSys_Baisman30m_g74/defs/soil_silt_loam.def', delim_whitespace=True, header=None, dtype = 'object')
-soil_csloam = pd.read_table('/scratch/js4yd/MorrisSA/RHESSys_Baisman30m_g74/defs/soil_silt_loam_compact.def', delim_whitespace=True, header=None, dtype = 'object')
-land_grass = pd.read_table('/scratch/js4yd/MorrisSA/RHESSys_Baisman30m_g74/defs/landuse_grass.def', delim_whitespace=True, header=None, dtype = 'object')
-land_undev = pd.read_table('/scratch/js4yd/MorrisSA/RHESSys_Baisman30m_g74/defs/landuse_undeveloped.def', delim_whitespace=True, header=None, dtype = 'object')
-land_urban = pd.read_table('/scratch/js4yd/MorrisSA/RHESSys_Baisman30m_g74/defs/landuse_urban.def', delim_whitespace=True, header=None, dtype = 'object')
-land_septic = pd.read_table('/scratch/js4yd/MorrisSA/RHESSys_Baisman30m_g74/defs/landuse_urbanSeptic.def', delim_whitespace=True, header=None, dtype = 'object')
-veg_Tree = pd.read_table('/scratch/js4yd/MorrisSA/RHESSys_Baisman30m_g74/defs/stratum_deciduousBES.def', delim_whitespace=True, header=None, dtype = 'object')
-veg_grass = pd.read_table('/scratch/js4yd/MorrisSA/RHESSys_Baisman30m_g74/defs/stratum_grass.def', delim_whitespace=True, header=None, dtype = 'object')
-veg_NonVeg = pd.read_table('/scratch/js4yd/MorrisSA/RHESSys_Baisman30m_g74/defs/stratum_nonveg.def', delim_whitespace=True, header=None, dtype = 'object')
+basin = pd.read_table(sys.argv[3]+'/basin_basin.def', delim_whitespace=True, header=None, dtype = 'object')
+zone = pd.read_table(sys.argv[3]+'/zone_zone.def', delim_whitespace=True, header=None, dtype = 'object')
+hill = pd.read_table(sys.argv[3]+'/hillslope_hillslope.def', delim_whitespace=True, header=None, dtype = 'object')
+soil_loam = pd.read_table(sys.argv[3]+'/soil_loam.def', delim_whitespace=True, header=None, dtype = 'object')
+soil_cloam = pd.read_table(sys.argv[3]+'/soil_loam_compact.def', delim_whitespace=True, header=None, dtype = 'object')
+soil_sloam = pd.read_table(sys.argv[3]+'/soil_silt_loam.def', delim_whitespace=True, header=None, dtype = 'object')
+soil_csloam = pd.read_table(sys.argv[3]+'/soil_silt_loam_compact.def', delim_whitespace=True, header=None, dtype = 'object')
+land_grass = pd.read_table(sys.argv[3]+'/landuse_grass.def', delim_whitespace=True, header=None, dtype = 'object')
+land_undev = pd.read_table(sys.argv[3]+'/landuse_undeveloped.def', delim_whitespace=True, header=None, dtype = 'object')
+land_urban = pd.read_table(sys.argv[3]+'/landuse_urban.def', delim_whitespace=True, header=None, dtype = 'object')
+land_septic = pd.read_table(sys.argv[3]+'/landuse_urbanSeptic.def', delim_whitespace=True, header=None, dtype = 'object')
+veg_Tree = pd.read_table(sys.argv[3]+'/stratum_deciduousBES.def', delim_whitespace=True, header=None, dtype = 'object')
+veg_grass = pd.read_table(sys.argv[3]+'/stratum_grass.def', delim_whitespace=True, header=None, dtype = 'object')
+veg_NonVeg = pd.read_table(sys.argv[3]+'/stratum_nonveg.def', delim_whitespace=True, header=None, dtype = 'object')
 
 #for i in range(len(MorrisSample_df.iloc[:,0])):
 for i in [int(sys.argv[1])]:
@@ -46,11 +53,11 @@ for i in [int(sys.argv[1])]:
     #Make new directory for the replicate. This is the directory where code to run GIS2RHESSys pre-processing will be
     os.mkdir(od+'/Run'+str(i))
     #Make the directory in which the RHESSys simulation will be run
-    os.mkdir(od+'/Run'+str(i)+'/RHESSys_Baisman30m_g74')
+    os.mkdir(od+'/Run'+str(i)+'/'+sys.argv[4])
     #Make new directory for the def files in that folder
-    os.mkdir(od+'/Run'+str(i)+'/RHESSys_Baisman30m_g74'+'/defs')
+    os.mkdir(od+'/Run'+str(i)+'/'+sys.argv[4]+'/defs')
     #Change into that directory
-    os.chdir(od+'/Run'+str(i)+'/RHESSys_Baisman30m_g74'+'/defs')
+    os.chdir(od+'/Run'+str(i)+'/'+sys.argv[4]+'/defs')
     
     #%% Zone
     #Edit the zone file with the variables generated
