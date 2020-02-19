@@ -5,7 +5,7 @@ library(survival)
 library(pracma)
 
 modelEstimation = function (eList, windowY = 7, windowQ = 2, windowS = 0.5, minNumObs = 100, 
-          minNumUncen = 50, edgeAdjust = TRUE, verbose = TRUE, run.parallel = FALSE, numTsteps=16, numQsteps=14) 
+          minNumUncen = 50, edgeAdjust = TRUE, verbose = TRUE, run.parallel = FALSE, numTsteps=16, numQsteps=14, QuadLogQ = FALSE) 
 {
   if (!is.egret(eList)) {
     stop("Please check eList argument")
@@ -19,13 +19,13 @@ modelEstimation = function (eList, windowY = 7, windowQ = 2, windowS = 0.5, minN
   Sample1 <- estCrossVal(eList$Daily$DecYear[1], eList$Daily$DecYear[length(eList$Daily$DecYear)], 
                          eList$Sample, windowY = windowY, windowQ = windowQ, 
                          windowS = windowS, minNumObs = minNumObs, minNumUncen = minNumUncen, 
-                         edgeAdjust = edgeAdjust, verbose = verbose)
+                         edgeAdjust = edgeAdjust, verbose = verbose, QuadLogQ = QuadLogQ)
   eList$Sample <- Sample1
   if (verbose) 
     cat("\nNext step running  estSurfaces with survival regression:\n")
   surfaces1 <- estSurfaces(eList, windowY = windowY, windowQ = windowQ, 
                            windowS = windowS, minNumObs = minNumObs, minNumUncen = minNumUncen, 
-                           edgeAdjust = edgeAdjust, verbose = verbose, run.parallel = run.parallel, numTsteps=numTsteps, numQsteps=numQsteps)
+                           edgeAdjust = edgeAdjust, verbose = verbose, run.parallel = run.parallel, numTsteps=numTsteps, numQsteps=numQsteps, QuadLogQ = QuadLogQ)
   eList$surfaces <- surfaces1
   Daily1 <- estDailyFromSurfaces(eList)
   eList$Daily <- Daily1
@@ -36,7 +36,7 @@ modelEstimation = function (eList, windowY = 7, windowQ = 2, windowS = 0.5, minN
 estSurfaces = function (eList, surfaceStart = NA, surfaceEnd = NA, localSample = NA, 
           windowY = 7, windowQ = 2, windowS = 0.5, minNumObs = 100, 
           minNumUncen = 50, edgeAdjust = TRUE, verbose = TRUE, interactive = NULL, 
-          run.parallel = FALSE, numTsteps=16, numQsteps=14) 
+          run.parallel = FALSE, numTsteps=16, numQsteps=14, QuadLogQ = FALSE) 
 {
   if (!is.null(interactive)) {
     warning("The argument 'interactive' is deprecated. Please use 'verbose' instead")
@@ -76,8 +76,12 @@ estSurfaces = function (eList, surfaceStart = NA, surfaceEnd = NA, localSample =
   #The function that returns values is runSurvReg, but computations are in run_WRTDS
   resultSurvReg <- runSurvReg(estPtYear = estPtYear, estPtLQ = estPtLogQ, DecLow = DecLow, 
                               DecHigh = DecHigh, Sample = localSample, windowY = windowY, windowQ = windowQ, windowS = windowS, minNumObs = minNumObs, 
-                              minNumUncen = minNumUncen, edgeAdjust = edgeAdjust, verbose = verbose, run.parallel = run.parallel)
-  surfaces <- array(0, dim = c(numQsteps, nVectorYear, 8))
+                              minNumUncen = minNumUncen, edgeAdjust = edgeAdjust, verbose = verbose, run.parallel = run.parallel, QuadLogQ = QuadLogQ)
+  if (QuadLogQ){
+    surfaces <- array(0, dim = c(numQsteps, nVectorYear, 9))
+  }else{
+    surfaces <- array(0, dim = c(numQsteps, nVectorYear, 8))
+  }
   for (iQ in 1:numQsteps) {
     for (iY in 1:nVectorYear) {
       k <- (iY - 1) * numQsteps + iQ
@@ -113,7 +117,8 @@ surfaceIndex = function (Daily, numTsteps, numQsteps)
 
 runSurvReg = function (estPtYear, estPtLQ, DecLow, DecHigh, Sample, windowY = 7, 
           windowQ = 2, windowS = 0.5, minNumObs = 100, minNumUncen = 50, 
-          verbose = TRUE, interactive = NULL, edgeAdjust = TRUE, run.parallel = FALSE) 
+          verbose = TRUE, interactive = NULL, edgeAdjust = TRUE, run.parallel = FALSE,
+          QuadLogQ = FALSE) 
 {
   if (!is.null(interactive)) {
     warning("The argument 'interactive' is deprecated. Please use 'verbose' instead")
@@ -143,12 +148,16 @@ runSurvReg = function (estPtYear, estPtLQ, DecLow, DecHigh, Sample, windowY = 7,
                                                                        estLQ = estPtLQ[n], localSample = localSample, 
                                                                        DecLow = DecLow, DecHigh = DecHigh, minNumObs = minNumObs, 
                                                                        minNumUncen = minNumUncen, windowY = windowY, 
-                                                                       windowQ = windowQ, windowS = windowS, edgeAdjust = edgeAdjust)
+                                                                       windowQ = windowQ, windowS = windowS, edgeAdjust = edgeAdjust, QuadLogQ = QuadLogQ)
                                           }
     warningFlag <- sum(sapply(wrtds_return_list, function(x) x[["warningFlag"]]))
     resultSurvReg <- t(sapply(wrtds_return_list, function(x) x[["survReg"]]))
   }else {
-    resultSurvReg <- array(0, c(numEstPt, 8))
+    if (QuadLogQ){
+      resultSurvReg <- array(0, c(numEstPt, 9))
+    }else{
+      resultSurvReg <- array(0, c(numEstPt, 8))
+    }
     if (verbose) 
       cat("Survival regression (% complete):\n")
     for (i in 1:numEstPt) {
@@ -158,7 +167,7 @@ runSurvReg = function (estPtYear, estPtLQ, DecLow, DecHigh, Sample, windowY = 7,
                                 localSample = localSample, DecLow = DecLow, 
                                 DecHigh = DecHigh, minNumObs = minNumObs, minNumUncen = minNumUncen, 
                                 windowY = windowY, windowQ = windowQ, windowS = windowS, 
-                                edgeAdjust = edgeAdjust)
+                                edgeAdjust = edgeAdjust, QuadLogQ = QuadLogQ)
       if (i %in% printUpdate & verbose) {
         cat(floor(i * 100/numEstPt), "\t")
         if (floor(i * 100/numEstPt) %in% endOfLine) 
@@ -179,14 +188,19 @@ runSurvReg = function (estPtYear, estPtLQ, DecLow, DecHigh, Sample, windowY = 7,
 }
 
 run_WRTDS = function (estY, estLQ, localSample, DecLow, DecHigh, minNumObs, 
-          minNumUncen, windowY, windowQ, windowS, edgeAdjust) 
+                      minNumUncen, windowY, windowQ, windowS, edgeAdjust,
+                      QuadLogQ = FALSE) 
 {
   tempWindowY <- windowY
   tempWindowQ <- windowQ
   tempWindowS <- windowS
   distLow <- estY - DecLow
   distHigh <- DecHigh - estY
-  survReg <- rep(NA,8)
+  if (QuadLogQ){
+    survReg <- rep(NA,9)
+  }else{
+    survReg <- rep(NA,8)
+  }
   warningFlag <- 0
   if (all(is.na(c(distLow, distHigh)))) {
     return(list(survReg = survReg, warningFlag = warningFlag))
@@ -230,9 +244,15 @@ run_WRTDS = function (estY, estLQ, localSample, DecLow, DecHigh, minNumObs,
   weight <- weight/aveWeight
   Sam <- data.frame(Sam)
   x <- tryCatch({
-    survModel <- survival::survreg(survival::Surv(log(ConcLow), 
-                                                  log(ConcHigh), type = "interval2") ~ DecYear + LogQ + 
-                                     SinDY + CosDY, data = Sam, weights = weight, dist = "gaus")
+    if (QuadLogQ){
+      survModel <- survival::survreg(survival::Surv(log(ConcLow), 
+                                                    log(ConcHigh), type = "interval2") ~ DecYear + LogQ +
+                                     SinDY + CosDY + I(LogQ^2), data = Sam, weights = weight, dist = "gaus")
+    }else{
+      survModel <- survival::survreg(survival::Surv(log(ConcLow), 
+                                                    log(ConcHigh), type = "interval2") ~ DecYear + LogQ + 
+                                       SinDY + CosDY, data = Sam, weights = weight, dist = "gaus")
+    }
   }, warning = function(w) {
     return(NA)
   }, error = function(e) {
@@ -249,7 +269,7 @@ run_WRTDS = function (estY, estLQ, localSample, DecLow, DecHigh, minNumObs,
     survReg[1] <- yHat
     survReg[2] <- SE
     survReg[3] <- bias * exp(yHat)
-    survReg[c(4,5,6,7,8)] <- as.numeric(survModel$coefficients)
+    survReg[seq(4,length(survReg),1)] <- as.numeric(survModel$coefficients)
   }
   if (all(is.na(x))) {
     warningFlag <- 1
@@ -451,8 +471,52 @@ plotContours = function (eList, yearStart, yearEnd, qBottom = NA, qTop = NA,
 }
 
 
+estCrossVal = function (DecLow, DecHigh, Sample, windowY = 7, windowQ = 2, 
+          windowS = 0.5, minNumObs = 100, minNumUncen = 50, edgeAdjust = TRUE, 
+          verbose = TRUE, QuadLogQ = FALSE) 
+{
+  localSample <- Sample
+  originalColumns <- names(localSample)
+  numObs <- nrow(localSample)
+  yHat <- rep(0, numObs)
+  SE <- rep(0, numObs)
+  ConcHat <- rep(0, numObs)
+  iCounter <- seq(1, numObs)
+  if (verbose) 
+    cat("\n estCrossVal % complete:\n")
+  colToKeep <- c("ConcLow", "ConcHigh", "Uncen", "DecYear", 
+                 "SinDY", "CosDY", "LogQ")
+  SampleCrossV <- localSample[, which(originalColumns %in% 
+                                        colToKeep)]
+  SampleCV <- data.frame(SampleCrossV, iCounter, yHat, SE, 
+                         ConcHat)
+  printUpdate <- floor(seq(1, numObs, numObs/100))
+  endOfLine <- seq(10, 100, 10)
+  for (i in 1:numObs) {
+    if (i %in% printUpdate & verbose) {
+      cat(floor(i * 100/numObs), "\t")
+      if (floor(i * 100/numObs) %in% endOfLine) 
+        cat("\n")
+    }
+    SampleMinusOne <- SampleCV[SampleCV$iCounter != i, ]
+    result <- runSurvReg(estPtYear = SampleCrossV$DecYear[i], estPtLQ = SampleCrossV$LogQ[i], 
+                         DecLow = DecLow, DecHigh = DecHigh, Sample = SampleMinusOne, windowY = windowY, windowQ = windowQ, 
+                         windowS = windowS, minNumObs = minNumObs, minNumUncen = minNumUncen, edgeAdjust = edgeAdjust, 
+                         verbose = FALSE, run.parallel = FALSE, QuadLogQ = QuadLogQ)
+    yHat[i] <- result[1]
+    SE[i] <- result[2]
+    ConcHat[i] <- result[3]
+  }
+  localSample$yHat <- yHat
+  localSample$SE <- SE
+  localSample$ConcHat <- ConcHat
+  SampleCrossV <- localSample
+  return(SampleCrossV)
+}
+
+
 #Function to predict TN from the provided date and flow by interpolating the model parameters
-predictWRTDS = function(Date, Flow, rowt, colt, TabInt, TabYear, TabLogQ, TabSinYear, TabCosYear, TabLogErr){
+predictWRTDS = function(Date, Flow, rowt, colt, TabInt, TabYear, TabLogQ, TabSinYear, TabCosYear, TabLogErr, TabLogQ2 = NULL){
   #There are some hillslopes with 0 flows to 6 decimal places. Report 0 concentration for those flows
   if (Flow == 0){
     preds = rep(0,3)
@@ -464,7 +528,7 @@ predictWRTDS = function(Date, Flow, rowt, colt, TabInt, TabYear, TabLogQ, TabSin
     
     #Flow is expected in real space units in cfs
     #Convert to log space in cms units
-    LogFlow = log(Flow*12^3*2.54^3/100^3)
+    LogFlow = log(Flow*.3048^3)
     
     #Calculate the sin and cos of the year
     SinDY = sin(2*pi*DecYear)
@@ -493,11 +557,20 @@ predictWRTDS = function(Date, Flow, rowt, colt, TabInt, TabYear, TabLogQ, TabSin
     }
     
     #Get the 5th, median, and 95th percentiles in log space
-    predMed = (interp2(xp = PDecYear, yp = PLogFlow, method = 'linear', Z = TabInt, y = rowt, x = colt) + 
-                 interp2(xp = PDecYear, yp = PLogFlow, method = 'linear', Z = TabYear, y = rowt, x = colt)*DecYear +
-                 interp2(xp = PDecYear, yp = PLogFlow, method = 'linear', Z = TabLogQ, y = rowt, x = colt)*LogFlow +
-                 interp2(xp = PDecYear, yp = PLogFlow, method = 'linear', Z = TabSinYear, y = rowt, x = colt)*SinDY +
-                 interp2(xp = PDecYear, yp = PLogFlow, method = 'linear', Z = TabCosYear, y = rowt, x = colt)*CosDY)
+    if (is.null(TabLogQ2)){
+      predMed = (interp2(xp = PDecYear, yp = PLogFlow, method = 'linear', Z = TabInt, y = rowt, x = colt) + 
+                   interp2(xp = PDecYear, yp = PLogFlow, method = 'linear', Z = TabYear, y = rowt, x = colt)*DecYear +
+                   interp2(xp = PDecYear, yp = PLogFlow, method = 'linear', Z = TabLogQ, y = rowt, x = colt)*LogFlow +
+                   interp2(xp = PDecYear, yp = PLogFlow, method = 'linear', Z = TabSinYear, y = rowt, x = colt)*SinDY +
+                   interp2(xp = PDecYear, yp = PLogFlow, method = 'linear', Z = TabCosYear, y = rowt, x = colt)*CosDY)
+    }else{
+      predMed = (interp2(xp = PDecYear, yp = PLogFlow, method = 'linear', Z = TabInt, y = rowt, x = colt) + 
+                   interp2(xp = PDecYear, yp = PLogFlow, method = 'linear', Z = TabYear, y = rowt, x = colt)*DecYear +
+                   interp2(xp = PDecYear, yp = PLogFlow, method = 'linear', Z = TabLogQ, y = rowt, x = colt)*LogFlow +
+                   interp2(xp = PDecYear, yp = PLogFlow, method = 'linear', Z = TabSinYear, y = rowt, x = colt)*SinDY +
+                   interp2(xp = PDecYear, yp = PLogFlow, method = 'linear', Z = TabCosYear, y = rowt, x = colt)*CosDY +
+                   interp2(xp = PDecYear, yp = PLogFlow, method = 'linear', Z = TabLogQ2, y = rowt, x = colt)*LogFlow^2)
+    }
     e = interp2(xp = PDecYear, yp = PLogFlow, method = 'linear', Z = TabLogErr, y = rowt, x = colt)
     pred05 = predMed + e*-2
     
@@ -540,7 +613,7 @@ FillTableNAs = function(DateInd, #Date is the column index
   return(NewTableVals)
 }
 
-#runSurvReg parameters
+#runSurvReg parameters----
 # estPtYear = estPtYear 
 # estPtLQ = estPtLogQ 
 # DecLow = DecLow 
@@ -555,7 +628,7 @@ FillTableNAs = function(DateInd, #Date is the column index
 # verbose = verbose 
 # run.parallel = FALSE
 # 
-# #run_WRTDS parameters
+# #run_WRTDS parameters----
 # estY = estPtYear[i] 
 # estLQ = estPtLQ[i] 
 # localSample = localSample 
@@ -568,7 +641,7 @@ FillTableNAs = function(DateInd, #Date is the column index
 # windowS = windowS 
 # edgeAdjust = edgeAdjust
 # 
-# #survreg function - returns scale in log space and then converts to real space.
+# #survreg function - returns scale in log space and then converts to real space.----
 # function (formula, data, weights, subset, na.action, dist = "weibull", 
 #           init = NULL, scale = 0, control, parms = NULL, model = FALSE, 
 #           x = FALSE, y = TRUE, robust = FALSE, score = FALSE, ...) 
