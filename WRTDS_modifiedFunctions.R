@@ -270,6 +270,7 @@ run_WRTDS = function (estY, estLQ, localSample, DecLow, DecHigh, minNumObs,
     survReg[2] <- SE
     survReg[3] <- bias * exp(yHat)
     survReg[seq(4,length(survReg),1)] <- as.numeric(survModel$coefficients)
+    #Fixme to add p-values to the output as well: as.numeric(summary(survModel)$table[c(-1,-length(as.numeric(summary(survModel)$table))),4])
   }
   if (all(is.na(x))) {
     warningFlag <- 1
@@ -303,7 +304,7 @@ plotContours = function (eList, yearStart, yearEnd, qBottom = NA, qTop = NA,
     par(mgp = c(2.5, 0.5, 0))
   }
   surfaceName <- c("log of Concentration", "Standard Error of log(C)", 
-                   "Concentration")
+                   "Concentration", "Intercept",  "Day of Year", "Log Flow", "Seasonal: Sin", "Seasonal: Cos", "(Log Flow)^2")
   j <- whatSurface
   surf <- localsurfaces
   surfaceMin <- min(surf[, , j])
