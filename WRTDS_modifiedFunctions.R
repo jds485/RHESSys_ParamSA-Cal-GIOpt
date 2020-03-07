@@ -517,8 +517,19 @@ estCrossVal = function (DecLow, DecHigh, Sample, windowY = 7, windowQ = 2,
 
 
 #Function to predict TN from the provided date and flow by interpolating the model parameters
-predictWRTDS = function(Date, Flow, rowt, colt, TabInt, TabYear, TabLogQ, TabSinYear, TabCosYear, TabLogErr, TabLogQ2 = NULL){
-  #There are some hillslopes with 0 flows to 6 decimal places. Report 0 concentration for those flows
+predictWRTDS = function(Date, #Date is expected to be in year-mo-dy format as a character
+                        Flow, #Flow is expected in real space units in cfs
+                        rowt, #rownames of the surfaces from WRTDS, in numeric format
+                        colt, #colnames of the surfaces from WRTDS, in numeric format
+                        TabInt, #integer surface from WRTDS
+                        TabYear, #year surface from WRTDS 
+                        TabLogQ, #log flow surface from WRTDS
+                        TabSinYear, #sin of the year surface from WRTDS
+                        TabCosYear, #cos of the year surface from WRTDS
+                        TabLogErr, #log error surface from WRTDS
+                        TabLogQ2 = NULL) #(log flow)^2 surface from WRTDS
+  {
+  #Report 0 concentration for those flows that are 0
   if (Flow == 0){
     preds = rep(0,3)
     return(preds)
@@ -557,7 +568,7 @@ predictWRTDS = function(Date, Flow, rowt, colt, TabInt, TabYear, TabLogQ, TabSin
       PDecYear = DecYear
     }
     
-    #Get the 5th, median, and 95th percentiles in log space
+    #Get the approximate 5th, median, and 95th percentiles in log space
     if (is.null(TabLogQ2)){
       predMed = (interp2(xp = PDecYear, yp = PLogFlow, method = 'linear', Z = TabInt, y = rowt, x = colt) + 
                    interp2(xp = PDecYear, yp = PLogFlow, method = 'linear', Z = TabYear, y = rowt, x = colt)*DecYear +
