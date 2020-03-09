@@ -189,6 +189,8 @@ grass74 "$LOCATION"/$MAPSET --exec Rscript "$SSURGOLIBRARIES"/ssurgo_soiltexture
 
 ###################################################################################
 ## 1.9 Extract Land Use and Land Cover Information
+#For adding GI, will want to implement them at the 1m scale, and then have them computed as part of the fraction of patches in later steps in this script.
+
 downloadedLULCfile="$PROJDIR"/raw_data/'BARN_1mLC_UTM.tif'
 grass74 "$LOCATION"/$MAPSET --exec r.in.gdal -e --overwrite input="$downloadedLULCfile" output=lulcRAW location=lulcRAW
 LOCATIONLULC="$GISDBASE"/lulcRAW
