@@ -419,7 +419,7 @@ MakeFigs = FALSE
 for (i in 1:length(fs)){
   #Make figures of the basin output----
   od = getwd()
-  #Fixme: ? Could read inn worldfile and plot all of the worldfile info for each run, or save info and compare for each run.
+  #Fixme: ? Could read in worldfile and plot all of the worldfile info for each run, or save info and compare for each run.
   
   setwd(paste0(od, '/', fs[i], '/output'))
   
