@@ -192,8 +192,12 @@ grass74 "$LOCATION"/$MAPSET --exec Rscript "$SSURGOLIBRARIES"/ssurgo_soiltexture
 ###################################################################################
 ## 1.9 Extract Land Use and Land Cover Information
 #For adding GI, will want to implement them at the 1m scale, and then have them computed as part of the fraction of patches in later steps in this script.
+#New land use land cover IDs needed to implement the GI
 
-downloadedLULCfile="$PROJDIR"/raw_data/'BARN_1mLC_UTM.tif'
+#Delete LULC files if they exist
+rm -r "$GISDBASE"/lulcRAW
+
+downloadedLULCfile="$PROJDIR"/'raw_data'/'BARN_1mLC_UTM.tif'
 grass74 "$LOCATION"/$MAPSET --exec r.in.gdal -e --overwrite input="$downloadedLULCfile" output=lulcRAW location=lulcRAW
 LOCATIONLULC="$GISDBASE"/lulcRAW
 grass74 "$LOCATION"/$MAPSET --exec r.to.vect input=patch output=patch type=area
@@ -202,6 +206,7 @@ grass74 "$LOCATIONLULC"/$MAPSET --exec v.to.rast input=patch$RESOLUTION'm' outpu
 
 grass74 "$LOCATIONLULC"/$MAPSET --exec Rscript "$GITHUBLIBRARIES"/aggregate_lulcFrac.R patch$RESOLUTION'm' lulcRAW "$PROJDIR"/"$RHESSysNAME"/lulcFrac$RESOLUTION'm.csv'
 
+#Assuming that a modified lulcFrac file has been made, this is from where the script would need to be re-run.
 grass74 "$LOCATION"/$MAPSET --exec Rscript "$GITHUBLIBRARIES"/aggregate_lulcFrac_write2GIS.R patch "$PROJDIR"/"$RHESSysNAME"/lulcFrac$RESOLUTION'm.csv' "$PROJDIR"/GIS2RHESSys/lulc_1m_Chesapeake_Conservancy.csv
 
 #Fixme: Why is this folder deleted? JDS commenting out to report intermediate file.
@@ -209,6 +214,8 @@ grass74 "$LOCATION"/$MAPSET --exec Rscript "$GITHUBLIBRARIES"/aggregate_lulcFrac
 
 ###################################################################################
 ## 1.10 Assign IDs to land uses
+#Will need to add GI IDs here
+
 #Note: vegetation ID for grass of 3
 grass74 "$LOCATION"/$MAPSET --exec r.mapcalc --overwrite expression="grass1StratumID = if(lawnFrac>0,3,null())"
 grass74 "$LOCATION"/$MAPSET --exec r.mapcalc --overwrite expression="grass1FFrac = if(lawnFrac>0,1.0,null())"
@@ -216,10 +223,16 @@ grass74 "$LOCATION"/$MAPSET --exec r.mapcalc --overwrite expression="grass1FFrac
 grass74 "$LOCATION"/$MAPSET --exec r.mapcalc --overwrite expression="grass1LAI = if(lawnFrac>0,1.5,null())"
 
 #Note: vegetation ID for trees of 102
-grass74 "$LOCATION"/$MAPSET --exec r.mapcalc --overwrite expression="tree1StratumID = if(forestFrac>0,102,null())"
-grass74 "$LOCATION"/$MAPSET --exec r.mapcalc --overwrite expression="tree1FFrac = if(forestFrac>0,1.0,null())"
+grass74 "$LOCATION"/$MAPSET --exec r.mapcalc --overwrite expression="tree1StratumID = if(forestBaseFrac>0,102,null())"
+grass74 "$LOCATION"/$MAPSET --exec r.mapcalc --overwrite expression="tree1FFrac = if(forestBaseFrac>0,1.0,null())"
 #Note: default LAI for grass of 5.5 - maximum in a growth season
-grass74 "$LOCATION"/$MAPSET --exec r.mapcalc --overwrite expression="tree1LAI = if(forestFrac>0,5.5,null())"
+grass74 "$LOCATION"/$MAPSET --exec r.mapcalc --overwrite expression="tree1LAI = if(forestBaseFrac>0,5.5,null())"
+
+#Note: GI #1 - Evergreen tree with fixed parameters, vegetation ID of 414
+grass74 "$LOCATION"/$MAPSET --exec r.mapcalc --overwrite expression="tree2StratumID = if(forestGIEvFrac>0,414,null())"
+grass74 "$LOCATION"/$MAPSET --exec r.mapcalc --overwrite expression="tree2FFrac = if(forestGIEvFrac>0,1.0,null())"
+#Note: default LAI for grass of 5.5 - maximum in a growth season
+grass74 "$LOCATION"/$MAPSET --exec r.mapcalc --overwrite expression="tree2LAI = if(forestGIEvFrac>0,5.5,null())"
 
 ###################################################################################
 ## 1.11 Add road information
@@ -308,9 +321,14 @@ echo drivewayMAP drivewayFrac >> "$templateFile"
 echo pavedRoadFracMAP pavedroadFrac >> "$templateFile"
 # ... forest vegetations
 echo forestFracMAP forestFrac >> "$templateFile"
+echo forestBaseFracMAP forestBaseFrac >> "$templateFile"
+echo forestGIEvFracMAP forestGIEvFrac >> "$templateFile"
 echo tree1StratumID tree1StratumID >> "$templateFile"
 echo tree1FFrac tree1FFrac >> "$templateFile"
 echo tree1LAI tree1LAI >> "$templateFile"
+echo tree2StratumID tree2StratumID >> "$templateFile"
+echo tree2FFrac tree2FFrac >> "$templateFile"
+echo tree2LAI tree2LAI >> "$templateFile"
 # ... shrub vegetation
 echo shrubFracMAP shrubFrac >> "$templateFile"
 #echo shrub1StratumID shrub1StratumID >> "$templateFile"
