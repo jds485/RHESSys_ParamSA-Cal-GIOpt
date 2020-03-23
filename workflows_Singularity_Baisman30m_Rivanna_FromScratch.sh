@@ -125,9 +125,11 @@ grass74 "$LOCATION"/$MAPSET --exec r.mapcalc --overwrite expression="colmap = co
 grass74 "$LOCATION"/$MAPSET --exec r.slope.aspect --overwrite elevation=dem slope=slope_ aspect=aspect_
 grass74 "$LOCATION"/$MAPSET --exec r.horizon --overwrite -d elevation=dem direction=180 output="west" distance='1.0'
 grass74 "$LOCATION"/$MAPSET --exec r.horizon --overwrite -d elevation=dem direction=0 output="east" distance='1.0'
-
+# Accumulation and drainage are names of output rasters. tci is topo index raster name
 grass74 "$LOCATION"/$MAPSET --exec r.watershed --overwrite elevation=dem accumulation=uaa drainage=drain tci=wetness_index
+#Hillslope, streamflow, and basin raster maps
 grass74 "$LOCATION"/$MAPSET --exec r.watershed --overwrite elevation=dem threshold=$inputThreshold basin=sub_ stream=str_ half_basin=hill_
+#Outlet is the watershed outlet. This grabs the grid cell corresponding to it.
 eval $(grass74 "$LOCATION"/$MAPSET --exec r.what --quiet map=sub_ points=outlet separator=space | awk '{print "outletSUB=" $3}')
 grass74 "$LOCATION"/$MAPSET --exec r.mapcalc --overwrite expression="tmp = if(sub_== $outletSUB && str_>0, uaa, null())"
 
