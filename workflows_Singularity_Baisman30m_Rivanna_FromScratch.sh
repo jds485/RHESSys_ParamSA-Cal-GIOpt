@@ -5,32 +5,30 @@
 #
 # STEP 2: create a working directory in /scratch/<user>/ space and upload the "raw_data" to it
 # STEP 3: fill in the user information below and upload this script to Rivanna
-# STEP 4: in the singularity image, run command: sh workflows_Baisman_30m_rivanna_fromScratch.sh
-# STEP 5: wait and hope not to see errors; otherwise contact Laurence.
-# STEP 6: after this fromScratch setup, you can do the Modification script.
+# STEP 4: in the singularity image, run command: sh workflows_Singularity_Baisman30m_Rivanna_FromScratch.sh
+# STEP 5: wait and check for errors.
+# STEP 6: after this fromScratch setup, you can run RHESSys models using a different shell script.
 
 ##################################################################################
 # 1.1 Set directory locations
-#Should load this library to computer and not download every run. If you want to use the library from GitHub, use this commented command
+#Should download these libraries to computer and not download every run. If you want to use the library from GitHub, use the commented-out command.
 #GITHUBLIBRARIES="https://raw.githubusercontent.com/laurencelin/GIS2RHESSys/master/libraries"
 GITHUBLIBRARIES='/scratch/js4yd/MorrisSA/GIS2RHESSys/libraries'
-
-#Should do this instead of using web to download below.
 SSURGOLIBRARIES='/scratch/js4yd/MorrisSA/ssurgo_extraction'
 
 ##################################################################################
 # 1.2 Set Desired File Names
 # please fill in the <user>, <foldername>, <rhessysfoldername> below
-PROJDIR='/scratch/js4yd/MorrisSA' # full Linux path to the project location; Folders will be created in this directory, and this directory should have the raw_data in it.
+# full Linux path to the project location. Folders will be created in this directory, and this directory should have the raw_data in it.
+PROJDIR='/scratch/js4yd/MorrisSA'
 
 #Set the desired projection system (or is this the projection system that the input data are in?)
 EPSGCODE='EPSG:26918'
 
-#spatial resolution (meters) of the grids
+#Desired spatial resolution (meters) of the raster grids
 RESOLUTION=30 
 
-#Fixme: this may need to be duplicated for each of the models, instead of using just one.
-#May just require that LOCATION below is what is referenced for each grass dataset, and therefore not need to be looped.
+#Location of GIS data to be generated
 GISDBASE="$PROJDIR"/grass_dataset
 
 #Set the name of the directory in folder for use in GRASS
@@ -41,14 +39,12 @@ MAPSET=PERMANENT
 mkdir "$GISDBASE"
 #mkdir "$PROJDIR"/raw_data ##<<--------------- upload by scp -r command to the "$PROJDIR"
 
-### Set variables that are held constant in each loop iteration:
-#Section 1.4
+#Set gauge location
 gageLat='39.47947' # catchment outlet WGS84 Lat (decimal degree)
 gageLong='-76.67803' # catchment outlet WGS84 Long (decimal degree; includes the negative sign if applied)
 
-#Section 1.5
 #Set expected area of watershed, and stream extent thresholds
-expectedDrainageArea=3807283 # meter squre
+expectedDrainageArea=3807283 # meter sq.
 expectedThresholdModelStr=350000 # meter sq. # note to include Pond Branch as a channel; 390*900=351000
 expectedThresholdStrExt=100000 # meter sq.
 GRASS_thres=$(($expectedThresholdModelStr/$RESOLUTION/$RESOLUTION)) # grid cell for stream network and hillslope configuration
@@ -77,7 +73,6 @@ grass74 -c $EPSGCODE -e "$LOCATION"
 
 ##################################################################################
 # 1.3 Gather the raw data DEM, and resample to defined grid resolution.
-#Fixme: This would not be needed in the loop. DEM gets created once. Can check if file exists, and execute if it doesn't
 downloadedDEMfile="$PROJDIR"/raw_data/BR_DEM1m_CBP_filled.tif
 #Import raster DEM file using GDAL
 grass74 "$LOCATION"/$MAPSET --exec r.in.gdal -e --overwrite input="$downloadedDEMfile" output=demRAW location=elevationRAW
@@ -90,12 +85,11 @@ grass74 "$LOCATIONDEM"/$MAPSET --exec r.resamp.stats -w input=demRAW output=dem$
 #Write the new resample DEM to a GeoTIFF file
 grass74 "$LOCATIONDEM"/$MAPSET --exec r.out.gdal --overwrite input=dem$RESOLUTION'm' output="$PROJDIR"/raw_data/dem$RESOLUTION'm.tif' format=GTiff
 
-#Fixme: This part would be included in the loop over replicates
 ### ... import the (rescaled) elevation data into ""$LOCATION"/$MAPSET"
 grass74 "$LOCATION"/$MAPSET --exec r.in.gdal -o -e --overwrite input="$PROJDIR"/raw_data/dem$RESOLUTION'm.tif' output=dem
 grass74 "$LOCATION"/$MAPSET --exec g.region raster=dem
 
-#Fixme: Why is this folder deleted? JDS commenting out to report intermediate file.
+#Commenting out to report intermediate files.
 #rm -rf "$LOCATIONDEM"
 
 ##################################################################################
@@ -107,7 +101,7 @@ echo $xyCoord | grass74 "$LOCATION"/$MAPSET --exec v.in.ascii in=- out=outlet x=
 ##################################################################################
 # 1.5 Delineate Watershed with Grass and R scripts
 # Delineate watershed and subbasins using the grass shell scripts and r script.
-#Run from shell script: Doesn't work for JDS
+#Running from shell script doesn't work for JDS
 #grass74 "$LOCATION"/$MAPSET --exec bash "$GITHUBLIBRARIES"/grass_delineation_1.sh $GRASS_thres $GRASS_drainarea_lowerbound $GRASS_drainarea_upperbound
 
 #Contents of shell script
@@ -147,7 +141,7 @@ grass74 "$LOCATION"/$MAPSET -text --exec Rscript "$GITHUBLIBRARIES"/basin_determ
 
 grass74 "$LOCATION"/$MAPSET --exec r.watershed elevation=dem threshold=$GRASS_thresII stream=strExt --overwrite # full stream extension;
 
-#Run from shell script: Doesn't work for JDS
+#Running from shell script doesn't work for JDS
 #grass74 "$LOCATION"/$MAPSET --exec bash "$GITHUBLIBRARIES"/grass_delineation_2.sh
 
 #Contents of shell script
@@ -186,16 +180,13 @@ grass74 "$LOCATION"/$MAPSET --exec v.db.select --overwrite map=ssurgo separator=
 
 grass74 "$LOCATION"/$MAPSET --exec Rscript "$SSURGOLIBRARIES"/ssurgo_extraction.R "$downloadedSSURGOdirectoryPATH"
 grass74 "$LOCATION"/$MAPSET --exec Rscript "$SSURGOLIBRARIES"/ssurgo_soiltexture2gis.R "$PROJDIR"/"$RHESSysNAME"/soil_cat_mukey.csv "$downloadedSSURGOdirectoryPATH"/soil_mukey_texture.csv
-#Fixme: Why is this folder deleted? JDS commenting out to report intermediate file.
+
+#Commenting out to report intermediate files.
 #rm -rf "$LOCATIONSOIL"
 
 ###################################################################################
 ## 1.9 Extract Land Use and Land Cover Information
-#For adding GI, will want to implement them at the 1m scale, and then have them computed as part of the fraction of patches in later steps in this script.
-#New land use land cover IDs needed to implement the GI
-
-#Delete LULC files if they exist
-rm -r "$GISDBASE"/lulcRAW
+#Can add new land use land cover IDs needed to implement additional vegetation species
 
 downloadedLULCfile="$PROJDIR"/'raw_data'/'BARN_1mLC_UTM.tif'
 grass74 "$LOCATION"/$MAPSET --exec r.in.gdal -e --overwrite input="$downloadedLULCfile" output=lulcRAW location=lulcRAW
@@ -209,12 +200,12 @@ grass74 "$LOCATIONLULC"/$MAPSET --exec Rscript "$GITHUBLIBRARIES"/aggregate_lulc
 #Assuming that a modified lulcFrac file has been made, this is from where the script would need to be re-run.
 grass74 "$LOCATION"/$MAPSET --exec Rscript "$GITHUBLIBRARIES"/aggregate_lulcFrac_write2GIS.R patch "$PROJDIR"/"$RHESSysNAME"/lulcFrac$RESOLUTION'm.csv' "$PROJDIR"/GIS2RHESSys/lulc_1m_Chesapeake_Conservancy.csv
 
-#Fixme: Why is this folder deleted? JDS commenting out to report intermediate file.
+#Commenting out to report intermediate files.
 #rm -rf "$LOCATIONLULC"
 
 ###################################################################################
 ## 1.10 Assign IDs to land uses
-#Will need to add GI IDs here
+#Will need to add all vegetation IDs here
 
 #Note: vegetation ID for grass of 3
 grass74 "$LOCATION"/$MAPSET --exec r.mapcalc --overwrite expression="grass1StratumID = if(lawnFrac>0,3,null())"
@@ -225,13 +216,13 @@ grass74 "$LOCATION"/$MAPSET --exec r.mapcalc --overwrite expression="grass1LAI =
 #Note: vegetation ID for trees of 102
 grass74 "$LOCATION"/$MAPSET --exec r.mapcalc --overwrite expression="tree1StratumID = if(forestBaseFrac>0,102,null())"
 grass74 "$LOCATION"/$MAPSET --exec r.mapcalc --overwrite expression="tree1FFrac = if(forestBaseFrac>0,1.0,null())"
-#Note: default LAI for grass of 5.5 - maximum in a growth season
+#Note: default LAI for trees of 5.5 - maximum in a growth season
 grass74 "$LOCATION"/$MAPSET --exec r.mapcalc --overwrite expression="tree1LAI = if(forestBaseFrac>0,5.5,null())"
 
 #Note: GI #1 - Evergreen tree with fixed parameters, vegetation ID of 414
 grass74 "$LOCATION"/$MAPSET --exec r.mapcalc --overwrite expression="tree2StratumID = if(forestGIEvFrac>0,414,null())"
 grass74 "$LOCATION"/$MAPSET --exec r.mapcalc --overwrite expression="tree2FFrac = if(forestGIEvFrac>0,1.0,null())"
-#Note: default LAI for grass of 5.5 - maximum in a growth season
+#Note: default LAI for trees of 5.5 - maximum in a growth season
 grass74 "$LOCATION"/$MAPSET --exec r.mapcalc --overwrite expression="tree2LAI = if(forestGIEvFrac>0,5.5,null())"
 
 ###################################################################################
@@ -241,7 +232,8 @@ grass74 "$LOCATION"/$MAPSET --exec v.in.ogr --overwrite input="$downloadedROADfi
 LOCATIONROAD="$GISDBASE"/roadRAW
 grass74 "$LOCATION"/$MAPSET --exec v.proj --overwrite location=roadRAW mapset=$MAPSET input=roads output=roads
 grass74 "$LOCATION"/$MAPSET --exec v.to.rast --overwrite input=roads output=vector_roads use=cat
-#Fixme: Why is this folder deleted? JDS commenting out to report intermediate file.
+
+#Commenting out to report intermediate files.
 #rm -rf "$LOCATIONROAD"
 
 ###################################################################################
@@ -250,7 +242,7 @@ grass74 "$LOCATION"/$MAPSET --exec Rscript "$GITHUBLIBRARIES"/elevation_analysis
 grass74 "$LOCATION"/$MAPSET --exec r.mapcalc expression="riparian_hands = if( handsDEM < 5, 1, null())" --overwrite
 
 ###################################################################################
-## 1.13 Evaluate infrastructure: storm drains, sewer line locations (based on road locations), and compactness of soil (based on house locations)
+## 1.13 Evaluate infrastructure: storm drains, sewer line locations (based on road locations), and compactness of soil (based on roof locations)
 #### ... storm drinage along the paved roads
 grass74 "$LOCATION"/$MAPSET --exec r.mapcalc expression="roadDEM = if(pavedroadFrac>0,dem,null())"
 grass74 "$LOCATION"/$MAPSET --exec r.watershed -s --overwrite elevation=roadDEM drainage=roadDrain
@@ -258,12 +250,12 @@ grass74 "$LOCATION"/$MAPSET --exec r.mapcalc --overwrite expression="roadExit = 
 
 #### ... sewer drainage
 #### ... assume sewer lines go along major roads (imported from shapefile) and sewer lines drain a neigbourhood area
-#Assumes a buffer of 30 m? and several other assumptions for where sewers are located
+#Fixme: Assumes a buffer of 30 m? Should this be $RESOLUTION instead? Several other assumptions for where sewers are located
 grass74 "$LOCATION"/$MAPSET --exec r.buffer --overwrite input=vector_roads output=roadbuff distances=30
 grass74 "$LOCATION"/$MAPSET --exec r.mapcalc --overwrite expression="sewercover = if( (lawnFrac>0.1 || impFrac >0.1) && pavedroadFrac<0.3 && roadbuff>0, 1, null())"
 
 #### ... soil compactness
-#Assumes a buffer of 30 m?
+#Fixme: Assumes a buffer of 30 m? Should this be $RESOLUTION instead?
 grass74 "$LOCATION"/$MAPSET --exec r.mapcalc --overwrite expression="roof = if( (roofFrac > 0.1), 1, null())"
 grass74 "$LOCATION"/$MAPSET --exec r.buffer --overwrite input=roof output=roofBuff distances=30
 grass74 "$LOCATION"/$MAPSET --exec r.mapcalc --overwrite expression="naturalLand = if( (forestFrac>=1 || lawnFrac>=1)&& isnull(roofBuff), 1 , null())"
@@ -272,22 +264,22 @@ grass74 "$LOCATION"/$MAPSET --exec r.mapcalc --overwrite expression="compactedso
 #### ... additional surface drainage  (other than roof, driveway, parking, and paved roads), e.g., drainage hole in playground / garden
 grass74 "$LOCATION"/$MAPSET --exec r.mapcalc --overwrite expression="addsurfdrain = if( (forestFrac<1.0) && (roofBuff>0), 1 , null())"
 
-#### ... septic
-#### ... lawn area within 30 m of the house
+#### ... septic - randomly assign to one lawn cell around some roof locations
+#### ... lawn areas within 30 m of the house
 #grass74 "$LOCATION"/$MAPSET --exec r.mapcalc -s --overwrite expression="septic = if( (roofBuff==2) && (lawnFrac>=0) && (rand(0,100)>=60), 1 , null())"
 
 #Removed random septic here. Placing septic systems around all houses.
 grass74 "$LOCATION"/$MAPSET --exec r.mapcalc -s --overwrite expression="septic = if( (roofBuff==2) && (lawnFrac>=0), 1 , null())"
 
 ###################################################################################
-## 2.1 Specify output information for RHESSys input files that GIS2RHESSys outputs
+## 2.1 Specify information for RHESSys input files that GIS2RHESSys outputs
 templateFile="$PROJDIR"/"$RHESSysNAME"/g2w_template.txt
 
 # set paths for RHESSys input files
 # 1 = Yes, output this file; 0 = No, do not output this file
 echo outputWorldfile \""$PROJDIR"/"$RHESSysNAME"/worldfiles/worldfile.csv\" 1 > "$templateFile"
 echo outputWorldfileHDR \""$PROJDIR"/"$RHESSysNAME"/worldfiles/worldfile.hdr\" 1 >> "$templateFile"
-echo outputDefs \""$PROJDIR"/"$RHESSysNAME"/defs\" 0 >> "$templateFile"
+echo outputDefs \""$PROJDIR"/"$RHESSysNAME"/defs\" 1 >> "$templateFile"
 echo outputSurfFlow \""$PROJDIR"/"$RHESSysNAME"/flows/surfflow.txt\" 1 >> "$templateFile"
 echo outputSubFlow \""$PROJDIR"/"$RHESSysNAME"/flows/subflow.txt\" 1 >> "$templateFile"
 
@@ -295,7 +287,7 @@ echo outputSubFlow \""$PROJDIR"/"$RHESSysNAME"/flows/subflow.txt\" 1 >> "$templa
 echo stationID 101 >> "$templateFile"
 echo stationFile \""clim/Oregon.base"\" >> "$templateFile"
 
-# the following maps that must be provided with syntex:
+# the following maps that must be provided with syntax:
 # echo keyword <map> >> "$templateFile"
 echo basinMap basin >> "$templateFile"
 echo hillslopeMap hill >> "$templateFile"
