@@ -198,6 +198,8 @@ grass74 "$LOCATIONLULC"/$MAPSET --exec v.to.rast input=patch$RESOLUTION'm' outpu
 grass74 "$LOCATIONLULC"/$MAPSET --exec Rscript "$GITHUBLIBRARIES"/aggregate_lulcFrac.R patch$RESOLUTION'm' lulcRAW "$PROJDIR"/"$RHESSysNAME"/lulcFrac$RESOLUTION'm.csv'
 
 #Assuming that a modified lulcFrac file has been made, this is from where the script would need to be re-run.
+# delete old lulcRAW folder, delete old g2w_template, delete old flows folder contents, delete old worldfile
+# modify old lulcFrac30m.csv, and make sure the lulc Chesapeake file is updated for GI lulc codes
 grass74 "$LOCATION"/$MAPSET --exec Rscript "$GITHUBLIBRARIES"/aggregate_lulcFrac_write2GIS.R patch "$PROJDIR"/"$RHESSysNAME"/lulcFrac$RESOLUTION'm.csv' "$PROJDIR"/GIS2RHESSys/lulc_1m_Chesapeake_Conservancy.csv
 
 #Commenting out to report intermediate files.
@@ -352,5 +354,6 @@ echo additionalSurfaceDrainMAP addsurfdrain >> "$templateFile"
 #
 ##################################################################################
 # 2.2
+#Fixme? Add option to uptate/not update land use. Would need a way to save the old land use info and reset what comes out of this function.
 grass74 "$LOCATION"/$MAPSET --exec Rscript "$GITHUBLIBRARIES"/g2w_cf_RHESSysEC.R "$PROJDIR" default default default "$templateFile"
 Rscript "$GITHUBLIBRARIES"/LIB_RHESSys_writeTable2World.R NA "$PROJDIR"/"$RHESSysNAME"/worldfiles/worldfile.csv "$PROJDIR"/"$RHESSysNAME"/worldfiles/worldfile
