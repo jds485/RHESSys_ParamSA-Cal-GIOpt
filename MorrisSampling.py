@@ -22,15 +22,27 @@ import numpy as np
 import random as rd
 import string
 
+#sys.argv contains: 
+#0: unused - script call info
+#1: working directory
+#2: random seed
+#3: number of trajectories
+#4: round tolerance <= 10
+#5: problem file name
+
 #%% Set working directory
-os.chdir('/scratch/js4yd/MorrisSA/RHESSysRuns')
+#os.chdir('/scratch/js4yd/MorrisSA/RHESSysRuns')
+os.chdir(sys.argv[1])
 
 #Set the random seed for randomly generated values
-rd.seed(1349)
+#rd.seed(1349)
+rd.seed(int(sys.argv[2]))
 
 #%% Set Morris sampling parameters
 #number of sampling trajectories
-N = 40
+#N = 40
+N = int(sys.argv[3])
+
 #p to determine the grid levels for SALib 
 #num_levels = 100
 #Set rounding precision as number of decimal places. Using 10 for lack of a sigfig function in Py 2.7.x
@@ -39,13 +51,15 @@ N = 40
 #This can result in sums of variables not equal to exactly 1. Best to use <= 10 decimal places for now.
 #Also note that round() and pandas .round() give different results when placeholder 0s are needed.
 #Oddly, both do not add 0s. Rather, round() adds 0.0000000025, and .round adds 0.0000000099.
-roundTol = 10
+#roundTol = 10
+roundTol = int(sys.argv[4])
 
 #%% Load problem file for SALib sampling - NOTE - Morris in SALib is currently 
 #not generating sampling locations correctly. Using R to generate the model 
 #run locations instead.
 
-ProbFile = pd.read_csv('BaismanMorrisSamplingProblemFile_Full.csv')
+#ProbFile = pd.read_csv('BaismanMorrisSamplingProblemFile_Full.csv')
+ProbFile = pd.read_csv(sys.argv[5])
 
 #Check that the lower bounds are all less than the upper bounds
 if not all(ProbFile.iloc[:,2] < ProbFile.iloc[:,3]):
@@ -936,7 +950,7 @@ if sum(MorrisSample_df.loc[:,'s108_porosity_0'] > MorrisSample_df.loc[:,'s8_poro
 
 #%% Vegetation
 #%% K_absorptance + K_reflectance + K_transmittance = 1 - round check
-#The only venetation for SA that is changed is #102 - trees. Other two are 1 - values assigned randomly.
+#The only vegetation for SA that is changed is #102 - trees. Other two are 1 - values assigned randomly.
 #Fixme: For the calibration will need a different check because all vars could be adjusted.
 #Fixme: This loop is slow because it has to loop through the entire database once per unique soil class.
 #Could the i for loop be dropped and all soil classes done in the row iteration loop? 
@@ -2244,3 +2258,5 @@ MorrisSample_df.round(roundTol).to_csv('MorrisSamples_AfterProcessing.csv', inde
 #OrigMorrisSample_df = pd.read_csv('MorrisSamples_BeforeProcessing.csv')
 #Modified file
 #MorrisSample_df = pd.read_csv('MorrisSamples_AfterProcessing.csv')
+
+#Want to re-run all of the samples that were affected by this problem. Should not take long to do.
