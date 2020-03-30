@@ -65,6 +65,55 @@ ProbFile = pd.read_csv(sys.argv[5])
 if not all(ProbFile.iloc[:,2] < ProbFile.iloc[:,3]):
     sys.exit('PyERROR: For parameters, all lower bounds are not less than the upper bounds')
 
+#Check lower bounds for variables that are set in code
+if not (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == 's108_Ksat_0_v'].index[0],2] < ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == 's108_Ksat_0'].index[0],2]):
+    sys.exit('PyERROR: Lower bound of soil 108 vertical Ksat is not less than the lower bound of soil 108 Ksat. Either increase lower bound of Ksat or decrease lower bound of vertical Ksat.')
+
+if not (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == 's8_Ksat_0_v'].index[0],2] < ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == 's8_Ksat_0'].index[0],2]):
+    sys.exit('PyERROR: Lower bound of soil 8 vertical Ksat is not less than the lower bound of soil 8 Ksat. Either increase lower bound of Ksat or decrease lower bound of vertical Ksat.')
+
+if not (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == 's109_Ksat_0_v'].index[0],2] < ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == 's109_Ksat_0'].index[0],2]):
+    sys.exit('PyERROR: Lower bound of soil 109 vertical Ksat is not less than the lower bound of soil 109 Ksat. Either increase lower bound of Ksat or decrease lower bound of vertical Ksat.')
+
+if not (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == 's9_Ksat_0_v'].index[0],2] < ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == 's9_Ksat_0'].index[0],2]):
+    sys.exit('PyERROR: Lower bound of soil 9 vertical Ksat is not less than the lower bound of soil 9 Ksat. Either increase lower bound of Ksat or decrease lower bound of vertical Ksat.')
+
+if not (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == 's109_m'].index[0],2] < ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == 's9_m'].index[0],2]):
+    sys.exit('PyERROR: Lower bound of soil 109 m is not less than the lower bound of soil 9 m. Either increase lower bound of s9 m or decrease lower bound of s109 m.')
+
+if not (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == 's108_m'].index[0],2] < ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == 's8_m'].index[0],2]):
+    sys.exit('PyERROR: Lower bound of soil 108 m is not less than the lower bound of soil 8 m. Either increase lower bound of s8 m or decrease lower bound of s108 m.')
+
+if not (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == 's109_porosity_0'].index[0],2] < ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == 's9_porosity_0'].index[0],2]):
+    sys.exit('PyERROR: Lower bound of soil 109 porosity_0 is not less than the lower bound of soil 9 porosity_0. Either increase lower bound of s9 porosity_0 or decrease lower bound of s109 porosity_0.')
+
+if not (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == 's108_porosity_0'].index[0],2] < ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == 's8_porosity_0'].index[0],2]):
+    sys.exit('PyERROR: Lower bound of soil 108 porosity_0 is not less than the lower bound of soil 8 porosity_0. Either increase lower bound of s8 porosity_0 or decrease lower bound of s108 porosity_0.')
+
+if not (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == 's109_Ksat_0'].index[0],2] < ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == 's9_Ksat_0'].index[0],2]):
+    sys.exit('PyERROR: Lower bound of soil 109 Ksat_0 is not less than the lower bound of soil 9 Ksat_0. Either increase lower bound of s9 Ksat_0 or decrease lower bound of s109 Ksat_0.')
+
+if not (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == 's108_Ksat_0'].index[0],2] < ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == 's8_Ksat_0'].index[0],2]):
+    sys.exit('PyERROR: Lower bound of soil 108 Ksat_0 is not less than the lower bound of soil 8 Ksat_0. Either increase lower bound of s8 Ksat_0 or decrease lower bound of s108 Ksat_0.')
+
+if not (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == 's109_Ksat_0_v'].index[0],2] < ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == 's8_Ksat_0_v'].index[0],2]):
+    sys.exit('PyERROR: Lower bound of soil 109 Ksat_0_v is not less than the lower bound of soil 9 Ksat_0_v. Either increase lower bound of s8 Ksat_0_v or decrease lower bound of s108 Ksat_0_v.')
+
+if not (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == 's108_Ksat_0_v'].index[0],2] < ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == 's8_Ksat_0_v'].index[0],2]):
+    sys.exit('PyERROR: Lower bound of soil 108 Ksat_0_v is not less than the lower bound of soil 8 Ksat_0_v. Either increase lower bound of s8 Ksat_0_v or decrease lower bound of s108 Ksat_0_v.')
+
+if not (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == 'v102_epc.topt'].index[0],2] < ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == 'v102_epc.tmax'].index[0],2]):
+    sys.exit('PyERROR: Lower bound of veg 102 epc.topt is not less than the lower bound of veg 102 epc.tmax. Either increase lower bound of epc.tmax or decrease lower bound of epc.topt.')
+
+if not (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == 'v3_epc.topt'].index[0],2] < ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == 'v3_epc.tmax'].index[0],2]):
+    sys.exit('PyERROR: Lower bound of veg 3 epc.topt is not less than the lower bound of veg 3 epc.tmax. Either increase lower bound of epc.tmax or decrease lower bound of epc.topt.')
+
+if not (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == 'v102_epc.leaf_cn'].index[0],2] < ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == 'v102_epc.leaflitr_cn'].index[0],2]):
+    sys.exit('PyERROR: Lower bound of veg 102 epc.leaf_cn is not less than the lower bound of veg 102 epc.leaflitr_cn. Either increase lower bound of epc.leaflitr_cn or decrease lower bound of epc.leaf_cn.')
+
+if not (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == 'v3_epc.leaf_cn'].index[0],2] < ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == 'v3_epc.leaflitr_cn'].index[0],2]):
+    sys.exit('PyERROR: Lower bound of veg 3 epc.leaf_cn is not less than the lower bound of veg 3 epc.leaflitr_cn. Either increase lower bound of epc.leaflitr_cn or decrease lower bound of epc.leaf_cn.')
+    
 #Save that file into a new file with no headers
 #ProbFile.drop('DefParameter', axis = 1).to_csv('BaismanMorrisSamplingProblemFile_ForSA.csv', header=False, index=False) 
 
@@ -360,6 +409,7 @@ for i in range(len(MorrisSample_df.filter(regex='silt$').columns)):
 del i, j, clay, silt, sand, delta, ind, f
 
 #Check sums
+#Fixme: can these autodetect parameter names to compare?
 if any((MorrisSample_df.loc[:, 's8_silt'] + MorrisSample_df.loc[:, 's8_sand'] + MorrisSample_df.loc[:, 's8_clay']).round(roundTol) != 1.0000):
     sys.exit('PyERROR: Sum of sand + silt + clay != 1 for s8')
 if any((MorrisSample_df.loc[:, 's108_silt'] + MorrisSample_df.loc[:, 's108_sand'] + MorrisSample_df.loc[:, 's108_clay']).round(roundTol) != 1.0000):
@@ -382,13 +432,13 @@ if any((MorrisSample_df.loc[:, 's109_silt'] + MorrisSample_df.loc[:, 's109_sand'
 #If it is not greater, simulate a random value less than Ksatu for Ksatc
 for i in range(len(MorrisSample_df.filter(regex='_Ksat_0$').columns)):
     #Find the indicator for the first soil type
-    #string = Get all columns containing m
+    #string = Get all columns containing _Ksat_0
     ind1 = re.split(string=MorrisSample_df.filter(regex='_Ksat_0$').columns[i], pattern='_')[0]
     
     #Only work on the columns that have a 0, and find the other corresponding index
     if len(re.split(string=ind1, pattern='0')) == 2:
         ind2 = string.join(re.split(string=ind1, pattern='10'), sep='')
-        #Use the indicator to extract the m compacted, and m uncompacted columns
+        #Use the indicator to extract the Ksat compacted, and Ksat uncompacted columns
         mc = MorrisSample_df.loc[:, ind1 + '_Ksat_0']
         mu = MorrisSample_df.loc[:, ind2 + '_Ksat_0']
         
@@ -495,7 +545,7 @@ del compare, i, ind1, ind2, j, mu, mc, trajChange, inds
 #Check sums
 if sum(MorrisSample_df.loc[:,'s109_Ksat_0'] > MorrisSample_df.loc[:,'s9_Ksat_0']) != 0:
     sys.exit('PyERROR: s109 Ksat not < s9 Ksat')
-if sum(MorrisSample_df.loc[:,'s108_Ksat_0'] > MorrisSample_df.loc[:,'s8_Ksat_0']):
+if sum(MorrisSample_df.loc[:,'s108_Ksat_0'] > MorrisSample_df.loc[:,'s8_Ksat_0']) != 0:
     sys.exit('PyERROR: s108 Ksat not < s8 Ksat')
     
 #%% Next make sure that vertical Ksat < Ksat for each soil
@@ -597,7 +647,7 @@ if sum(MorrisSample_df.loc[:,'s8_Ksat_0_v'] > MorrisSample_df.loc[:,'s8_Ksat_0']
 #If it is not greater, simulate a random value less than Ksatu for Ksatc
 for i in range(len(MorrisSample_df.filter(regex='_Ksat_0_v$').columns)):
     #Find the indicator for the first soil type
-    #string = Get all columns containing m
+    #string = Get all columns containing Ksat_0_v
     ind1 = re.split(string=MorrisSample_df.filter(regex='_Ksat_0_v$').columns[i], pattern='_')[0]
     
     #Only work on the columns that have a 0, and find the other corresponding index
@@ -635,76 +685,46 @@ for i in range(len(MorrisSample_df.filter(regex='_Ksat_0_v$').columns)):
                     #Change all mc to a random value
                     Val = [rd.uniform(ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind1+'_Ksat_0_v'].index[0],2], mu[indsTrajPos].iloc[0])]*len(mc[indsTrajPos])
                     mc[indsTrajPos] = Val
-                elif (len(mu[indsTrajPos].unique()) == 1) | (len(mc[indsTrajPos].unique()) == 1):
-                    #There is one change in this trajectory for one, but not the other variable
-                    if (len(mu[indsTrajPos].unique()) == 1):
-                        #mc changes
-                        indmcChange = mc[indsTrajPos][mc[indsTrajPos] != mc[indsTrajPos].iloc[0]].index[0]
-                        
-                        #Only 1 change in the trajectory. Change to random value less than mu and greater than lower bound
-                        Val = [rd.uniform(ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind1+'_Ksat_0_v'].index[0],2], mu[indsTrajPos].iloc[0])]*len(mc[indsTrajPos[indsTrajPos < indmcChange]])
-                        mc[indsTrajPos[indsTrajPos < indmcChange]] = Val
-                    
-                        Val = [rd.uniform(ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind1+'_Ksat_0_v'].index[0],2], mu[indsTrajPos].iloc[0])]*len(mc[indsTrajPos[indsTrajPos >= indmcChange]])
-                        mc[indsTrajPos[indsTrajPos >= indmcChange]] = Val
-                        
-                        del indmcChange
-                    else:
-                        #mu changes
-                        indmuChange = mu[indsTrajPos][mu[indsTrajPos] != mu[indsTrajPos].iloc[0]].index[0]
-                        
-                        #Only 1 change in the trajectory. Change to random value less than mu and greater than lower bound
-                        Val = [rd.uniform(ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind1+'_Ksat_0_v'].index[0],2], mu[indsTrajPos[indsTrajPos < indmuChange]].iloc[0])]*len(mc[indsTrajPos[indsTrajPos < indmuChange]])
-                        mc[indsTrajPos[indsTrajPos < indmuChange]] = Val
-                    
-                        Val = [rd.uniform(ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind1+'_Ksat_0_v'].index[0],2], mu[indsTrajPos[indsTrajPos >= indmuChange]].iloc[0])]*len(mc[indsTrajPos[indsTrajPos >= indmuChange]])
-                        mc[indsTrajPos[indsTrajPos >= indmuChange]] = Val
-                        
-                        del indmuChange
                 else:
-                    #within these positions, mc and mu change each exactly once. Find when those happen.
-                    indmcChange = mc[indsTrajPos][mc[indsTrajPos] != mc[indsTrajPos].iloc[0]].index[0]
-                    indmuChange = mu[indsTrajPos][mu[indsTrajPos] != mu[indsTrajPos].iloc[0]].index[0]
-                    if indmuChange == indmcChange:
-                        #Only 1 change in the trajectory. Change to random value less than mu and greater than lower bound
-                        Val = [rd.uniform(ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind1+'_Ksat_0_v'].index[0],2], mu[indsTrajPos[indsTrajPos < indmuChange]].iloc[0])]*len(mc[indsTrajPos[indsTrajPos < indmuChange]])
-                        mc[indsTrajPos[indsTrajPos < indmuChange]] = Val
+                    #determine all of the indices for each
+                    for k in range(len(mc[indsTrajPos].unique())):
+                        #Find the first instance of the unique value and record it
+                        if k == 0:
+                            #Start new inex array
+                            indvKsatChange = mc[indsTrajPos][mc[indsTrajPos] == mc[indsTrajPos].unique()[k]].index[0]
+                        else:
+                            #append to list
+                            indvKsatChange = np.append(indvKsatChange, mc[indsTrajPos][mc[indsTrajPos] == mc[indsTrajPos].unique()[k]].index[0])
+                    del k
+                    for k in range(len(mu[indsTrajPos].unique())):
+                        #Find the first instance of the unique value and record it
+                        if k == 0:
+                            #Start new inex array
+                            indKsatChange = mu[indsTrajPos][mu[indsTrajPos] == mu[indsTrajPos].unique()[k]].index[0]
+                        else:
+                            #append to list
+                            indKsatChange = np.append(indKsatChange, mu[indsTrajPos][mu[indsTrajPos] == mu[indsTrajPos].unique()[k]].index[0])
+                    del k
                     
-                        Val = [rd.uniform(ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind1+'_Ksat_0_v'].index[0],2], mu[indsTrajPos[indsTrajPos >= indmuChange]].iloc[0])]*len(mc[indsTrajPos[indsTrajPos >= indmuChange]])
-                        mc[indsTrajPos[indsTrajPos >= indmuChange]] = Val
-                    elif indmuChange > indmcChange:
-                        #Work from mc index first
-                        Val = [rd.uniform(ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind1+'_Ksat_0_v'].index[0],2], mu[indsTrajPos[indsTrajPos < indmcChange]].iloc[0])]*len(mc[indsTrajPos[indsTrajPos < indmcChange]])
-                        mc[indsTrajPos[indsTrajPos < indmcChange]] = Val
+                    #Join into one list, which is sorted by the unique command by default.
+                    IndsAll = np.unique(np.append(indKsatChange, indvKsatChange))
                     
-                        #Now check the indices between indmcChange and indmuChange
-                        Val = [rd.uniform(ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind1+'_Ksat_0_v'].index[0],2], mu[indsTrajPos[(indsTrajPos < indmuChange) & (indsTrajPos >= indmcChange)]].iloc[0])]*len(mc[indsTrajPos[(indsTrajPos < indmuChange) & (indsTrajPos >= indmcChange)]])
-                        mc[indsTrajPos[(indsTrajPos < indmuChange) & (indsTrajPos >= indmcChange)]] = Val
+                    #Start looping through the IndsAll indices, and replace as needed.
+                    for k in range(len(IndsAll)):
+                        if k == (len(IndsAll)-1):
+                            Val = [rd.uniform(ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind1+'_Ksat_0_v'].index[0],2], mu[indsTrajPos[(indsTrajPos >= IndsAll[k])]].iloc[0])]*len(mc[indsTrajPos[(indsTrajPos >= IndsAll[k])]])
+                            mc[indsTrajPos[(indsTrajPos >= IndsAll[k])]] = Val
+                        else: 
+                            Val = [rd.uniform(ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind1+'_Ksat_0_v'].index[0],2], mu[indsTrajPos[(indsTrajPos >= IndsAll[k]) & (indsTrajPos < IndsAll[k+1])]].iloc[0])]*len(mc[indsTrajPos[(indsTrajPos >= IndsAll[k]) & (indsTrajPos < IndsAll[k+1])]])
+                            mc[indsTrajPos[(indsTrajPos >= IndsAll[k]) & (indsTrajPos < IndsAll[k+1])]] = Val
                     
-                        #Now check the indices greater than or equal to indmuChange
-                        Val = [rd.uniform(ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind1+'_Ksat_0_v'].index[0],2], mu[indsTrajPos[(indsTrajPos >= indmuChange)]].iloc[0])]*len(mc[indsTrajPos[(indsTrajPos >= indmuChange)]])
-                        mc[indsTrajPos[(indsTrajPos >= indmuChange)]] = Val
-                    else:
-                        #Work from mu index first
-                        Val = [rd.uniform(ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind1+'_Ksat_0_v'].index[0],2], mu[indsTrajPos[indsTrajPos < indmuChange]].iloc[0])]*len(mc[indsTrajPos[indsTrajPos < indmuChange]])
-                        mc[indsTrajPos[indsTrajPos < indmuChange]] = Val
-                    
-                        #Now check the indices between indmuChange and indmcChange
-                        Val = [rd.uniform(ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind1+'_Ksat_0_v'].index[0],2], mu[indsTrajPos[(indsTrajPos < indmcChange) & (indsTrajPos >= indmuChange)]].iloc[0])]*len(mc[indsTrajPos[(indsTrajPos < indmcChange) & (indsTrajPos >= indmuChange)]])
-                        mc[indsTrajPos[(indsTrajPos < indmcChange) & (indsTrajPos >= indmuChange)]] = Val
-                    
-                        #Now check the indices greater than or equal to indmcChange
-                        Val = [rd.uniform(ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind1+'_Ksat_0_v'].index[0],2], mu[indsTrajPos[(indsTrajPos >= indmcChange)]].iloc[0])]*len(mc[indsTrajPos[(indsTrajPos >= indmcChange)]])
-                        mc[indsTrajPos[(indsTrajPos >= indmcChange)]] = Val
-                    
-                    del indmcChange, indmuChange
+                    del indvKsatChange, indKsatChange, k, IndsAll
                 del Val
             del indsTrajPos
-        #Save the new column
-        MorrisSample_df.loc[:, ind1 + '_Ksat_0_v'] = mc
 
 del compare, i, ind1, ind2, j, mu, mc, trajChange, inds
 
+#Check sums
 if sum(MorrisSample_df.loc[:,'s109_Ksat_0_v'] > MorrisSample_df.loc[:,'s9_Ksat_0_v']) != 0:
     sys.exit('PyERROR: s109 vKsat not < s9 Ksat')
 if sum(MorrisSample_df.loc[:,'s108_Ksat_0_v'] > MorrisSample_df.loc[:,'s8_Ksat_0_v']) != 0:
@@ -824,6 +844,7 @@ for i in range(len(MorrisSample_df.filter(regex='_m$').columns)):
 
 del compare, i, ind1, ind2, j, mu, mc, trajChange, inds
 
+#Check sums
 if sum(MorrisSample_df.loc[:,'s109_m'] > MorrisSample_df.loc[:,'s9_m']) != 0:
     sys.exit('PyERROR: s109 m not < s9 m')
 if sum(MorrisSample_df.loc[:,'s108_m'] > MorrisSample_df.loc[:,'s8_m']) != 0:
@@ -943,6 +964,7 @@ for i in range(len(MorrisSample_df.filter(regex='_porosity_0$').columns)):
 
 del compare, i, ind1, ind2, j, pu, pc, trajChange, inds
 
+#Check sums
 if sum(MorrisSample_df.loc[:,'s109_porosity_0'] > MorrisSample_df.loc[:,'s9_porosity_0']) != 0:
     sys.exit('PyERROR: s109 porosity_0 not < s9 porosity_0')
 if sum(MorrisSample_df.loc[:,'s108_porosity_0'] > MorrisSample_df.loc[:,'s8_porosity_0']) != 0:
@@ -2209,12 +2231,12 @@ for i in range(len(MorrisSample_df.filter(regex='epc.leaf_cn$').columns)):
 del compare, i, ind, j, vKsat, Ksat, trajChange, inds
 
 #Check sums
-if sum(MorrisSample_df.loc[:,'v102_epc.leaf_cn'] > MorrisSample_df.loc[:,'v102_epc.leaflitr_cn']):
+if sum(MorrisSample_df.loc[:,'v102_epc.leaf_cn'] > MorrisSample_df.loc[:,'v102_epc.leaflitr_cn']) != 0:
     sys.exit('PyERROR: leaf_cn not < leaflitr_cn for v102')
-if sum(MorrisSample_df.loc[:,'v3_epc.leaf_cn'] > MorrisSample_df.loc[:,'v3_epc.leaflitr_cn']):
+if sum(MorrisSample_df.loc[:,'v3_epc.leaf_cn'] > MorrisSample_df.loc[:,'v3_epc.leaflitr_cn']) != 0:
     sys.exit('PyERROR: leaf_cn not < leaflitr_cn for v3')
 
-#%% Check all sums once more to make sure nothing odd happened
+#%% Check sums for all parameters once more to make sure nothing odd happened
 if (any((MorrisSample_df.loc[:, 's8_silt'] + MorrisSample_df.loc[:, 's8_sand'] + MorrisSample_df.loc[:, 's8_clay']).round(roundTol) != 1.0000) | \
 any((MorrisSample_df.loc[:, 's108_silt'] + MorrisSample_df.loc[:, 's108_sand'] + MorrisSample_df.loc[:, 's108_clay']).round(roundTol) != 1.0000) | \
 any((MorrisSample_df.loc[:, 's9_silt'] + MorrisSample_df.loc[:, 's9_sand'] + MorrisSample_df.loc[:, 's9_clay']).round(roundTol) != 1.0000) | \
@@ -2253,10 +2275,23 @@ MorrisSample_df.round(roundTol).to_csv('MorrisSamples_AfterProcessing.csv', inde
 #%% All constraints have passed. Now make sure that the parameter that was supposed to change actually changed.
 #Parameters might not change as a result of how constraints affect the sampling scheme.
 #This step was missed in the 1st run completed for this analysis.
-#os.chdir('C:\Users\jsmif\OneDrive - University of Virginia\BES_Data\BES_Data\RHESSysFiles\BR&POBR\RHESSysFilePreparation\defs\MorrisSampleLocs')
+os.chdir('C:\Users\jsmif\OneDrive - University of Virginia\BES_Data\BES_Data\RHESSysFiles\BR&POBR\RHESSysFilePreparation\defs\MorrisSampleLocs')
 #Original file
-#OrigMorrisSample_df = pd.read_csv('MorrisSamples_BeforeProcessing.csv')
+OrigMorrisSample_df = pd.read_csv('MorrisSamples_BeforeProcessing.csv')
 #Modified file
-#MorrisSample_df = pd.read_csv('MorrisSamples_AfterProcessing.csv')
+MorrisSample_df = pd.read_csv('MorrisSamples_AfterProcessing.csv')
+
+#Find all of the instances in which a parameter does not change in the AfterProcessing.csv file
+ListMissing = []
+ColsMissing = []
+for i in range(len(MorrisSample_df.iloc[:,0])-1):
+    #Check that there is a difference from the current row to the next row.
+    #Absolute value because some changes have sum constraints such that a difference will always be 0
+    if sum(abs(MorrisSample_df.iloc[i,:271] - MorrisSample_df.iloc[i+1,:271])) == 0:
+        #record i+1 because that is the row that should have changed
+        ListMissing.append(i+1)
+        #Find which parameter should have changed - get the name
+        #OrigMorrisSample_df.iloc[i,np.where(((OrigMorrisSample_df.iloc[i,:] - OrigMorrisSample_df.iloc[i+1,:]) != 0).values == True)[0][0]]
+        ColsMissing.append(OrigMorrisSample_df.columns[np.where(((OrigMorrisSample_df.iloc[i,:] - OrigMorrisSample_df.iloc[i+1,:]) != 0).values == True)[0][0]])  
 
 #Want to re-run all of the samples that were affected by this problem. Should not take long to do.
