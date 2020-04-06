@@ -961,7 +961,7 @@ ColsMissing = []
 for i in range(len(MorrisSample_df.iloc[:,0])-1):
     #Check that there is a difference from the current row to the next row.
     #Absolute value because some changes have sum constraints such that a difference will always be 0
-    if sum(abs(MorrisSample_df.iloc[i,:271] - MorrisSample_df.iloc[i+1,:271])) == 0:
+    if sum(abs(MorrisSample_df.iloc[i,:len(OrigMorrisSample_df.columns)] - MorrisSample_df.iloc[i+1,:len(OrigMorrisSample_df.columns)])) == 0:
         #record i+1 because that is the row that should have changed
         ListMissing.append(i+1)
         #Find which parameter should have changed - get the name
@@ -971,5 +971,5 @@ for i in range(len(MorrisSample_df.iloc[:,0])-1):
 if len(ListMissing) > 0:
     sys.exit('PyERROR46: Some of the variables that were supposed to change in the Morris trajectory did not change.')
 else:
-    #%% Write the resulting MorrisSample_df to a csv file
+    #Write the resulting MorrisSample_df to a csv file
     MorrisSample_df.round(roundTol).to_csv('MorrisSamples_AfterProcessing.csv', index = False)  
