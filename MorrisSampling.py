@@ -34,6 +34,9 @@ import string
 #os.chdir('/scratch/js4yd/MorrisSA/RHESSysRuns')
 os.chdir(sys.argv[1])
 
+#Import function
+from Sum3CheckFun import FullSum3Check
+
 #Set the random seed for randomly generated values
 #rd.seed(1349)
 rd.seed(int(sys.argv[2]))
@@ -58,61 +61,61 @@ roundTol = int(sys.argv[4])
 #not generating sampling locations correctly. Using R to generate the model 
 #run locations instead.
 
-#ProbFile = pd.read_csv('BaismanMorrisSamplingProblemFile_Full.csv')
+#ProbFile = pd.read_csv('BaismanMorrisSamplingProblemFile_Full_Feb2020.csv')
 ProbFile = pd.read_csv(sys.argv[5])
 
 #Check that the lower bounds are all less than the upper bounds
 if not all(ProbFile.iloc[:,2] < ProbFile.iloc[:,3]):
-    sys.exit('PyERROR: For parameters, all lower bounds are not less than the upper bounds')
+    sys.exit('PyERROR1: For parameters, all lower bounds are not less than the upper bounds')
 
 #Check lower bounds for variables that are set in code
 if not (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == 's108_Ksat_0_v'].index[0],2] < ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == 's108_Ksat_0'].index[0],2]):
-    sys.exit('PyERROR: Lower bound of soil 108 vertical Ksat is not less than the lower bound of soil 108 Ksat. Either increase lower bound of Ksat or decrease lower bound of vertical Ksat.')
+    sys.exit('PyERROR2: Lower bound of soil 108 vertical Ksat is not less than the lower bound of soil 108 Ksat. Either increase lower bound of Ksat or decrease lower bound of vertical Ksat. The change must be greater than rounding tolerance.')
 
 if not (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == 's8_Ksat_0_v'].index[0],2] < ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == 's8_Ksat_0'].index[0],2]):
-    sys.exit('PyERROR: Lower bound of soil 8 vertical Ksat is not less than the lower bound of soil 8 Ksat. Either increase lower bound of Ksat or decrease lower bound of vertical Ksat.')
+    sys.exit('PyERROR3: Lower bound of soil 8 vertical Ksat is not less than the lower bound of soil 8 Ksat. Either increase lower bound of Ksat or decrease lower bound of vertical Ksat. The change must be greater than rounding tolerance.')
 
 if not (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == 's109_Ksat_0_v'].index[0],2] < ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == 's109_Ksat_0'].index[0],2]):
-    sys.exit('PyERROR: Lower bound of soil 109 vertical Ksat is not less than the lower bound of soil 109 Ksat. Either increase lower bound of Ksat or decrease lower bound of vertical Ksat.')
+    sys.exit('PyERROR4: Lower bound of soil 109 vertical Ksat is not less than the lower bound of soil 109 Ksat. Either increase lower bound of Ksat or decrease lower bound of vertical Ksat. The change must be greater than rounding tolerance.')
 
 if not (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == 's9_Ksat_0_v'].index[0],2] < ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == 's9_Ksat_0'].index[0],2]):
-    sys.exit('PyERROR: Lower bound of soil 9 vertical Ksat is not less than the lower bound of soil 9 Ksat. Either increase lower bound of Ksat or decrease lower bound of vertical Ksat.')
+    sys.exit('PyERROR5: Lower bound of soil 9 vertical Ksat is not less than the lower bound of soil 9 Ksat. Either increase lower bound of Ksat or decrease lower bound of vertical Ksat. The change must be greater than rounding tolerance.')
 
 if not (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == 's109_m'].index[0],2] < ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == 's9_m'].index[0],2]):
-    sys.exit('PyERROR: Lower bound of soil 109 m is not less than the lower bound of soil 9 m. Either increase lower bound of s9 m or decrease lower bound of s109 m.')
+    sys.exit('PyERROR6: Lower bound of soil 109 m is not less than the lower bound of soil 9 m. Either increase lower bound of s9 m or decrease lower bound of s109 m. The change must be greater than rounding tolerance.')
 
 if not (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == 's108_m'].index[0],2] < ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == 's8_m'].index[0],2]):
-    sys.exit('PyERROR: Lower bound of soil 108 m is not less than the lower bound of soil 8 m. Either increase lower bound of s8 m or decrease lower bound of s108 m.')
+    sys.exit('PyERROR7: Lower bound of soil 108 m is not less than the lower bound of soil 8 m. Either increase lower bound of s8 m or decrease lower bound of s108 m. The change must be greater than rounding tolerance.')
 
 if not (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == 's109_porosity_0'].index[0],2] < ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == 's9_porosity_0'].index[0],2]):
-    sys.exit('PyERROR: Lower bound of soil 109 porosity_0 is not less than the lower bound of soil 9 porosity_0. Either increase lower bound of s9 porosity_0 or decrease lower bound of s109 porosity_0.')
+    sys.exit('PyERROR8: Lower bound of soil 109 porosity_0 is not less than the lower bound of soil 9 porosity_0. Either increase lower bound of s9 porosity_0 or decrease lower bound of s109 porosity_0. The change must be greater than rounding tolerance.')
 
 if not (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == 's108_porosity_0'].index[0],2] < ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == 's8_porosity_0'].index[0],2]):
-    sys.exit('PyERROR: Lower bound of soil 108 porosity_0 is not less than the lower bound of soil 8 porosity_0. Either increase lower bound of s8 porosity_0 or decrease lower bound of s108 porosity_0.')
+    sys.exit('PyERROR9: Lower bound of soil 108 porosity_0 is not less than the lower bound of soil 8 porosity_0. Either increase lower bound of s8 porosity_0 or decrease lower bound of s108 porosity_0. The change must be greater than rounding tolerance.')
 
 if not (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == 's109_Ksat_0'].index[0],2] < ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == 's9_Ksat_0'].index[0],2]):
-    sys.exit('PyERROR: Lower bound of soil 109 Ksat_0 is not less than the lower bound of soil 9 Ksat_0. Either increase lower bound of s9 Ksat_0 or decrease lower bound of s109 Ksat_0.')
+    sys.exit('PyERROR10: Lower bound of soil 109 Ksat_0 is not less than the lower bound of soil 9 Ksat_0. Either increase lower bound of s9 Ksat_0 or decrease lower bound of s109 Ksat_0. The change must be greater than rounding tolerance.')
 
 if not (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == 's108_Ksat_0'].index[0],2] < ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == 's8_Ksat_0'].index[0],2]):
-    sys.exit('PyERROR: Lower bound of soil 108 Ksat_0 is not less than the lower bound of soil 8 Ksat_0. Either increase lower bound of s8 Ksat_0 or decrease lower bound of s108 Ksat_0.')
+    sys.exit('PyERROR11: Lower bound of soil 108 Ksat_0 is not less than the lower bound of soil 8 Ksat_0. Either increase lower bound of s8 Ksat_0 or decrease lower bound of s108 Ksat_0. The change must be greater than rounding tolerance.')
 
 if not (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == 's109_Ksat_0_v'].index[0],2] < ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == 's8_Ksat_0_v'].index[0],2]):
-    sys.exit('PyERROR: Lower bound of soil 109 Ksat_0_v is not less than the lower bound of soil 9 Ksat_0_v. Either increase lower bound of s8 Ksat_0_v or decrease lower bound of s108 Ksat_0_v.')
+    sys.exit('PyERROR12: Lower bound of soil 109 Ksat_0_v is not less than the lower bound of soil 9 Ksat_0_v. Either increase lower bound of s8 Ksat_0_v or decrease lower bound of s108 Ksat_0_v. The change must be greater than rounding tolerance.')
 
 if not (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == 's108_Ksat_0_v'].index[0],2] < ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == 's8_Ksat_0_v'].index[0],2]):
-    sys.exit('PyERROR: Lower bound of soil 108 Ksat_0_v is not less than the lower bound of soil 8 Ksat_0_v. Either increase lower bound of s8 Ksat_0_v or decrease lower bound of s108 Ksat_0_v.')
+    sys.exit('PyERROR13: Lower bound of soil 108 Ksat_0_v is not less than the lower bound of soil 8 Ksat_0_v. Either increase lower bound of s8 Ksat_0_v or decrease lower bound of s108 Ksat_0_v. The change must be greater than rounding tolerance.')
 
 if not (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == 'v102_epc.topt'].index[0],2] < ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == 'v102_epc.tmax'].index[0],2]):
-    sys.exit('PyERROR: Lower bound of veg 102 epc.topt is not less than the lower bound of veg 102 epc.tmax. Either increase lower bound of epc.tmax or decrease lower bound of epc.topt.')
+    sys.exit('PyERROR14: Lower bound of veg 102 epc.topt is not less than the lower bound of veg 102 epc.tmax. Either increase lower bound of epc.tmax or decrease lower bound of epc.topt. The change must be greater than rounding tolerance.')
 
 if not (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == 'v3_epc.topt'].index[0],2] < ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == 'v3_epc.tmax'].index[0],2]):
-    sys.exit('PyERROR: Lower bound of veg 3 epc.topt is not less than the lower bound of veg 3 epc.tmax. Either increase lower bound of epc.tmax or decrease lower bound of epc.topt.')
+    sys.exit('PyERROR15: Lower bound of veg 3 epc.topt is not less than the lower bound of veg 3 epc.tmax. Either increase lower bound of epc.tmax or decrease lower bound of epc.topt. The change must be greater than rounding tolerance.')
 
 if not (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == 'v102_epc.leaf_cn'].index[0],2] < ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == 'v102_epc.leaflitr_cn'].index[0],2]):
-    sys.exit('PyERROR: Lower bound of veg 102 epc.leaf_cn is not less than the lower bound of veg 102 epc.leaflitr_cn. Either increase lower bound of epc.leaflitr_cn or decrease lower bound of epc.leaf_cn.')
+    sys.exit('PyERROR16: Lower bound of veg 102 epc.leaf_cn is not less than the lower bound of veg 102 epc.leaflitr_cn. Either increase lower bound of epc.leaflitr_cn or decrease lower bound of epc.leaf_cn. The change must be greater than rounding tolerance.')
 
 if not (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == 'v3_epc.leaf_cn'].index[0],2] < ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == 'v3_epc.leaflitr_cn'].index[0],2]):
-    sys.exit('PyERROR: Lower bound of veg 3 epc.leaf_cn is not less than the lower bound of veg 3 epc.leaflitr_cn. Either increase lower bound of epc.leaflitr_cn or decrease lower bound of epc.leaf_cn.')
+    sys.exit('PyERROR17: Lower bound of veg 3 epc.leaf_cn is not less than the lower bound of veg 3 epc.leaflitr_cn. Either increase lower bound of epc.leaflitr_cn or decrease lower bound of epc.leaf_cn. The change must be greater than rounding tolerance.')
     
 #Save that file into a new file with no headers
 #ProbFile.drop('DefParameter', axis = 1).to_csv('BaismanMorrisSamplingProblemFile_ForSA.csv', header=False, index=False) 
@@ -134,290 +137,20 @@ MorrisSample_df = pd.read_csv('MorrisSamples_BeforeProcessing.csv')
 #Fixme: should also check that the change in any one parameter is within the 
 #step change of the Morris delta on that parameter
 
-#%% Soil:
+#%% Soil: sand + silt + clay = 1
 
-#Fixme: Tried to make a function to do this, but I'm confused by the handling of dataframe by Python functions.
-#It seems that even the function requires a deep copy to be specified.
-#Can and should compare results of this versus the explicit and unaesthetic current method
-#test = Sum3Check(Col1='silt', Col2='sand', Col3='clay', MorrisSample=MorrisSample_df, Prob=ProbFile, regExCol='silt')
-#%%
-#silt + sand + clay = 1
-#loop over the columns containing silt (+ sand + clay) to check the relationship is statisfied
-#Fixme: This loop is slow because it has to loop through the entire database once per unique soil class.
-#Could the i for loop be dropped and all soil classes done in the row iteration loop? 
-for i in range(len(MorrisSample_df.filter(regex='silt$').columns)):
-    #Find the indicator for the soil type
-    #string = Get all columns containing silt
-    ind = re.split(string=MorrisSample_df.filter(regex='silt$').columns[i], pattern='_')[0]
-    #Use the indicator to extract the silt, sand, and clay columns
-    silt = MorrisSample_df.loc[:, ind + '_silt']
-    sand = MorrisSample_df.loc[:, ind + '_sand']
-    clay = MorrisSample_df.loc[:, ind + '_clay']
-    
-    #Save the original column
-    MorrisSample_df.loc[:, 'orig_' + ind + '_silt_orig'] = silt
-    MorrisSample_df.loc[:, 'orig_' + ind + '_sand_orig'] = sand
-    MorrisSample_df.loc[:, 'orig_' + ind + '_clay_orig'] = clay
-    
-    #Loop through the indices to reassign the sand silt and clay values - should remain within the delta step change
-    for j in range(len(silt)):
-        #Compute the remainder from 1
-        delta = 1 - (sand[j] + silt[j] + clay[j])
-        
-        #Need to add delta/3 to each parameter.
-        #Check that the redistribution of values is within each parameter's range
-        #Add delta/3 
-        #Check if this will make sand greater than upper bound on sand
-        if ((sand[j] + delta/3) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_sand'].index[0],3])):
-            #Set sand to its maximum value and distribute the remaining delta to clay and silt
-            delta -= (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_sand'].index[0],3] - sand[j])
-            sand[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_sand'].index[0],3]
-            
-            #delta must be positive, so no need to check upper bounds on silt and clay by adding delta/2
-            #Check if this will make silt greater than upper bound on silt
-            if ((silt[j] + delta/2) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_silt'].index[0],3])):
-                #Set silt to its maximum value and distribute the remaining delta to clay
-                delta -= (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_silt'].index[0],3] - silt[j])
-                silt[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_silt'].index[0],3]
-                
-                #Check if this will make clay greater than upper bound on clay
-                if ((clay[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_clay'].index[0],3])):
-                    #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('PyERROR: The sum of clay, silt, and sand cannot be 1 for Replicate = %s' % str(j))
-                else:
-                    clay[j] += delta
-            elif ((clay[j] + delta/2) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_clay'].index[0],3])):
-                #Set clay to its maximum value and distribute the remaining delta to silt
-                delta -= (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_clay'].index[0],3] - clay[j])
-                clay[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_clay'].index[0],3]
-                
-                #Check if this will make silt greater than upper bound on silt
-                if ((silt[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_silt'].index[0],3])):
-                    #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('PyERROR: The sum of clay, silt, and sand cannot be 1 for Replicate = %s' % str(j))
-                else:
-                    silt[j] += delta
-            else:
-                #Clay and silt both not exceeding their max. Add delta/2
-                clay[j] += delta/2
-                silt[j] += delta/2
-            
-        elif ((sand[j] + delta/3) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_sand'].index[0],2])):        
-            #Set sand to its minimum value and distribute the remaining delta to clay and silt
-            delta += (sand[j] - ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_sand'].index[0],2])
-            sand[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_sand'].index[0],2]
-            
-            #delta must be negative, so no need to check lower bounds on silt and clay by adding delta/2
-            #Check if this will make silt less than lower bound on silt
-            if ((silt[j] + delta/2) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_silt'].index[0],2])):
-                #Set silt to its minimum value and distribute the remaining delta to clay
-                delta += (silt[j] - ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_silt'].index[0],2])
-                silt[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_silt'].index[0],2]
-                
-                #Check if this will make clay less than lower bound on clay
-                if ((clay[j] + delta) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_clay'].index[0],2])):
-                    #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('PyERROR: The sum of clay, silt, and sand cannot be 1 for Replicate = %s' % str(j))
-                else:
-                    clay[j] += delta
-            elif ((clay[j] + delta/2) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_clay'].index[0],2])):
-                #Set clay to its minimum value and distribute the remaining delta to silt
-                delta += (clay[j] - ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_clay'].index[0],2])
-                clay[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_clay'].index[0],2]
-                
-                #Check if this will make silt less than lower bound on silt
-                if ((silt[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_silt'].index[0],2])):
-                    #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('PyERROR: The sum of clay, silt, and sand cannot be 1 for Replicate = %s' % str(j))
-                else:
-                    silt[j] += delta
-            else:
-                #Clay and silt both not less than their min. Add delta/2 (which is subtraction)
-                clay[j] += delta/2
-                silt[j] += delta/2
-        elif ((silt[j] + delta/3) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_silt'].index[0],3])):
-            #Set silt to its maximum value and distribute the remaining delta to clay and silt
-            delta -= (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_silt'].index[0],3] - silt[j])
-            silt[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_silt'].index[0],3]
-            
-            #delta must be positive, so no need to check upper bounds on sand and clay by adding delta/2
-            if ((sand[j] + delta/2) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_sand'].index[0],3])):
-                #Set sand to its maximum value and distribute the remaining delta to clay
-                delta -= (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_sand'].index[0],3] - sand[j])
-                sand[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_sand'].index[0],3]
-                
-                #Check if this will make clay greater than upper bound on clay
-                if ((clay[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_clay'].index[0],3])):
-                    #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('PyERROR: The sum of clay, silt, and sand cannot be 1 for Replicate = %s' % str(j))
-                else:
-                    clay[j] += delta
-            elif ((clay[j] + delta/2) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_clay'].index[0],3])):
-                #Set clay to its maximum value and distribute the remaining delta to sand
-                delta -= (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_clay'].index[0],3] - clay[j])
-                clay[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_clay'].index[0],3]
-                
-                #Check if this will make sand greater than upper bound on sand
-                if ((sand[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_sand'].index[0],3])):
-                    #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('PyERROR: The sum of clay, silt, and sand cannot be 1 for Replicate = %s' % str(j))
-                else:
-                    sand[j] += delta
-            else:
-                #Clay and sand both not exceeding their max. Add delta/2
-                clay[j] += delta/2
-                sand[j] += delta/2
-            
-        elif ((silt[j] + delta/3) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_silt'].index[0],2])):        
-            #Set silt to its minimum value and distribute the remaining delta to clay and silt
-            delta += (silt[j] - ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_silt'].index[0],2])
-            silt[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_silt'].index[0],2]
-            
-            #delta must be negative, so no need to check lower bounds on sand and clay by adding delta/2
-            #Check if this will make sand less than lower bound on sand
-            if ((sand[j] + delta/2) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_sand'].index[0],2])):
-                #Set sand to its minimum value and distribute the remaining delta to clay
-                delta += (sand[j] - ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_sand'].index[0],2])
-                sand[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_sand'].index[0],2]
-                
-                #Check if this will make clay less than lower bound on clay
-                if ((clay[j] + delta) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_clay'].index[0],2])):
-                    #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('PyERROR: The sum of clay, silt, and sand cannot be 1 for Replicate = %s' % str(j))
-                else:
-                    clay[j] += delta
-            elif ((clay[j] + delta/2) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_clay'].index[0],2])):
-                #Set clay to its minimum value and distribute the remaining delta to sand
-                delta += (clay[j] - ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_clay'].index[0],2])
-                clay[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_clay'].index[0],2]
-                
-                #Check if this will make sand less than lower bound on sand
-                if ((sand[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_sand'].index[0],2])):
-                    #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('PyERROR: The sum of clay, silt, and sand cannot be 1 for Replicate = %s' % str(j))
-                else:
-                    sand[j] += delta
-            else:
-                #Clay and sand both not less than their min. Add delta/2 (which is subtraction)
-                clay[j] += delta/2
-                sand[j] += delta/2
-        elif ((clay[j] + delta/3) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_clay'].index[0],3])):
-            #Set clay to its maximum value and distribute the remaining delta to sand and silt
-            delta -= (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_clay'].index[0],3] - clay[j])
-            clay[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_clay'].index[0],3]
-            
-            #delta must be positive, so no need to check upper bounds on sand and silt by adding delta/2
-            #Check if this will make sand greater than upper bound on sand
-            if ((sand[j] + delta/2) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_sand'].index[0],3])):
-                #Set sand to its maximum value and distribute the remaining delta to silt
-                delta -= (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_sand'].index[0],3] - sand[j])
-                sand[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_sand'].index[0],3]
-                
-                #Check if this will make silt greater than upper bound on silt
-                if ((silt[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_silt'].index[0],3])):
-                    #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('PyERROR: The sum of clay, silt, and sand cannot be 1 for Replicate = %s' % str(j))
-                else:
-                    silt[j] += delta
-            elif ((silt[j] + delta/2) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_silt'].index[0],3])):
-                #Set silt to its maximum value and distribute the remaining delta to sand
-                delta -= (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_silt'].index[0],3] - silt[j])
-                silt[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_silt'].index[0],3]
-                
-                #Check if this will make sand greater than upper bound on sand
-                if ((sand[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_sand'].index[0],3])):
-                    #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('PyERROR: The sum of clay, silt, and sand cannot be 1 for Replicate = %s' % str(j))
-                else:
-                    sand[j] += delta
-            else:
-                #silt and sand both not exceeding their max. Add delta/2
-                silt[j] += delta/2
-                sand[j] += delta/2
-            
-        elif ((clay[j] + delta/3) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_clay'].index[0],2])):        
-            #Set clay to its minimum value and distribute the remaining delta to sand and silt
-            delta += (clay[j] - ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_clay'].index[0],2])
-            clay[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_clay'].index[0],2]
-            
-            #delta must be negative, so no need to check lower bounds on sand and silt by adding delta/2
-            #Check if this will make sand less than lower bound on sand
-            if ((sand[j] + delta/2) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_sand'].index[0],2])):
-                #Set sand to its minimum value and distribute the remaining delta to silt
-                delta += (sand[j] - ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_sand'].index[0],2])
-                sand[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_sand'].index[0],2]
-                
-                #Check if this will make silt less than lower bound on silt
-                if ((silt[j] + delta) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_silt'].index[0],2])):
-                    #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('PyERROR: The sum of clay, silt, and sand cannot be 1 for Replicate = %s' % str(j))
-                else:
-                    silt[j] += delta
-            elif ((silt[j] + delta/2) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_silt'].index[0],2])):
-                #Set silt to its minimum value and distribute the remaining delta to sand
-                delta += (silt[j] - ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_silt'].index[0],2])
-                silt[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_silt'].index[0],2]
-                
-                #Check if this will make sand less than lower bound on sand
-                if ((sand[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_sand'].index[0],2])):
-                    #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('PyERROR: The sum of clay, silt, and sand cannot be 1 for Replicate = %s' % str(j))
-                else:
-                    sand[j] += delta
-            else:
-                #silt and sand both not less than their min. Add delta/2 (which is subtraction)
-                silt[j] += delta/2
-                sand[j] += delta/2
-        else:
-            #sand, silt, and clay within their bounds. Add delta/3
-            sand[j] += delta/3
-            silt[j] += delta/3
-            clay[j] += delta/3
-        
-        #The resulting values could sum to a number other than exactly 1, but be within thousandths of 1. 
-        #So, round all values and ensure they sum to exactly 1
-        sand[j] = round(sand[j],roundTol) 
-        silt[j] = round(silt[j],roundTol)
-        clay[j] = round(clay[j],roundTol)
-        f = round(1 - (sand[j] + silt[j] + clay[j]),roundTol)
-        if f > 0:
-            #Check for being less than upper bound. Add to first of sand, silt, clay
-            if (sand[j] + f) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_sand'].index[0],3]):
-                sand[j] += f
-            elif (silt[j] + f) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_silt'].index[0],3]):
-                silt[j] += f
-            elif (clay[j] + f) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_clay'].index[0],3]):
-                clay[j] += f
-            else:
-                sys.exit('PyERROR: Sum of clay + silt + sand != 1, and cannot be rounded to 1 for Replicate = %s' % str(j))
-        elif f < 0:
-            #Check for being greater than lower bound. Add to first of sand, silt, clay
-            if (sand[j] + f) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_sand'].index[0],2]):
-                sand[j] += f
-            elif (silt[j] + f) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_silt'].index[0],2]):
-                silt[j] += f
-            elif (clay[j] + f) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_clay'].index[0],2]):
-                clay[j] += f
-            else:
-                sys.exit('PyERROR: Sum of clay + silt + sand != 1, and cannot be rounded to 1 for Replicate = %s' % str(j))    
-    
-    #Save the new column of values to track what was changed.
-    MorrisSample_df.loc[:, ind + '_silt'] = silt
-    MorrisSample_df.loc[:, ind + '_sand'] = sand
-    MorrisSample_df.loc[:, ind + '_clay'] = clay
-
-del i, j, clay, silt, sand, delta, ind, f
+MorrisSample_df = FullSum3Check(Col1='_silt', Col2='_sand', Col3='_clay', MorrisSample_df=MorrisSample_df, N=N, ProbFile=ProbFile, regexNm='silt$', roundTol=roundTol)
 
 #Check sums
 #Fixme: can these autodetect parameter names to compare?
 if any((MorrisSample_df.loc[:, 's8_silt'] + MorrisSample_df.loc[:, 's8_sand'] + MorrisSample_df.loc[:, 's8_clay']).round(roundTol) != 1.0000):
-    sys.exit('PyERROR: Sum of sand + silt + clay != 1 for s8')
+    sys.exit('PyERROR18: Sum of sand + silt + clay != 1 for s8')
 if any((MorrisSample_df.loc[:, 's108_silt'] + MorrisSample_df.loc[:, 's108_sand'] + MorrisSample_df.loc[:, 's108_clay']).round(roundTol) != 1.0000):
-    sys.exit('PyERROR: Sum of sand + silt + clay != 1 for s108')
+    sys.exit('PyERROR19: Sum of sand + silt + clay != 1 for s108')
 if any((MorrisSample_df.loc[:, 's9_silt'] + MorrisSample_df.loc[:, 's9_sand'] + MorrisSample_df.loc[:, 's9_clay']).round(roundTol) != 1.0000):
-    sys.exit('PyERROR: Sum of sand + silt + clay != 1 for s9')
+    sys.exit('PyERROR20: Sum of sand + silt + clay != 1 for s9')
 if any((MorrisSample_df.loc[:, 's109_silt'] + MorrisSample_df.loc[:, 's109_sand'] + MorrisSample_df.loc[:, 's109_clay']).round(roundTol) != 1.0000):
-    sys.exit('PyERROR: Sum of sand + silt + clay != 1 for s109')
+    sys.exit('PyERROR21: Sum of sand + silt + clay != 1 for s109')
 
 #%%
 #4 parameters for compacted soil must be <= values for uncompacted soil
@@ -544,9 +277,9 @@ del compare, i, ind1, ind2, j, mu, mc, trajChange, inds
 
 #Check sums
 if sum(MorrisSample_df.loc[:,'s109_Ksat_0'] > MorrisSample_df.loc[:,'s9_Ksat_0']) != 0:
-    sys.exit('PyERROR: s109 Ksat not < s9 Ksat')
+    sys.exit('PyERROR22: s109 Ksat not < s9 Ksat')
 if sum(MorrisSample_df.loc[:,'s108_Ksat_0'] > MorrisSample_df.loc[:,'s8_Ksat_0']) != 0:
-    sys.exit('PyERROR: s108 Ksat not < s8 Ksat')
+    sys.exit('PyERROR23: s108 Ksat not < s8 Ksat')
     
 #%% Next make sure that vertical Ksat < Ksat for each soil
 #Ksat_0_v < Ksat_0
@@ -591,7 +324,7 @@ for i in range(len(MorrisSample_df.filter(regex='Ksat_0_v$').columns)):
                 Val = [rd.uniform(ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_Ksat_0_v'].index[0],2], Ksat[indsTrajPos].iloc[0])]*len(vKsat[indsTrajPos])
                 vKsat[indsTrajPos] = Val
             else:
-                #determine all of the indices for each
+                #determine all of the change indices for each
                 for k in range(len(vKsat[indsTrajPos].unique())):
                     #Find the first instance of the unique value and record it
                     if k == 0:
@@ -634,13 +367,13 @@ del compare, i, ind, j, vKsat, Ksat, trajChange, inds
 
 #Check sums
 if sum(MorrisSample_df.loc[:,'s109_Ksat_0_v'] > MorrisSample_df.loc[:,'s109_Ksat_0']) != 0:
-    sys.exit('PyERROR: s109 vKsat not < s109 Ksat')
+    sys.exit('PyERROR24: s109 vKsat not < s109 Ksat')
 if sum(MorrisSample_df.loc[:,'s9_Ksat_0_v'] > MorrisSample_df.loc[:,'s9_Ksat_0']) != 0:
-    sys.exit('PyERROR: s9 vKsat not < s9 Ksat')
+    sys.exit('PyERROR25: s9 vKsat not < s9 Ksat')
 if sum(MorrisSample_df.loc[:,'s108_Ksat_0_v'] > MorrisSample_df.loc[:,'s108_Ksat_0']) != 0:
-    sys.exit('PyERROR: s108 vKsat not < s108 Ksat')
+    sys.exit('PyERROR26: s108 vKsat not < s108 Ksat')
 if sum(MorrisSample_df.loc[:,'s8_Ksat_0_v'] > MorrisSample_df.loc[:,'s8_Ksat_0']) != 0:
-    sys.exit('PyERROR: s8 vKsat not < s8 Ksat')
+    sys.exit('PyERROR27: s8 vKsat not < s8 Ksat')
 
 #%%
 #Finally, make sure that vKsat compacted < vKsat uncompacted
@@ -726,9 +459,9 @@ del compare, i, ind1, ind2, j, mu, mc, trajChange, inds
 
 #Check sums
 if sum(MorrisSample_df.loc[:,'s109_Ksat_0_v'] > MorrisSample_df.loc[:,'s9_Ksat_0_v']) != 0:
-    sys.exit('PyERROR: s109 vKsat not < s9 Ksat')
+    sys.exit('PyERROR28: s109 vKsat not < s9 Ksat')
 if sum(MorrisSample_df.loc[:,'s108_Ksat_0_v'] > MorrisSample_df.loc[:,'s8_Ksat_0_v']) != 0:
-    sys.exit('PyERROR: s108 vKsat not < s8 Ksat')
+    sys.exit('PyERROR29: s108 vKsat not < s8 Ksat')
 
 #%%
 #m uncompacted >= m compacted for each soil type:
@@ -846,9 +579,9 @@ del compare, i, ind1, ind2, j, mu, mc, trajChange, inds
 
 #Check sums
 if sum(MorrisSample_df.loc[:,'s109_m'] > MorrisSample_df.loc[:,'s9_m']) != 0:
-    sys.exit('PyERROR: s109 m not < s9 m')
+    sys.exit('PyERROR30: s109 m not < s9 m')
 if sum(MorrisSample_df.loc[:,'s108_m'] > MorrisSample_df.loc[:,'s8_m']) != 0:
-    sys.exit('PyERROR: s108 m not < s8 m')
+    sys.exit('PyERROR31: s108 m not < s8 m')
     
 #%% Porosity
 #porosity uncompacted >= porosity compacted for each soil type:
@@ -966,1100 +699,49 @@ del compare, i, ind1, ind2, j, pu, pc, trajChange, inds
 
 #Check sums
 if sum(MorrisSample_df.loc[:,'s109_porosity_0'] > MorrisSample_df.loc[:,'s9_porosity_0']) != 0:
-    sys.exit('PyERROR: s109 porosity_0 not < s9 porosity_0')
+    sys.exit('PyERROR32: s109 porosity_0 not < s9 porosity_0')
 if sum(MorrisSample_df.loc[:,'s108_porosity_0'] > MorrisSample_df.loc[:,'s8_porosity_0']) != 0:
-    sys.exit('PyERROR: s108 porosity_0 not < s8 porosity_0')
+    sys.exit('PyERROR33: s108 porosity_0 not < s8 porosity_0')
 
 #%% Vegetation
+
 #%% K_absorptance + K_reflectance + K_transmittance = 1 - round check
 #The only vegetation for SA that is changed is #102 - trees. Other two are 1 - values assigned randomly.
 #Fixme: For the calibration will need a different check because all vars could be adjusted.
-#Fixme: This loop is slow because it has to loop through the entire database once per unique soil class.
-#Could the i for loop be dropped and all soil classes done in the row iteration loop? 
-for i in range(len(MorrisSample_df.filter(regex='102_K_absorptance$').columns)):
-    #Find the indicator for the soil type
-    #string = Get all columns containing Ka
-    ind = re.split(string=MorrisSample_df.filter(regex='K_absorptance$').columns[i], pattern='_')[0]
-    #Use the indicator to extract the Ka, Kr, and Kt columns
-    Ka = MorrisSample_df.loc[:, ind + '_K_absorptance']
-    Kr = MorrisSample_df.loc[:, ind + '_K_reflectance']
-    Kt = MorrisSample_df.loc[:, ind + '_K_transmittance']
-    
-    #Save the original column
-    MorrisSample_df.loc[:, 'orig_' + ind + '_K_absorptance_orig'] = Ka
-    MorrisSample_df.loc[:, 'orig_' + ind + '_K_reflectance_orig'] = Kr
-    MorrisSample_df.loc[:, 'orig_' + ind + '_K_transmittance_orig'] = Kt
-    
-    #Loop through the indices to reassign the Kr Ka and Kt values - should remain within the delta step change
-    for j in range(len(Ka)):
-        #Compute the remainder from 1
-        delta = 1 - (Kr[j] + Ka[j] + Kt[j])
-        
-        #Need to add delta/3 to each parameter.
-        #Check that the redistribution of values is within each parameter's range
-        #Add delta/3 
-        #Check if this will make Kr greater than upper bound on Kr
-        if ((Kr[j] + delta/3) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_reflectance'].index[0],3])):
-            #Set Kr to its maximum value and distribute the remaining delta to Kt and Ka
-            delta -= (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_reflectance'].index[0],3] - Kr[j])
-            Kr[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_reflectance'].index[0],3]
-            
-            #delta must be positive, so no need to check upper bounds on Ka and Kt by adding delta/2
-            #Check if this will make Ka greater than upper bound on Ka
-            if ((Ka[j] + delta/2) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_absorptance'].index[0],3])):
-                #Set Ka to its maximum value and distribute the remaining delta to Kt
-                delta -= (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_absorptance'].index[0],3] - Ka[j])
-                Ka[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_absorptance'].index[0],3]
-                
-                #Check if this will make Kt greater than upper bound on Kt
-                if ((Kt[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_transmittance'].index[0],3])):
-                    #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
-                else:
-                    Kt[j] += delta
-            elif ((Kt[j] + delta/2) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_transmittance'].index[0],3])):
-                #Set Kt to its maximum value and distribute the remaining delta to Ka
-                delta -= (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_transmittance'].index[0],3] - Kt[j])
-                Kt[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_transmittance'].index[0],3]
-                
-                #Check if this will make Ka greater than upper bound on Ka
-                if ((Ka[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_absorptance'].index[0],3])):
-                    #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
-                else:
-                    Ka[j] += delta
-            else:
-                #Kt and Ka both not exceeding their max. Add delta/2
-                Kt[j] += delta/2
-                Ka[j] += delta/2
-            
-        elif ((Kr[j] + delta/3) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_reflectance'].index[0],2])):        
-            #Set Kr to its minimum value and distribute the remaining delta to Kt and Ka
-            delta += (Kr[j] - ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_reflectance'].index[0],2])
-            Kr[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_reflectance'].index[0],2]
-            
-            #delta must be negative, so no need to check lower bounds on Ka and Kt by adding delta/2
-            #Check if this will make Ka less than lower bound on Ka
-            if ((Ka[j] + delta/2) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_absorptance'].index[0],2])):
-                #Set Ka to its minimum value and distribute the remaining delta to Kt
-                delta += (Ka[j] - ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_absorptance'].index[0],2])
-                Ka[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_absorptance'].index[0],2]
-                
-                #Check if this will make Kt less than lower bound on Kt
-                if ((Kt[j] + delta) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_transmittance'].index[0],2])):
-                    #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
-                else:
-                    Kt[j] += delta
-            elif ((Kt[j] + delta/2) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_transmittance'].index[0],2])):
-                #Set Kt to its minimum value and distribute the remaining delta to Ka
-                delta += (Kt[j] - ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_transmittance'].index[0],2])
-                Kt[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_transmittance'].index[0],2]
-                
-                #Check if this will make Ka less than lower bound on Ka
-                if ((Ka[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_absorptance'].index[0],2])):
-                    #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
-                else:
-                    Ka[j] += delta
-            else:
-                #Kt and Ka both not less than their min. Add delta/2 (which is subtraction)
-                Kt[j] += delta/2
-                Ka[j] += delta/2
-        elif ((Ka[j] + delta/3) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_absorptance'].index[0],3])):
-            #Set Ka to its maximum value and distribute the remaining delta to Kt and Ka
-            delta -= (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_absorptance'].index[0],3] - Ka[j])
-            Ka[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_absorptance'].index[0],3]
-            
-            #delta must be positive, so no need to check upper bounds on Kr and Kt by adding delta/2
-            if ((Kr[j] + delta/2) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_reflectance'].index[0],3])):
-                #Set Kr to its maximum value and distribute the remaining delta to Kt
-                delta -= (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_reflectance'].index[0],3] - Kr[j])
-                Kr[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_reflectance'].index[0],3]
-                
-                #Check if this will make Kt greater than upper bound on Kt
-                if ((Kt[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_transmittance'].index[0],3])):
-                    #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
-                else:
-                    Kt[j] += delta
-            elif ((Kt[j] + delta/2) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_transmittance'].index[0],3])):
-                #Set Kt to its maximum value and distribute the remaining delta to Kr
-                delta -= (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_transmittance'].index[0],3] - Kt[j])
-                Kt[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_transmittance'].index[0],3]
-                
-                #Check if this will make Kr greater than upper bound on Kr
-                if ((Kr[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_reflectance'].index[0],3])):
-                    #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
-                else:
-                    Kr[j] += delta
-            else:
-                #Kt and Kr both not exceeding their max. Add delta/2
-                Kt[j] += delta/2
-                Kr[j] += delta/2
-            
-        elif ((Ka[j] + delta/3) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_absorptance'].index[0],2])):        
-            #Set Ka to its minimum value and distribute the remaining delta to Kt and Ka
-            delta += (Ka[j] - ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_absorptance'].index[0],2])
-            Ka[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_absorptance'].index[0],2]
-            
-            #delta must be negative, so no need to check lower bounds on Kr and Kt by adding delta/2
-            #Check if this will make Kr less than lower bound on Kr
-            if ((Kr[j] + delta/2) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_reflectance'].index[0],2])):
-                #Set Kr to its minimum value and distribute the remaining delta to Kt
-                delta += (Kr[j] - ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_reflectance'].index[0],2])
-                Kr[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_reflectance'].index[0],2]
-                
-                #Check if this will make Kt less than lower bound on Kt
-                if ((Kt[j] + delta) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_transmittance'].index[0],2])):
-                    #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
-                else:
-                    Kt[j] += delta
-            elif ((Kt[j] + delta/2) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_transmittance'].index[0],2])):
-                #Set Kt to its minimum value and distribute the remaining delta to Kr
-                delta += (Kt[j] - ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_transmittance'].index[0],2])
-                Kt[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_transmittance'].index[0],2]
-                
-                #Check if this will make Kr less than lower bound on Kr
-                if ((Kr[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_reflectance'].index[0],2])):
-                    #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
-                else:
-                    Kr[j] += delta
-            else:
-                #Kt and Kr both not less than their min. Add delta/2 (which is subtraction)
-                Kt[j] += delta/2
-                Kr[j] += delta/2
-        elif ((Kt[j] + delta/3) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_transmittance'].index[0],3])):
-            #Set Kt to its maximum value and distribute the remaining delta to Kr and Ka
-            delta -= (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_transmittance'].index[0],3] - Kt[j])
-            Kt[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_transmittance'].index[0],3]
-            
-            #delta must be positive, so no need to check upper bounds on Kr and Ka by adding delta/2
-            #Check if this will make Kr greater than upper bound on Kr
-            if ((Kr[j] + delta/2) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_reflectance'].index[0],3])):
-                #Set Kr to its maximum value and distribute the remaining delta to Ka
-                delta -= (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_reflectance'].index[0],3] - Kr[j])
-                Kr[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_reflectance'].index[0],3]
-                
-                #Check if this will make Ka greater than upper bound on Ka
-                if ((Ka[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_absorptance'].index[0],3])):
-                    #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
-                else:
-                    Ka[j] += delta
-            elif ((Ka[j] + delta/2) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_absorptance'].index[0],3])):
-                #Set Ka to its maximum value and distribute the remaining delta to Kr
-                delta -= (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_absorptance'].index[0],3] - Ka[j])
-                Ka[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_absorptance'].index[0],3]
-                
-                #Check if this will make Kr greater than upper bound on Kr
-                if ((Kr[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_reflectance'].index[0],3])):
-                    #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
-                else:
-                    Kr[j] += delta
-            else:
-                #Ka and Kr both not exceeding their max. Add delta/2
-                Ka[j] += delta/2
-                Kr[j] += delta/2
-            
-        elif ((Kt[j] + delta/3) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_transmittance'].index[0],2])):        
-            #Set Kt to its minimum value and distribute the remaining delta to Kr and Ka
-            delta += (Kt[j] - ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_transmittance'].index[0],2])
-            Kt[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_transmittance'].index[0],2]
-            
-            #delta must be negative, so no need to check lower bounds on Kr and Ka by adding delta/2
-            #Check if this will make Kr less than lower bound on Kr
-            if ((Kr[j] + delta/2) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_reflectance'].index[0],2])):
-                #Set Kr to its minimum value and distribute the remaining delta to Ka
-                delta += (Kr[j] - ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_reflectance'].index[0],2])
-                Kr[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_reflectance'].index[0],2]
-                
-                #Check if this will make Ka less than lower bound on Ka
-                if ((Ka[j] + delta) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_absorptance'].index[0],2])):
-                    #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
-                else:
-                    Ka[j] += delta
-            elif ((Ka[j] + delta/2) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_absorptance'].index[0],2])):
-                #Set Ka to its minimum value and distribute the remaining delta to Kr
-                delta += (Ka[j] - ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_absorptance'].index[0],2])
-                Ka[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_absorptance'].index[0],2]
-                
-                #Check if this will make Kr less than lower bound on Kr
-                if ((Kr[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_reflectance'].index[0],2])):
-                    #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
-                else:
-                    Kr[j] += delta
-            else:
-                #Ka and Kr both not less than their min. Add delta/2 (which is subtraction)
-                Ka[j] += delta/2
-                Kr[j] += delta/2
-        else:
-            #Kr, Ka, and Kt within their bounds. Add delta/3
-            Kr[j] += delta/3
-            Ka[j] += delta/3
-            Kt[j] += delta/3
-        
-        #The resulting values could sum to a number other than exactly 1, but be within thouKrths of 1. 
-        #So, round all values and ensure they sum to exactly 1
-        Kr[j] = round(Kr[j],roundTol) 
-        Ka[j] = round(Ka[j],roundTol)
-        Kt[j] = round(Kt[j],roundTol)
-        f = round(1 - (Kr[j] + Ka[j] + Kt[j]),roundTol)
-        if f > 0:
-            #Check for being less than upper bound. Add to first of Kr, Ka, Kt
-            if (Kr[j] + f) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_reflectance'].index[0],3]):
-                Kr[j] += f
-            elif (Ka[j] + f) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_absorptance'].index[0],3]):
-                Ka[j] += f
-            elif (Kt[j] + f) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_transmittance'].index[0],3]):
-                Kt[j] += f
-            else:
-                sys.exit('PyERROR: Sum of Kt + Ka + Kr != 1, and cannot be rounded to 1 for Replicate = %s' % str(j))
-        elif f < 0:
-            #Check for being greater than lower bound. Add to first of Kr, Ka, Kt
-            if (Kr[j] + f) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_reflectance'].index[0],2]):
-                Kr[j] += f
-            elif (Ka[j] + f) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_absorptance'].index[0],2]):
-                Ka[j] += f
-            elif (Kt[j] + f) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_K_transmittance'].index[0],2]):
-                Kt[j] += f
-            else:
-                sys.exit('PyERROR: Sum of Kt + Ka + Kr != 1, and cannot be rounded to 1 for Replicate = %s' % str(j))    
-    
-    #Save the new column of values to track what was changed.
-    MorrisSample_df.loc[:, ind + '_K_absorptance'] = Ka
-    MorrisSample_df.loc[:, ind + '_K_reflectance'] = Kr
-    MorrisSample_df.loc[:, ind + '_K_transmittance'] = Kt
-
-del i, j, Kt, Ka, Kr, delta, ind, f
+MorrisSample_df = FullSum3Check(Col1='_K_absorptance', Col2='_K_reflectance', Col3='_K_transmittance', MorrisSample_df=MorrisSample_df, N=N, ProbFile=ProbFile, regexNm='102_K_absorptance$', roundTol=roundTol)
 
 #Check sums
 if any((MorrisSample_df.loc[:, 'v102_K_absorptance'] + MorrisSample_df.loc[:, 'v102_K_reflectance'] + MorrisSample_df.loc[:, 'v102_K_transmittance']).round(roundTol) != 1.0000):
-    sys.exit('PyERROR: Sum of K absorptance, reflectance, transmittance != 1 for v102')
+    sys.exit('PyERROR34: Sum of K absorptance, reflectance, transmittance != 1 for v102')
 
 #%% PAR_absorptance + PAR_reflectance + PAR_transmittance = 1 - round check
 #The only venetation for SA that is changed is #102 - trees. Other two are 1 - values assigned randomly.
 #Fixme: For the calibration will need a different check because all vars could be adjusted.
-#Fixme: This loop is slow because it has to loop through the entire database once per unique soil class.
-#Could the i for loop be dropped and all soil classes done in the row iteration loop? 
-for i in range(len(MorrisSample_df.filter(regex='102_PAR_absorptance$').columns)):
-    #Find the indicator for the soil type
-    #string = Get all columns containing Ka
-    ind = re.split(string=MorrisSample_df.filter(regex='PAR_absorptance$').columns[i], pattern='_')[0]
-    #Use the indicator to extract the Ka, Kr, and Kt columns
-    Ka = MorrisSample_df.loc[:, ind + '_PAR_absorptance']
-    Kr = MorrisSample_df.loc[:, ind + '_PAR_reflectance']
-    Kt = MorrisSample_df.loc[:, ind + '_PAR_transmittance']
-    
-    #Save the original column
-    MorrisSample_df.loc[:, 'orig_' + ind + '_PAR_absorptance_orig'] = Ka
-    MorrisSample_df.loc[:, 'orig_' + ind + '_PAR_reflectance_orig'] = Kr
-    MorrisSample_df.loc[:, 'orig_' + ind + '_PAR_transmittance_orig'] = Kt
-    
-    #Loop through the indices to reassign the Kr Ka and Kt values - should remain within the delta step change
-    for j in range(len(Ka)):
-        #Compute the remainder from 1
-        delta = 1 - (Kr[j] + Ka[j] + Kt[j])
-        
-        #Need to add delta/3 to each parameter.
-        #Check that the redistribution of values is within each parameter's range
-        #Add delta/3 
-        #Check if this will make Kr greater than upper bound on Kr
-        if ((Kr[j] + delta/3) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_reflectance'].index[0],3])):
-            #Set Kr to its maximum value and distribute the remaining delta to Kt and Ka
-            delta -= (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_reflectance'].index[0],3] - Kr[j])
-            Kr[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_reflectance'].index[0],3]
-            
-            #delta must be positive, so no need to check upper bounds on Ka and Kt by adding delta/2
-            #Check if this will make Ka greater than upper bound on Ka
-            if ((Ka[j] + delta/2) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_absorptance'].index[0],3])):
-                #Set Ka to its maximum value and distribute the remaining delta to Kt
-                delta -= (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_absorptance'].index[0],3] - Ka[j])
-                Ka[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_absorptance'].index[0],3]
-                
-                #Check if this will make Kt greater than upper bound on Kt
-                if ((Kt[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_transmittance'].index[0],3])):
-                    #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
-                else:
-                    Kt[j] += delta
-            elif ((Kt[j] + delta/2) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_transmittance'].index[0],3])):
-                #Set Kt to its maximum value and distribute the remaining delta to Ka
-                delta -= (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_transmittance'].index[0],3] - Kt[j])
-                Kt[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_transmittance'].index[0],3]
-                
-                #Check if this will make Ka greater than upper bound on Ka
-                if ((Ka[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_absorptance'].index[0],3])):
-                    #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
-                else:
-                    Ka[j] += delta
-            else:
-                #Kt and Ka both not exceeding their max. Add delta/2
-                Kt[j] += delta/2
-                Ka[j] += delta/2
-            
-        elif ((Kr[j] + delta/3) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_reflectance'].index[0],2])):        
-            #Set Kr to its minimum value and distribute the remaining delta to Kt and Ka
-            delta += (Kr[j] - ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_reflectance'].index[0],2])
-            Kr[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_reflectance'].index[0],2]
-            
-            #delta must be negative, so no need to check lower bounds on Ka and Kt by adding delta/2
-            #Check if this will make Ka less than lower bound on Ka
-            if ((Ka[j] + delta/2) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_absorptance'].index[0],2])):
-                #Set Ka to its minimum value and distribute the remaining delta to Kt
-                delta += (Ka[j] - ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_absorptance'].index[0],2])
-                Ka[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_absorptance'].index[0],2]
-                
-                #Check if this will make Kt less than lower bound on Kt
-                if ((Kt[j] + delta) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_transmittance'].index[0],2])):
-                    #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
-                else:
-                    Kt[j] += delta
-            elif ((Kt[j] + delta/2) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_transmittance'].index[0],2])):
-                #Set Kt to its minimum value and distribute the remaining delta to Ka
-                delta += (Kt[j] - ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_transmittance'].index[0],2])
-                Kt[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_transmittance'].index[0],2]
-                
-                #Check if this will make Ka less than lower bound on Ka
-                if ((Ka[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_absorptance'].index[0],2])):
-                    #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
-                else:
-                    Ka[j] += delta
-            else:
-                #Kt and Ka both not less than their min. Add delta/2 (which is subtraction)
-                Kt[j] += delta/2
-                Ka[j] += delta/2
-        elif ((Ka[j] + delta/3) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_absorptance'].index[0],3])):
-            #Set Ka to its maximum value and distribute the remaining delta to Kt and Ka
-            delta -= (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_absorptance'].index[0],3] - Ka[j])
-            Ka[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_absorptance'].index[0],3]
-            
-            #delta must be positive, so no need to check upper bounds on Kr and Kt by adding delta/2
-            if ((Kr[j] + delta/2) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_reflectance'].index[0],3])):
-                #Set Kr to its maximum value and distribute the remaining delta to Kt
-                delta -= (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_reflectance'].index[0],3] - Kr[j])
-                Kr[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_reflectance'].index[0],3]
-                
-                #Check if this will make Kt greater than upper bound on Kt
-                if ((Kt[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_transmittance'].index[0],3])):
-                    #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
-                else:
-                    Kt[j] += delta
-            elif ((Kt[j] + delta/2) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_transmittance'].index[0],3])):
-                #Set Kt to its maximum value and distribute the remaining delta to Kr
-                delta -= (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_transmittance'].index[0],3] - Kt[j])
-                Kt[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_transmittance'].index[0],3]
-                
-                #Check if this will make Kr greater than upper bound on Kr
-                if ((Kr[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_reflectance'].index[0],3])):
-                    #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
-                else:
-                    Kr[j] += delta
-            else:
-                #Kt and Kr both not exceeding their max. Add delta/2
-                Kt[j] += delta/2
-                Kr[j] += delta/2
-            
-        elif ((Ka[j] + delta/3) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_absorptance'].index[0],2])):        
-            #Set Ka to its minimum value and distribute the remaining delta to Kt and Ka
-            delta += (Ka[j] - ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_absorptance'].index[0],2])
-            Ka[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_absorptance'].index[0],2]
-            
-            #delta must be negative, so no need to check lower bounds on Kr and Kt by adding delta/2
-            #Check if this will make Kr less than lower bound on Kr
-            if ((Kr[j] + delta/2) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_reflectance'].index[0],2])):
-                #Set Kr to its minimum value and distribute the remaining delta to Kt
-                delta += (Kr[j] - ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_reflectance'].index[0],2])
-                Kr[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_reflectance'].index[0],2]
-                
-                #Check if this will make Kt less than lower bound on Kt
-                if ((Kt[j] + delta) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_transmittance'].index[0],2])):
-                    #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
-                else:
-                    Kt[j] += delta
-            elif ((Kt[j] + delta/2) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_transmittance'].index[0],2])):
-                #Set Kt to its minimum value and distribute the remaining delta to Kr
-                delta += (Kt[j] - ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_transmittance'].index[0],2])
-                Kt[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_transmittance'].index[0],2]
-                
-                #Check if this will make Kr less than lower bound on Kr
-                if ((Kr[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_reflectance'].index[0],2])):
-                    #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
-                else:
-                    Kr[j] += delta
-            else:
-                #Kt and Kr both not less than their min. Add delta/2 (which is subtraction)
-                Kt[j] += delta/2
-                Kr[j] += delta/2
-        elif ((Kt[j] + delta/3) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_transmittance'].index[0],3])):
-            #Set Kt to its maximum value and distribute the remaining delta to Kr and Ka
-            delta -= (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_transmittance'].index[0],3] - Kt[j])
-            Kt[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_transmittance'].index[0],3]
-            
-            #delta must be positive, so no need to check upper bounds on Kr and Ka by adding delta/2
-            #Check if this will make Kr greater than upper bound on Kr
-            if ((Kr[j] + delta/2) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_reflectance'].index[0],3])):
-                #Set Kr to its maximum value and distribute the remaining delta to Ka
-                delta -= (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_reflectance'].index[0],3] - Kr[j])
-                Kr[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_reflectance'].index[0],3]
-                
-                #Check if this will make Ka greater than upper bound on Ka
-                if ((Ka[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_absorptance'].index[0],3])):
-                    #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
-                else:
-                    Ka[j] += delta
-            elif ((Ka[j] + delta/2) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_absorptance'].index[0],3])):
-                #Set Ka to its maximum value and distribute the remaining delta to Kr
-                delta -= (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_absorptance'].index[0],3] - Ka[j])
-                Ka[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_absorptance'].index[0],3]
-                
-                #Check if this will make Kr greater than upper bound on Kr
-                if ((Kr[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_reflectance'].index[0],3])):
-                    #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
-                else:
-                    Kr[j] += delta
-            else:
-                #Ka and Kr both not exceeding their max. Add delta/2
-                Ka[j] += delta/2
-                Kr[j] += delta/2
-            
-        elif ((Kt[j] + delta/3) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_transmittance'].index[0],2])):        
-            #Set Kt to its minimum value and distribute the remaining delta to Kr and Ka
-            delta += (Kt[j] - ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_transmittance'].index[0],2])
-            Kt[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_transmittance'].index[0],2]
-            
-            #delta must be negative, so no need to check lower bounds on Kr and Ka by adding delta/2
-            #Check if this will make Kr less than lower bound on Kr
-            if ((Kr[j] + delta/2) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_reflectance'].index[0],2])):
-                #Set Kr to its minimum value and distribute the remaining delta to Ka
-                delta += (Kr[j] - ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_reflectance'].index[0],2])
-                Kr[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_reflectance'].index[0],2]
-                
-                #Check if this will make Ka less than lower bound on Ka
-                if ((Ka[j] + delta) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_absorptance'].index[0],2])):
-                    #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
-                else:
-                    Ka[j] += delta
-            elif ((Ka[j] + delta/2) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_absorptance'].index[0],2])):
-                #Set Ka to its minimum value and distribute the remaining delta to Kr
-                delta += (Ka[j] - ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_absorptance'].index[0],2])
-                Ka[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_absorptance'].index[0],2]
-                
-                #Check if this will make Kr less than lower bound on Kr
-                if ((Kr[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_reflectance'].index[0],2])):
-                    #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
-                else:
-                    Kr[j] += delta
-            else:
-                #Ka and Kr both not less than their min. Add delta/2 (which is subtraction)
-                Ka[j] += delta/2
-                Kr[j] += delta/2
-        else:
-            #Kr, Ka, and Kt within their bounds. Add delta/3
-            Kr[j] += delta/3
-            Ka[j] += delta/3
-            Kt[j] += delta/3
-        
-        #The resulting values could sum to a number other than exactly 1, but be within thouKrths of 1. 
-        #So, round all values and ensure they sum to exactly 1
-        Kr[j] = round(Kr[j],roundTol) 
-        Ka[j] = round(Ka[j],roundTol)
-        Kt[j] = round(Kt[j],roundTol)
-        f = round(1 - (Kr[j] + Ka[j] + Kt[j]),roundTol)
-        if f > 0:
-            #Check for being less than upper bound. Add to first of Kr, Ka, Kt
-            if (Kr[j] + f) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_reflectance'].index[0],3]):
-                Kr[j] += f
-            elif (Ka[j] + f) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_absorptance'].index[0],3]):
-                Ka[j] += f
-            elif (Kt[j] + f) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_transmittance'].index[0],3]):
-                Kt[j] += f
-            else:
-                sys.exit('PyERROR: Sum of Kt + Ka + Kr != 1, and cannot be rounded to 1 for Replicate = %s' % str(j))
-        elif f < 0:
-            #Check for being greater than lower bound. Add to first of Kr, Ka, Kt
-            if (Kr[j] + f) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_reflectance'].index[0],2]):
-                Kr[j] += f
-            elif (Ka[j] + f) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_absorptance'].index[0],2]):
-                Ka[j] += f
-            elif (Kt[j] + f) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_PAR_transmittance'].index[0],2]):
-                Kt[j] += f
-            else:
-                sys.exit('PyERROR: Sum of Kt + Ka + Kr != 1, and cannot be rounded to 1 for Replicate = %s' % str(j))    
-    
-    #Save the new column of values to track what was changed.
-    MorrisSample_df.loc[:, ind + '_PAR_absorptance'] = Ka
-    MorrisSample_df.loc[:, ind + '_PAR_reflectance'] = Kr
-    MorrisSample_df.loc[:, ind + '_PAR_transmittance'] = Kt
-
-del i, j, Kt, Ka, Kr, delta, ind, f
+MorrisSample_df = FullSum3Check(Col1='_PAR_absorptance', Col2='_PAR_reflectance', Col3='_PAR_transmittance', MorrisSample_df=MorrisSample_df, N=N, ProbFile=ProbFile, regexNm='102_PAR_absorptance$', roundTol=roundTol)
 
 #Check sums
 if any((MorrisSample_df.loc[:, 'v102_PAR_absorptance'] + MorrisSample_df.loc[:, 'v102_PAR_reflectance'] + MorrisSample_df.loc[:, 'v102_PAR_transmittance']).round(roundTol) != 1.0000):
-    sys.exit('PyERROR: Sum of PAR absorptance, reflectance, transmittance != 1 for v102')
+    sys.exit('PyERROR35: Sum of PAR absorptance, reflectance, transmittance != 1 for v102')
 
 #%% epc.frootlitr_fcel + epc.frootlitr_flab + epc.frootlitr_flig = 1 - round check
 #The only venetation for SA that is changed is #102 - trees and #3 - grass. Other is not random.
-#Fixme: This loop is slow because it has to loop through the entire database once per unique soil class.
-#Could the i for loop be dropped and all soil classes done in the row iteration loop? 
-for i in range(len(MorrisSample_df.filter(regex='epc.frootlitr_fcel$').columns)):
-    #Find the indicator for the soil type
-    #string = Get all columns containing Ka
-    ind = re.split(string=MorrisSample_df.filter(regex='epc.frootlitr_fcel$').columns[i], pattern='_')[0]
-    #Use the indicator to extract the Ka, Kr, and Kt columns
-    Ka = MorrisSample_df.loc[:, ind + '_epc.frootlitr_fcel']
-    Kr = MorrisSample_df.loc[:, ind + '_epc.frootlitr_flab']
-    Kt = MorrisSample_df.loc[:, ind + '_epc.frootlitr_flig']
-    
-    #Save the original column
-    MorrisSample_df.loc[:, 'orig_' + ind + '_epc.frootlitr_fcel_orig'] = Ka
-    MorrisSample_df.loc[:, 'orig_' + ind + '_epc.frootlitr_flab_orig'] = Kr
-    MorrisSample_df.loc[:, 'orig_' + ind + '_epc.frootlitr_flig_orig'] = Kt
-    
-    #Loop through the indices to reassign the Kr Ka and Kt values - should remain within the delta step change
-    for j in range(len(Ka)):
-        #Compute the remainder from 1
-        delta = 1 - (Kr[j] + Ka[j] + Kt[j])
-        
-        #Need to add delta/3 to each parameter.
-        #Check that the redistribution of values is within each parameter's range
-        #Add delta/3 
-        #Check if this will make Kr greater than upper bound on Kr
-        if ((Kr[j] + delta/3) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_flab'].index[0],3])):
-            #Set Kr to its maximum value and distribute the remaining delta to Kt and Ka
-            delta -= (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_flab'].index[0],3] - Kr[j])
-            Kr[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_flab'].index[0],3]
-            
-            #delta must be positive, so no need to check upper bounds on Ka and Kt by adding delta/2
-            #Check if this will make Ka greater than upper bound on Ka
-            if ((Ka[j] + delta/2) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_fcel'].index[0],3])):
-                #Set Ka to its maximum value and distribute the remaining delta to Kt
-                delta -= (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_fcel'].index[0],3] - Ka[j])
-                Ka[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_fcel'].index[0],3]
-                
-                #Check if this will make Kt greater than upper bound on Kt
-                if ((Kt[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_flig'].index[0],3])):
-                    #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
-                else:
-                    Kt[j] += delta
-            elif ((Kt[j] + delta/2) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_flig'].index[0],3])):
-                #Set Kt to its maximum value and distribute the remaining delta to Ka
-                delta -= (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_flig'].index[0],3] - Kt[j])
-                Kt[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_flig'].index[0],3]
-                
-                #Check if this will make Ka greater than upper bound on Ka
-                if ((Ka[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_fcel'].index[0],3])):
-                    #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
-                else:
-                    Ka[j] += delta
-            else:
-                #Kt and Ka both not exceeding their max. Add delta/2
-                Kt[j] += delta/2
-                Ka[j] += delta/2
-            
-        elif ((Kr[j] + delta/3) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_flab'].index[0],2])):        
-            #Set Kr to its minimum value and distribute the remaining delta to Kt and Ka
-            delta += (Kr[j] - ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_flab'].index[0],2])
-            Kr[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_flab'].index[0],2]
-            
-            #delta must be negative, so no need to check lower bounds on Ka and Kt by adding delta/2
-            #Check if this will make Ka less than lower bound on Ka
-            if ((Ka[j] + delta/2) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_fcel'].index[0],2])):
-                #Set Ka to its minimum value and distribute the remaining delta to Kt
-                delta += (Ka[j] - ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_fcel'].index[0],2])
-                Ka[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_fcel'].index[0],2]
-                
-                #Check if this will make Kt less than lower bound on Kt
-                if ((Kt[j] + delta) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_flig'].index[0],2])):
-                    #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
-                else:
-                    Kt[j] += delta
-            elif ((Kt[j] + delta/2) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_flig'].index[0],2])):
-                #Set Kt to its minimum value and distribute the remaining delta to Ka
-                delta += (Kt[j] - ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_flig'].index[0],2])
-                Kt[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_flig'].index[0],2]
-                
-                #Check if this will make Ka less than lower bound on Ka
-                if ((Ka[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_fcel'].index[0],2])):
-                    #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
-                else:
-                    Ka[j] += delta
-            else:
-                #Kt and Ka both not less than their min. Add delta/2 (which is subtraction)
-                Kt[j] += delta/2
-                Ka[j] += delta/2
-        elif ((Ka[j] + delta/3) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_fcel'].index[0],3])):
-            #Set Ka to its maximum value and distribute the remaining delta to Kt and Ka
-            delta -= (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_fcel'].index[0],3] - Ka[j])
-            Ka[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_fcel'].index[0],3]
-            
-            #delta must be positive, so no need to check upper bounds on Kr and Kt by adding delta/2
-            if ((Kr[j] + delta/2) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_flab'].index[0],3])):
-                #Set Kr to its maximum value and distribute the remaining delta to Kt
-                delta -= (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_flab'].index[0],3] - Kr[j])
-                Kr[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_flab'].index[0],3]
-                
-                #Check if this will make Kt greater than upper bound on Kt
-                if ((Kt[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_flig'].index[0],3])):
-                    #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
-                else:
-                    Kt[j] += delta
-            elif ((Kt[j] + delta/2) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_flig'].index[0],3])):
-                #Set Kt to its maximum value and distribute the remaining delta to Kr
-                delta -= (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_flig'].index[0],3] - Kt[j])
-                Kt[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_flig'].index[0],3]
-                
-                #Check if this will make Kr greater than upper bound on Kr
-                if ((Kr[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_flab'].index[0],3])):
-                    #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
-                else:
-                    Kr[j] += delta
-            else:
-                #Kt and Kr both not exceeding their max. Add delta/2
-                Kt[j] += delta/2
-                Kr[j] += delta/2
-            
-        elif ((Ka[j] + delta/3) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_fcel'].index[0],2])):        
-            #Set Ka to its minimum value and distribute the remaining delta to Kt and Ka
-            delta += (Ka[j] - ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_fcel'].index[0],2])
-            Ka[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_fcel'].index[0],2]
-            
-            #delta must be negative, so no need to check lower bounds on Kr and Kt by adding delta/2
-            #Check if this will make Kr less than lower bound on Kr
-            if ((Kr[j] + delta/2) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_flab'].index[0],2])):
-                #Set Kr to its minimum value and distribute the remaining delta to Kt
-                delta += (Kr[j] - ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_flab'].index[0],2])
-                Kr[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_flab'].index[0],2]
-                
-                #Check if this will make Kt less than lower bound on Kt
-                if ((Kt[j] + delta) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_flig'].index[0],2])):
-                    #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
-                else:
-                    Kt[j] += delta
-            elif ((Kt[j] + delta/2) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_flig'].index[0],2])):
-                #Set Kt to its minimum value and distribute the remaining delta to Kr
-                delta += (Kt[j] - ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_flig'].index[0],2])
-                Kt[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_flig'].index[0],2]
-                
-                #Check if this will make Kr less than lower bound on Kr
-                if ((Kr[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_flab'].index[0],2])):
-                    #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
-                else:
-                    Kr[j] += delta
-            else:
-                #Kt and Kr both not less than their min. Add delta/2 (which is subtraction)
-                Kt[j] += delta/2
-                Kr[j] += delta/2
-        elif ((Kt[j] + delta/3) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_flig'].index[0],3])):
-            #Set Kt to its maximum value and distribute the remaining delta to Kr and Ka
-            delta -= (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_flig'].index[0],3] - Kt[j])
-            Kt[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_flig'].index[0],3]
-            
-            #delta must be positive, so no need to check upper bounds on Kr and Ka by adding delta/2
-            #Check if this will make Kr greater than upper bound on Kr
-            if ((Kr[j] + delta/2) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_flab'].index[0],3])):
-                #Set Kr to its maximum value and distribute the remaining delta to Ka
-                delta -= (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_flab'].index[0],3] - Kr[j])
-                Kr[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_flab'].index[0],3]
-                
-                #Check if this will make Ka greater than upper bound on Ka
-                if ((Ka[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_fcel'].index[0],3])):
-                    #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
-                else:
-                    Ka[j] += delta
-            elif ((Ka[j] + delta/2) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_fcel'].index[0],3])):
-                #Set Ka to its maximum value and distribute the remaining delta to Kr
-                delta -= (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_fcel'].index[0],3] - Ka[j])
-                Ka[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_fcel'].index[0],3]
-                
-                #Check if this will make Kr greater than upper bound on Kr
-                if ((Kr[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_flab'].index[0],3])):
-                    #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
-                else:
-                    Kr[j] += delta
-            else:
-                #Ka and Kr both not exceeding their max. Add delta/2
-                Ka[j] += delta/2
-                Kr[j] += delta/2
-            
-        elif ((Kt[j] + delta/3) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_flig'].index[0],2])):        
-            #Set Kt to its minimum value and distribute the remaining delta to Kr and Ka
-            delta += (Kt[j] - ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_flig'].index[0],2])
-            Kt[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_flig'].index[0],2]
-            
-            #delta must be negative, so no need to check lower bounds on Kr and Ka by adding delta/2
-            #Check if this will make Kr less than lower bound on Kr
-            if ((Kr[j] + delta/2) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_flab'].index[0],2])):
-                #Set Kr to its minimum value and distribute the remaining delta to Ka
-                delta += (Kr[j] - ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_flab'].index[0],2])
-                Kr[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_flab'].index[0],2]
-                
-                #Check if this will make Ka less than lower bound on Ka
-                if ((Ka[j] + delta) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_fcel'].index[0],2])):
-                    #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
-                else:
-                    Ka[j] += delta
-            elif ((Ka[j] + delta/2) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_fcel'].index[0],2])):
-                #Set Ka to its minimum value and distribute the remaining delta to Kr
-                delta += (Ka[j] - ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_fcel'].index[0],2])
-                Ka[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_fcel'].index[0],2]
-                
-                #Check if this will make Kr less than lower bound on Kr
-                if ((Kr[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_flab'].index[0],2])):
-                    #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
-                else:
-                    Kr[j] += delta
-            else:
-                #Ka and Kr both not less than their min. Add delta/2 (which is subtraction)
-                Ka[j] += delta/2
-                Kr[j] += delta/2
-        else:
-            #Kr, Ka, and Kt within their bounds. Add delta/3
-            Kr[j] += delta/3
-            Ka[j] += delta/3
-            Kt[j] += delta/3
-        
-        #The resulting values could sum to a number other than exactly 1, but be within thouKrths of 1. 
-        #So, round all values and ensure they sum to exactly 1
-        Kr[j] = round(Kr[j],roundTol) 
-        Ka[j] = round(Ka[j],roundTol)
-        Kt[j] = round(Kt[j],roundTol)
-        f = round(1 - (Kr[j] + Ka[j] + Kt[j]),roundTol)
-        if f > 0:
-            #Check for being less than upper bound. Add to first of Kr, Ka, Kt
-            if (Kr[j] + f) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_flab'].index[0],3]):
-                Kr[j] += f
-            elif (Ka[j] + f) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_fcel'].index[0],3]):
-                Ka[j] += f
-            elif (Kt[j] + f) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_flig'].index[0],3]):
-                Kt[j] += f
-            else:
-                sys.exit('PyERROR: Sum of Kt + Ka + Kr != 1, and cannot be rounded to 1 for Replicate = %s' % str(j))
-        elif f < 0:
-            #Check for being greater than lower bound. Add to first of Kr, Ka, Kt
-            if (Kr[j] + f) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_flab'].index[0],2]):
-                Kr[j] += f
-            elif (Ka[j] + f) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_fcel'].index[0],2]):
-                Ka[j] += f
-            elif (Kt[j] + f) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.frootlitr_flig'].index[0],2]):
-                Kt[j] += f
-            else:
-                sys.exit('PyERROR: Sum of Kt + Ka + Kr != 1, and cannot be rounded to 1 for Replicate = %s' % str(j))    
-    
-    #Save the new column of values to track what was changed.
-    MorrisSample_df.loc[:, ind + '_epc.frootlitr_fcel'] = Ka
-    MorrisSample_df.loc[:, ind + '_epc.frootlitr_flab'] = Kr
-    MorrisSample_df.loc[:, ind + '_epc.frootlitr_flig'] = Kt
-
-del i, j, Kt, Ka, Kr, delta, ind, f
+MorrisSample_df = FullSum3Check(Col1='_epc.frootlitr_fcel', Col2='_epc.frootlitr_flab', Col3='_epc.frootlitr_flig', MorrisSample_df=MorrisSample_df, N=N, ProbFile=ProbFile, regexNm='epc.frootlitr_fcel$', roundTol=roundTol)
 
 #Check sums
 if any((MorrisSample_df.loc[:, 'v102_epc.frootlitr_fcel'] + MorrisSample_df.loc[:, 'v102_epc.frootlitr_flab'] + MorrisSample_df.loc[:, 'v102_epc.frootlitr_flig']).round(roundTol) != 1.0000):
-    sys.exit('PyERROR: Sum of frootlitr_fcel, flab, flig != 1 for v102')
+    sys.exit('PyERROR36: Sum of frootlitr_fcel, flab, flig != 1 for v102')
 if any((MorrisSample_df.loc[:, 'v3_epc.frootlitr_fcel'] + MorrisSample_df.loc[:, 'v3_epc.frootlitr_flab'] + MorrisSample_df.loc[:, 'v3_epc.frootlitr_flig']).round(roundTol) != 1.0000):
-    sys.exit('PyERROR: Sum of frootlitr_fcel, flab, flig != 1 for v3')
+    sys.exit('PyERROR37: Sum of frootlitr_fcel, flab, flig != 1 for v3')
     
 #%% epc.leaflitr_fcel + epc.leaflitr_flab + epc.leaflitr_flig = 1 - round check
 #The only venetation for SA that is changed is #102 - trees and #3 - grass. Other is not random.
-#Fixme: This loop is slow because it has to loop through the entire database once per unique soil class.
-#Could the i for loop be dropped and all soil classes done in the row iteration loop? 
-for i in range(len(MorrisSample_df.filter(regex='epc.leaflitr_fcel$').columns)):
-    #Find the indicator for the soil type
-    #string = Get all columns containing Ka
-    ind = re.split(string=MorrisSample_df.filter(regex='epc.leaflitr_fcel$').columns[i], pattern='_')[0]
-    #Use the indicator to extract the Ka, Kr, and Kt columns
-    Ka = MorrisSample_df.loc[:, ind + '_epc.leaflitr_fcel']
-    Kr = MorrisSample_df.loc[:, ind + '_epc.leaflitr_flab']
-    Kt = MorrisSample_df.loc[:, ind + '_epc.leaflitr_flig']
-    
-    #Save the original column
-    MorrisSample_df.loc[:, 'orig_' + ind + '_epc.leaflitr_fcel_orig'] = Ka
-    MorrisSample_df.loc[:, 'orig_' + ind + '_epc.leaflitr_flab_orig'] = Kr
-    MorrisSample_df.loc[:, 'orig_' + ind + '_epc.leaflitr_flig_orig'] = Kt
-    
-    #Loop through the indices to reassign the Kr Ka and Kt values - should remain within the delta step change
-    for j in range(len(Ka)):
-        #Compute the remainder from 1
-        delta = 1 - (Kr[j] + Ka[j] + Kt[j])
-        
-        #Need to add delta/3 to each parameter.
-        #Check that the redistribution of values is within each parameter's range
-        #Add delta/3 
-        #Check if this will make Kr greater than upper bound on Kr
-        if ((Kr[j] + delta/3) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_flab'].index[0],3])):
-            #Set Kr to its maximum value and distribute the remaining delta to Kt and Ka
-            delta -= (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_flab'].index[0],3] - Kr[j])
-            Kr[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_flab'].index[0],3]
-            
-            #delta must be positive, so no need to check upper bounds on Ka and Kt by adding delta/2
-            #Check if this will make Ka greater than upper bound on Ka
-            if ((Ka[j] + delta/2) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_fcel'].index[0],3])):
-                #Set Ka to its maximum value and distribute the remaining delta to Kt
-                delta -= (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_fcel'].index[0],3] - Ka[j])
-                Ka[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_fcel'].index[0],3]
-                
-                #Check if this will make Kt greater than upper bound on Kt
-                if ((Kt[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_flig'].index[0],3])):
-                    #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
-                else:
-                    Kt[j] += delta
-            elif ((Kt[j] + delta/2) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_flig'].index[0],3])):
-                #Set Kt to its maximum value and distribute the remaining delta to Ka
-                delta -= (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_flig'].index[0],3] - Kt[j])
-                Kt[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_flig'].index[0],3]
-                
-                #Check if this will make Ka greater than upper bound on Ka
-                if ((Ka[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_fcel'].index[0],3])):
-                    #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
-                else:
-                    Ka[j] += delta
-            else:
-                #Kt and Ka both not exceeding their max. Add delta/2
-                Kt[j] += delta/2
-                Ka[j] += delta/2
-            
-        elif ((Kr[j] + delta/3) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_flab'].index[0],2])):        
-            #Set Kr to its minimum value and distribute the remaining delta to Kt and Ka
-            delta += (Kr[j] - ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_flab'].index[0],2])
-            Kr[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_flab'].index[0],2]
-            
-            #delta must be negative, so no need to check lower bounds on Ka and Kt by adding delta/2
-            #Check if this will make Ka less than lower bound on Ka
-            if ((Ka[j] + delta/2) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_fcel'].index[0],2])):
-                #Set Ka to its minimum value and distribute the remaining delta to Kt
-                delta += (Ka[j] - ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_fcel'].index[0],2])
-                Ka[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_fcel'].index[0],2]
-                
-                #Check if this will make Kt less than lower bound on Kt
-                if ((Kt[j] + delta) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_flig'].index[0],2])):
-                    #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
-                else:
-                    Kt[j] += delta
-            elif ((Kt[j] + delta/2) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_flig'].index[0],2])):
-                #Set Kt to its minimum value and distribute the remaining delta to Ka
-                delta += (Kt[j] - ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_flig'].index[0],2])
-                Kt[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_flig'].index[0],2]
-                
-                #Check if this will make Ka less than lower bound on Ka
-                if ((Ka[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_fcel'].index[0],2])):
-                    #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
-                else:
-                    Ka[j] += delta
-            else:
-                #Kt and Ka both not less than their min. Add delta/2 (which is subtraction)
-                Kt[j] += delta/2
-                Ka[j] += delta/2
-        elif ((Ka[j] + delta/3) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_fcel'].index[0],3])):
-            #Set Ka to its maximum value and distribute the remaining delta to Kt and Ka
-            delta -= (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_fcel'].index[0],3] - Ka[j])
-            Ka[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_fcel'].index[0],3]
-            
-            #delta must be positive, so no need to check upper bounds on Kr and Kt by adding delta/2
-            if ((Kr[j] + delta/2) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_flab'].index[0],3])):
-                #Set Kr to its maximum value and distribute the remaining delta to Kt
-                delta -= (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_flab'].index[0],3] - Kr[j])
-                Kr[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_flab'].index[0],3]
-                
-                #Check if this will make Kt greater than upper bound on Kt
-                if ((Kt[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_flig'].index[0],3])):
-                    #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
-                else:
-                    Kt[j] += delta
-            elif ((Kt[j] + delta/2) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_flig'].index[0],3])):
-                #Set Kt to its maximum value and distribute the remaining delta to Kr
-                delta -= (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_flig'].index[0],3] - Kt[j])
-                Kt[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_flig'].index[0],3]
-                
-                #Check if this will make Kr greater than upper bound on Kr
-                if ((Kr[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_flab'].index[0],3])):
-                    #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
-                else:
-                    Kr[j] += delta
-            else:
-                #Kt and Kr both not exceeding their max. Add delta/2
-                Kt[j] += delta/2
-                Kr[j] += delta/2
-            
-        elif ((Ka[j] + delta/3) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_fcel'].index[0],2])):        
-            #Set Ka to its minimum value and distribute the remaining delta to Kt and Ka
-            delta += (Ka[j] - ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_fcel'].index[0],2])
-            Ka[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_fcel'].index[0],2]
-            
-            #delta must be negative, so no need to check lower bounds on Kr and Kt by adding delta/2
-            #Check if this will make Kr less than lower bound on Kr
-            if ((Kr[j] + delta/2) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_flab'].index[0],2])):
-                #Set Kr to its minimum value and distribute the remaining delta to Kt
-                delta += (Kr[j] - ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_flab'].index[0],2])
-                Kr[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_flab'].index[0],2]
-                
-                #Check if this will make Kt less than lower bound on Kt
-                if ((Kt[j] + delta) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_flig'].index[0],2])):
-                    #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
-                else:
-                    Kt[j] += delta
-            elif ((Kt[j] + delta/2) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_flig'].index[0],2])):
-                #Set Kt to its minimum value and distribute the remaining delta to Kr
-                delta += (Kt[j] - ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_flig'].index[0],2])
-                Kt[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_flig'].index[0],2]
-                
-                #Check if this will make Kr less than lower bound on Kr
-                if ((Kr[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_flab'].index[0],2])):
-                    #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
-                else:
-                    Kr[j] += delta
-            else:
-                #Kt and Kr both not less than their min. Add delta/2 (which is subtraction)
-                Kt[j] += delta/2
-                Kr[j] += delta/2
-        elif ((Kt[j] + delta/3) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_flig'].index[0],3])):
-            #Set Kt to its maximum value and distribute the remaining delta to Kr and Ka
-            delta -= (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_flig'].index[0],3] - Kt[j])
-            Kt[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_flig'].index[0],3]
-            
-            #delta must be positive, so no need to check upper bounds on Kr and Ka by adding delta/2
-            #Check if this will make Kr greater than upper bound on Kr
-            if ((Kr[j] + delta/2) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_flab'].index[0],3])):
-                #Set Kr to its maximum value and distribute the remaining delta to Ka
-                delta -= (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_flab'].index[0],3] - Kr[j])
-                Kr[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_flab'].index[0],3]
-                
-                #Check if this will make Ka greater than upper bound on Ka
-                if ((Ka[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_fcel'].index[0],3])):
-                    #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
-                else:
-                    Ka[j] += delta
-            elif ((Ka[j] + delta/2) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_fcel'].index[0],3])):
-                #Set Ka to its maximum value and distribute the remaining delta to Kr
-                delta -= (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_fcel'].index[0],3] - Ka[j])
-                Ka[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_fcel'].index[0],3]
-                
-                #Check if this will make Kr greater than upper bound on Kr
-                if ((Kr[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_flab'].index[0],3])):
-                    #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
-                else:
-                    Kr[j] += delta
-            else:
-                #Ka and Kr both not exceeding their max. Add delta/2
-                Ka[j] += delta/2
-                Kr[j] += delta/2
-            
-        elif ((Kt[j] + delta/3) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_flig'].index[0],2])):        
-            #Set Kt to its minimum value and distribute the remaining delta to Kr and Ka
-            delta += (Kt[j] - ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_flig'].index[0],2])
-            Kt[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_flig'].index[0],2]
-            
-            #delta must be negative, so no need to check lower bounds on Kr and Ka by adding delta/2
-            #Check if this will make Kr less than lower bound on Kr
-            if ((Kr[j] + delta/2) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_flab'].index[0],2])):
-                #Set Kr to its minimum value and distribute the remaining delta to Ka
-                delta += (Kr[j] - ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_flab'].index[0],2])
-                Kr[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_flab'].index[0],2]
-                
-                #Check if this will make Ka less than lower bound on Ka
-                if ((Ka[j] + delta) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_fcel'].index[0],2])):
-                    #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
-                else:
-                    Ka[j] += delta
-            elif ((Ka[j] + delta/2) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_fcel'].index[0],2])):
-                #Set Ka to its minimum value and distribute the remaining delta to Kr
-                delta += (Ka[j] - ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_fcel'].index[0],2])
-                Ka[j] = ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_fcel'].index[0],2]
-                
-                #Check if this will make Kr less than lower bound on Kr
-                if ((Kr[j] + delta) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_flab'].index[0],2])):
-                    #Throw an error - the sum of these 3 values must be 1 at this point.
-                    sys.exit('PyERROR: The sum of Kt, Ka, and Kr cannot be 1 for Replicate = %s' % str(j))
-                else:
-                    Kr[j] += delta
-            else:
-                #Ka and Kr both not less than their min. Add delta/2 (which is subtraction)
-                Ka[j] += delta/2
-                Kr[j] += delta/2
-        else:
-            #Kr, Ka, and Kt within their bounds. Add delta/3
-            Kr[j] += delta/3
-            Ka[j] += delta/3
-            Kt[j] += delta/3
-        
-        #The resulting values could sum to a number other than exactly 1, but be within thouKrths of 1. 
-        #So, round all values and ensure they sum to exactly 1
-        Kr[j] = round(Kr[j],roundTol) 
-        Ka[j] = round(Ka[j],roundTol)
-        Kt[j] = round(Kt[j],roundTol)
-        f = round(1 - (Kr[j] + Ka[j] + Kt[j]),roundTol)
-        if f > 0:
-            #Check for being less than upper bound. Add to first of Kr, Ka, Kt
-            if (Kr[j] + f) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_flab'].index[0],3]):
-                Kr[j] += f
-            elif (Ka[j] + f) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_fcel'].index[0],3]):
-                Ka[j] += f
-            elif (Kt[j] + f) < (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_flig'].index[0],3]):
-                Kt[j] += f
-            else:
-                sys.exit('PyERROR: Sum of Kt + Ka + Kr != 1, and cannot be rounded to 1 for Replicate = %s' % str(j))
-        elif f < 0:
-            #Check for being greater than lower bound. Add to first of Kr, Ka, Kt
-            if (Kr[j] + f) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_flab'].index[0],2]):
-                Kr[j] += f
-            elif (Ka[j] + f) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_fcel'].index[0],2]):
-                Ka[j] += f
-            elif (Kt[j] + f) > (ProbFile.iloc[ProbFile.iloc[:,0][ProbFile.iloc[:,0] == ind+'_epc.leaflitr_flig'].index[0],2]):
-                Kt[j] += f
-            else:
-                sys.exit('PyERROR: Sum of Kt + Ka + Kr != 1, and cannot be rounded to 1 for Replicate = %s' % str(j))    
-    
-    #Save the new column of values to track what was changed.
-    MorrisSample_df.loc[:, ind + '_epc.leaflitr_fcel'] = Ka
-    MorrisSample_df.loc[:, ind + '_epc.leaflitr_flab'] = Kr
-    MorrisSample_df.loc[:, ind + '_epc.leaflitr_flig'] = Kt
-
-del i, j, Kt, Ka, Kr, delta, ind, f
+MorrisSample_df = FullSum3Check(Col1='_epc.leaflitr_fcel', Col2='_epc.leaflitr_flab', Col3='_epc.leaflitr_flig', MorrisSample_df=MorrisSample_df, N=N, ProbFile=ProbFile, regexNm='epc.leaflitr_fcel$', roundTol=roundTol)
 
 #Check sums
 if any((MorrisSample_df.loc[:, 'v102_epc.leaflitr_fcel'] + MorrisSample_df.loc[:, 'v102_epc.leaflitr_flab'] + MorrisSample_df.loc[:, 'v102_epc.leaflitr_flig']).round(roundTol) != 1.0000):
-    sys.exit('PyERROR: Sum of leaflitr_fcel, flab, flig != 1 for v102')
+    sys.exit('PyERROR38: Sum of leaflitr_fcel, flab, flig != 1 for v102')
 if any((MorrisSample_df.loc[:, 'v3_epc.leaflitr_fcel'] + MorrisSample_df.loc[:, 'v3_epc.leaflitr_flab'] + MorrisSample_df.loc[:, 'v3_epc.leaflitr_flig']).round(roundTol) != 1.0000):
-    sys.exit('PyERROR: Sum of leaflitr_fcel, flab, flig != 1 for v3')
+    sys.exit('PyERROR39: Sum of leaflitr_fcel, flab, flig != 1 for v3')
 #%% epc.topt <= epc.tmax
 #If epc.tmax is not greater, simulate a random value less than epc.tmax for epc.topt
 for i in range(len(MorrisSample_df.filter(regex='epc.topt$').columns)):
@@ -2144,9 +826,9 @@ del compare, i, ind, j, vKsat, Ksat, trajChange, inds
 
 #Check sums
 if sum(MorrisSample_df.loc[:,'v102_epc.topt'] > MorrisSample_df.loc[:,'v102_epc.tmax']) != 0:
-    sys.exit('PyERROR: topt not < tmax for v102')
+    sys.exit('PyERROR40: topt not < tmax for v102')
 if sum(MorrisSample_df.loc[:,'v3_epc.topt'] > MorrisSample_df.loc[:,'v3_epc.tmax']) != 0:
-    sys.exit('PyERROR: topt not < tmax for v3')
+    sys.exit('PyERROR41: topt not < tmax for v3')
 
 #%% Leaf litter CN >= leaf CN
 #If epc.leaflitr_cn is not greater, simulate a random value less than epc.leaflitr_cn for epc.leaf_cn
@@ -2232,9 +914,9 @@ del compare, i, ind, j, vKsat, Ksat, trajChange, inds
 
 #Check sums
 if sum(MorrisSample_df.loc[:,'v102_epc.leaf_cn'] > MorrisSample_df.loc[:,'v102_epc.leaflitr_cn']) != 0:
-    sys.exit('PyERROR: leaf_cn not < leaflitr_cn for v102')
+    sys.exit('PyERROR42: leaf_cn not < leaflitr_cn for v102')
 if sum(MorrisSample_df.loc[:,'v3_epc.leaf_cn'] > MorrisSample_df.loc[:,'v3_epc.leaflitr_cn']) != 0:
-    sys.exit('PyERROR: leaf_cn not < leaflitr_cn for v3')
+    sys.exit('PyERROR43: leaf_cn not < leaflitr_cn for v3')
 
 #%% Check sums for all parameters once more to make sure nothing odd happened
 if (any((MorrisSample_df.loc[:, 's8_silt'] + MorrisSample_df.loc[:, 's8_sand'] + MorrisSample_df.loc[:, 's8_clay']).round(roundTol) != 1.0000) | \
@@ -2247,7 +929,7 @@ any((MorrisSample_df.loc[:, 'v102_epc.frootlitr_fcel'] + MorrisSample_df.loc[:, 
 any((MorrisSample_df.loc[:, 'v3_epc.frootlitr_fcel'] + MorrisSample_df.loc[:, 'v3_epc.frootlitr_flab'] + MorrisSample_df.loc[:, 'v3_epc.frootlitr_flig']).round(roundTol) != 1.0000) | \
 any((MorrisSample_df.loc[:, 'v102_epc.leaflitr_fcel'] + MorrisSample_df.loc[:, 'v102_epc.leaflitr_flab'] + MorrisSample_df.loc[:, 'v102_epc.leaflitr_flig']).round(roundTol) != 1.0000) | \
 any((MorrisSample_df.loc[:, 'v3_epc.leaflitr_fcel'] + MorrisSample_df.loc[:, 'v3_epc.leaflitr_flab'] + MorrisSample_df.loc[:, 'v3_epc.leaflitr_flig']).round(roundTol) != 1.0000)):
-    sys.exit('PyERROR: One of the sums used to be correct, but after other function manipulations is now incorrect. This is a function bug that should be reported.')
+    sys.exit('PyERROR44: One of the sums used to be correct, but after other function manipulations is now incorrect. This is a function bug that should be reported.')
 
 if (sum(MorrisSample_df.loc[:,'s109_Ksat_0'] > MorrisSample_df.loc[:,'s9_Ksat_0']) + \
 sum(MorrisSample_df.loc[:,'s108_Ksat_0'] > MorrisSample_df.loc[:,'s8_Ksat_0']) + \
@@ -2267,19 +949,11 @@ sum(MorrisSample_df.loc[:,'v102_epc.topt'] > MorrisSample_df.loc[:,'v102_epc.tma
 sum(MorrisSample_df.loc[:,'v3_epc.topt'] > MorrisSample_df.loc[:,'v3_epc.tmax']) + \
 sum(MorrisSample_df.loc[:,'v102_epc.leaf_cn'] > MorrisSample_df.loc[:,'v102_epc.leaflitr_cn']) + \
 sum(MorrisSample_df.loc[:,'v3_epc.leaf_cn'] > MorrisSample_df.loc[:,'v3_epc.leaflitr_cn'])) != 0:
-    sys.exit('PyERROR: One of the inequalities used to be correct, but after other function manipulations is now incorrect. This is a function bug that should be reported.')
-
-#%% Write the resulting MorrisSample_df to a csv file
-MorrisSample_df.round(roundTol).to_csv('MorrisSamples_AfterProcessing.csv', index = False)
+    sys.exit('PyERROR45: One of the inequalities used to be correct, but after other function manipulations is now incorrect. This is a function bug that should be reported.')
 
 #%% All constraints have passed. Now make sure that the parameter that was supposed to change actually changed.
-#Parameters might not change as a result of how constraints affect the sampling scheme.
-#This step was missed in the 1st run completed for this analysis.
-os.chdir('C:\Users\jsmif\OneDrive - University of Virginia\BES_Data\BES_Data\RHESSysFiles\BR&POBR\RHESSysFilePreparation\defs\MorrisSampleLocs')
 #Original file
 OrigMorrisSample_df = pd.read_csv('MorrisSamples_BeforeProcessing.csv')
-#Modified file
-MorrisSample_df = pd.read_csv('MorrisSamples_AfterProcessing.csv')
 
 #Find all of the instances in which a parameter does not change in the AfterProcessing.csv file
 ListMissing = []
@@ -2292,6 +966,10 @@ for i in range(len(MorrisSample_df.iloc[:,0])-1):
         ListMissing.append(i+1)
         #Find which parameter should have changed - get the name
         #OrigMorrisSample_df.iloc[i,np.where(((OrigMorrisSample_df.iloc[i,:] - OrigMorrisSample_df.iloc[i+1,:]) != 0).values == True)[0][0]]
-        ColsMissing.append(OrigMorrisSample_df.columns[np.where(((OrigMorrisSample_df.iloc[i,:] - OrigMorrisSample_df.iloc[i+1,:]) != 0).values == True)[0][0]])  
+        ColsMissing.append(OrigMorrisSample_df.columns[np.where(((OrigMorrisSample_df.iloc[i,:] - OrigMorrisSample_df.iloc[i+1,:]) != 0).values == True)[0][0]])
 
-#Want to re-run all of the samples that were affected by this problem. Should not take long to do.
+if len(ListMissing) > 0:
+    sys.exit('PyERROR46: Some of the variables that were supposed to change in the Morris trajectory did not change.')
+else:
+    #%% Write the resulting MorrisSample_df to a csv file
+    MorrisSample_df.round(roundTol).to_csv('MorrisSamples_AfterProcessing.csv', index = False)  
