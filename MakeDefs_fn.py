@@ -18,15 +18,16 @@ import signal
 #2: RHESSysRuns directory for saving replicates "$BASEDIR"/RHESSysRuns
 #3: def file directory "$BASEDIR"/"$RHESSysNAME"/defs
 #4: grass GIS folder name "$RHESSysNAME"
-
+#5: name of the Morris sampling problem file that has parameter names and lower and upper bounds (BaismanMorrisSamplingProblemFile_Full.csv)
+#6: rounding tolerance (10)
 #%% Set working directory
 os.chdir(sys.argv[2])
 
 #%% Set parameters
-roundTol = 10
+roundTol = int(sys.argv[6])
 
 #%% Read the MorrisSample_df and problem file with bounds of parameters
-ProbFile = pd.read_csv('BaismanMorrisSamplingProblemFile_Full.csv')
+ProbFile = pd.read_csv(sys.argv[5])
 MorrisSample_df = pd.read_csv('MorrisSamples_AfterProcessing.csv')
 
 #%% Make the definition files from the Morris sample locations and place them in new directories by replicate ID
