@@ -5,3 +5,6 @@ Rscript /scratch/js4yd/MorrisSA/RHESSysRuns/MorrisSamplingLocations_BeforeProces
 
 #Execute MorrisSampling.py to adjust these locations to meet parameter constraints. This is completed using the version of Python in the singularity container
 singularity exec /share/resources/containers/singularity/rhessys/rhessys_v3.img python /scratch/js4yd/MorrisSA/RHESSysRuns/MorrisSampling.py '/scratch/js4yd/MorrisSA/RHESSysRuns' '1349' '40' '10' 'BaismanMorrisSamplingProblemFile_Full.csv'
+
+#Run sampling diagnostics script to get figure of parameter correlations pre and post processing.
+Rscript /scratch/js4yd/MorrisSA/RHESSysRuns/MorrisSamplingDiagnostics.R '/scratch/js4yd/MorrisSA/RHESSysRuns/'

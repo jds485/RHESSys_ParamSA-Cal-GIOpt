@@ -1,6 +1,11 @@
 #Morris Sampling Diagnostics
 
-setwd("C:\\Users\\jsmif\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\RHESSysFilePreparation\\defs\\MorrisSampleLocs")
+arg = commandArgs(T)
+#1: working directory
+
+#setwd("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\RHESSysFilePreparation\\defs\\MorrisSampleLocs")
+#setwd("/scratch/js4yd/MorrisSA/RHESSysRuns/")
+setwd(arg[1])
 
 #Read input file
 pre = read.csv('MorrisSamples_BeforeProcessing.csv', stringsAsFactors = FALSE, header = TRUE)
@@ -9,18 +14,19 @@ pre = read.csv('MorrisSamples_BeforeProcessing.csv', stringsAsFactors = FALSE, h
 post = read.csv('MorrisSamples_AfterProcessing.csv', stringsAsFactors = FALSE, header = TRUE)
 
 #Get the rows of the initial trajectory locations. These will be used for comparing the samples generated
-StartLocs = seq(1, 10880, 272)
+StartLocs = seq(1, nrow(pre), ncol(pre)+1)
 
-#Plot scatterplot matrix?
-plot(pre[StartLocs, 1:5])
+#Plot scatterplot matrix of trajectory starting locations. Too large to visualize all variables, so looking at 1st 10.
+plot(pre[StartLocs, 1:10])
 hist(pre$h_gw_loss_coeff, breaks = 100)
 
-#Correlation matrix
+#Correlation matrix of starting locations only for all parameters
 Cpre = cor(pre[StartLocs, ])
 heatmap(x = Cpre, symm = TRUE)
 Cpost = cor(post[StartLocs, ])
 heatmap(x = Cpost, symm = TRUE)
 
+#Correlation matrix of all points in trajectory for all parameters
 Cpre_full = cor(pre)
 heatmap(x = Cpre_full, symm = TRUE, Rowv = NA, Colv = NA, revC = TRUE, col = rainbow(10))
 Cpost_full = cor(post)
