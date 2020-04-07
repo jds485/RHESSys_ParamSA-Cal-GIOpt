@@ -30,7 +30,7 @@ i=10372
 cd "$BASEDIR"/RHESSysRuns
 #Use the MakeDefs_fn.py script to make the ith replicate directory and the defs directory with the ith def file combination
 #Execute using the version of Python in the singularity container
-singularity exec "$SINGIMAGE"/rhessys_v3.img python "$BASEDIR"/RHESSysRuns/MakeDefs_fn.py "$i"
+singularity exec "$SINGIMAGE"/rhessys_v3.img python "$BASEDIR"/RHESSysRuns/MakeDefs_fn.py "$i" "$BASEDIR"/RHESSysRuns "$BASEDIR"/"$RHESSysNAME"/defs "$RHESSysNAME" 'BaismanMorrisSamplingProblemFile_Full.csv' '10'
 
 #Change into directory that was just made and copy in files needed to run RHESSys
 # full path to the project location;
