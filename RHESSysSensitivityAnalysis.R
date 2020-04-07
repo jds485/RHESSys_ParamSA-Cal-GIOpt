@@ -809,3 +809,19 @@ for (i in 1:r){
     print(j)
   }
 }
+
+#Resample values for the NaN replicates
+#644:
+set.seed(644)
+runif(n = 1, min = 0.1, max = 0.36767)
+#3365:
+set.seed(3365)
+runif(n = 1, min = 0.4, max = 0.5)
+#4913:
+set.seed(4913)
+runif(n = 1, min = 0.4, max = 0.5)
+#5388
+set.seed(5388)
+runif(n = 1, min = 0.1, max = .909091)
+#5837
+#set manually because both Ksat0 and Ksat0v needed adjustment from lower bound
