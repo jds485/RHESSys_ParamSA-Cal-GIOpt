@@ -5,7 +5,7 @@ mkdir /nv/vol288/quinnlab-value/js4yd/Baisman30m_MorrisSA/output
 cd /scratch/js4yd/MorrisSA/RHESSysRuns/output
 for l in $(ls)
 do
-#There are 2 kinds of optput files. Some have P9999 for adding 9999 to the number. All others, want to get the number after the underscore and subtract 1, then rename the file with that new number. 
+#There are 2 kinds of output files. Some have P9999 for adding 9999 to the number. All others, want to get the number after the underscore and subtract 1, then rename the file with that new number. 
 
 #Set delimiter
 IFS='_'
@@ -25,7 +25,7 @@ SUBTWO="${ADDR[1]:0:1}"
 i=$(expr $SUBTWO - $SUBONE)
 fi
 echo "$i"
-#mv /scratch/js4yd/MorrisSA/RHESSysRuns/output/"$l" /nv/vol288/quinnlab-value/js4yd/Baisman30m_MorrisSA/output/Run_"$i".out
+cp /scratch/js4yd/MorrisSA/RHESSysRuns/output/"$l" /nv/vol288/quinnlab-value/js4yd/Baisman30m_MorrisSA/output/Run_"$i".out
 done
 #Reset default delimiter
 IFS=' '
