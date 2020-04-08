@@ -48,7 +48,7 @@ cp "$BASEDIR"/GIS2RHESSys/soilCollection.csv ./GIS2RHESSys
 cp "$BASEDIR"/GIS2RHESSys/vegCollection_modified.csv ./GIS2RHESSys
 #The vegetation file needs to be modified by the def file data
 #Run the vegetation modification script
-singularity exec "$SINGIMAGE"/rhessys_v3.img python "$BASEDIR"/RHESSysRuns/ModifyVeg.py "$BASEDIR"/RHESSysRuns/Run"$i"/GIS2RHESSys "$PROJDIR"/"$RHESSysNAME" "$PROJDIR"/"$RHESSysNAME"/defs
+singularity exec "$SINGIMAGE"/rhessys_v3.img python "$BASEDIR"/RHESSysRuns/ModifyVeg.py "$BASEDIR"/RHESSysRuns/Run"$i"/GIS2RHESSys "$PROJDIR"/"$RHESSysNAME" "$PROJDIR"/"$RHESSysNAME"/defs 'vegCollection_modified.csv'
 
 cd "$PROJDIR"
 mkdir ./GIS2RHESSys/libraries

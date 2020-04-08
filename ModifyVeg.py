@@ -12,12 +12,13 @@ Created on Mon Nov  4 09:24:36 2019
 #1: vegetation csv file starting location "$BASEDIR"/RHESSysRuns/Run"$i"/GIS2RHESSys 
 #2: desired output file location '"$PROJDIR"/"$RHESSysNAME"'
 #3: def file directory
+#4: csv file name (e.g., 'vegCollection_modified.csv')
 
 import pandas as pd
 import sys
 import os
 import string
-veg = pd.read_csv(sys.argv[1]+'/vegCollection_modified.csv', header=None)
+veg = pd.read_csv(sys.argv[1]+'/'+sys.argv[4], header=None)
 
 #Modify each column using the def files
 #Go to the def file directory
@@ -45,4 +46,4 @@ for h in range(len(IndH)):
         veg.loc[IndD,IndV] = f.iloc[d,0]
 
 #Write a new vegetation csv file in the output location
-veg.to_csv(sys.argv[2]+'/vegCollection_modified.csv', index=False, header=False)
+veg.to_csv(sys.argv[2]+'/'+sys.argv[4], index=False, header=False)
