@@ -566,7 +566,7 @@ for i in [int(sys.argv[1])]:
     #epc.day_leafon = value for tree
     v3.loc[:,0][v3.loc[:,1] == 'epc.day_leafon'] = v102.loc[:,0][v102.loc[:,1] == 'epc.day_leafon']
     #epc.min_percent_leafg = Same as epc.leaf_turnover for grass
-    v3.loc[:,0][v3.loc[:,1] == 'epc.min_percent_leafg'] = v3.loc[:,0][v3.loc[:,1] == 'epc.leaf_turnover']
+    v3.loc[:,0][v3.loc[:,1] == 'epc.min_percent_leafg'] = v3.loc[:,0][v3.loc[:,1] == 'epc.leaf_turnover'].values[0]
     #PAR_transmittance = 1 - PAR_absorptance – PAR_reflectance - round check
     v3.loc[:,0][v3.loc[:,1] == 'PAR_transmittance'] = '%.10f' % (1. - float(v3.loc[:,0][v3.loc[:,1] == 'PAR_absorptance']) - float(v3.loc[:,0][v3.loc[:,1] == 'PAR_reflectance']))
     #K_reflectance = 1 - K_absorptance - K_transmittance - round check
