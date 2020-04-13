@@ -1,5 +1,6 @@
 #Script for processing results from RHESSys using WRTDS, plotting, and saving as simpler datasets
 
+#Load libraries----
 library(stringi)
 library(stringr)
 library(rgdal)
@@ -11,7 +12,11 @@ library(parallel)
 library(doParallel)
 library(foreach)
 
-#Load modified WRTDS functions and the interpolation tables for regression parameters
+#Load functions to check the .out files for errors
+setwd('C:\\Users\\js4yd\\OneDrive - University of Virginia\\RHESSys_ParameterSA')
+source('CheckOutput.R')
+
+#Load modified WRTDS functions and the interpolation tables for regression parameters----
 setwd('C:\\Users\\js4yd\\OneDrive - University of Virginia\\RHESSys_ParameterSA')
 source('WRTDS_modifiedFunctions.R')
 setwd("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\WRTDS")
@@ -23,123 +28,55 @@ TabCosYear = as.matrix(read.table(file = 'TabCosYearMod4_p4.txt', sep = '\t', he
 TabLogErr = as.matrix(read.table(file = 'TabLogErrMod4_p5.txt', sep = '\t', header = TRUE, check.names = FALSE))
 
 #Test smaller dataset:----
-setwd("C:\\Users\\jsmif\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\SAOutputCompare")
-#Search for SA runs that should be re-run because of errors----
+setwd("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\SAOutputCompare")
+
+#Specify the number of replicates run
+numReps = 10880
+#Specify the output file name string format used to indicate numbers were added. At least 2 underscores must be used.
+PlusString = 'Run_P9999_'
+PlusNum = 9999
+  
+# Search for SA runs that should be re-run because of errors----
 setwd(paste0(getwd(), '/output_Orig'))
-#Output files
-ofs = list.files()
-#Create a matrix to store the time cost in seconds
-time = matrix(NA, nrow = length(ofs), ncol = 3)
-#Create a matrix to store the errors
-errs = as.data.frame(matrix(NA, nrow = length(ofs), ncol = 8))
-colnames(errs) = c('ind', 'Pyind', 'error', 'traceback', 'Emessage', 'Tmessage', 'Eline', 'Tline')
-for (i in 1:length(ofs)){
-  f = read.table(file = ofs[i], header = FALSE, fill = TRUE, stringsAsFactors = FALSE, sep = '`')
-  #Find the original and Python index that should be used for this variable.
-  #Note that there are 2 possible stringsplit results because job arrays could not be submitted with ID numbers more than 4 digits long.
-  if (length(strsplit(ofs[i], split = '_')[[1]]) == 2){
-    ind = as.numeric(strsplit(strsplit(ofs[i], split = 'Run_')[[1]][2], '.out')[[1]])
-    Pyind = ind - 1
-  }else{
-    #Have to add 9999 to the number
-    Pyind = as.numeric(strsplit(strsplit(ofs[i], split = 'Run_P9999_')[[1]][2], '.out')[[1]]) + 9999
-    ind = Pyind + 1
-  }
-  
-  #Check for error messages
-  errs$ind[i] = ind
-  errs$Pyind[i] = Pyind
-  #Search for tracebacks in the output file - results when node fails and it re-runs the code. Obviously there will be directory creation errors because they were already made!
-  #Search for PyERROR
-  #slurmstepd: error: *** JOB 6847502 ON udc-aw29-24b CANCELLED AT 2019-11-07T02:09:10 DUE TO TIME LIMIT ***
-  #slurmstepd: error: *** JOB 6847502 STEPD TERMINATED ON udc-aw29-24b AT 2019-11-07T02:10:11 DUE TO JOB NOT ENDING WITH SIGNALS ***
-  if (length(grep(f$V1, pattern = 'error', ignore.case = TRUE)) != 0){
-    errs$error[i] = 1
-    if (length(paste(grep(f$V1, pattern = 'error', ignore.case = TRUE, value = TRUE))) == 1){
-      s = grep(f$V1, pattern = 'error', ignore.case = TRUE, value = TRUE)
-      l = grep(f$V1, pattern = 'error', ignore.case = TRUE)
-    }else{
-      s = paste(grep(f$V1, pattern = 'error', ignore.case = TRUE, value = TRUE))[1]
-      for (st in 1:(length(str_c(paste(grep(f$V1, pattern = 'error', ignore.case = TRUE, value = TRUE)), sep = ', '))-1)){
-        s = str_c(paste(s, grep(f$V1, pattern = 'error', ignore.case = TRUE, value = TRUE)[st+1]), sep = ', ')
-      }
-      #Taking the first error line here. That's what matters
-      l = grep(f$V1, pattern = 'error', ignore.case = TRUE)[1]
-    }
-    errs$Emessage[i] = s
-    errs$Eline[i] = l
-  }
-  if (length(grep(f$V1, pattern = 'traceback', ignore.case = TRUE)) != 0){
-    errs$traceback[i] = 1
-    if (length(paste(grep(f$V1, pattern = 'traceback', ignore.case = TRUE, value = TRUE))) == 1){
-      s = grep(f$V1, pattern = 'traceback', ignore.case = TRUE, value = TRUE)
-      l = grep(f$V1, pattern = 'traceback', ignore.case = TRUE)
-    }else{
-      s = paste(grep(f$V1, pattern = 'traceback', ignore.case = TRUE, value = TRUE))[1]
-      for (st in 1:(length(str_c(paste(grep(f$V1, pattern = 'traceback', ignore.case = TRUE, value = TRUE)), sep = ', '))-1)){
-        s = str_c(paste(s, grep(f$V1, pattern = 'traceback', ignore.case = TRUE, value = TRUE)[st+1]), sep = ', ')
-      }
-      l = paste(grep(f$V1, pattern = 'traceback', ignore.case = TRUE))[1]
-    }
-    errs$Tmessage[i] = s
-    errs$Tline[i] = l
-  }
-  
-  #add to the time cost if that data are available
-  time[i,1] = ind
-  time[i,2] = Pyind
-  if (length(grep(f$V1, pattern = 'time cost =')) != 0){
-    time[i,3] = as.numeric(strsplit(strsplit(grep(f$V1, pattern = 'time cost =', value = TRUE), split = '= ')[[1]][2], split = ' seconds')[[1]][1])
-  }
-}
-rm(i, ind, Pyind, s, l, f, st)
-#Find missing runs by index (not Python index - subtract 1 for the Python index):
-Missing = seq(1,10880,1)[-which(seq(1,10880,1) %in% errs$ind)]
-if (length(Missing) > 0){
-  print(paste('Missing run for index', Missing))
-}
-#Index 10000 was rerun successfully
+OutCheck = CheckOutput(numReps = numReps, PlusString = PlusString, PlusNum = PlusNum, wd = getwd())
+#Find missing runs by job array index (not Python index - subtract 1 for the Python index):
+Missing = OutCheck$Missing
+#Index 10000 was rerun successfully. This happened because of a shell script error that has now been fixed.
 
 #Python Tracebacks - These happened due to node failure.
-Trace = errs$ind[which(errs$traceback == 1)]
+Trace1 = OutCheck$Tracebacks
 #3252, 3280, 9089, and 9092 are fine. All output is reported, and all defs inputs are correct.
+#These were therefore not rerun.
 
-#Collect the errors indices
-Errors = errs$ind[which((errs$error == 1) & (is.na(errs$traceback)))]
+#Collect the error indices that are not tracebacks
+Errors = OutCheck$Errors
+
+#error matrix
+errs = OutCheck$errs
 
 #Array of runs that had K_absorption+reflectance+transmittance summation tracebacks. These were run before that bug was fixed, and should be rerun.
-s = paste0(as.character(errs[order(errs$ind),][which(errs[order(errs$ind),]$error == 1),]$ind[1:32])[1], ',')
-for (st in 1:(length(paste0(as.character(errs[order(errs$ind),][which(errs[order(errs$ind),]$error == 1),]$ind[1:32]), sep=','))-1)){
-  if (st == (length(paste0(as.character(errs[order(errs$ind),][which(errs[order(errs$ind),]$error == 1),]$ind[1:32])))-1)){
-    s = str_c(s, paste0(as.character(errs[order(errs$ind),][which(errs[order(errs$ind),]$error == 1),]$ind[1:32])[st+1], sep=''))
-  }else{
-    s = str_c(s, paste0(as.character(errs[order(errs$ind),][which(errs[order(errs$ind),]$error == 1),]$ind[1:32])[st+1], sep=',')) 
-  }
-}
-rm(st)
+#s is the job array string to use to rerun the indices
+L155 = errs$ind[which(errs$ind %in% Errors)][which(errs$Eline[which(errs$ind %in% Errors)] == 155)]
+
+s = CheckLines(LineInds = L155)
 #All of these were rerun successfully
 
 #Remaining error files
-Errors = sort(Errors)[-seq(1,32,1)]
+Errors = Errors[-which(Errors %in% L155)]
 
 #Error in line 1 or 5 - rerun these completely, and delete the folder if it exists. These did not run at all.
 L1 = errs$ind[which(errs$ind %in% Errors)][which(errs$Eline[which(errs$ind %in% Errors)] == 1)]
 L5 = errs$ind[which(errs$ind %in% Errors)][which(errs$Eline[which(errs$ind %in% Errors)] == 5)]
 L15 = sort(c(L1, L5))
-#Remove the values less than 10000. Those were run separately successfully.
+rm(L1, L5)
+#Run separately those values less than and greater than 10000. All ran successfully.
 L15_l10000 = L15[L15 >= 10000]
 L15 = L15[L15 < 10000]
 
 #Array to rerun
-s15 = paste0(as.character(L15[1]), sep=',')
-for (st in 1:(length(L15)-1)){
-  if (st == (length(L15)-1)){
-    s15 = str_c(s15, paste0(as.character(L15[st+1]), sep=''))
-  }else{
-    s15 = str_c(s15, paste0(as.character(L15[st+1]), sep=',')) 
-  }
-}
-rm(st)
+s15 = CheckLines(LineInds = L15)
+
+s15_10000 = CheckLines(L15_l10000)
 
 #Remaining error files:
 Errors = Errors[-which(Errors %in% L15)]
@@ -153,15 +90,7 @@ L154 = errs$ind[which(errs$ind %in% Errors)][which(errs$Eline[which(errs$ind %in
 L101p = sort(c(L101,L109,L152,L154))
 
 #Array to rerun
-s101p = paste0(as.character(L101p[1]), sep=',')
-for (st in 1:(length(L101p)-1)){
-  if (st == (length(L101p)-1)){
-    s101p = str_c(s101p, paste0(as.character(L101p[st+1]), sep=''))
-  }else{
-    s101p = str_c(s101p, paste0(as.character(L101p[st+1]), sep=',')) 
-  }
-}
-rm(st)
+s101p = CheckLines(LineInds = L101p)
 
 #Remaining error files:
 Errors = Errors[-which(Errors %in% L101p)]
@@ -173,15 +102,7 @@ L156_10000 = L156[L156 >= 10000]
 L156 = L156[L156 < 10000]
 
 #Array of reruns
-s156 = paste0(as.character(L156[1]), sep=',')
-for (st in 1:(length(L156)-1)){
-  if (st == (length(L156)-1)){
-    s156 = str_c(s156, paste0(as.character(L156[st+1]), sep=''))
-  }else{
-    s156 = str_c(s156, paste0(as.character(L156[st+1]), sep=',')) 
-  }
-}
-rm(st)
+s156 = CheckLines(LineInds = L156)
 
 #Remaining error files:
 Errors = Errors[-which(Errors %in% L156)]
@@ -192,98 +113,40 @@ Errors = Errors[-which(Errors %in% L156_10000)]
 L196 = errs$ind[which(errs$ind %in% Errors)][which(errs$Eline[which(errs$ind %in% Errors)] == 196)]
 #All files moved. None needed to be rerun.
 
-#Check for missing runs and errors in final set of output files----
+#Remaining error files:
+Errors = Errors[-which(Errors %in% L196)]
+
+rm(OutCheck, errs, Errors, Missing)
+
+# Check for missing runs and errors in final set of output files----
 #Find missing runs by index (not Python index - subtract 1 for the Python index):
-setwd("C:\\Users\\jsmif\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\SAOutputCompare")
+setwd("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\SAOutputCompare")
 setwd(paste0(getwd(), '/output'))
 #Output files
-ofs = list.files()
-#Create a matrix to store the time cost in seconds
-time = matrix(NA, nrow = length(ofs), ncol = 3)
-#Create a matrix to store the errors
-errs = as.data.frame(matrix(NA, nrow = length(ofs), ncol = 8))
-colnames(errs) = c('ind', 'Pyind', 'error', 'traceback', 'Emessage', 'Tmessage', 'Eline', 'Tline')
-for (i in 1:length(ofs)){
-  f = read.table(file = ofs[i], header = FALSE, fill = TRUE, stringsAsFactors = FALSE, sep = '`')
-  #Find the original and Python index that should be used for this variable.
-  #Note that there are 2 possible stringsplit results because job arrays could not be submitted with ID numbers more than 4 digits long.
-  if (length(strsplit(ofs[i], split = '_')[[1]]) == 2){
-    ind = as.numeric(strsplit(strsplit(ofs[i], split = 'Run_')[[1]][2], '.out')[[1]])
-    Pyind = ind - 1
-  }else{
-    #Have to add 9999 to the number
-    Pyind = as.numeric(strsplit(strsplit(ofs[i], split = 'Run_P9999_')[[1]][2], '.out')[[1]]) + 9999
-    ind = Pyind + 1
-  }
-  
-  #Check for error messages
-  errs$ind[i] = ind
-  errs$Pyind[i] = Pyind
-  #Search for tracebacks in the output file - results when node fails and it re-runs the code. Obviously there will be directory creation errors because they were already made!
-  #Search for PyERROR
-  #slurmstepd: error: *** JOB 6847502 ON udc-aw29-24b CANCELLED AT 2019-11-07T02:09:10 DUE TO TIME LIMIT ***
-  #slurmstepd: error: *** JOB 6847502 STEPD TERMINATED ON udc-aw29-24b AT 2019-11-07T02:10:11 DUE TO JOB NOT ENDING WITH SIGNALS ***
-  if (length(grep(f$V1, pattern = 'error', ignore.case = TRUE)) != 0){
-    errs$error[i] = 1
-    if (length(paste(grep(f$V1, pattern = 'error', ignore.case = TRUE, value = TRUE))) == 1){
-      s = grep(f$V1, pattern = 'error', ignore.case = TRUE, value = TRUE)
-      l = grep(f$V1, pattern = 'error', ignore.case = TRUE)
-    }else{
-      s = paste(grep(f$V1, pattern = 'error', ignore.case = TRUE, value = TRUE))[1]
-      for (st in 1:(length(str_c(paste(grep(f$V1, pattern = 'error', ignore.case = TRUE, value = TRUE)), sep = ', '))-1)){
-        s = str_c(paste(s, grep(f$V1, pattern = 'error', ignore.case = TRUE, value = TRUE)[st+1]), sep = ', ')
-      }
-      #Taking the first error line here. That's what matters
-      l = grep(f$V1, pattern = 'error', ignore.case = TRUE)[1]
-    }
-    errs$Emessage[i] = s
-    errs$Eline[i] = l
-  }
-  if (length(grep(f$V1, pattern = 'traceback', ignore.case = TRUE)) != 0){
-    errs$traceback[i] = 1
-    if (length(paste(grep(f$V1, pattern = 'traceback', ignore.case = TRUE, value = TRUE))) == 1){
-      s = grep(f$V1, pattern = 'traceback', ignore.case = TRUE, value = TRUE)
-      l = grep(f$V1, pattern = 'traceback', ignore.case = TRUE)
-    }else{
-      s = paste(grep(f$V1, pattern = 'traceback', ignore.case = TRUE, value = TRUE))[1]
-      for (st in 1:(length(str_c(paste(grep(f$V1, pattern = 'traceback', ignore.case = TRUE, value = TRUE)), sep = ', '))-1)){
-        s = str_c(paste(s, grep(f$V1, pattern = 'traceback', ignore.case = TRUE, value = TRUE)[st+1]), sep = ', ')
-      }
-      l = paste(grep(f$V1, pattern = 'traceback', ignore.case = TRUE))[1]
-    }
-    errs$Tmessage[i] = s
-    errs$Tline[i] = l
-  }
-  
-  #add to the time cost if that data are available
-  time[i,1] = ind
-  time[i,2] = Pyind
-  if (length(grep(f$V1, pattern = 'time cost =')) != 0){
-    time[i,3] = as.numeric(strsplit(strsplit(grep(f$V1, pattern = 'time cost =', value = TRUE), split = '= ')[[1]][2], split = ' seconds')[[1]][1])
-  }
-}
-rm(i, ind, Pyind, s, l, f, st)
+OutCheck = CheckOutput(numReps = numReps, PlusString = PlusString, PlusNum = PlusNum, wd = getwd())
 #Find missing runs by index (not Python index - subtract 1 for the Python index):
-Missing = seq(1,10880,1)[-which(seq(1,10880,1) %in% errs$ind)]
-if (length(Missing) > 0){
-  print(paste('Missing run for index', Missing))
-}
+Missing = OutCheck$Missing
 
 #Python Tracebacks - These happened due to node failure.
-Trace = errs$ind[which(errs$traceback == 1)]
-#3252, 3280, 9089, and 9092 are fine. All output is reported, and all defs inputs are correct.
-if (length(Trace) != 4){
-  print(paste('Tracebacks greater than before rerunning. There are new tracebacks', Trace))
+Trace = OutCheck$Tracebacks
+#3252, 3280, 9089, and 9092 are the same as before because they were not rerun
+if (length(Trace) > length(Trace1)){
+  print(paste('There are new tracebacks: ', Trace))
 }
 
 #Collect the errors indices
-Errors = errs$ind[which((errs$error == 1) & (is.na(errs$traceback)))]
-if (length(Errors) != length(L196)){
+Errors = OutCheck$Errors
+#Check that the error indices are the same as were reported for L196, which did not need to be rerun.
+if (length(Errors) > length(L196)){
   print(paste('There are new errors', Errors[-which(Errors %in% L196)]))
+}else{
+  Errors = Errors[-which(Errors %in% L196)]
 }
 
-#Time in hours for completed results----
-setwd("C:\\Users\\jsmif\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\SAOutputCompare")
+# Time in hours for completed results----
+setwd("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\SAOutputCompare")
+#time matrix
+time = OutCheck$time
 time[,3] = time[,3]/3600
 #Sort by index, then plot by index to see if there are trends
 time = time[order(time[,1]),]
@@ -291,7 +154,7 @@ png('computationTime.png', res = 300, units = 'in', width = 5, height = 5)
 plot(time[,1], time[,3], pch = 16, cex = 0.2, ylim = c(0,1), xlab = 'Morris Index', ylab = 'Time (hrs)')
 dev.off()
 
-#Time per year
+#Time per year of RHESSys simulation - 11 years
 png('computationTimePerYear.png', res = 300, units = 'in', width = 5, height = 5)
 plot(time[,1], time[,3]/11, pch = 16, cex = 0.2, ylim = c(0,.1), xlab = 'Morris Index', ylab = 'Time (hrs)', main = 'Time per Year of Simulation')
 dev.off()
@@ -301,22 +164,22 @@ png('computationTimeHist.png', res = 300, units = 'in', width = 5, height = 5)
 hist(time[,3], xlim = c(0,1), breaks=50, xlab = 'Time (hrs)')
 dev.off()
 
-#Forecasted time per year of Calibration period
+#Forecasted time per year of calibration period simulation in RHESSys (14 years)
 png('computationTimeHist_CalibrationEstimate.png', res = 300, units = 'in', width = 5, height = 5)
 hist(time[,3]/11*14, xlim = c(0,1.5), breaks=50, xlab = 'Time (hrs)')
 dev.off()
 
 #Fixme: try to diagnose runtime length by parameters - there may not be a correlation here.
 
-#Go through results folders----
+# Go through results folders----
 #Folder list. These all have results and input files in them.
 fs = list.files()
 #Remove the output folder from this list
-fs = fs[-grep(fs,pattern = 'output')]
+fs = fs[-grep(fs, pattern = 'output')]
 #Remove the png files
-fs = fs[-grep(fs,pattern = '.png')]
+fs = fs[-grep(fs, pattern = '.png')]
 
-#Read the worldfile. This is used to extract the area of basin and hillslopes----
+# Read the worldfile. This is used to extract the area of basin and hillslopes----
 #Patch resolution, m
 res = 30
 
@@ -324,8 +187,8 @@ world = read.csv(paste0(getwd(), '/', fs[1], '/worldfiles/worldfile.csv'), strin
 
 #Taking the unique patch IDs because strata can exist in more than one patch.
 Area.basin = length(unique(world$patchID))*res^2
-#Multiplier conversion for basin streamflow
-conversion_b = Area.basin/1000*(100^3)/(2.54^3)/(12^3)/24/3600
+#Multiplier conversion for basin streamflow (mm/d)*conversion_b -> cfs
+conversion_b = Area.basin/1000/.3048^3/24/3600
 
 #Get hillslope areas and conversion factor for streamflow in hillslopes
 uhills = unique(world$hillID)
@@ -336,11 +199,11 @@ for (h in 1:length(uhills)){
   conversion_h[h,1] = h
   #some patches have multiple strata, so their area cannot be counted from the count of cells.
   Area.Hills[h,2] = length(which(world[which(duplicated(world$patchID) == FALSE),]$hillID == h))*res^2
-  conversion_h[h,2] = Area.Hills[h,2]/1000*(100^3)/(2.54^3)/(12^3)/24/3600
+  conversion_h[h,2] = Area.Hills[h,2]/1000/.3048^3/24/3600
 }
 rm(h)
 
-#Make the worldfile a spatial dataframe to get a map. Plot information in the worldfile on the maps----
+#  Make the worldfile a spatial dataframe to get a map. Plot information in the worldfile on the maps----
 coordinates(world) = c('patchX', 'patchY')
 proj4string(world) = CRS('+init=epsg:26918')
 #Change to degrees
@@ -368,7 +231,7 @@ box(which = 'figure', lwd = 2)
 dev.off()
 rm(h)
 
-#Check that the input def file parameter values match the output parameter values----
+# Check that the input def file parameter values match the output parameter values----
 for (i in 1:length(fs)){
   od = getwd()
   setwd(paste0(od, '/', fs[i]))
@@ -1184,6 +1047,10 @@ rm(h)
 
 #Full dataset:----
 setwd("C:\\Users\\js4yd\\Documents\\BaismanSA\\RHESSysRuns")
+
+#Specify the number of replicates run
+numReps = 10880
+
 #Check for missing runs and errors in final set of output files----
 #Find missing runs by index (not Python index - subtract 1 for the Python index):
 setwd(paste0(getwd(), '/output'))
@@ -1203,8 +1070,8 @@ for (i in 1:length(ofs)){
     ind = as.numeric(strsplit(strsplit(ofs[i], split = 'Run_')[[1]][2], '.out')[[1]])
     Pyind = ind - 1
   }else{
-    #Have to add 9999 to the number
-    Pyind = as.numeric(strsplit(strsplit(ofs[i], split = 'Run_P9999_')[[1]][2], '.out')[[1]]) + 9999
+    #Have to add PlusNum to the number
+    Pyind = as.numeric(strsplit(strsplit(ofs[i], split = PlusString)[[1]][2], '.out')[[1]]) + PlusNum
     ind = Pyind + 1
   }
   
@@ -1256,7 +1123,7 @@ for (i in 1:length(ofs)){
 }
 rm(i, ind, Pyind, s, l, f, st)
 #Find missing runs by index (not Python index - subtract 1 for the Python index):
-Missing = seq(1,10880,1)[-which(seq(1,10880,1) %in% errs$ind)]
+Missing = seq(1,numReps,1)[-which(seq(1,numReps,1) %in% errs$ind)]
 if (length(Missing) > 0){
   print(paste('Missing run for index', Missing))
 }
@@ -2761,7 +2628,7 @@ setwd("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\
 BasinSF = read.table(file = 'SAResults_BasinStreamflow_p4_CorrOrder.txt', sep = '\t', stringsAsFactors = FALSE, header = TRUE, check.names = FALSE)
 HillSF = read.table(file = 'SAResults_HillStreamflow_p6_CorrOrder.txt', sep = '\t', stringsAsFactors = FALSE, header = TRUE, check.names = FALSE)
 
-#Write also a transposed matrix that will be used for extracting TN data date by date
+#Write also a transposed matrix that will be used for extracting TN data by date
 write.table(t(BasinSF), file = 'SAResults_BasinStreamflow_p4_t_CorrOrder.txt', sep = '\t', row.names = colnames(BasinSF))
 write.table(t(HillSF), file = 'SAResults_HillStreamflow_p6_t_CorrOrder.txt', sep = '\t', row.names = colnames(HillSF))
 
