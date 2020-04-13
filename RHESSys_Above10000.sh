@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH -D /scratch/js4yd/MorrisSA/RHESSysRuns/
-#SBATCH -o /scratch/js4yd/MorrisSA/RHESSysRuns/output/Run_P9999_%a.out
+#SBATCH -o /scratch/js4yd/MorrisSA/RHESSysRuns/output/Run_P9998_%a.out
 #SBATCH --ntasks=1                              # Number of tasks per serial job (must be 1)
 #SBATCH -p standard           									# Queue partition name "standard"
 #SBATCH -A quinnlab       											# allocation name
@@ -25,7 +25,7 @@ LOCATION_NAME="g74_$RHESSysNAME"
 MAPSET=PERMANENT
 RHESSysModelLoc="/scratch/js4yd/RHESSysEastCoast"
 
-#Set the index, i, to be the task ID minus 1
+#Set the index, i, to be the task ID plus 9998
 SUBONE=9998
 i=$(expr ${SLURM_ARRAY_TASK_ID} + $SUBONE) 
 
