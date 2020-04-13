@@ -26,7 +26,7 @@ MAPSET=PERMANENT
 RHESSysModelLoc="/scratch/js4yd/RHESSysEastCoast"
 
 #Set the index, i, to be the task ID minus 1
-SUBONE=9999
+SUBONE=9998
 i=$(expr ${SLURM_ARRAY_TASK_ID} + $SUBONE) 
 
 cd "$BASEDIR"/RHESSysRuns
