@@ -1,3 +1,4 @@
+##DEPRECATED: This information was split into several scripts to run faster. TNFileJoining_Basin, TNFileJoining_Hill05, TNFileJoining_HillMed, TNFileJoining_Hill95
 #Combining the TN information into dataframes and writing txt file of the output
 
 #Template for the column names
