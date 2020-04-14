@@ -14,4 +14,4 @@ module load gcc/7.1.0 openmpi/3.1.4 R/3.5.3
 OUTDIR='/scratch/js4yd/MorrisSA/TNprocessing/TNdata'
 INDIR='/scratch/js4yd/MorrisSA/TNprocessing'
 
-Rscript "$INDIR"/TNFileExtraction.R "$SLURM_ARRAY_TASK_ID" "$INDIR" "$OUTDIR"
+Rscript "$INDIR"/TNFileExtraction.R "$SLURM_ARRAY_TASK_ID" "$INDIR" "$OUTDIR" 'SAResults_BasinStreamflow_p4_t.txt' 'SAResults_HillStreamflow_p6_t.txt' 'TabIntMod4_p5.txt' 'TabYearMod4_p4.txt' 'TabLogQMod4_p4.txt' 'TabSinYearMod4_p4.txt' 'TabCosYearMod4_p4.txt' 'TabLogErrMod4_p5.txt' 

@@ -1,6 +1,6 @@
 #Morris Sampling Diagnostics
 
-arg = commandArgs(T)
+arg = commandArgs(trailingOnly = TRUE)
 #1: working directory
 
 #setwd("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\RHESSysFilePreparation\\defs\\MorrisSampleLocs")

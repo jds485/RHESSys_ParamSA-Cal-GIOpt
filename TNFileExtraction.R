@@ -13,16 +13,16 @@ setwd(arg[2])
 source('WRTDS_modifiedFunctions.R')
 
 #Load in the transposed streamflow data with rows as the dates
-BasinSF = read.table(file = 'SAResults_BasinStreamflow_p4_t.txt', sep = '\t', stringsAsFactors = FALSE, check.names = FALSE, nrows = 1, skip=d+1, row.names = 1)
-HillSF = read.table(file = 'SAResults_HillStreamflow_p6_t.txt', sep = '\t', stringsAsFactors = FALSE, check.names = FALSE, nrows = 1, skip=d+2, row.names = 1)
+BasinSF = read.table(file = arg[4], sep = '\t', stringsAsFactors = FALSE, check.names = FALSE, nrows = 1, skip=d+1, row.names = 1)
+HillSF = read.table(file = arg[5], sep = '\t', stringsAsFactors = FALSE, check.names = FALSE, nrows = 1, skip=d+2, row.names = 1)
 
 #Tables
-TabInt = as.matrix(read.table(file = 'TabIntMod4_p5.txt', sep = '\t', header = TRUE, check.names = FALSE))
-TabYear = as.matrix(read.table(file = 'TabYearMod4_p4.txt', sep = '\t', header = TRUE, check.names = FALSE))
-TabLogQ = as.matrix(read.table(file = 'TabLogQMod4_p4.txt', sep = '\t', header = TRUE, check.names = FALSE))
-TabSinYear = as.matrix(read.table(file = 'TabSinYearMod4_p4.txt', sep = '\t', header = TRUE, check.names = FALSE))
-TabCosYear = as.matrix(read.table(file = 'TabCosYearMod4_p4.txt', sep = '\t', header = TRUE, check.names = FALSE))
-TabLogErr = as.matrix(read.table(file = 'TabLogErrMod4_p5.txt', sep = '\t', header = TRUE, check.names = FALSE))
+TabInt = as.matrix(read.table(file = arg[6], sep = '\t', header = TRUE, check.names = FALSE))
+TabYear = as.matrix(read.table(file = arg[7], sep = '\t', header = TRUE, check.names = FALSE))
+TabLogQ = as.matrix(read.table(file = arg[8], sep = '\t', header = TRUE, check.names = FALSE))
+TabSinYear = as.matrix(read.table(file = arg[9], sep = '\t', header = TRUE, check.names = FALSE))
+TabCosYear = as.matrix(read.table(file = arg[10], sep = '\t', header = TRUE, check.names = FALSE))
+TabLogErr = as.matrix(read.table(file = arg[11], sep = '\t', header = TRUE, check.names = FALSE))
 
 #Loop over the date to fill in the new dataset
 a = matrix(NA, nrow = 3, ncol = ncol(BasinSF))

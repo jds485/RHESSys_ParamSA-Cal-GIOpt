@@ -2,7 +2,7 @@
 
 library(sensitivity)
 
-arg = commandArgs(T)
+arg = commandArgs(trailingOnly = TRUE)
 #1: working directory
 #2: problem file name
 #3: random seed number

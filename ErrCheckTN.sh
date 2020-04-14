@@ -10,4 +10,4 @@
 
 module load gcc/7.1.0 openmpi/3.1.4 R/3.5.3
 
-Rscript /scratch/js4yd/MorrisSA/TNprocessing/ErrCheckTNFileExtraction.R
+Rscript /scratch/js4yd/MorrisSA/TNprocessing/ErrCheckTNFileExtraction.R '/scratch/js4yd/MorrisSA/TNprocessing/output' '3973'

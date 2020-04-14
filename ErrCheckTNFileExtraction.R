@@ -1,9 +1,12 @@
 #Compare the output files from TN extraction and search for errors
 
-setwd('/scratch/js4yd/MorrisSA/TNprocessing/output')
+#Get the command line arguments
+arg = commandArgs(trailingOnly = TRUE)
+
+setwd(arg[1])
 ofs = list.files()
-#Scan every file for "error" and report the index numebr if it's there
-errs = as.data.frame(matrix(NA, nrow = length(ofs), ncol = 8))
+#Scan every file for "error" and report the index number if it's there
+errs = as.data.frame(matrix(NA, nrow = length(ofs), ncol = 4))
 colnames(errs) = c('ind', 'error', 'Emessage', 'Eline')
 for (i in 1:length(ofs)){
   f = scan(file = ofs[i], what = 'character', sep = '`', fill = TRUE, quiet = TRUE)
@@ -38,13 +41,12 @@ print(errs$ind[!is.na(errs$error)])
 print("Error Messages:")
 print(errs$error[!is.na(errs$error)])
 
-#Find missing runs by index (not Python index - subtract 1 for the Python index):
-Missing = seq(1,3973,1)[-which(seq(1,3973,1) %in% errs$ind)]
+#Find missing runs by index:
+Missing = seq(1,as.numeric(arg[2]),1)[-which(seq(1,as.numeric(arg[2]),1) %in% errs$ind)]
 if (length(Missing) > 0){
   print("Missing:")
   print(Missing)
 }
-
 
 
 #read.table method works only when files have data. Some .out file have no data, and this crashes.
