@@ -17,17 +17,6 @@ library(vroom)
 setwd('C:\\Users\\js4yd\\OneDrive - University of Virginia\\RHESSys_ParameterSA')
 source('CheckOutput.R')
 
-#Load modified WRTDS functions and the interpolation tables for regression parameters----
-setwd('C:\\Users\\js4yd\\OneDrive - University of Virginia\\RHESSys_ParameterSA')
-source('WRTDS_modifiedFunctions.R')
-setwd("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\WRTDS")
-TabInt = as.matrix(read.table(file = 'TabIntMod4_p5.txt', sep = '\t', header = TRUE, check.names = FALSE))
-TabYear = as.matrix(read.table(file = 'TabYearMod4_p4.txt', sep = '\t', header = TRUE, check.names = FALSE))
-TabLogQ = as.matrix(read.table(file = 'TabLogQMod4_p4.txt', sep = '\t', header = TRUE, check.names = FALSE))
-TabSinYear = as.matrix(read.table(file = 'TabSinYearMod4_p4.txt', sep = '\t', header = TRUE, check.names = FALSE))
-TabCosYear = as.matrix(read.table(file = 'TabCosYearMod4_p4.txt', sep = '\t', header = TRUE, check.names = FALSE))
-TabLogErr = as.matrix(read.table(file = 'TabLogErrMod4_p5.txt', sep = '\t', header = TRUE, check.names = FALSE))
-
 #Test smaller dataset:----
 setwd("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\SAOutputCompare")
 
@@ -1233,8 +1222,8 @@ print(paste("Input def files checked for match to output def files."))
 # Loop through all of the folders (SA replicates) and extract the data needed----
 temp_out = list.files(paste0(getwd(), '/', fs[1], '/output'))
 tempb = vroom(file = paste0(getwd(), '/', fs[1], '/output/', temp_out[grep(temp_out, pattern = 'basin.daily')]), delim = ' ', col_names = TRUE, col_types = cols(.default=col_double()), progress = FALSE)
-BasinStreamflow = BasinSatDef = BasinTN05 = BasinTN95 = BasinTNMed = matrix(NA, nrow = numReps, ncol = (1 + nrow(tempb)))
-HillStreamflow = HillSatDef = HillTN05 = HillTN95 = HillTNMed = matrix(NA, nrow = numReps*length(uhills), ncol = (2 + nrow(tempb)))
+BasinStreamflow = BasinSatDef = matrix(NA, nrow = numReps, ncol = (1 + nrow(tempb)))
+HillStreamflow = HillSatDef = matrix(NA, nrow = numReps*length(uhills), ncol = (2 + nrow(tempb)))
 rm(temp_out, tempb)
 
 MakeFigs = FALSE
@@ -1253,7 +1242,6 @@ for (i in 1:length(fs)){
   }
   
   #Obtain basin and hillslope data
-  #Fixme: speed up using scan
   fs_out = list.files()
   bs = vroom(file = paste0(getwd(), '/', fs_out[grep(fs_out, pattern = 'basin.daily')]), delim = ' ', col_names = TRUE, col_types = cols(.default=col_double()), progress = FALSE)
   hs = vroom(file = paste0(getwd(), '/', fs_out[grep(fs_out, pattern = 'hillslope.daily')]), delim = ' ', col_names = TRUE, col_types = cols(.default=col_double()), progress = FALSE)
@@ -1754,7 +1742,7 @@ for (i in 1:length(fs)){
   rm(h)
   
   #Fixme: WRTDS calculations for this simulation----
-  #This is too large to do on my computation resources, so it's being split into a separate calculation.
+  #This is too large to do on my computational resources, so it's been split into a separate calculation.
   #dtest = as.character(colnames(BasinSF)[d+1])
   #a = apply(X = as.matrix(BasinSF[,d+1]), MARGIN = 1, FUN = predictWRTDS, Date = dtest)
   #BasinTN05[,d+1] = a[1,]
@@ -1796,6 +1784,15 @@ write.table(BasinStreamflow, file = 'SAResults_BasinStreamflow_p4_CorrOrder.txt'
 write.table(BasinSatDef, file = 'SAResults_BasinSatDef_p1_CorrOrder.txt', row.names = FALSE, sep = '\t')
 write.table(HillStreamflow, file = 'SAResults_HillStreamflow_p6_CorrOrder.txt', row.names = FALSE, sep = '\t')
 write.table(HillSatDef, file = 'SAResults_HillSatDef_p1_CorrOrder.txt', row.names = FALSE, sep = '\t')
+
+#Make transposed streamflow data for parallel extraction----
+setwd("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR")
+BasinSF = read.table(file = 'SAResults_BasinStreamflow_p4_CorrOrder.txt', sep = '\t', stringsAsFactors = FALSE, header = TRUE, check.names = FALSE)
+HillSF = read.table(file = 'SAResults_HillStreamflow_p6_CorrOrder.txt', sep = '\t', stringsAsFactors = FALSE, header = TRUE, check.names = FALSE)
+
+#Write a transposed matrix that will be used for extracting TN data by date
+write.table(t(BasinSF), file = 'SAResults_BasinStreamflow_p4_t_CorrOrder.txt', sep = '\t', row.names = colnames(BasinSF))
+write.table(t(HillSF), file = 'SAResults_HillStreamflow_p6_t_CorrOrder.txt', sep = '\t', row.names = colnames(HillSF))
 
 #  Make plots of the streamflow and saturation deficit observed across the SA runs----
 #   Basin----
@@ -2047,6 +2044,17 @@ rm(h)
 #Fixme: Streamflow only With WRTDS - same loop as earlier in code, just now with WRTDS
 # tic = Sys.time()
 # for (i in 1:length(fs)){
+#Load modified WRTDS functions and the interpolation tables for regression parameters----
+# setwd('C:\\Users\\js4yd\\OneDrive - University of Virginia\\RHESSys_ParameterSA')
+# source('WRTDS_modifiedFunctions.R')
+# setwd("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\WRTDS")
+# TabInt = as.matrix(read.table(file = 'TabIntMod4_p5.txt', sep = '\t', header = TRUE, check.names = FALSE))
+# TabYear = as.matrix(read.table(file = 'TabYearMod4_p4.txt', sep = '\t', header = TRUE, check.names = FALSE))
+# TabLogQ = as.matrix(read.table(file = 'TabLogQMod4_p4.txt', sep = '\t', header = TRUE, check.names = FALSE))
+# TabSinYear = as.matrix(read.table(file = 'TabSinYearMod4_p4.txt', sep = '\t', header = TRUE, check.names = FALSE))
+# TabCosYear = as.matrix(read.table(file = 'TabCosYearMod4_p4.txt', sep = '\t', header = TRUE, check.names = FALSE))
+# TabLogErr = as.matrix(read.table(file = 'TabLogErrMod4_p5.txt', sep = '\t', header = TRUE, check.names = FALSE))
+#
 #   #Make figures of the basin output----
 #   od = getwd()
 #   #Fixme: ? Could read in worldfile and plot all of the worldfile info for each run, or save info and compare for each run.
@@ -2059,8 +2067,8 @@ rm(h)
 #   
 #   #Obtain basin and hillslope data
 #   fs_out = list.files()
-#   bs = read.table(paste0(getwd(), '/', fs_out[grep(fs_out, pattern = 'basin.daily')]), stringsAsFactors = FALSE, header = TRUE)
-#   hs = read.table(paste0(getwd(), '/', fs_out[grep(fs_out, pattern = 'hillslope.daily')]), stringsAsFactors = FALSE, header = TRUE)
+#   bs = vroom(file = paste0(getwd(), '/', fs_out[grep(fs_out, pattern = 'basin.daily')]), delim = ' ', col_names = TRUE, col_types = cols(.default=col_double()), progress = FALSE)
+#   hs = vroom(file = paste0(getwd(), '/', fs_out[grep(fs_out, pattern = 'hillslope.daily')]), delim = ' ', col_names = TRUE, col_types = cols(.default=col_double()), progress = FALSE)
 #   
 #   #Make a new date column
 #   bs$Date = as.Date(paste0(bs$year, '-', bs$month, '-', bs$day))
@@ -2579,15 +2587,6 @@ rm(h)
 # toc = Sys.time()
 # print(toc-tic)
 
-
-#Make transposed streamflow data for parallel extraction----
-setwd("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR")
-BasinSF = read.table(file = 'SAResults_BasinStreamflow_p4_CorrOrder.txt', sep = '\t', stringsAsFactors = FALSE, header = TRUE, check.names = FALSE)
-HillSF = read.table(file = 'SAResults_HillStreamflow_p6_CorrOrder.txt', sep = '\t', stringsAsFactors = FALSE, header = TRUE, check.names = FALSE)
-
-#Write also a transposed matrix that will be used for extracting TN data by date
-write.table(t(BasinSF), file = 'SAResults_BasinStreamflow_p4_t_CorrOrder.txt', sep = '\t', row.names = colnames(BasinSF))
-write.table(t(HillSF), file = 'SAResults_HillStreamflow_p6_t_CorrOrder.txt', sep = '\t', row.names = colnames(HillSF))
 
 #TN extraction time analysis----
 # #Loop over the date to fill in the new dataset
