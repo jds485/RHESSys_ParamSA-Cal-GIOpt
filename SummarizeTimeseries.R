@@ -11,6 +11,7 @@ library(pracma)
 library(parallel)
 library(doParallel)
 library(foreach)
+library(vroom)
 
 #Load functions to check the .out files for errors
 setwd('C:\\Users\\js4yd\\OneDrive - University of Virginia\\RHESSys_ParameterSA')
@@ -188,7 +189,7 @@ world = read.csv(paste0(getwd(), '/', fs[1], '/worldfiles/worldfile.csv'), strin
 #Taking the unique patch IDs because strata can exist in more than one patch.
 Area.basin = length(unique(world$patchID))*res^2
 #Multiplier conversion for basin streamflow (mm/d)*conversion_b -> cfs
-conversion_b = Area.basin/1000/.3048^3/24/3600
+conversion_b = Area.basin/1000/(.3048^3)/24/3600
 
 #Get hillslope areas and conversion factor for streamflow in hillslopes
 uhills = unique(world$hillID)
@@ -199,7 +200,7 @@ for (h in 1:length(uhills)){
   conversion_h[h,1] = h
   #some patches have multiple strata, so their area cannot be counted from the count of cells.
   Area.Hills[h,2] = length(which(world[which(duplicated(world$patchID) == FALSE),]$hillID == h))*res^2
-  conversion_h[h,2] = Area.Hills[h,2]/1000/.3048^3/24/3600
+  conversion_h[h,2] = Area.Hills[h,2]/1000/(.3048^3)/24/3600
 }
 rm(h)
 
@@ -245,7 +246,7 @@ for (i in 1:length(fs)){
     if (strsplit(fs_def[d], split = '.def', fixed = TRUE)[[1]] != 'basin_basin'){
       f = read.table(paste0(getwd(), '/output/', fs_Rdef[grep(fs_Rdef, pattern = paste0(strsplit(fs_def[d], split = '.def', fixed = TRUE)[[1]], '_', strsplit(grep(fs_Rdef, pattern = strsplit(fs_def[d], split = '.def', fixed = TRUE)[[1]], value = TRUE), split = '_')[[1]][2]))]), header = FALSE, stringsAsFactors = FALSE, colClasses = 'character')
       
-      #The variable epc.min_percent_leafg in the grass def file for some reason did not get entered, 
+      #The variable epc.min_percent_leafg in the grass def file did not get entered due to an issue with the Python code, 
       #but the value for it is correct in the output def file because it is assigned the value for epc.leaf_turnover. 
       #Fixing the input file here
       if (fs_def[d] == 'stratum_grass.def'){
@@ -271,16 +272,16 @@ rm(f, fo, d, fs_def, fs_Rdef, i, v, od)
 
 print(paste("Input def files match output def files."))
 
-#Loop through all of the folders (SA replicates) and extract the data needed----
+# Loop through all of the folders (SA replicates) and extract the data needed----
 temp_out = list.files(paste0(getwd(), '/', fs[1], '/output'))
-tempb = read.table(paste0(getwd(), '/', fs[1], '/output/', temp_out[grep(temp_out, pattern = 'basin.daily')]), stringsAsFactors = FALSE, header = TRUE)
-BasinStreamflow = BasinSatDef = matrix(NA, nrow = length(fs), ncol = (1 + nrow(tempb)))
-HillStreamflow = HillSatDef = matrix(NA, nrow = length(fs)*length(uhills), ncol = (2 + nrow(tempb)))
+tempb = vroom(paste0(getwd(), '/', fs[1], '/output/', temp_out[grep(temp_out, pattern = 'basin.daily')]), delim = ' ', col_names = TRUE, col_types = cols(.default=col_double()))
+BasinStreamflow = BasinSatDef = matrix(NA, nrow = numReps, ncol = (1 + nrow(tempb)))
+HillStreamflow = HillSatDef = matrix(NA, nrow = numReps*length(uhills), ncol = (2 + nrow(tempb)))
 rm(temp_out, tempb)
 
 MakeFigs = FALSE
 for (i in 1:length(fs)){
-  #Make figures of the basin output----
+  #Process basin output----
   od = getwd()
   #Fixme: ? Could read in worldfile and plot all of the worldfile info for each run, or save info and compare for each run.
   
@@ -288,8 +289,8 @@ for (i in 1:length(fs)){
   
   #Obtain basin and hillslope data
   fs_out = list.files()
-  bs = read.table(paste0(getwd(), '/', fs_out[grep(fs_out, pattern = 'basin.daily')]), stringsAsFactors = FALSE, header = TRUE)
-  hs = read.table(paste0(getwd(), '/', fs_out[grep(fs_out, pattern = 'hillslope.daily')]), stringsAsFactors = FALSE, header = TRUE)
+  bs = vroom(paste0(getwd(), '/', fs_out[grep(fs_out, pattern = 'basin.daily')]), delim = ' ', col_names = TRUE, col_types = cols(.default=col_double()), progress = FALSE)
+  hs = vroom(paste0(getwd(), '/', fs_out[grep(fs_out, pattern = 'hillslope.daily')]), delim = ' ', col_names = TRUE, col_types = cols(.default=col_double()), progress = FALSE)
   
   #Make a new date column
   bs$Date = as.Date(paste0(bs$year, '-', bs$month, '-', bs$day))
@@ -777,19 +778,19 @@ for (i in 1:length(fs)){
   }
   
   #Save basin and hillslope timeseries----
-  #Fixme: i should be grepping the fs[i] number
-  BasinStreamflow[i,] = c(i, bs$streamflow*conversion_b)
-  BasinSatDef[i,] = c(i, bs$sat_def)
+  IndSave = as.numeric(strsplit(x = fs[i], split = 'Run', fixed = TRUE)[[1]][2])+1
+  BasinStreamflow[IndSave,] = c(IndSave, bs$streamflow*conversion_b)
+  BasinSatDef[IndSave,] = c(IndSave, bs$sat_def)
   for (h in 1:length(uhills)){
-    HillStreamflow[i + length(fs)*(uhills[h]-1),] = c(i, uhills[h], hs$streamflow[hs$hillID == uhills[h]]*conversion_h[conversion_h[,1] == uhills[h], 2])
-    HillSatDef[i + length(fs)*(uhills[h]-1),] = c(i, uhills[h], hs$sat_def[hs$hillID == uhills[h]])
+    HillStreamflow[IndSave + length(fs)*(uhills[h]-1),] = c(IndSave, uhills[h], hs$streamflow[hs$hillID == uhills[h]]*conversion_h[conversion_h[,1] == uhills[h], 2])
+    HillSatDef[IndSave + length(fs)*(uhills[h]-1),] = c(IndSave, uhills[h], hs$sat_def[hs$hillID == uhills[h]])
   }
-  rm(h)
+  rm(h, IndSave)
   
   setwd(od)
 }
 
-#Make basin and hillslope matrices into dataframes----
+# Make basin and hillslope matrices into dataframes----
 BasinStreamflow = as.data.frame(BasinStreamflow)
 BasinSatDef = as.data.frame(BasinSatDef)
 colnames(BasinStreamflow) = colnames(BasinSatDef) = c('Replicate', as.character(bs$Date))
@@ -799,8 +800,8 @@ colnames(HillStreamflow) = colnames(HillSatDef) = c('Replicate', 'HillID', as.ch
 
 rm(i, fs_out, bs, hs, od)
 
-#Make plots of the streamflow and saturation deficit observed across the SA runs----
-#Basin----
+# Make plots of the streamflow and saturation deficit observed across the SA runs----
+#  Basin----
 png(paste0('streamflowRepsBasin_Med.png'), res = 300, height = 5, width=5, units = 'in')
 matplot(x = as.Date(colnames(BasinStreamflow)[-1]), y = t(BasinStreamflow[,-1]), col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'Streamflow (cfs)', type = 'l', axes=FALSE, cex.lab = 1.5)
 box()
@@ -899,7 +900,7 @@ for (q in 1:nrow(quants)){
 }
 dev.off()
 
-#Hillslope----
+#  Hillslope----
 png(paste0('streamflowRepsHill_Med.png'), res = 300, height = 10, width=10, units = 'in')
 layout(rbind(c(1,2), c(3,4), c(5,6), c(7,8), c(9,10), c(11,12), c(13,14)))
 par(mar = c(3,3,3,0.5))
@@ -1050,6 +1051,9 @@ setwd("C:\\Users\\js4yd\\Documents\\BaismanSA\\RHESSysRuns")
 
 #Specify the number of replicates run
 numReps = 10880
+#Specify the output file name string format used to indicate numbers were added. At least 2 underscores must be used.
+PlusString = 'Run_P9999_'
+PlusNum = 9999
 
 #Check for missing runs and errors in final set of output files----
 #Find missing runs by index (not Python index - subtract 1 for the Python index):
@@ -1185,7 +1189,7 @@ world = read.csv(paste0(getwd(), '/', fs[1], '/worldfiles/worldfile.csv'), strin
 #Taking the unique patch IDs because strata can exist in more than one patch.
 Area.basin = length(unique(world$patchID))*res^2
 #Multiplier conversion for basin streamflow
-conversion_b = Area.basin/1000*(100^3)/(2.54^3)/(12^3)/24/3600
+conversion_b = Area.basin/1000/(.3048^3)/24/3600
 
 #Get hillslope areas and conversion factor for streamflow in hillslopes
 uhills = unique(world$hillID)
@@ -1196,7 +1200,7 @@ for (h in 1:length(uhills)){
   conversion_h[h,1] = h
   #some patches have multiple strata, so their area cannot be counted from the count of cells.
   Area.Hills[h,2] = length(which(world[which(duplicated(world$patchID) == FALSE),]$hillID == h))*res^2
-  conversion_h[h,2] = Area.Hills[h,2]/1000*(100^3)/(2.54^3)/(12^3)/24/3600
+  conversion_h[h,2] = Area.Hills[h,2]/1000/(.3048^3)/24/3600
 }
 rm(h)
 
