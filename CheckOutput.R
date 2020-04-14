@@ -5,6 +5,8 @@ library(stringr)
 
 #Fixme: this function could have an option to process in parallel, but it's so fast to run as-is that may not be necessary.
 #Fixme: could speed up by using scan instead of read.table. Or a vroom package command?
+#Fixme: could speed up by changing read.table to scan: scan(file = ofs[i], fill = TRUE, sep = '`', what = 'character', quiet = TRUE)
+#       would need to remove all of the $V1, maybe some other edits 
 CheckOutput = function(numReps, #the number of replicates run
                        PlusString, #The output file name string format used to indicate numbers were added. At least 2 underscores must be used.
                        PlusNum, #The number to be added to all output file names that have PlusString in the name
