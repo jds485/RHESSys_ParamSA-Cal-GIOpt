@@ -1,7 +1,11 @@
 #For extracting trajectory EEs on Rivanna using a SLURM array
 
+#Load in t from the SLURM job array ID number
+arg = commandArgs(trailingOnly = TRUE)
+t = as.numeric(arg[1])
+
 #Load file containing the input data needed for the loop
-load("/scratch/js4yd/MorrisSA/SAmetrics/EEs_All_Trajectory1.RData")
+load(arg[3])
 
 #Create a storage matrix for the EEs for each parameter
 EEs05_b = EEs95_b = EEsot_b = EEsTN05_b = EEsTNMed_b = EEsTN95_b = matrix(NA, nrow = 1, ncol = cols)
@@ -11,12 +15,8 @@ EEs05_h = EEs95_h = EEsot_h = EEsTN05_h = EEsTNMed_h = EEsTN95_h = matrix(NA, nr
 Deltas = matrix(NA, nrow = 1, ncol = cols)
 #Store the column names. These are the dates
 colnms = colnames(BasinSF[,-1])
+
 #Loop over the trajectories
-
-#Load in t from the SLURM job array ID number
-arg = commandArgs(trailingOnly = TRUE)
-t = as.numeric(arg[1])
-
 tic = Sys.time()
 #Compute the EEs for all parameters in the trajectory
 for (i in 1:cols){
@@ -63,7 +63,7 @@ for (i in 1:cols){
   EEsTN95_b[1, parm] = diffTN95/delta
   
   #Hillslopes
-  #Fixme: Compare to median streamflow and TN
+  #Compare to median streamflow and TN
   diff05_h = diff95_h = diffot_h = diffTN05_h = diffTNMed_h = diffTN95_h = NA
   for (hi in 1:length(uhills)){
     #Get the indices for this hillslope

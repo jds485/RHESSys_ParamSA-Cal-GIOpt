@@ -14,4 +14,4 @@ module load gcc/7.1.0 openmpi/3.1.4 R/3.5.3
 OUTDIR='/scratch/js4yd/MorrisSA/SAmetrics/SAdata'
 INDIR='/scratch/js4yd/MorrisSA/SAmetrics'
 
-Rscript "$INDIR"/ExtractSAtrajectories.R "$SLURM_ARRAY_TASK_ID" "$OUTDIR"
+Rscript "$INDIR"/ExtractSAtrajectories.R "$SLURM_ARRAY_TASK_ID" "$OUTDIR" "/scratch/js4yd/MorrisSA/SAmetrics/EEs_All_Trajectory1.RData"

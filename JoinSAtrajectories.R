@@ -1,8 +1,12 @@
 #Script to join SA trajectory data
+#Fixme: change hard-coded numbers, if possible.
 
-setwd('/scratch/js4yd/MorrisSA/SAmetrics/SAdata/')
+#Load command line arguments
+arg = commandArgs(trailingOnly = TRUE)
 
-OrigParams = read.csv("/scratch/js4yd/MorrisSA/SAmetrics/MorrisSamples_BeforeProcessing.csv", stringsAsFactors = FALSE)
+setwd(arg[1])
+
+OrigParams = read.csv(arg[2], stringsAsFactors = FALSE)
 
 Deltas = EEs05_b = EEs95_b = EEsot_b = EEsTN05_b = EEsTNMed_b = EEsTN95_b = matrix(NA, nrow = 40, ncol = 271)
 EEs05_h = EEs95_h = EEsot_h = EEsTN05_h = EEsTNMed_h = EEsTN95_h = matrix(NA, nrow = 40*14, ncol = 272)
@@ -31,7 +35,7 @@ colnames(EEs05_h) = colnames(EEs95_h) = colnames(EEsot_h) = colnames(EEsTN05_h) 
 
 
 #Write files
-setwd('/scratch/js4yd/MorrisSA/SAmetrics/')
+setwd(arg[3])
 write.table(EEs05_b, file = paste0(getwd(), '/EEs05_b_All.txt'), sep = '\t', row.names = FALSE, col.names = TRUE)
 write.table(EEs95_b, file = paste0(getwd(), '/EEs95_b_All.txt'), sep = '\t', row.names = FALSE, col.names = TRUE) 
 write.table(EEsot_b, file = paste0(getwd(), '/EEsot_b_All.txt'), sep = '\t', row.names = FALSE, col.names = TRUE)
