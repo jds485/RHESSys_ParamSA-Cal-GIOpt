@@ -1,5 +1,6 @@
 #Script for processing results from RHESSys using WRTDS, plotting, and saving as simpler datasets
 #Fixme: this script should be edited to be run on an HPC instead of needed to download the run data to a personal computer.
+#Fixme: plus 9999 should be changed to plus 9998.
 
 #Load libraries----
 library(stringi)
@@ -1768,6 +1769,7 @@ rm(i, fs_out, bs, hs, od)
 save.image("~/BaismanSA/RHESSysRuns/AllSArepData_CorrOrder.RData")
 
 #Checked that every value was non-zero when rounded. For this dataset, Basin to 4 and Hillslope to 6 works
+#For hillslopes, there are some days with actual 0 flows in ephemeral reaches, total of 46361 cells = 0.
 #round to 4 and 6 decimal places for streamflow
 BasinStreamflow[,-1] = round(BasinStreamflow[,-1], 4)
 HillStreamflow[,-c(1,2)] = round(HillStreamflow[,-c(1,2)], 6)
