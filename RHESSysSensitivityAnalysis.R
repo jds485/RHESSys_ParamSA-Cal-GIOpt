@@ -1,6 +1,10 @@
 #Script for calculating Morris EEs from output streamflow and TN data
+
+#Load libraries----
 #This library may be useful for analysis, but is not used right now
 #library(sensitivity)
+
+#Load functions----
 source('ColorFunctions.R')
 
 #Load Morris parameter files and ranges----
@@ -31,7 +35,7 @@ HillTN05 = read.table(file = 'SAResults_HillTN05_p3_All_Reordered.txt', sep = '\
 HillTNMed = read.table(file = 'SAResults_HillTNMed_p3_All_Reordered.txt', sep = '\t', stringsAsFactors = FALSE, header = TRUE, check.names = FALSE)
 HillTN95 = read.table(file = 'SAResults_HillTN95_p3_All_Reordered.txt', sep = '\t', stringsAsFactors = FALSE, header = TRUE, check.names = FALSE)
 
-#Remove observations earlier than 10/01/2004 (SA timeperiod start)----
+# Remove observations earlier than 10/01/2004 (SA timeperiod start)----
 HillSF = HillSF[, c(1, 2, which(as.Date(colnames(HillSF[,-c(1,2)])) >= as.Date('2004-10-01'))+2)]
 HillTN05 = HillTN05[, c(1, 2, which(as.Date(colnames(HillTN05[,-c(1,2)])) >= as.Date('2004-10-01'))+2)]
 HillTNMed = HillTNMed[, c(1, 2, which(as.Date(colnames(HillTNMed[,-c(1,2)])) >= as.Date('2004-10-01'))+2)]
@@ -42,7 +46,7 @@ BasinTN05 = BasinTN05[, c(1, which(as.Date(colnames(BasinTN05[,-1])) >= as.Date(
 BasinTNMed = BasinTNMed[, c(1, which(as.Date(colnames(BasinTNMed[,-1])) >= as.Date('2004-10-01'))+1)]
 BasinTN95 = BasinTN95[, c(1, which(as.Date(colnames(BasinTN95[,-1])) >= as.Date('2004-10-01'))+1)]
 
-#Order by replicate ID. This is done to ensure that the trajectories are in order. They should already be in order, though.----
+# Order by replicate ID. This is done to ensure that the trajectories are in order. They should already be in order, though.----
 BasinSF = BasinSF[order(BasinSF$Replicate),]
 BasinTN05 = BasinTN05[order(BasinTN05$Replicate),]
 BasinTNMed = BasinTNMed[order(BasinTNMed$Replicate),]
@@ -63,7 +67,7 @@ obs = obs[as.Date(obs$Date) <= as.Date(colnames(BasinSF)[ncol(BasinSF)]),]
 #Remove observations earlier than 10/01/2004 (SA timeperiod start)
 obs = obs[as.Date(obs$Date) >= as.Date('2004-10-01'),]
 
-#Find the days with the highest 5th percentile, lowest 5th percentile and all other flows----
+# Find the days with the highest 5th percentile, lowest 5th percentile and all other flows----
 q05 = quantile(x = obs$Flow, probs = 0.05)
 q95 = quantile(x = obs$Flow, probs = 0.95)
 
@@ -74,7 +78,7 @@ days95 = as.Date(obs95$Date)
 obsot = obs[-which(as.Date(obs$Date) %in% c(days05, days95)),]
 daysot = as.Date(obsot$Date)
 
-#Check what days these correspond to - want a uniform distribution in time----
+#  Check what days these correspond to - want a uniform distribution in time----
 png('PercentileFlowChecks.png', res = 300, units = 'in', width = 15, height = 5)
 layout(rbind(c(1,2,3)))
 hist(as.Date(days05), breaks = 30, freq = TRUE, axes = FALSE, xlim = c(as.Date('2004-10-01'), as.Date('2010-09-30')), main = 'Lower 5th Percentile Flow Dates')
@@ -90,7 +94,7 @@ axis(side = 1, at = as.Date(paste0(seq(2004,2011,1), '-01-01')), labels = format
 axis(side = 2)
 dev.off()
 
-#Coverage is not great for the low flow metric. Use instead the lowest 5th percentile in each year of data----
+#  Coverage is not great for the low flow metric. Use instead the lowest 5th percentile in each year of data----
 #Find the indices at which there is a change in the water year, as defined by Oct. 1
 IndsNewYear = c(colnames(BasinSF)[grep(colnames(BasinSF),pattern = '-10-01', fixed=TRUE)], colnames(BasinSF)[ncol(BasinSF)])
 obs05 = NULL
@@ -121,7 +125,7 @@ axis(side = 1, at = as.Date(paste0(seq(2004,2011,1), '-01-01')), labels = format
 axis(side = 2)
 dev.off()
 
-#Coverage for middle flows is slighly biased to earlier years because of upper flow metric. Test yearly 5ths for both upper and lower----
+#  Coverage for middle flows is slighly biased to earlier years because of upper flow metric. Test yearly 5ths for both upper and lower----
 #Find the indices at which there is a change in the water year, as defined by Oct. 1
 obs05 = obs95 = NULL
 for (iy in 1:(length(IndsNewYear)-1)){
@@ -154,7 +158,7 @@ axis(side = 1, at = as.Date(paste0(seq(2004,2011,1), '-01-01')), labels = format
 axis(side = 2)
 dev.off()
 
-#Selected metric: lower 5th yearly, upper 5th global, and all else----
+# Selected metric: lower 5th yearly, upper 5th global, and all else----
 q95 = quantile(x = obs$Flow, probs = 0.95)
 obs95 = obs[obs$Flow >= q95,]
 days95 = as.Date(obs95$Date)
@@ -178,7 +182,7 @@ BasinSF05 = BasinSF[,-1][,which(as.Date(colnames(BasinSF[1,-1])) %in% days05)]
 BasinSF95 = BasinSF[,-1][,which(as.Date(colnames(BasinSF[1,-1])) %in% days95)]
 BasinSFot = BasinSF[,-1][,which(as.Date(colnames(BasinSF[1,-1])) %in% daysot)]
 
-#Create the median hillslope streamflows----
+#Create the median hillslope streamflows that will be used as a reference point to compute Morris EEs----
 uhills = sort(unique(HillSF$HillID))
 MedHills = matrix(NA, nrow = length(uhills), ncol = ncol(BasinSF))
 for (h in 1:length(uhills)){
@@ -213,7 +217,7 @@ HillTN05 = HillTN05[,c(1,2,which(as.Date(colnames(HillTN05[,-c(1,2)])) %in% as.D
 HillTNMed = HillTNMed[,c(1,2,which(as.Date(colnames(HillTNMed[,-c(1,2)])) %in% as.Date(obsTN$Date))+2)]
 HillTN95 = HillTN95[,c(1,2,which(as.Date(colnames(HillTN95[,-c(1,2)])) %in% as.Date(obsTN$Date))+2)]
 
-#Create the median hillslope TNs----
+#Create the median hillslope TNs that will be used as a reference point to compute Morris EEs----
 MedTN05Hills = MedTNMedHills = MedTN95Hills = matrix(NA, nrow = length(uhills), ncol = ncol(HillTN05)-1)
 for (h in 1:length(uhills)){
   MedTN05Hills[h,] = c(uhills[h], apply(X = HillTN05[which(HillTN05$HillID == uhills[h]),-c(1,2)], MARGIN = 2, FUN = median))
@@ -785,7 +789,6 @@ rm(i,j)
 #Show SA metrics for the basin and for each hillslope - ranks, and maps for hillslope----
 
 
-
 #Diagnose problems with EEs----
 for (i in 1:cols){
   ind = i+(1+cols)*(t-1)
@@ -824,4 +827,4 @@ runif(n = 1, min = 0.4, max = 0.5)
 set.seed(5388)
 runif(n = 1, min = 0.1, max = .909091)
 #5837
-#set manually because both Ksat0 and Ksat0v needed adjustment from lower bound
+#set manually to 0.4 because both Ksat0 and Ksat0v needed adjustment from lower bound
