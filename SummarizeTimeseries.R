@@ -1,23 +1,25 @@
 #Script for processing results from RHESSys using WRTDS, plotting, and saving as simpler datasets
+#Fixme: this script should be edited to be run on an HPC instead of needed to download the run data to a personal computer.
 
 #Load libraries----
 library(stringi)
 library(stringr)
 library(rgdal)
 library(GISTools)
-library(EGRET)
-library(survival)
-library(pracma)
-library(parallel)
-library(doParallel)
-library(foreach)
 library(vroom)
+#These libraries are not used, but are needed for commented out code for TN processing. That was moved to another script.
+#library(EGRET)
+#library(survival)
+#library(pracma)
+#library(parallel)
+#library(doParallel)
+#library(foreach)
 
-#Load functions to check the .out files for errors
+#Load functions to check the .out files for errors----
 setwd('C:\\Users\\js4yd\\OneDrive - University of Virginia\\RHESSys_ParameterSA')
 source('CheckOutput.R')
 
-#Test smaller dataset:----
+#Test using a small subset of the full dataset:----
 setwd("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\SAOutputCompare")
 
 #Specify the number of replicates run
@@ -1785,7 +1787,7 @@ write.table(BasinSatDef, file = 'SAResults_BasinSatDef_p1_CorrOrder.txt', row.na
 write.table(HillStreamflow, file = 'SAResults_HillStreamflow_p6_CorrOrder.txt', row.names = FALSE, sep = '\t')
 write.table(HillSatDef, file = 'SAResults_HillSatDef_p1_CorrOrder.txt', row.names = FALSE, sep = '\t')
 
-#Make transposed streamflow data for parallel extraction----
+#   Make transposed streamflow data for parallel extraction----
 setwd("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR")
 BasinSF = read.table(file = 'SAResults_BasinStreamflow_p4_CorrOrder.txt', sep = '\t', stringsAsFactors = FALSE, header = TRUE, check.names = FALSE)
 HillSF = read.table(file = 'SAResults_HillStreamflow_p6_CorrOrder.txt', sep = '\t', stringsAsFactors = FALSE, header = TRUE, check.names = FALSE)
@@ -2039,7 +2041,9 @@ for (h in 1:length(uhills)){
 dev.off()
 rm(h)
 
-
+#######################################
+#######################################
+#REMAINDER IS DEPRECATED - MOVED TO ANOTHER R SCRIPT: 
 #Estimate the nitrogen timeseries for each replicate using WRTDS----
 #Fixme: Streamflow only With WRTDS - same loop as earlier in code, just now with WRTDS
 # tic = Sys.time()
