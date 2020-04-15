@@ -1,16 +1,21 @@
 #Combining the TN information into dataframes and writing txt file of the output
 tic=Sys.time()
+
+#Get the arg values
+arg = commandArgs(trailingOnly = TRUE)
+
 #Template for the column names
 #Load in the transposed streamflow data with rows as the dates
-setwd("/scratch/js4yd/MorrisSA/TNprocessing/")
-BasinSF = read.table(file = 'DateColumnNames.txt', sep = '\t', stringsAsFactors = FALSE, header = TRUE, check.names = FALSE, nrows = 1)
+setwd(arg[1])
+BasinSF = read.table(file = arg[2], sep = '\t', stringsAsFactors = FALSE, header = TRUE, check.names = FALSE, nrows = 1)
 
-HillSF1 = as.numeric(scan(file = 'SAResults_HillStreamflow_p6_t.txt', sep = '\t', what = 'numeric', blank.lines.skip = TRUE, quiet = TRUE, nlines = 1, skip=1, row.names)[-1])
-HillSF2 = as.numeric(scan(file = 'SAResults_HillStreamflow_p6_t.txt', sep = '\t', what = 'numeric', blank.lines.skip = TRUE, quiet = TRUE, nlines = 1, skip=2, row.names)[-1])
+#Get the 1st and 2nd rows for hillslopes from the streamflow file. These will be the same in the TN files.
+HillSF1 = as.numeric(scan(file = arg[3], sep = '\t', what = 'numeric', blank.lines.skip = TRUE, quiet = TRUE, nlines = 1, skip=1, row.names)[-1])
+HillSF2 = as.numeric(scan(file = arg[3], sep = '\t', what = 'numeric', blank.lines.skip = TRUE, quiet = TRUE, nlines = 1, skip=2, row.names)[-1])
 
 
-#Filenames - separate list for basin and hillslope files
-setwd('/scratch/js4yd/MorrisSA/TNprocessing/TNdata/')
+#Filenames from which data will be extracted
+setwd(arg[4])
 fs_h = grep(list.files(), pattern = 'h_', value = TRUE)
 
 #Use temporary files to extract dataframes for storing basin and hillslope information
@@ -45,11 +50,11 @@ colnames(HillTNMed) = c('Replicate', 'HillID', colnames(BasinSF)[-1])
 
 #Save TN timeseries----
 #Save R data file
-setwd('/scratch/js4yd/MorrisSA/TNprocessing/')
-save.image(file = "TNSAreps_Hill95_All.RData", safe = FALSE)
+setwd(arg[1])
+save.image(file = arg[5], safe = FALSE)
 
 #tables
-write.table(round(HillTNMed,3), file = 'SAResults_HillTN95_p3_All.txt', row.names = FALSE, sep = '\t')
+write.table(round(HillTNMed,3), file = arg[6], row.names = FALSE, sep = '\t')
 
 
 toc=Sys.time()

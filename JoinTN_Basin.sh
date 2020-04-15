@@ -10,4 +10,13 @@
 
 module load gcc/7.1.0 openmpi/3.1.4 R/3.5.3
 
-Rscript TNFileJoining_Basin.R
+#arguments are: 
+#1. directory where files in arguments 2 and 3 are located. Files in arguments 5 and 6 will also be written to this directory
+#2. text file from the basin streamflows with only the column names and 2 rows of data (to speed up processing)
+#3. the hillslope streamflows file
+#4. directory where the TN a_ and h_ files are located
+#5. name of the Rdata file containing all R variables created when running this script
+#6. name of the TN data text file that will be written: 05
+#7. name of the TN data text file that will be written: Med
+#8. name of the TN data text file that will be written: 95
+Rscript TNFileJoining_Basin.R "/scratch/js4yd/MorrisSA/TNprocessing/" 'DateColumnNames.txt' 'SAResults_HillStreamflow_p6_t.txt' '/scratch/js4yd/MorrisSA/TNprocessing/TNdata/' "TNSAreps_Basin_All.RData" 'SAResults_BasinTN05_p3_All.txt' 'SAResults_BasinTNMed_p3_All.txt' 'SAResults_BasinTN95_p3_All.txt'

@@ -1,13 +1,17 @@
 #Combining the TN information into dataframes and writing txt file of the output
 tic=Sys.time()
+
+#Get the arg values
+arg = commandArgs(trailingOnly = TRUE)
+
 #Template for the column names
 #Load in the transposed streamflow data with rows as the dates
-setwd("/scratch/js4yd/MorrisSA/TNprocessing/")
-BasinSF = read.table(file = 'DateColumnNames.txt', sep = '\t', stringsAsFactors = FALSE, header = TRUE, check.names = FALSE, nrows = 1)
-HillSF = read.table(file = 'SAResults_HillStreamflow_p6_t.txt', sep = '\t', stringsAsFactors = FALSE, check.names = FALSE, nrows = 2, skip=1, row.names = 1)
+setwd(arg[1])
+BasinSF = read.table(file = arg[2], sep = '\t', stringsAsFactors = FALSE, header = TRUE, check.names = FALSE, nrows = 1)
+HillSF = read.table(file = arg[3], sep = '\t', stringsAsFactors = FALSE, check.names = FALSE, nrows = 2, skip=1, row.names = 1)
 
-#Filenames - separate list for basin and hillslope files
-setwd('/scratch/js4yd/MorrisSA/TNprocessing/TNdata/')
+#Filenames from which data will be extracted
+setwd(arg[4])
 fs_b = grep(list.files(), pattern = 'a_', value = TRUE)
 
 #Use temporary files to extract dataframes for storing basin and hillslope information
@@ -43,13 +47,13 @@ colnames(BasinTN05) = colnames(BasinTN95) = colnames(BasinTNMed) = colnames(Basi
 
 #Save TN timeseries----
 #Save R data file
-setwd('/scratch/js4yd/MorrisSA/TNprocessing/')
-save.image(file = "TNSAreps_Basin_All.RData", safe = FALSE)
+setwd(arg[1])
+save.image(file = arg[5], safe = FALSE)
 
 #tables
-write.table(round(BasinTN05,3), file = 'SAResults_BasinTN05_p3_All.txt', row.names = FALSE, sep = '\t')
-write.table(round(BasinTNMed,3), file = 'SAResults_BasinTNMed_p3_All.txt', row.names = FALSE, sep = '\t')
-write.table(round(BasinTN95,3), file = 'SAResults_BasinTN95_p3_All.txt', row.names = FALSE, sep = '\t')
+write.table(round(BasinTN05,3), file = arg[6], row.names = FALSE, sep = '\t')
+write.table(round(BasinTNMed,3), file = arg[7], row.names = FALSE, sep = '\t')
+write.table(round(BasinTN95,3), file = arg[8], row.names = FALSE, sep = '\t')
 
 toc=Sys.time()
 print('Write time')
