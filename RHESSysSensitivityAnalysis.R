@@ -5,6 +5,7 @@
 #library(sensitivity)
 
 #Load functions----
+#Fixme: full path needed
 source('ColorFunctions.R')
 
 #Load Morris parameter files and ranges----
@@ -226,16 +227,18 @@ for (h in 1:length(uhills)){
 }
 rm(h)
 
-#Create a storage matrix for the EEs for each parameter----
-EEs05_b = EEs95_b = EEsot_b = EEsTN05_b = EEsTNMed_b = EEsTN95_b = matrix(NA, nrow = r, ncol = cols)
+#Save input data for Rivanna run----
+save.image(file = "C:/Users/js4yd/OneDrive - University of Virginia/BES_Data/BES_Data/RHESSysFiles/BR&POBR/EEs_All_Trajectory1.RData")
+#Run on Rivanna: Create a storage matrix for the EEs for each parameter----
+#EEs05_b = EEs95_b = EEsot_b = EEsTN05_b = EEsTNMed_b = EEsTN95_b = matrix(NA, nrow = r, ncol = cols)
 #Need an extra column for the hillslope ID
-EEs05_h = EEs95_h = EEsot_h = EEsTN05_h = EEsTNMed_h = EEsTN95_h = matrix(NA, nrow = r*length(uhills), ncol = cols+1)
+#EEs05_h = EEs95_h = EEsot_h = EEsTN05_h = EEsTNMed_h = EEsTN95_h = matrix(NA, nrow = r*length(uhills), ncol = cols+1)
 #Create a stoage matrix for the deltas
-Deltas = matrix(NA, nrow = r, ncol = cols)
+#Deltas = matrix(NA, nrow = r, ncol = cols)
 #Store the column names. These are the dates
-colnms = colnames(BasinSF[,-1])
-#Loop over the trajectories----
-#Fixme: this should be parallelized - done using job array and rejoin
+#colnms = colnames(BasinSF[,-1])
+#Run on Rivanna: Loop over the trajectories----
+#Fixme: this should be parallelized - fixed by using job array and rejoin on Rivanna
 # tic = Sys.time()
 # for (t in 1:r){
 #   #Compute the EEs for all parameters in the trajectory
@@ -316,7 +319,7 @@ colnms = colnames(BasinSF[,-1])
 # save.image(file = 'EEs_Corr.RData')
 
 #Load data from Rivanna run----
-#Input data load - loads all data above this line
+#Input data load - loads all data that were saved in the save.image file above this line
 load("C:/Users/js4yd/OneDrive - University of Virginia/BES_Data/BES_Data/RHESSysFiles/BR&POBR/EEs_All_Trajectory1.RData")
 
 #Load EE and Deltas info
