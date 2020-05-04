@@ -945,8 +945,6 @@ sum(MorrisSample_df.loc[:,'s108_porosity_0'] > MorrisSample_df.loc[:,'s8_porosit
 sum(MorrisSample_df.loc[:,'s109_porosity_0'] > MorrisSample_df.loc[:,'s9_porosity_0']) + \
 sum(MorrisSample_df.loc[:,'v102_epc.topt'] > MorrisSample_df.loc[:,'v102_epc.tmax']) + \
 sum(MorrisSample_df.loc[:,'v3_epc.topt'] > MorrisSample_df.loc[:,'v3_epc.tmax']) + \
-sum(MorrisSample_df.loc[:,'v102_epc.topt'] > MorrisSample_df.loc[:,'v102_epc.tmax']) + \
-sum(MorrisSample_df.loc[:,'v3_epc.topt'] > MorrisSample_df.loc[:,'v3_epc.tmax']) + \
 sum(MorrisSample_df.loc[:,'v102_epc.leaf_cn'] > MorrisSample_df.loc[:,'v102_epc.leaflitr_cn']) + \
 sum(MorrisSample_df.loc[:,'v3_epc.leaf_cn'] > MorrisSample_df.loc[:,'v3_epc.leaflitr_cn'])) != 0:
     sys.exit('PyERROR45: One of the inequalities used to be correct, but after other function manipulations is now incorrect. This is a function bug that should be reported.')
