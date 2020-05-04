@@ -99,9 +99,9 @@ for (h in 1:length(uhills)){
 }
 
 #Save new dataset----
-write.csv(BasinSF, file = 'SAResults_BasinStreamflow_p4_Reordered_Add5.csv', row.names = FALSE)
-write.csv(HillSF, file = 'SAResults_HillStreamflow_p6_Reordered_Add5.csv', row.names = FALSE)
-
+#write.csv(BasinSF, file = 'SAResults_BasinStreamflow_p4_Reordered_Add5.csv', row.names = FALSE)
+#write.csv(HillSF, file = 'SAResults_HillStreamflow_p6_Reordered_Add5.csv', row.names = FALSE)
+setwd("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR")
 write.table(BasinSF, file = 'SAResults_BasinStreamflow_p4_Reordered_Add5.txt', row.names = FALSE, sep = '\t')
 write.table(HillSF, file = 'SAResults_HillStreamflow_p6_Reordered_Add5.txt', row.names = FALSE, sep = '\t')
 
@@ -186,13 +186,13 @@ for (h in 1:length(uhills)){
 }
 
 #Save new dataset----
-write.csv(BasinTN05, file = 'SAResults_BasinTN05_p3_All_Reordered_Add5.csv', row.names = FALSE)
-write.csv(BasinTNMed, file = 'SAResults_BasinTNMed_p3_All_Reordered_Add5.csv', row.names = FALSE)
-write.csv(BasinTN95, file = 'SAResults_BasinTN95_p3_All_Reordered_Add5.csv', row.names = FALSE)
-write.csv(HillTN05, file = 'SAResults_HillTN05_p3_All_Reordered_Add5.csv', row.names = FALSE)
-write.csv(HillTNMed, file = 'SAResults_HillTNMed_p3_All_Reordered_Add5.csv', row.names = FALSE)
-write.csv(HillTN95, file = 'SAResults_HillTN95_p3_All_Reordered_Add5.csv', row.names = FALSE)
-
+# write.csv(BasinTN05, file = 'SAResults_BasinTN05_p3_All_Reordered_Add5.csv', row.names = FALSE)
+# write.csv(BasinTNMed, file = 'SAResults_BasinTNMed_p3_All_Reordered_Add5.csv', row.names = FALSE)
+# write.csv(BasinTN95, file = 'SAResults_BasinTN95_p3_All_Reordered_Add5.csv', row.names = FALSE)
+# write.csv(HillTN05, file = 'SAResults_HillTN05_p3_All_Reordered_Add5.csv', row.names = FALSE)
+# write.csv(HillTNMed, file = 'SAResults_HillTNMed_p3_All_Reordered_Add5.csv', row.names = FALSE)
+# write.csv(HillTN95, file = 'SAResults_HillTN95_p3_All_Reordered_Add5.csv', row.names = FALSE)
+"C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR"
 write.table(BasinTN05, file = 'SAResults_BasinTN05_p3_All_Reordered_Add5.txt', row.names = FALSE, sep = '\t')
 write.table(BasinTNMed, file = 'SAResults_BasinTNMed_p3_All_Reordered_Add5.txt', row.names = FALSE, sep = '\t')
 write.table(BasinTN95, file = 'SAResults_BasinTN95_p3_All_Reordered_Add5.txt', row.names = FALSE, sep = '\t')
