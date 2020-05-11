@@ -384,8 +384,6 @@ for (h in 1:length(uhills)){
 rm(h)
 
 #Compute the EEs for these replicates----
-
-
 #Store the column names. These are the dates
 colnms = colnames(BasinSF[,-1])
 
@@ -444,17 +442,31 @@ for(A in 1:length(t)){
     diffTNMed_h = (sum(abs((HillTNMed[IndsHill+1,-c(1,2)] - MedTNMedHills[which(MedTNMedHills[,1] == uhills[hi]),-1]))) - sum(abs((HillTNMed[IndsHill,-c(1,2)] - MedTNMedHills[which(MedTNMedHills[,1] == uhills[hi]),-1]))))
     diffTN95_h = (sum(abs((HillTN95[IndsHill+1,-c(1,2)] - MedTN95Hills[which(MedTN95Hills[,1] == uhills[hi]),-1]))) - sum(abs((HillTN95[IndsHill,-c(1,2)] - MedTN95Hills[which(MedTN95Hills[,1] == uhills[hi]),-1]))))
     
-    EEs05_h[hi, c(t[A],parm+1)] = c(uhills[hi], diff05_h/delta)
-    EEs95_h[hi, c(t[A],parm+1)] = c(uhills[hi], diff95_h/delta)
-    EEsot_h[hi, c(t[A],parm+1)] = c(uhills[hi], diffot_h/delta)
+    EEs05_h[(t[A]-1)*(length(uhills)) + uhills[hi], c(1,parm+1)] = c(uhills[hi], diff05_h/delta)
+    EEs95_h[(t[A]-1)*(length(uhills)) + uhills[hi], c(1,parm+1)] = c(uhills[hi], diff95_h/delta)
+    EEsot_h[(t[A]-1)*(length(uhills)) + uhills[hi], c(1,parm+1)] = c(uhills[hi], diffot_h/delta)
     
-    EEsTN05_h[hi, c(t[A],parm+1)] = c(uhills[hi], diffTN05_h/delta)
-    EEsTNMed_h[hi, c(t[A],parm+1)] = c(uhills[hi], diffTNMed_h/delta)
-    EEsTN95_h[hi, c(t[A],parm+1)] = c(uhills[hi], diffTN95_h/delta)
+    EEsTN05_h[(t[A]-1)*(length(uhills)) + uhills[hi], c(1,parm+1)] = c(uhills[hi], diffTN05_h/delta)
+    EEsTNMed_h[(t[A]-1)*(length(uhills)) + uhills[hi], c(1,parm+1)] = c(uhills[hi], diffTNMed_h/delta)
+    EEsTN95_h[(t[A]-1)*(length(uhills)) + uhills[hi], c(1,parm+1)] = c(uhills[hi], diffTN95_h/delta)
   }
   rm(hi, parm, delta, diff05_h, diff05, diff95, diff95_h, diffot, diffot_h, diffTN05, diffTN05_h, diffTN95, diffTN95_h, diffTNMed, diffTNMed_h)
 }
 rm(A, i, t)
+
+#Check if EEs have NA values
+any(is.na(EEs05_b))
+any(is.na(EEs95_b))
+any(is.na(EEsot_b))
+any(is.na(EEsTN05_b))
+any(is.na(EEsTN95_b))
+any(is.na(EEsTNMed_b))
+any(is.na(EEs05_h))
+any(is.na(EEs95_h))
+any(is.na(EEsot_h))
+any(is.na(EEsTN05_h))
+any(is.na(EEsTN95_h))
+any(is.na(EEsTNMed_h))
 
 #Save EE datasets----
 write.table(EEs05_b, file = paste0(getwd(), '/EEs05_b_All_Add5.txt'), sep = '\t', row.names = FALSE, col.names = TRUE)
