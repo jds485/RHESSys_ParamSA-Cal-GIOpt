@@ -1571,6 +1571,10 @@ for (h in 1:length(uhills)){
   EEsTNMed_h_mua_05[uhills[h], ] = apply(X = EEsTNMed_h_mua[EEsTNMed_h_mua[,1] == uhills[h],], MARGIN = 2, FUN = mean)
   EEsTNMed_h_mua_95[uhills[h], ] = apply(X = EEsTNMed_h_mua[EEsTNMed_h_mua[,1] == uhills[h],], MARGIN = 2, FUN = mean)
 }
+#Name the columns
+colnames(EEs05_h_mua_m) = colnames(EEs95_h_mua_m) = colnames(EEsot_h_mua_m) = colnames(EEsTN05_h_mua_m) = colnames(EEsTN95_h_mua_m) = colnames(EEsTNMed_h_mua_m) = c('HillID', names(EEs05_b_mua_m))
+colnames(EEs05_h_mua_05) = colnames(EEs95_h_mua_05) = colnames(EEsot_h_mua_05) = colnames(EEsTN05_h_mua_05) = colnames(EEsTN95_h_mua_05) = colnames(EEsTNMed_h_mua_05) = c('HillID', names(EEs05_b_mua_05))
+colnames(EEs05_h_mua_95) = colnames(EEs95_h_mua_95) = colnames(EEsot_h_mua_95) = colnames(EEsTN05_h_mua_95) = colnames(EEsTN95_h_mua_95) = colnames(EEsTNMed_h_mua_95) = c('HillID', names(EEs05_b_mua_95))
 
 # Make plots of the distributions for variables----
 for (p in 1:ncol(EEs05_b_mua)){
@@ -1640,13 +1644,33 @@ RanksMuaTNMed_b = data.frame(Param = colnames(InputParams)[rev(order(muaEEsTNMed
 RanksMua05_h = RanksMua95_h = RanksMuaot_h = RanksMuaTN05_h = RanksMuaTN95_h = RanksMuaTNMed_h = list()
 for (h in 1:length(uhills)){
   RanksMua05_h = c(RanksMua05_h, list(data.frame(Param = colnames(InputParams)[rev(order(muaEEs05_h[h,]))], EE05_h = muaEEs05_h[h,][rev(order(muaEEs05_h[h,]))], stringsAsFactors = FALSE)))
-  RanksMua95_h = c(RanksMua95_h, list(data.frame(Param = colnames(InputParams)[rev(order(muaEEs95_h[h,]))], EE05_h = muaEEs95_h[h,][rev(order(muaEEs95_h[h,]))], stringsAsFactors = FALSE)))
-  RanksMuaot_h = c(RanksMuaot_h, list(data.frame(Param = colnames(InputParams)[rev(order(muaEEsot_h[h,]))], EE05_h = muaEEsot_h[h,][rev(order(muaEEsot_h[h,]))], stringsAsFactors = FALSE)))
-  RanksMuaTN05_h = c(RanksMuaTN05_h, list(data.frame(Param = colnames(InputParams)[rev(order(muaEEsTN05_h[h,]))], EE05_h = muaEEsTN05_h[h,][rev(order(muaEEsTN05_h[h,]))], stringsAsFactors = FALSE)))
-  RanksMuaTN95_h = c(RanksMuaTN95_h, list(data.frame(Param = colnames(InputParams)[rev(order(muaEEsTN95_h[h,]))], EE05_h = muaEEsTN95_h[h,][rev(order(muaEEsTN95_h[h,]))], stringsAsFactors = FALSE)))
-  RanksMuaTNMed_h = c(RanksMuaTNMed_h, list(data.frame(Param = colnames(InputParams)[rev(order(muaEEsTNMed_h[h,]))], EE05_h = muaEEsTNMed_h[h,][rev(order(muaEEsTNMed_h[h,]))], stringsAsFactors = FALSE)))
+  RanksMua95_h = c(RanksMua95_h, list(data.frame(Param = colnames(InputParams)[rev(order(muaEEs95_h[h,]))], EE95_h = muaEEs95_h[h,][rev(order(muaEEs95_h[h,]))], stringsAsFactors = FALSE)))
+  RanksMuaot_h = c(RanksMuaot_h, list(data.frame(Param = colnames(InputParams)[rev(order(muaEEsot_h[h,]))], EEot_h = muaEEsot_h[h,][rev(order(muaEEsot_h[h,]))], stringsAsFactors = FALSE)))
+  RanksMuaTN05_h = c(RanksMuaTN05_h, list(data.frame(Param = colnames(InputParams)[rev(order(muaEEsTN05_h[h,]))], EETN05_h = muaEEsTN05_h[h,][rev(order(muaEEsTN05_h[h,]))], stringsAsFactors = FALSE)))
+  RanksMuaTN95_h = c(RanksMuaTN95_h, list(data.frame(Param = colnames(InputParams)[rev(order(muaEEsTN95_h[h,]))], EETN95_h = muaEEsTN95_h[h,][rev(order(muaEEsTN95_h[h,]))], stringsAsFactors = FALSE)))
+  RanksMuaTNMed_h = c(RanksMuaTNMed_h, list(data.frame(Param = colnames(InputParams)[rev(order(muaEEsTNMed_h[h,]))], EETNMed_h = muaEEsTNMed_h[h,][rev(order(muaEEsTNMed_h[h,]))], stringsAsFactors = FALSE)))
 }
 names(RanksMua05_h) = names(RanksMua95_h) = names(RanksMuaot_h) = names(RanksMuaTN05_h) = names(RanksMuaTN95_h) = names(RanksMuaTNMed_h) = paste0('Hill', seq(1,14,1))
+rm(h)
+
+# Using Aggregated variables----
+RanksMua05_b_Agg = data.frame(Param = names(EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)])[order(EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)],decreasing = TRUE)], EE05_b = as.numeric(EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)][order(EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)]), stringsAsFactors = FALSE)
+RanksMua95_b_Agg = data.frame(Param = names(EEs95_b_mua_m[-which(names(EEs95_b_mua_m) %in% ColsAggregated)])[order(EEs95_b_mua_m[-which(names(EEs95_b_mua_m) %in% ColsAggregated)],decreasing = TRUE)], EE95_b = as.numeric(EEs95_b_mua_m[-which(names(EEs95_b_mua_m) %in% ColsAggregated)][order(EEs95_b_mua_m[-which(names(EEs95_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)]), stringsAsFactors = FALSE)
+RanksMuaot_b_Agg = data.frame(Param = names(EEsot_b_mua_m[-which(names(EEsot_b_mua_m) %in% ColsAggregated)])[order(EEsot_b_mua_m[-which(names(EEsot_b_mua_m) %in% ColsAggregated)],decreasing = TRUE)], EEot_b = as.numeric(EEsot_b_mua_m[-which(names(EEsot_b_mua_m) %in% ColsAggregated)][order(EEsot_b_mua_m[-which(names(EEsot_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)]), stringsAsFactors = FALSE)
+RanksMuaTN05_b_Agg = data.frame(Param = names(EEsTN05_b_mua_m[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)])[order(EEsTN05_b_mua_m[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)],decreasing = TRUE)], EETN05_b = as.numeric(EEsTN05_b_mua_m[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)][order(EEsTN05_b_mua_m[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)]), stringsAsFactors = FALSE)
+RanksMuaTN95_b_Agg = data.frame(Param = names(EEsTN95_b_mua_m[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)])[order(EEsTN95_b_mua_m[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)],decreasing = TRUE)], EETN95_b = as.numeric(EEsTN95_b_mua_m[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)][order(EEsTN95_b_mua_m[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)]), stringsAsFactors = FALSE)
+RanksMuaTNMed_b_Agg = data.frame(Param = names(EEsTNMed_b_mua_m[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)])[order(EEsTNMed_b_mua_m[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)],decreasing = TRUE)], EETNMed_b = as.numeric(EEsTNMed_b_mua_m[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)][order(EEsTNMed_b_mua_m[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)]), stringsAsFactors = FALSE)
+
+RanksMua05_h_Agg = RanksMua95_h_Agg = RanksMuaot_h_Agg = RanksMuaTN05_h_Agg = RanksMuaTN95_h_Agg = RanksMuaTNMed_h_Agg = list()
+for (h in 1:length(uhills)){
+  RanksMua05_h_Agg = c(RanksMua05_h_Agg, list(data.frame(Param = colnames(EEs05_h_mua_m)[-c(1,which(colnames(EEs05_h_mua_m) %in% ColsAggregated))][order(EEs05_h_mua_m[h, -c(1,which(colnames(EEs05_h_mua_m) %in% ColsAggregated))],decreasing = TRUE)], EE05_h = as.numeric(EEs05_h_mua_m[h, -c(1,which(colnames(EEs05_h_mua_m) %in% ColsAggregated))][order(EEs05_h_mua_m[h, -c(1,which(colnames(EEs05_h_mua_m) %in% ColsAggregated))],decreasing = TRUE)]), stringsAsFactors = FALSE)))
+  RanksMua95_h_Agg = c(RanksMua95_h_Agg, list(data.frame(Param = colnames(EEs95_h_mua_m)[-c(1,which(colnames(EEs95_h_mua_m) %in% ColsAggregated))][order(EEs95_h_mua_m[h, -c(1,which(colnames(EEs95_h_mua_m) %in% ColsAggregated))],decreasing = TRUE)], EE95_h = as.numeric(EEs95_h_mua_m[h, -c(1,which(colnames(EEs95_h_mua_m) %in% ColsAggregated))][order(EEs95_h_mua_m[h, -c(1,which(colnames(EEs95_h_mua_m) %in% ColsAggregated))],decreasing = TRUE)]), stringsAsFactors = FALSE)))
+  RanksMuaot_h_Agg = c(RanksMuaot_h_Agg, list(data.frame(Param = colnames(EEsot_h_mua_m)[-c(1,which(colnames(EEsot_h_mua_m) %in% ColsAggregated))][order(EEsot_h_mua_m[h, -c(1,which(colnames(EEsot_h_mua_m) %in% ColsAggregated))],decreasing = TRUE)], EEot_h = as.numeric(EEsot_h_mua_m[h, -c(1,which(colnames(EEsot_h_mua_m) %in% ColsAggregated))][order(EEsot_h_mua_m[h, -c(1,which(colnames(EEsot_h_mua_m) %in% ColsAggregated))],decreasing = TRUE)]), stringsAsFactors = FALSE)))
+  RanksMuaTN05_h_Agg = c(RanksMuaTN05_h_Agg, list(data.frame(Param = colnames(EEsTN05_h_mua_m)[-c(1,which(colnames(EEsTN05_h_mua_m) %in% ColsAggregated))][order(EEsTN05_h_mua_m[h, -c(1,which(colnames(EEsTN05_h_mua_m) %in% ColsAggregated))],decreasing = TRUE)], EETN05_h = as.numeric(EEsTN05_h_mua_m[h, -c(1,which(colnames(EEsTN05_h_mua_m) %in% ColsAggregated))][order(EEsTN05_h_mua_m[h, -c(1,which(colnames(EEsTN05_h_mua_m) %in% ColsAggregated))],decreasing = TRUE)]), stringsAsFactors = FALSE)))
+  RanksMuaTN95_h_Agg = c(RanksMuaTN95_h_Agg, list(data.frame(Param = colnames(EEsTN95_h_mua_m)[-c(1,which(colnames(EEsTN95_h_mua_m) %in% ColsAggregated))][order(EEsTN95_h_mua_m[h, -c(1,which(colnames(EEsTN95_h_mua_m) %in% ColsAggregated))],decreasing = TRUE)], EETN95_h = as.numeric(EEsTN95_h_mua_m[h, -c(1,which(colnames(EEsTN95_h_mua_m) %in% ColsAggregated))][order(EEsTN95_h_mua_m[h, -c(1,which(colnames(EEsTN95_h_mua_m) %in% ColsAggregated))],decreasing = TRUE)]), stringsAsFactors = FALSE)))
+  RanksMuaTNMed_h_Agg = c(RanksMuaTNMed_h_Agg, list(data.frame(Param = colnames(EEsTNMed_h_mua_m)[-c(1,which(colnames(EEsTNMed_h_mua_m) %in% ColsAggregated))][order(EEsTNMed_h_mua_m[h, -c(1,which(colnames(EEsTNMed_h_mua_m) %in% ColsAggregated))],decreasing = TRUE)], EETNMed_h = as.numeric(EEsTNMed_h_mua_m[h, -c(1,which(colnames(EEsTNMed_h_mua_m) %in% ColsAggregated))][order(EEsTNMed_h_mua_m[h, -c(1,which(colnames(EEsTNMed_h_mua_m) %in% ColsAggregated))],decreasing = TRUE)]), stringsAsFactors = FALSE)))
+}
+names(RanksMua05_h_Agg) = names(RanksMua95_h_Agg) = names(RanksMuaot_h_Agg) = names(RanksMuaTN05_h_Agg) = names(RanksMuaTN95_h_Agg) = names(RanksMuaTNMed_h_Agg) = paste0('Hill', seq(1,14,1))
 rm(h)
 
 # Get the unique variables from the flow and TN metric lists----
@@ -1672,7 +1696,7 @@ ParamSelectTN_b = unique(c(names(EEsTN05_b_mua_95[1:nrow(ParamRanges)][EEsTN05_b
 #Some differences using this method
 length(unique(c(ParamSelect_b, ParamSelectTN_b)))
 
-# Same, but dropping the aggregated parameters
+# Same, but dropping the aggregated parameters----
 Top10_Agg = ceiling((length(EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]) - length(which(EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)] == 0)))*0.1)
 RanksMua_b_Agg = unique(c(names(sort(EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[1:Top10_Agg]),
                           names(sort(EEsot_b_mua_m[-which(names(EEsot_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[1:Top10_Agg]),
@@ -1691,7 +1715,7 @@ ParamSelectTN_b_Agg = unique(c(names(EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua
 
 length(unique(c(ParamSelect_b_Agg, ParamSelectTN_b_Agg)))
 
-#Make a plot of the number of parameters selected versus the threshold percentage----
+# Make a plot of the number of parameters selected versus the threshold percentage----
 x = seq(0.01,1,0.01)
 ParamTotals = vector('numeric', length(x))
 for (i in 1:length(x)){
@@ -1740,6 +1764,7 @@ legend('topleft', legend = c('Based on Mean', 'Based on 95th Percentile'), lty =
 dev.off()
 
 #Color scheme for Categories of Variables----
+# Unaggregated----
 #One color per category
 colos = c(rainbow(12), 'black')
 colos[3] = 'gray'
@@ -1774,6 +1799,43 @@ for (i in 1:cols){
     ColPlots[i] = colos[13]
   }
 }
+# Aggregated----
+#Assign colors to the categories
+ColPlots_Agg = vector('character', length=length(colnames(EEs05_b_mua)[-which(colnames(EEs05_b_mua) %in% ColsAggregated)]))
+for (i in 1:length(colnames(EEs05_b_mua)[-which(colnames(EEs05_b_mua) %in% ColsAggregated)])){
+  if (strsplit(colnames(EEs05_b_mua)[-which(colnames(EEs05_b_mua) %in% ColsAggregated)][i], split = '_', fixed = TRUE)[[1]][1] == 'h'){
+    ColPlots_Agg[i] = colos[1]
+  }else if (strsplit(colnames(EEs05_b_mua)[-which(colnames(EEs05_b_mua) %in% ColsAggregated)][i], split = '_', fixed = TRUE)[[1]][1] == 'z'){
+    ColPlots_Agg[i] = colos[2]
+  }else if (strsplit(colnames(EEs05_b_mua)[-which(colnames(EEs05_b_mua) %in% ColsAggregated)][i], split = '_', fixed = TRUE)[[1]][1] == 's9'){
+    ColPlots_Agg[i] = colos[3]
+  }else if (strsplit(colnames(EEs05_b_mua)[-which(colnames(EEs05_b_mua) %in% ColsAggregated)][i], split = '_', fixed = TRUE)[[1]][1] == 's109'){
+    ColPlots_Agg[i] = colos[4]
+  }else if (strsplit(colnames(EEs05_b_mua)[-which(colnames(EEs05_b_mua) %in% ColsAggregated)][i], split = '_', fixed = TRUE)[[1]][1] == 's8'){
+    ColPlots_Agg[i] = colos[5]
+  }else if (strsplit(colnames(EEs05_b_mua)[-which(colnames(EEs05_b_mua) %in% ColsAggregated)][i], split = '_', fixed = TRUE)[[1]][1] == 's108'){
+    ColPlots_Agg[i] = colos[6]
+  }else if (strsplit(colnames(EEs05_b_mua)[-which(colnames(EEs05_b_mua) %in% ColsAggregated)][i], split = '_', fixed = TRUE)[[1]][1] == 'l1'){
+    ColPlots_Agg[i] = colos[7]
+  }else if (strsplit(colnames(EEs05_b_mua)[-which(colnames(EEs05_b_mua) %in% ColsAggregated)][i], split = '_', fixed = TRUE)[[1]][1] == 'l2'){
+    ColPlots_Agg[i] = colos[8]
+  }else if (strsplit(colnames(EEs05_b_mua)[-which(colnames(EEs05_b_mua) %in% ColsAggregated)][i], split = '_', fixed = TRUE)[[1]][1] == 'l3'){
+    ColPlots_Agg[i] = colos[9]
+  }else if (strsplit(colnames(EEs05_b_mua)[-which(colnames(EEs05_b_mua) %in% ColsAggregated)][i], split = '_', fixed = TRUE)[[1]][1] == 'l4'){
+    ColPlots_Agg[i] = colos[10]
+  }else if (strsplit(colnames(EEs05_b_mua)[-which(colnames(EEs05_b_mua) %in% ColsAggregated)][i], split = '_', fixed = TRUE)[[1]][1] == 'v102'){
+    ColPlots_Agg[i] = colos[11]
+  }else if (strsplit(colnames(EEs05_b_mua)[-which(colnames(EEs05_b_mua) %in% ColsAggregated)][i], split = '_', fixed = TRUE)[[1]][1] == 'v3'){
+    ColPlots_Agg[i] = colos[12]
+  }else if (strsplit(colnames(EEs05_b_mua)[-which(colnames(EEs05_b_mua) %in% ColsAggregated)][i], split = '_', fixed = TRUE)[[1]][1] == 'v4'){
+    ColPlots_Agg[i] = colos[13]
+  }else if (strsplit(colnames(EEs05_b_mua)[-which(colnames(EEs05_b_mua) %in% ColsAggregated)][i], split = '_', fixed = TRUE)[[1]][1] == 'Soil8'){
+    ColPlots_Agg[i] = 'darkgreen'
+  }else if (strsplit(colnames(EEs05_b_mua)[-which(colnames(EEs05_b_mua) %in% ColsAggregated)][i], split = '_', fixed = TRUE)[[1]][1] == 'Soil9'){
+    ColPlots_Agg[i] = 'darkgray'
+  }
+}
+
 #Make plots of the sd vs. mu----
 png('EE05_sdVsMu_b.png', res = 300, units = 'in', height = 7, width = 7)
 plot(x = muEEs05_b, y = sdEEs05_b, pch = 16, xlab = 'Mean of the Elementary Effect', ylab = 'Standard Deviation of the Elementary Effect', main = 'Metric: SAE for Lower 5th Percentile of Flow', col = ColPlots)
@@ -1803,16 +1865,15 @@ dev.off()
 #Make plots of the ranking for mean absolute value----
 png('EE05_mua_b.png', res = 300, units = 'in', height = 7, width = 7)
 barplot(height = EEs05_b_mua_m[1:nrow(ParamRanges)]/max(EEs05_b_mua_95[1:nrow(ParamRanges)]), ylab = 'Normalized Mean Abs. Val. of Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Lower 5th Percentile of Flow', col = ColPlots, border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,300))
-arrows(seq(0.5,270.5,1), EEs05_b_mua_05[1:nrow(ParamRanges)]/max(EEs05_b_mua_95[1:nrow(ParamRanges)]), seq(0.5,270.5,1), EEs05_b_mua_95[1:nrow(ParamRanges)]/max(EEs05_b_mua_95[1:nrow(ParamRanges)]), length=0.05, angle=90, code=3)
-#Make lines separating the different classes of variables
-lines(x = c(-100,300), y = c(RanksMua05_b[Top10,2]/max(EEs05_b_mua_95[1:nrow(ParamRanges)]),RanksMua05_b[Top10,2]/max(EEs05_b_mua_95[1:nrow(ParamRanges)])), col = 'black', lwd = 2)
+arrows(seq(0.5,nrow(ParamRanges)-0.5,1), EEs05_b_mua_05[1:nrow(ParamRanges)]/max(EEs05_b_mua_95[1:nrow(ParamRanges)]), seq(0.5,nrow(ParamRanges)-0.5,1), EEs05_b_mua_95[1:nrow(ParamRanges)]/max(EEs05_b_mua_95[1:nrow(ParamRanges)]), length=0.05, angle=90, code=3)
+lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(RanksMua05_b[Top10,2]/max(EEs05_b_mua_95[1:nrow(ParamRanges)]),RanksMua05_b[Top10,2]/max(EEs05_b_mua_95[1:nrow(ParamRanges)])), col = 'black', lwd = 2)
 legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
 dev.off()
 
-png('EE05_mua_b_thresh12.png', res = 300, units = 'in', height = 7, width = 7)
-barplot(height = muaEEs05_b/max(muaEEs05_b), ylab = 'Normalized Mean Abs. Val. of Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Lower 5th Percentile of Flow', col = ColPlots, border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5)
-#Make lines separating the different classes of variables
-lines(x = c(-100,300), y = c(RanksMua05_b[Top10,2]/max(muaEEs05_b),RanksMua05_b[Top10,2]/max(muaEEs05_b)))
+png('EE05_mua_b_Agg.png', res = 300, units = 'in', height = 7, width = 7)
+barplot(height = EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]), ylab = 'Normalized Mean Abs. Val. of Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Lower 5th Percentile of Flow', col = ColPlots_Agg, border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,300))
+arrows(seq(0.5,length(EEs05_b_mua_05[-which(names(EEs05_b_mua_m) %in% ColsAggregated)])-0.5,1), EEs05_b_mua_05[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]), seq(0.5,length(EEs05_b_mua_05[-which(names(EEs05_b_mua_m) %in% ColsAggregated)])-0.5,1), EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]), length=0.05, angle=90, code=3)
+lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(as.numeric(sort(EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10_Agg])/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]), as.numeric(sort(EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10_Agg])/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)])), col = 'black', lwd = 2)
 legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
 dev.off()
 
@@ -1837,15 +1898,16 @@ legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9',
 dev.off()
 
 png('EE95_mua_b.png', res = 300, units = 'in', height = 7, width = 7)
-barplot(height = muaEEs95_b/max(muaEEs95_b), ylab = 'Normalized Mean Abs. Val. of Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Upper 5th Percentile of Flow', col = ColPlots, border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5)
-#Make lines separating the different classes of variables
+barplot(height = EEs95_b_mua_m[1:nrow(ParamRanges)]/max(EEs95_b_mua_95[1:nrow(ParamRanges)]), ylab = 'Normalized Mean Abs. Val. of Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Upper 5th Percentile of Flow', col = ColPlots, border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,300))
+arrows(seq(0.5,nrow(ParamRanges)-0.5,1), EEs95_b_mua_05[1:nrow(ParamRanges)]/max(EEs95_b_mua_95[1:nrow(ParamRanges)]), seq(0.5,nrow(ParamRanges)-0.5,1), EEs95_b_mua_95[1:nrow(ParamRanges)]/max(EEs95_b_mua_95[1:nrow(ParamRanges)]), length=0.05, angle=90, code=3)
+lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(RanksMua95_b[Top10,2]/max(EEs95_b_mua_95[1:nrow(ParamRanges)]),RanksMua95_b[Top10,2]/max(EEs95_b_mua_95[1:nrow(ParamRanges)])), col = 'black', lwd = 2)
 legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
 dev.off()
 
-png('EE95_mua_b_thresh12.png', res = 300, units = 'in', height = 7, width = 7)
-barplot(height = muaEEs95_b/max(muaEEs95_b), ylab = 'Normalized Mean Abs. Val. of Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Upper 5th Percentile of Flow', col = ColPlots, border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5)
-#Make lines separating the different classes of variables
-lines(x = c(-100,300), y = c(RanksMua95_b[Top10,2]/max(muaEEs95_b),RanksMua95_b[Top10,2]/max(muaEEs95_b)))
+png('EE95_mua_b_Agg.png', res = 300, units = 'in', height = 7, width = 7)
+barplot(height = EEs95_b_mua_m[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]/max(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]), ylab = 'Normalized Mean Abs. Val. of Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Upper 5th Percentile of Flow', col = ColPlots_Agg, border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,300))
+arrows(seq(0.5,length(EEs95_b_mua_05[-which(names(EEs95_b_mua_m) %in% ColsAggregated)])-0.5,1), EEs95_b_mua_05[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]/max(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]), seq(0.5,length(EEs95_b_mua_05[-which(names(EEs95_b_mua_m) %in% ColsAggregated)])-0.5,1), EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]/max(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]), length=0.05, angle=90, code=3)
+lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(as.numeric(sort(EEs95_b_mua_m[-which(names(EEs95_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10_Agg])/max(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]), as.numeric(sort(EEs95_b_mua_m[-which(names(EEs95_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10_Agg])/max(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)])), col = 'black', lwd = 2)
 legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
 dev.off()
 
@@ -1870,15 +1932,16 @@ legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9',
 dev.off()
 
 png('EEot_mua_b.png', res = 300, units = 'in', height = 7, width = 7)
-barplot(height = muaEEsot_b/max(muaEEsot_b), ylab = 'Normalized Mean Abs. Val. of Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for 5th-95th Percentile Flows', col = ColPlots, border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5)
-#Make lines separating the different classes of variables
+barplot(height = EEsot_b_mua_m[1:nrow(ParamRanges)]/max(EEsot_b_mua_95[1:nrow(ParamRanges)]), ylab = 'Normalized Mean Abs. Val. of Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for 5th-95th Percentile Flows', col = ColPlots, border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,300))
+arrows(seq(0.5,nrow(ParamRanges)-0.5,1), EEsot_b_mua_05[1:nrow(ParamRanges)]/max(EEsot_b_mua_95[1:nrow(ParamRanges)]), seq(0.5,nrow(ParamRanges)-0.5,1), EEsot_b_mua_95[1:nrow(ParamRanges)]/max(EEsot_b_mua_95[1:nrow(ParamRanges)]), length=0.05, angle=90, code=3)
+lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(RanksMuaot_b[Top10,2]/max(EEsot_b_mua_95[1:nrow(ParamRanges)]),RanksMuaot_b[Top10,2]/max(EEsot_b_mua_95[1:nrow(ParamRanges)])), col = 'black', lwd = 2)
 legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
 dev.off()
 
-png('EEot_mua_b_thresh12.png', res = 300, units = 'in', height = 7, width = 7)
-barplot(height = muaEEsot_b/max(muaEEsot_b), ylab = 'Normalized Mean Abs. Val. of Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for 5th-95th Percentile Flows', col = ColPlots, border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5)
-#Make lines separating the different classes of variables
-lines(x = c(-100,300), y = c(RanksMuaot_b[Top10,2]/max(muaEEsot_b),RanksMuaot_b[Top10,2]/max(muaEEsot_b)))
+png('EEot_mua_b_Agg.png', res = 300, units = 'in', height = 7, width = 7)
+barplot(height = EEsot_b_mua_m[-which(names(EEsot_b_mua_m) %in% ColsAggregated)]/max(EEsot_b_mua_95[-which(names(EEsot_b_mua_m) %in% ColsAggregated)]), ylab = 'Normalized Mean Abs. Val. of Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for 5th-95th Percentile Flows', col = ColPlots_Agg, border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,300))
+arrows(seq(0.5,length(EEsot_b_mua_05[-which(names(EEsot_b_mua_m) %in% ColsAggregated)])-0.5,1), EEsot_b_mua_05[-which(names(EEsot_b_mua_m) %in% ColsAggregated)]/max(EEsot_b_mua_95[-which(names(EEsot_b_mua_m) %in% ColsAggregated)]), seq(0.5,length(EEsot_b_mua_05[-which(names(EEsot_b_mua_m) %in% ColsAggregated)])-0.5,1), EEsot_b_mua_95[-which(names(EEsot_b_mua_m) %in% ColsAggregated)]/max(EEsot_b_mua_95[-which(names(EEsot_b_mua_m) %in% ColsAggregated)]), length=0.05, angle=90, code=3)
+lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(as.numeric(sort(EEsot_b_mua_m[-which(names(EEsot_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10_Agg])/max(EEsot_b_mua_95[-which(names(EEsot_b_mua_m) %in% ColsAggregated)]), as.numeric(sort(EEsot_b_mua_m[-which(names(EEsot_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10_Agg])/max(EEsot_b_mua_95[-which(names(EEsot_b_mua_m) %in% ColsAggregated)])), col = 'black', lwd = 2)
 legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
 dev.off()
 
@@ -1903,8 +1966,16 @@ legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9',
 dev.off()
 
 png('EETN05_mua_b.png', res = 300, units = 'in', height = 7, width = 7)
-barplot(height = muaEEsTN05_b/max(muaEEsTN05_b), ylab = 'Normalized Mean Abs. Val. of Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Lower 5th Quantile of TN', col = ColPlots, border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5)
-#Make lines separating the different classes of variables
+barplot(height = EEsTN05_b_mua_m[1:nrow(ParamRanges)]/max(EEsTN05_b_mua_95[1:nrow(ParamRanges)]), ylab = 'Normalized Mean Abs. Val. of Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Lower 5th Quantile of TN', col = ColPlots, border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,300))
+arrows(seq(0.5,nrow(ParamRanges)-0.5,1), EEsTN05_b_mua_05[1:nrow(ParamRanges)]/max(EEsTN05_b_mua_95[1:nrow(ParamRanges)]), seq(0.5,nrow(ParamRanges)-0.5,1), EEsTN05_b_mua_95[1:nrow(ParamRanges)]/max(EEsTN05_b_mua_95[1:nrow(ParamRanges)]), length=0.05, angle=90, code=3)
+lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(RanksMuaTN05_b[Top10,2]/max(EEsTN05_b_mua_95[1:nrow(ParamRanges)]),RanksMuaTN05_b[Top10,2]/max(EEsTN05_b_mua_95[1:nrow(ParamRanges)])), col = 'black', lwd = 2)
+legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
+dev.off()
+
+png('EETN05_mua_b_Agg.png', res = 300, units = 'in', height = 7, width = 7)
+barplot(height = EEsTN05_b_mua_m[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)]/max(EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)]), ylab = 'Normalized Mean Abs. Val. of Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Lower 5th Quantile of TN', col = ColPlots_Agg, border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,300))
+arrows(seq(0.5,length(EEsTN05_b_mua_05[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)])-0.5,1), EEsTN05_b_mua_05[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)]/max(EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)]), seq(0.5,length(EEsTN05_b_mua_05[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)])-0.5,1), EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)]/max(EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)]), length=0.05, angle=90, code=3)
+lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(as.numeric(sort(EEsTN05_b_mua_m[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10_Agg])/max(EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)]), as.numeric(sort(EEsTN05_b_mua_m[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10_Agg])/max(EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)])), col = 'black', lwd = 2)
 legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
 dev.off()
 
@@ -1929,8 +2000,16 @@ legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9',
 dev.off()
 
 png('EETN95_mua_b.png', res = 300, units = 'in', height = 7, width = 7)
-barplot(height = muaEEsTN95_b/max(muaEEsTN95_b), ylab = 'Normalized Mean Abs. Val. of Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Upper 5th Quantile of TN', col = ColPlots, border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5)
-#Make lines separating the different classes of variables
+barplot(height = EEsTN95_b_mua_m[1:nrow(ParamRanges)]/max(EEsTN95_b_mua_95[1:nrow(ParamRanges)]), ylab = 'Normalized Mean Abs. Val. of Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Upper 5th Quantile of TN', col = ColPlots, border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,300))
+arrows(seq(0.5,nrow(ParamRanges)-0.5,1), EEsTN95_b_mua_05[1:nrow(ParamRanges)]/max(EEsTN95_b_mua_95[1:nrow(ParamRanges)]), seq(0.5,nrow(ParamRanges)-0.5,1), EEsTN95_b_mua_95[1:nrow(ParamRanges)]/max(EEsTN95_b_mua_95[1:nrow(ParamRanges)]), length=0.05, angle=90, code=3)
+lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(RanksMuaTN95_b[Top10,2]/max(EEsTN95_b_mua_95[1:nrow(ParamRanges)]),RanksMuaTN95_b[Top10,2]/max(EEsTN95_b_mua_95[1:nrow(ParamRanges)])), col = 'black', lwd = 2)
+legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
+dev.off()
+
+png('EETN95_mua_b_Agg.png', res = 300, units = 'in', height = 7, width = 7)
+barplot(height = EEsTN95_b_mua_m[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)]/max(EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)]), ylab = 'Normalized Mean Abs. Val. of Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Upper 5th Quantile of TN', col = ColPlots_Agg, border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,300))
+arrows(seq(0.5,length(EEsTN95_b_mua_05[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)])-0.5,1), EEsTN95_b_mua_05[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)]/max(EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)]), seq(0.5,length(EEsTN95_b_mua_05[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)])-0.5,1), EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)]/max(EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)]), length=0.05, angle=90, code=3)
+lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(as.numeric(sort(EEsTN95_b_mua_m[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10_Agg])/max(EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)]), as.numeric(sort(EEsTN95_b_mua_m[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10_Agg])/max(EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)])), col = 'black', lwd = 2)
 legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
 dev.off()
 
@@ -1955,15 +2034,16 @@ legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9',
 dev.off()
 
 png('EETNMed_mua_b.png', res = 300, units = 'in', height = 7, width = 7)
-barplot(height = muaEEsTNMed_b/max(muaEEsTNMed_b), ylab = 'Normalized Mean Abs. Val. of Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Mean of TN', col = ColPlots, border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5)
-#Make lines separating the different classes of variables
+barplot(height = EEsTNMed_b_mua_m[1:nrow(ParamRanges)]/max(EEsTNMed_b_mua_95[1:nrow(ParamRanges)]), ylab = 'Normalized Mean Abs. Val. of Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Mean of TN', col = ColPlots, border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,300))
+arrows(seq(0.5,nrow(ParamRanges)-0.5,1), EEsTNMed_b_mua_05[1:nrow(ParamRanges)]/max(EEsTNMed_b_mua_95[1:nrow(ParamRanges)]), seq(0.5,nrow(ParamRanges)-0.5,1), EEsTNMed_b_mua_95[1:nrow(ParamRanges)]/max(EEsTNMed_b_mua_95[1:nrow(ParamRanges)]), length=0.05, angle=90, code=3)
+lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(RanksMuaTN95_b[Top10,2]/max(EEsTNMed_b_mua_95[1:nrow(ParamRanges)]),RanksMuaTN95_b[Top10,2]/max(EEsTNMed_b_mua_95[1:nrow(ParamRanges)])), col = 'black', lwd = 2)
 legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
 dev.off()
 
-png('EETNMed_mua_b_thresh12.png', res = 300, units = 'in', height = 7, width = 7)
-barplot(height = muaEEsTNMed_b/max(muaEEsTNMed_b), ylab = 'Normalized Mean Abs. Val. of Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Mean of TN', col = ColPlots, border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5)
-#Make lines separating the different classes of variables
-lines(x = c(-100,300), y = c(RanksMuaTNMed_b[Top10,2]/max(muaEEsTNMed_b),RanksMuaTNMed_b[Top10,2]/max(muaEEsTNMed_b)))
+png('EETNMed_mua_b_Agg.png', res = 300, units = 'in', height = 7, width = 7)
+barplot(height = EEsTNMed_b_mua_m[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)]/max(EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)]), ylab = 'Normalized Mean Abs. Val. of Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Mean of TN', col = ColPlots_Agg, border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,300))
+arrows(seq(0.5,length(EEsTNMed_b_mua_05[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)])-0.5,1), EEsTNMed_b_mua_05[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)]/max(EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)]), seq(0.5,length(EEsTNMed_b_mua_05[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)])-0.5,1), EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)]/max(EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)]), length=0.05, angle=90, code=3)
+lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(as.numeric(sort(EEsTNMed_b_mua_m[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10_Agg])/max(EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)]), as.numeric(sort(EEsTNMed_b_mua_m[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10_Agg])/max(EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)])), col = 'black', lwd = 2)
 legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
 dev.off()
 
@@ -1988,8 +2068,7 @@ legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9',
 dev.off()
 
 #Hillslope Plots for mua----
-#Testing for normalized EE value. Rank order may be better to just see if the order matters.
-
+# Normalized EE value----
 colPal = colorRampPalette(colors = rev(c('red', 'orange', 'yellow', 'green', 'blue')))
 scaleRange = c(0, 1)
 scaleBy = 0.1
@@ -2009,6 +2088,7 @@ axis(side = 1, at = seq(1,14,1), labels = TRUE)
 axis(side = 2, at = seq(1,14,1), labels = FALSE)
 dev.off()
 
+# Rank order----
 colPal = colorRampPalette(colors = rev(c('red', 'orange', 'gray', 'green', 'blue')))
 scaleRange = c(0, 50)
 scaleBy = 15
@@ -2035,14 +2115,61 @@ axis(side = 2, at = seq(1,14,1), labels = SortRanksMua_b, las = 1)
 legend('right', title = expression(bold('Rank')), legend = c('1 - 14', '15 - 29', '30 - 44', '45 - 60', '61 - 101'), pch = 15, col = colFun(seq(0,60,15)), inset = -0.3, xpd = TRUE)
 dev.off()
 
-#Plots that drop the multiplier variables and use only the aggregated variables----
+# Plots that drop the multiplier variables and use only the aggregated variables----
+#  Normalized EE value----
+colPal = colorRampPalette(colors = rev(c('red', 'orange', 'yellow', 'green', 'blue')))
+scaleRange = c(0, 1)
+scaleBy = 0.1
+Pal = colPal((scaleRange[2] - scaleRange[1])/scaleBy + 1)
 
+#Make a grid of the parameters in top 10% for hillslopes
+SortRanksMua_b_Agg = RanksMua_b_Agg
+png('HillNormalizedTop12_Agg.png', res = 300, height = 6, width = 6, units = 'in')
+for (h in 1:length(uhills)){
+  #Loop over the top 10% ranks for basin
+  for (j in 1:length(SortRanksMua_b_Agg)){
+    plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,13), pch = 15, xlab = 'Hillslope ID', ylab = 'Parameter', col = colFun(RanksMua95_h_Agg[[h]]$EE95_h[RanksMua95_h_Agg[[h]]$Param == SortRanksMua_b_Agg[j]] / max(RanksMua95_h[[h]]$EE95_h)), axes = FALSE)
+    par(new=TRUE)
+  }
+}
+axis(side = 1, at = seq(1,14,1), labels = TRUE)
+axis(side = 2, at = seq(1,14,1), labels = FALSE)
+dev.off()
+
+#  Rank order----
+colPal = colorRampPalette(colors = rev(c('red', 'orange', 'gray', 'green', 'blue')))
+scaleRange = c(0, 50)
+scaleBy = 15
+Pal = colPal((scaleRange[2] - scaleRange[1])/scaleBy + 1)
+Ranks_Agg=NULL
+png('HillRankTop12_Agg.png', res = 300, height = 6, width = 6, units = 'in')
+par(mar = c(1,11,0,5))
+for (h in 1:length(uhills)){
+  #Loop over the top 10% ranks for basin
+  for (j in 1:length(SortRanksMua_b_Agg)){
+    if(j == 1){
+      plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,15), pch = 15, xlab = 'Hillslope ID', ylab = 'Parameter', col = colFun(which(RanksMua95_h_Agg[[h]]$Param == SortRanksMua_b_Agg[j])), axes = FALSE, cex.lab = 1.5)
+    }else{
+      plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,15), pch = 15, xlab = '', ylab = '', col = colFun(which(RanksMua95_h_Agg[[h]]$Param == SortRanksMua_b_Agg[j])), axes = FALSE)
+    }
+    par(new=TRUE)
+    Ranks_Agg = c(Ranks_Agg,which(RanksMua95_h_Agg[[h]]$Param == SortRanksMua_b_Agg[j]))
+  }
+}
+par(new=FALSE)
+axis(side = 1, at = seq(1,14,1), labels = TRUE, pos = 0.5)
+axis(side = 2, at = seq(1,13,1), labels = SortRanksMua_b_Agg, las = 1)
+#legend('top', title = expression(bold('Parameter Sensitivity Rank')), legend = c('1 - 14', '15 - 29', '30 - 44', '45 - 60', '61 - 101'), horiz = TRUE, pch = 15, col = colFun(seq(0,60,15)), inset = -0.1, xpd = TRUE)
+legend('right', title = expression(bold('Rank')), legend = c('1 - 14', '15 - 29', '30 - 44', '45 - 60', '61 - 101'), pch = 15, col = colFun(seq(0,60,15)), inset = -0.3, xpd = TRUE)
+dev.off()
 
 #Compare the parameters affected by multipliers after aggregating constrained parameters to see if they are different in sensitivity----
 #Using m as an example for now because it's in the top 12
 png('BasinKsatDecayEEs.png', res = 300, width = 3, height = 5, units = 'in')
 barplot(height = RanksMua05_b$EE05_b[c(grep(RanksMua05_b$Param, pattern = '9_m', fixed=TRUE, ignore.case = FALSE)[c(1,2)], grep(RanksMua05_b$Param, pattern = '8_m', fixed=TRUE, ignore.case = FALSE)[c(1,2)])]/max(RanksMua05_b$EE05_b), names.arg = c('s9_m', 's109_m', 's8_m', 's108_m'), ylab = 'Normalized Elementary Effect', ylim = c(0,1), cex.axis = 1.5, cex.lab = 1.5)
 dev.off()
+
+# Fixme: Compare using the bootstrapped distributions----
 
 #Parameter corrleation plots----
 #?sensitivity::pcc()
