@@ -1,17 +1,15 @@
 #Script for calculating Morris EEs from output streamflow and TN data
 
-#######################################
-#Fixme: update with the _Add5 files
-#######################################
-
 #Set directories----
 #Color functions - from JDS github repo: Geothermal_ESDA
 dir_ColFuns = "C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\Hydrology\\USGSGauges"
 
 #Load libraries----
-#This library may be useful for analysis, but is not used right now
-#library(sensitivity)
 library(vroom)
+library(cluster)
+library(factoextra)
+library(dendextend)
+library(tidyverse)
 
 #Load functions----
 source(paste0(dir_ColFuns, '\\ColorFunctions.R'))
@@ -330,7 +328,7 @@ save.image(file = "C:/Users/js4yd/OneDrive - University of Virginia/BES_Data/BES
 #Input data load - loads all data that were saved in the save.image file above this line
 load("C:/Users/js4yd/OneDrive - University of Virginia/BES_Data/BES_Data/RHESSysFiles/BR&POBR/EEs_All_Setup.RData")
 
-#Load EE and Deltas info----
+# Load EE and Deltas info----
 setwd("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR")
 Deltas = read.table(file = paste0(getwd(), '/Deltas_All_Add5.txt'), sep = '\t', header = TRUE, stringsAsFactors = FALSE)
 EEs05_b = read.table(file = paste0(getwd(), '/EEs05_b_All_Add5.txt'), sep = '\t', header = TRUE, stringsAsFactors = FALSE)
@@ -347,20 +345,23 @@ EEsTNMed_h = read.table(file = paste0(getwd(), '/EEsTNMed_h_All_Add5.txt'), sep 
 EEsTN95_h = read.table(file = paste0(getwd(), '/EEsTN95_h_All_Add5.txt'), sep = '\t', header = TRUE, stringsAsFactors = FALSE)
 
 #Check if EEs have NA values because of sampling scheme errors
-any(is.na(EEs05_b))
-any(is.na(EEs95_b))
-any(is.na(EEsot_b))
-any(is.na(EEsTN05_b))
-any(is.na(EEsTN95_b))
-any(is.na(EEsTNMed_b))
-any(is.na(EEs05_h))
-any(is.na(EEs95_h))
-any(is.na(EEsot_h))
-any(is.na(EEsTN05_h))
-any(is.na(EEsTN95_h))
-any(is.na(EEsTNMed_h))
+if (any(c(any(is.na(EEs05_b)),
+any(is.na(EEs95_b)),
+any(is.na(EEsot_b)),
+any(is.na(EEsTN05_b)),
+any(is.na(EEsTN95_b)),
+any(is.na(EEsTNMed_b)),
+any(is.na(EEs05_h)),
+any(is.na(EEs95_h)),
+any(is.na(EEsot_h)),
+any(is.na(EEsTN05_h)),
+any(is.na(EEsTN95_h)),
+any(is.na(EEsTNMed_h))))){
+  print('There are NA Values in EE tables. Please fix.')
+}
 
 #Aggregate the EEs for variables that require it----
+#Fixme: move to a function file
 AggregateEEs = function(EEs, #The elementary effect matrix
                         ColNames, #Matrix or vector containing the names of the columns. One row per item to be summed
                         FUN #The function to use to aggregate the columns (e.g., mean, max)
@@ -378,7 +379,8 @@ meanabs = function(x){
   mean(abs(x))
 }
 
-#Vector of column names that are aggregated. Later, they will be removed from the dataframe.
+# Make a vector of the column names that will be aggregated---- 
+#Later, they will be removed from the dataframe.
 ColsAggregated = c('s8_silt', 's8_sand', 's8_clay', 's108_silt', 's108_sand', 's108_clay', 's9_silt', 's9_sand', 's9_clay', 's109_silt', 's109_sand', 's109_clay',
                    'v102_K_absorptance', 'v102_K_reflectance', 'v102_K_transmittance',
                    'v102_PAR_absorptance', 'v102_PAR_reflectance', 'v102_PAR_transmittance',
@@ -389,6 +391,17 @@ ColsAggregated = c('s8_silt', 's8_sand', 's8_clay', 's108_silt', 's108_sand', 's
                    's108_porosity_0', 's8_porosity_0', 's109_porosity_0', 's9_porosity_0',
                    'v102_epc.topt', 'v102_epc.tmax', 'v3_epc.topt', 'v3_epc.tmax',
                    'v102_epc.leaf_cn', 'v102_epc.leaflitr_cn', 'v3_epc.leaf_cn', 'v3_epc.leaflitr_cn')
+#Indicator key for the aggregated name.
+ColsAggregated_key = c('s8_SoilTexture', 's8_SoilTexture', 's8_SoilTexture', 's108_SoilTexture', 's108_SoilTexture', 's108_SoilTexture', 's9_SoilTexture', 's9_SoilTexture', 's9_SoilTexture', 's109_SoilTexture', 's109_SoilTexture', 's109_SoilTexture',
+                      'v102_K_All', 'v102_K_All', 'v102_K_All',
+                      'v102_PAR_All', 'v102_PAR_All', 'v102_PAR_All',
+                      'v102_epc.frootlitr_All', 'v102_epc.frootlitr_All', 'v102_epc.frootlitr_All', 'v3_epc.frootlitr_All', 'v3_epc.frootlitr_All', 'v3_epc.frootlitr_All',
+                      'v102_epc.leaflitr_All', 'v102_epc.leaflitr_All', 'v102_epc.leaflitr_All', 'v3_epc.leaflitr_All', 'v3_epc.leaflitr_All', 'v3_epc.leaflitr_All',
+                      'Soil8_Ksat', 'Soil8_Ksat', 'Soil8_Ksat', 'Soil8_Ksat', 'Soil9_Ksat', 'Soil9_Ksat', 'Soil9_Ksat', 'Soil9_Ksat',
+                      'Soil8_m', 'Soil8_m', 'Soil9_m', 'Soil9_m',
+                      'Soil8_porosity_0', 'Soil8_porosity_0', 'Soil9_porosity_0', 'Soil9_porosity_0',
+                      'v102_Temp', 'v102_Temp', 'v3_Temp', 'v3_Temp',
+                      'v102_epc.LeafLitrCN', 'v102_epc.LeafLitrCN', 'v3_epc.LeafLitrCN', 'v3_epc.LeafLitrCN')
 
 # Sum constrained variables: 10 new averaged/max variables----
 #  Soil Texture----
@@ -875,7 +888,7 @@ for (p in 1:(nrow(ParamRanges))){
     }
   }
 }
-rm(p, tReps)
+rm(p, tReps, indp, h)
 #Assign column names
 colnames(EEs05_b_mua) = colnames(EEs95_b_mua) = colnames(EEsot_b_mua) = colnames(EEsTN05_b_mua) = colnames(EEsTN95_b_mua) = colnames(EEsTNMed_b_mua) = colnames(EEs05_b)[1:nrow(ParamRanges)]
 colnames(EEs05_h_mua) = colnames(EEs95_h_mua) = colnames(EEsot_h_mua) = colnames(EEsTN05_h_mua) = colnames(EEsTN95_h_mua) = colnames(EEsTNMed_h_mua) = colnames(EEs05_h)[1:(nrow(ParamRanges)+1)]
@@ -1577,6 +1590,7 @@ colnames(EEs05_h_mua_05) = colnames(EEs95_h_mua_05) = colnames(EEsot_h_mua_05) =
 colnames(EEs05_h_mua_95) = colnames(EEs95_h_mua_95) = colnames(EEsot_h_mua_95) = colnames(EEsTN05_h_mua_95) = colnames(EEsTN95_h_mua_95) = colnames(EEsTNMed_h_mua_95) = c('HillID', names(EEs05_b_mua_95))
 
 # Make plots of the distributions for variables----
+#Fixme: currently only plotting for one of the 6 metrics. Not sure it's necessary to show more.
 for (p in 1:ncol(EEs05_b_mua)){
   png(paste0('EEs05_b_mua_', colnames(EEs05_b_mua)[p], '.png'), res = 300, units = 'in', width = 5, height = 5)
   hist(EEs05_b_mua[,p], breaks = 50, main = colnames(EEs05_b_mua)[p], xlab = 'Elementary Effect', cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5)
@@ -1631,7 +1645,7 @@ for (h in 1:length(uhills)){
   muaEEsTN95_h[h,] = apply(X = abs(EEsTN95_h[inds,2:(nrow(ParamRanges)+1)]), MARGIN = 2, FUN = mean)
   muaEEsTNMed_h[h,] = apply(X = abs(EEsTNMed_h[inds,2:(nrow(ParamRanges)+1)]), MARGIN = 2, FUN = mean)
 }
-rm(inds)
+rm(inds, h)
 
 #Make a list of ordered parameter names for mua using original sample----
 RanksMua05_b = data.frame(Param = colnames(InputParams)[rev(order(muaEEs05_b))], EE05_b = muaEEs05_b[rev(order(muaEEs05_b))], stringsAsFactors = FALSE)
@@ -1673,51 +1687,81 @@ for (h in 1:length(uhills)){
 names(RanksMua05_h_Agg) = names(RanksMua95_h_Agg) = names(RanksMuaot_h_Agg) = names(RanksMuaTN05_h_Agg) = names(RanksMuaTN95_h_Agg) = names(RanksMuaTNMed_h_Agg) = paste0('Hill', seq(1,14,1))
 rm(h)
 
-# Get the unique variables from the flow and TN metric lists----
+#Get the top X% unique variables based on the flow and TN metrics----
 #Top 10% of the parameters is desired. Get the index of the 10% of non-zero EEs, rounded up
-Top10 = ceiling((length(muaEEs05_b) - length(which(muaEEs05_b == 0)))*0.1)
-RanksMua_b = unique(c(RanksMua05_b$Param[1:Top10],RanksMuaot_b$Param[1:Top10],RanksMua95_b$Param[1:Top10]))
-RanksMuaTN_b = unique(c(RanksMuaTN05_b$Param[1:Top10],RanksMuaTNMed_b$Param[1:Top10],RanksMuaTN95_b$Param[1:Top10]))
+Top1005 = ceiling((length(muaEEs05_b) - length(which(muaEEs05_b == 0)))*0.1)
+Top10ot = ceiling((length(muaEEsot_b) - length(which(muaEEsot_b == 0)))*0.1)
+Top1095 = ceiling((length(muaEEs95_b) - length(which(muaEEs95_b == 0)))*0.1)
+Top10TN05 = ceiling((length(muaEEsTN05_b) - length(which(muaEEsTN05_b == 0)))*0.1)
+Top10TNMed = ceiling((length(muaEEsTNMed_b) - length(which(muaEEsTNMed_b == 0)))*0.1)
+Top10TN95 = ceiling((length(muaEEsTN95_b) - length(which(muaEEsTN95_b == 0)))*0.1)
+
+RanksMua_b = unique(c(RanksMua05_b$Param[1:Top1005],RanksMuaot_b$Param[1:Top10ot],RanksMua95_b$Param[1:Top1095]))
+RanksMuaTN_b = unique(c(RanksMuaTN05_b$Param[1:Top10TN05],RanksMuaTNMed_b$Param[1:Top10TNMed],RanksMuaTN95_b$Param[1:Top10TN95]))
 
 #Unique across basin and TN are same for top 10%
 length(unique(c(RanksMua_b, RanksMuaTN_b)))
 
-#RanksMua_h = unique(c(RanksMua05_b$Param[1:40],RanksMuaot_b$Param[1:40],RanksMua95_b$Param[1:40]))
-#RanksMuaTN_h = unique(c(RanksMuaTN05_b$Param[1:40],RanksMuaTNMed_b$Param[1:40],RanksMuaTN95_b$Param[1:40]))
-
 # Select all parameters whose 95th quantile estimate of EE is greater than the selected threshold point
-ParamSelect_b = unique(c(names(EEs05_b_mua_95[1:nrow(ParamRanges)][EEs05_b_mua_95[1:nrow(ParamRanges)] >= RanksMua05_b$EE05_b[Top10]]),
-                         names(EEsot_b_mua_95[1:nrow(ParamRanges)][EEsot_b_mua_95[1:nrow(ParamRanges)] >= RanksMuaot_b$EEot_b[Top10]]),
-                         names(EEs95_b_mua_95[1:nrow(ParamRanges)][EEs95_b_mua_95[1:nrow(ParamRanges)] >= RanksMua95_b$EE95_b[Top10]])))
-ParamSelectTN_b = unique(c(names(EEsTN05_b_mua_95[1:nrow(ParamRanges)][EEsTN05_b_mua_95[1:nrow(ParamRanges)] >= RanksMuaTN05_b$EETN05_b[Top10]]),
-                         names(EEsTNMed_b_mua_95[1:nrow(ParamRanges)][EEsTNMed_b_mua_95[1:nrow(ParamRanges)] >= RanksMuaTNMed_b$EETNMed_b[Top10]]),
-                         names(EEsTN95_b_mua_95[1:nrow(ParamRanges)][EEsTN95_b_mua_95[1:nrow(ParamRanges)] >= RanksMuaTN95_b$EETN95_b[Top10]])))
+ParamSelect_b = unique(c(names(EEs05_b_mua_95[1:nrow(ParamRanges)][EEs05_b_mua_95[1:nrow(ParamRanges)] >= RanksMua05_b$EE05_b[Top1005]]),
+                         names(EEsot_b_mua_95[1:nrow(ParamRanges)][EEsot_b_mua_95[1:nrow(ParamRanges)] >= RanksMuaot_b$EEot_b[Top10ot]]),
+                         names(EEs95_b_mua_95[1:nrow(ParamRanges)][EEs95_b_mua_95[1:nrow(ParamRanges)] >= RanksMua95_b$EE95_b[Top1095]])))
+ParamSelectTN_b = unique(c(names(EEsTN05_b_mua_95[1:nrow(ParamRanges)][EEsTN05_b_mua_95[1:nrow(ParamRanges)] >= RanksMuaTN05_b$EETN05_b[Top10TN05]]),
+                         names(EEsTNMed_b_mua_95[1:nrow(ParamRanges)][EEsTNMed_b_mua_95[1:nrow(ParamRanges)] >= RanksMuaTNMed_b$EETNMed_b[Top10TNMed]]),
+                         names(EEsTN95_b_mua_95[1:nrow(ParamRanges)][EEsTN95_b_mua_95[1:nrow(ParamRanges)] >= RanksMuaTN95_b$EETN95_b[Top10TN95]])))
 
 #Some differences using this method
 length(unique(c(ParamSelect_b, ParamSelectTN_b)))
 
 # Same, but dropping the aggregated parameters----
-Top10_Agg = ceiling((length(EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]) - length(which(EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)] == 0)))*0.1)
-RanksMua_b_Agg = unique(c(names(sort(EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[1:Top10_Agg]),
-                          names(sort(EEsot_b_mua_m[-which(names(EEsot_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[1:Top10_Agg]),
-                          names(sort(EEs95_b_mua_m[-which(names(EEs95_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[1:Top10_Agg])))
-RanksMuaTN_b_Agg = unique(c(names(sort(EEsTN05_b_mua_m[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[1:Top10_Agg]),
-                            names(sort(EEsTNMed_b_mua_m[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[1:Top10_Agg]),
-                            names(sort(EEsTN95_b_mua_m[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[1:Top10_Agg])))
+Top1005_Agg = ceiling((length(EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]) - length(which(EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)] == 0)))*0.1)
+Top10ot_Agg = ceiling((length(EEsot_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]) - length(which(EEsot_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)] == 0)))*0.1)
+Top1095_Agg = ceiling((length(EEs95_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]) - length(which(EEs95_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)] == 0)))*0.1)
+Top10TN05_Agg = ceiling((length(EEsTN05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]) - length(which(EEsTN05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)] == 0)))*0.1)
+Top10TNMed_Agg = ceiling((length(EEsTNMed_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]) - length(which(EEsTNMed_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)] == 0)))*0.1)
+Top10TN95_Agg = ceiling((length(EEsTN95_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]) - length(which(EEsTN95_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)] == 0)))*0.1)
+
+RanksMua_b_Agg = unique(c(RanksMua05_b_Agg$Param[1:Top1005_Agg],RanksMuaot_b_Agg$Param[1:Top10ot_Agg],RanksMua95_b_Agg$Param[1:Top1095_Agg]))
+RanksMuaTN_b_Agg = unique(c(RanksMuaTN05_b_Agg$Param[1:Top10TN05_Agg],RanksMuaTNMed_b_Agg$Param[1:Top10TNMed_Agg],RanksMuaTN95_b_Agg$Param[1:Top10TN95_Agg]))
 
 # Select all parameters whose 95th quantile estimate of EE is greater than the selected threshold point
-ParamSelect_b_Agg = unique(c(names(EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)][EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)] >= sort(EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10_Agg]]),
-                         names(EEsot_b_mua_95[-which(names(EEsot_b_mua_m) %in% ColsAggregated)][EEsot_b_mua_95[-which(names(EEsot_b_mua_m) %in% ColsAggregated)] >= sort(EEsot_b_mua_m[-which(names(EEsot_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10_Agg]]),
-                         names(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)][EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)] >= sort(EEs95_b_mua_m[-which(names(EEs95_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10_Agg]])))
-ParamSelectTN_b_Agg = unique(c(names(EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)][EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)] >= sort(EEsTN05_b_mua_m[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10_Agg]]),
-                           names(EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)][EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)] >= sort(EEsTNMed_b_mua_m[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10_Agg]]),
-                           names(EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)][EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)] >= sort(EEsTN95_b_mua_m[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10_Agg]])))
+ParamSelect_b_Agg = unique(c(names(EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)][EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)] >= RanksMua05_b_Agg$EE05_b[Top1005_Agg]]),
+                         names(EEsot_b_mua_95[-which(names(EEsot_b_mua_m) %in% ColsAggregated)][EEsot_b_mua_95[-which(names(EEsot_b_mua_m) %in% ColsAggregated)] >= RanksMuaot_b_Agg$EEot_b[Top10ot_Agg]]),
+                         names(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)][EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)] >= RanksMua95_b_Agg$EE95_b[Top1095_Agg]])))
+ParamSelectTN_b_Agg = unique(c(names(EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)][EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)] >= RanksMuaTN05_b_Agg$EETN05_b[Top10TN05_Agg]]),
+                           names(EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)][EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)] >= RanksMuaTNMed_b_Agg$EETNMed_b[Top10TNMed_Agg]]),
+                           names(EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)][EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)] >= RanksMuaTN95_b_Agg$EETN95_b[Top10TN95_Agg]])))
 
 length(unique(c(ParamSelect_b_Agg, ParamSelectTN_b_Agg)))
 
-# Make a plot of the number of parameters selected versus the threshold percentage----
+#  Hillslope based selection of parameters----
+RanksMua_h_Agg = RanksMuaTN_h_Agg = NULL
+for (h in 1:length(uhills)){
+  Top10h05_Agg = ceiling((length(EEs05_h_mua_m[h,-c(1,which(colnames(EEs05_h_mua_m) %in% ColsAggregated))]) - length(which(EEs05_h_mua_m[h,-c(1,which(colnames(EEs05_h_mua_m) %in% ColsAggregated))] == 0)))*0.1)
+  Top10hot_Agg = ceiling((length(EEsot_h_mua_m[h,-c(1,which(colnames(EEs05_h_mua_m) %in% ColsAggregated))]) - length(which(EEsot_h_mua_m[h,-c(1,which(colnames(EEs05_h_mua_m) %in% ColsAggregated))] == 0)))*0.1)
+  Top10h95_Agg = ceiling((length(EEs95_h_mua_m[h,-c(1,which(colnames(EEs05_h_mua_m) %in% ColsAggregated))]) - length(which(EEs95_h_mua_m[h,-c(1,which(colnames(EEs05_h_mua_m) %in% ColsAggregated))] == 0)))*0.1)
+  Top10hTN05_Agg = ceiling((length(EEsTN05_h_mua_m[h,-c(1,which(colnames(EEs05_h_mua_m) %in% ColsAggregated))]) - length(which(EEsTN05_h_mua_m[h,-c(1,which(colnames(EEs05_h_mua_m) %in% ColsAggregated))] == 0)))*0.1)
+  Top10hTNMed_Agg = ceiling((length(EEsTNMed_h_mua_m[h,-c(1,which(colnames(EEs05_h_mua_m) %in% ColsAggregated))]) - length(which(EEsTNMed_h_mua_m[h,-c(1,which(colnames(EEs05_h_mua_m) %in% ColsAggregated))] == 0)))*0.1)
+  Top10hTN95_Agg = ceiling((length(EEsTN95_h_mua_m[h,-c(1,which(colnames(EEs05_h_mua_m) %in% ColsAggregated))]) - length(which(EEsTN95_h_mua_m[h,-c(1,which(colnames(EEs05_h_mua_m) %in% ColsAggregated))] == 0)))*0.1)
+  
+  RanksMua_h_Agg = unique(c(RanksMua_h_Agg, RanksMua05_h_Agg[[h]]$Param[1:Top10h05_Agg],RanksMuaot_h_Agg[[h]]$Param[1:Top10hot_Agg],RanksMua95_h_Agg[[h]]$Param[1:Top10h95_Agg]))
+  RanksMuaTN_h_Agg = unique(c(RanksMuaTN_h_Agg, RanksMuaTN05_h_Agg[[h]]$Param[1:Top10hTN05_Agg],RanksMuaTNMed_h_Agg[[h]]$Param[1:Top10hTNMed_Agg],RanksMuaTN95_h_Agg[[h]]$Param[1:Top10hTN95_Agg]))
+}
+
+# Select all parameters whose 95th quantile estimate of EE is greater than the selected threshold point
+ParamSelect_h_Agg = ParamSelectTN_h_Agg = NULL
+for (h in 1:length(uhills)){
+  ParamSelect_h_Agg = unique(c(ParamSelect_h_Agg, colnames(EEs05_h_mua_95)[-c(1,which(colnames(EEs05_h_mua_m) %in% ColsAggregated))][EEs05_h_mua_95[h,-c(1,which(colnames(EEs05_h_mua_m) %in% ColsAggregated))] >= RanksMua05_h_Agg[[h]][Top10h05_Agg,2]],
+                               colnames(EEsot_h_mua_95)[-c(1,which(colnames(EEsot_h_mua_m) %in% ColsAggregated))][EEsot_h_mua_95[h,-c(1,which(colnames(EEsot_h_mua_m) %in% ColsAggregated))] >= RanksMuaot_h_Agg[[h]][Top10hot_Agg,2]],
+                               colnames(EEs95_h_mua_95)[-c(1,which(colnames(EEs95_h_mua_m) %in% ColsAggregated))][EEs95_h_mua_95[h,-c(1,which(colnames(EEs95_h_mua_m) %in% ColsAggregated))] >= RanksMua95_h_Agg[[h]][Top10h95_Agg,2]]))
+  ParamSelectTN_h_Agg = unique(c(ParamSelectTN_h_Agg, colnames(EEsTN05_h_mua_95)[-c(1,which(colnames(EEsTN05_h_mua_m) %in% ColsAggregated))][EEsTN05_h_mua_95[h,-c(1,which(colnames(EEsTN05_h_mua_m) %in% ColsAggregated))] >= RanksMuaTN05_h_Agg[[h]][Top10hTN05_Agg,2]],
+                                                      colnames(EEsTNMed_h_mua_95)[-c(1,which(colnames(EEsTNMed_h_mua_m) %in% ColsAggregated))][EEsTNMed_h_mua_95[h,-c(1,which(colnames(EEsTNMed_h_mua_m) %in% ColsAggregated))] >= RanksMuaTNMed_h_Agg[[h]][Top10hTNMed_Agg,2]],
+                                                      colnames(EEsTN95_h_mua_95)[-c(1,which(colnames(EEsTN95_h_mua_m) %in% ColsAggregated))][EEsTN95_h_mua_95[h,-c(1,which(colnames(EEsTN95_h_mua_m) %in% ColsAggregated))] >= RanksMuaTN95_h_Agg[[h]][Top10hTN95_Agg,2]]))
+}
+
+#Make a plot of the number of parameters selected versus the threshold percentage----
 x = seq(0.01,1,0.01)
-ParamTotals = vector('numeric', length(x))
+ParamTotals_ThreshPercent = vector('numeric', length(x))
 for (i in 1:length(x)){
   Tops = ceiling((length(muaEEs05_b) - length(which(muaEEs05_b == 0)))*x[i])
   # Select all parameters whose 95th quantile estimate of EE is greater than the selected threshold point
@@ -1728,46 +1772,100 @@ for (i in 1:length(x)){
                              names(EEsTNMed_b_mua_95[1:nrow(ParamRanges)][EEsTNMed_b_mua_95[1:nrow(ParamRanges)] >= RanksMuaTNMed_b$EETNMed_b[Tops]]),
                              names(EEsTN95_b_mua_95[1:nrow(ParamRanges)][EEsTN95_b_mua_95[1:nrow(ParamRanges)] >= RanksMuaTN95_b$EETN95_b[Tops]])))
   
-  ParamTotals[i] = length(unique(c(pb, pbTN)))
+  ParamTotals_ThreshPercent[i] = length(unique(c(pb, pbTN)))
 }
 rm(pb, pbTN, Tops, i, x)
 
 png('ParamsInThresholdCutoff.png', res = 300, units = 'in', width = 5, height = 5)
-plot(x = seq(1,100,1), y = ParamTotals, type = 'l', xlab = 'Top X Percent Selected', ylab = 'Number of Parameters Selected', ylim = c(0,120), xlim = c(0,100))
+plot(x = seq(1,100,1), y = ParamTotals_ThreshPercent, type = 'l', xlab = 'Top X Percent Selected', ylab = 'Number of Parameters Selected', ylim = c(0,120), xlim = c(0,100))
 par(new=TRUE)
 plot(x = seq(1,100,1), y = ceiling((length(muaEEs05_b) - length(which(muaEEs05_b == 0)))*seq(0.01,1,0.01)), type = 'l', ylim = c(0,120), xlim = c(0,100), col = 'red', xlab = '', ylab = '', axes = FALSE)
 legend('topleft', legend = c('Based on Mean', 'Based on 95th Percentile'), lty = 1, col = c('red', 'black'))
 dev.off()
 
+# Aggregated----
 x = seq(0.01,1,0.01)
-ParamTotals = vector('numeric', length(x))
+ParamTotals_ThreshPercent_Agg = vector('numeric', length(x))
 for (i in 1:length(x)){
-  Tops = ceiling((length(EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]) - length(which(EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)] == 0)))*x[i])
+  Tops05 = ceiling((length(EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]) - length(which(EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)] == 0)))*x[i])
+  Topsot = ceiling((length(EEsot_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]) - length(which(EEsot_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)] == 0)))*x[i])
+  Tops95 = ceiling((length(EEs95_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]) - length(which(EEs95_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)] == 0)))*x[i])
+  TopsTN05 = ceiling((length(EEsTN05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]) - length(which(EEsTN05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)] == 0)))*x[i])
+  TopsTNMed = ceiling((length(EEsTNMed_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]) - length(which(EEsTNMed_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)] == 0)))*x[i])
+  TopsTN95 = ceiling((length(EEsTN95_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]) - length(which(EEsTN95_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)] == 0)))*x[i])
   
   # Select all parameters whose 95th quantile estimate of EE is greater than the selected threshold point
-  pb = unique(c(names(EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)][EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)] >= sort(EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Tops]]),
-                               names(EEsot_b_mua_95[-which(names(EEsot_b_mua_m) %in% ColsAggregated)][EEsot_b_mua_95[-which(names(EEsot_b_mua_m) %in% ColsAggregated)] >= sort(EEsot_b_mua_m[-which(names(EEsot_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Tops]]),
-                               names(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)][EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)] >= sort(EEs95_b_mua_m[-which(names(EEs95_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Tops]])))
-  pbTN = unique(c(names(EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)][EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)] >= sort(EEsTN05_b_mua_m[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Tops]]),
-                                 names(EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)][EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)] >= sort(EEsTNMed_b_mua_m[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Tops]]),
-                                 names(EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)][EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)] >= sort(EEsTN95_b_mua_m[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Tops]])))
+  pb = unique(c(names(EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)][EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)] >= RanksMua05_b_Agg$EE05_b[Tops05]]),
+                               names(EEsot_b_mua_95[-which(names(EEsot_b_mua_m) %in% ColsAggregated)][EEsot_b_mua_95[-which(names(EEsot_b_mua_m) %in% ColsAggregated)] >= RanksMuaot_b_Agg$EEot_b[Topsot]]),
+                               names(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)][EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)] >= RanksMua95_b_Agg$EE95_b[Tops95]])))
+  pbTN = unique(c(names(EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)][EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)] >= RanksMuaTN05_b_Agg$EETN05_b[TopsTN05]]),
+                                 names(EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)][EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)] >= RanksMuaTNMed_b_Agg$EETNMed_b[TopsTNMed]]),
+                                 names(EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)][EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)] >= RanksMuaTN95_b_Agg$EETN95_b[TopsTN95]])))
   
-  ParamTotals[i] = length(unique(c(pb, pbTN)))
+  ParamTotals_ThreshPercent_Agg[i] = length(unique(c(pb, pbTN)))
 }
-rm(pb, pbTN, Tops, i, x)
+rm(pb, pbTN, Tops05, Topsot, Tops95, TopsTN05, TopsTNMed, TopsTN95, i, x)
 
 png('ParamsInThresholdCutoff_Agg.png', res = 300, units = 'in', width = 5, height = 5)
-plot(x = seq(1,100,1), y = ParamTotals, type = 'l', xlab = 'Top X Percent Selected', ylab = 'Number of Parameters Selected', ylim = c(0,120), xlim = c(0,100))
+plot(x = seq(1,100,1), y = ParamTotals_ThreshPercent_Agg, type = 'l', xlab = 'Top X Percent Selected', ylab = 'Number of Parameters Selected', ylim = c(0,120), xlim = c(0,100))
 par(new=TRUE)
 plot(x = seq(1,100,1), y = ceiling((length(EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]) - length(which(EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)] == 0)))*seq(0.01,1,0.01)), type = 'l', ylim = c(0,120), xlim = c(0,100), col = 'red', xlab = '', ylab = '', axes = FALSE)
 legend('topleft', legend = c('Based on Mean', 'Based on 95th Percentile'), lty = 1, col = c('red', 'black'))
 dev.off()
 
-#Color scheme for Categories of Variables----
-# Unaggregated----
+# Aggregated with hillslope variables----
+x = seq(0.01,1,0.01)
+ParamTotals_ThreshPercent_h_Agg = vector('numeric', length(x))
+for (i in 1:length(x)){
+  Tops05 = ceiling((length(EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]) - length(which(EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)] == 0)))*x[i])
+  Topsot = ceiling((length(EEsot_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]) - length(which(EEsot_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)] == 0)))*x[i])
+  Tops95 = ceiling((length(EEs95_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]) - length(which(EEs95_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)] == 0)))*x[i])
+  TopsTN05 = ceiling((length(EEsTN05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]) - length(which(EEsTN05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)] == 0)))*x[i])
+  TopsTNMed = ceiling((length(EEsTNMed_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]) - length(which(EEsTNMed_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)] == 0)))*x[i])
+  TopsTN95 = ceiling((length(EEsTN95_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]) - length(which(EEsTN95_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)] == 0)))*x[i])
+  
+  # Select all parameters whose 95th quantile estimate of EE is greater than the selected threshold point
+  pb = unique(c(names(EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)][EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)] >= RanksMua05_b_Agg$EE05_b[Tops05]]),
+                names(EEsot_b_mua_95[-which(names(EEsot_b_mua_m) %in% ColsAggregated)][EEsot_b_mua_95[-which(names(EEsot_b_mua_m) %in% ColsAggregated)] >= RanksMuaot_b_Agg$EEot_b[Topsot]]),
+                names(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)][EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)] >= RanksMua95_b_Agg$EE95_b[Tops95]])))
+  pbTN = unique(c(names(EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)][EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)] >= RanksMuaTN05_b_Agg$EETN05_b[TopsTN05]]),
+                  names(EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)][EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)] >= RanksMuaTNMed_b_Agg$EETNMed_b[TopsTNMed]]),
+                  names(EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)][EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)] >= RanksMuaTN95_b_Agg$EETN95_b[TopsTN95]])))
+  
+  # Select all parameters whose 95th quantile estimate of EE is greater than the selected threshold point
+  ph = phTN = NULL
+  for (h in 1:length(uhills)){
+    Topsh05 = ceiling((length(EEs05_h_mua_m[h,-c(1,which(colnames(EEs05_h_mua_m) %in% ColsAggregated))]) - length(which(EEs05_h_mua_m[h,-c(1,which(colnames(EEs05_h_mua_m) %in% ColsAggregated))] == 0)))*x[i])
+    Topshot = ceiling((length(EEsot_h_mua_m[h,-c(1,which(colnames(EEs05_h_mua_m) %in% ColsAggregated))]) - length(which(EEsot_h_mua_m[h,-c(1,which(colnames(EEs05_h_mua_m) %in% ColsAggregated))] == 0)))*x[i])
+    Topsh95 = ceiling((length(EEs95_h_mua_m[h,-c(1,which(colnames(EEs05_h_mua_m) %in% ColsAggregated))]) - length(which(EEs95_h_mua_m[h,-c(1,which(colnames(EEs05_h_mua_m) %in% ColsAggregated))] == 0)))*x[i])
+    TopshTN05 = ceiling((length(EEsTN05_h_mua_m[h,-c(1,which(colnames(EEs05_h_mua_m) %in% ColsAggregated))]) - length(which(EEsTN05_h_mua_m[h,-c(1,which(colnames(EEs05_h_mua_m) %in% ColsAggregated))] == 0)))*x[i])
+    TopshTNMed = ceiling((length(EEsTNMed_h_mua_m[h,-c(1,which(colnames(EEs05_h_mua_m) %in% ColsAggregated))]) - length(which(EEsTNMed_h_mua_m[h,-c(1,which(colnames(EEs05_h_mua_m) %in% ColsAggregated))] == 0)))*x[i])
+    TopshTN95 = ceiling((length(EEsTN95_h_mua_m[h,-c(1,which(colnames(EEs05_h_mua_m) %in% ColsAggregated))]) - length(which(EEsTN95_h_mua_m[h,-c(1,which(colnames(EEs05_h_mua_m) %in% ColsAggregated))] == 0)))*x[i])
+    
+    ph = unique(c(ph, colnames(EEs05_h_mua_95)[-c(1,which(colnames(EEs05_h_mua_m) %in% ColsAggregated))][EEs05_h_mua_95[h,-c(1,which(colnames(EEs05_h_mua_m) %in% ColsAggregated))] >= RanksMua05_h_Agg[[h]][Topsh05,2]],
+                                 colnames(EEsot_h_mua_95)[-c(1,which(colnames(EEsot_h_mua_m) %in% ColsAggregated))][EEsot_h_mua_95[h,-c(1,which(colnames(EEsot_h_mua_m) %in% ColsAggregated))] >= RanksMuaot_h_Agg[[h]][Topshot,2]],
+                                 colnames(EEs95_h_mua_95)[-c(1,which(colnames(EEs95_h_mua_m) %in% ColsAggregated))][EEs95_h_mua_95[h,-c(1,which(colnames(EEs95_h_mua_m) %in% ColsAggregated))] >= RanksMua95_h_Agg[[h]][Topsh95,2]]))
+    phTN = unique(c(phTN, colnames(EEsTN05_h_mua_95)[-c(1,which(colnames(EEsTN05_h_mua_m) %in% ColsAggregated))][EEsTN05_h_mua_95[h,-c(1,which(colnames(EEsTN05_h_mua_m) %in% ColsAggregated))] >= RanksMuaTN05_h_Agg[[h]][TopshTN05,2]],
+                                   colnames(EEsTNMed_h_mua_95)[-c(1,which(colnames(EEsTNMed_h_mua_m) %in% ColsAggregated))][EEsTNMed_h_mua_95[h,-c(1,which(colnames(EEsTNMed_h_mua_m) %in% ColsAggregated))] >= RanksMuaTNMed_h_Agg[[h]][TopshTNMed,2]],
+                                   colnames(EEsTN95_h_mua_95)[-c(1,which(colnames(EEsTN95_h_mua_m) %in% ColsAggregated))][EEsTN95_h_mua_95[h,-c(1,which(colnames(EEsTN95_h_mua_m) %in% ColsAggregated))] >= RanksMuaTN95_h_Agg[[h]][TopshTN95,2]]))
+  }
+  
+  ParamTotals_ThreshPercent_h_Agg[i] = length(unique(c(pb, pbTN, ph, phTN)))
+}
+rm(pb, pbTN, Tops05, Tops95, Topsot, Topsh05, Topsh95, Topshot, TopsTN05, TopsTNMed, TopsTN95, TopshTN05, TopshTNMed, TopshTN95, i, x, h, ph, phTN)
+
+png('ParamsInThresholdCutoff_h_Agg.png', res = 300, units = 'in', width = 5, height = 5)
+plot(x = seq(1,100,1), y = ParamTotals_ThreshPercent_h_Agg, type = 'l', xlab = 'Top X Percent Selected', ylab = 'Number of Parameters Selected', ylim = c(0,120), xlim = c(0,100))
+par(new=TRUE)
+plot(x = seq(1,100,1), y = ceiling((length(EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]) - length(which(EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)] == 0)))*seq(0.01,1,0.01)), type = 'l', ylim = c(0,120), xlim = c(0,100), col = 'red', xlab = '', ylab = '', axes = FALSE)
+legend('topleft', legend = c('Based on Mean', 'Based on 95th Percentile'), lty = 1, col = c('red', 'black'))
+dev.off()
+
+#Color scheme for plotting EEs in categories of parameters----
 #One color per category
 colos = c(rainbow(12), 'black')
 colos[3] = 'gray'
+# Unaggregated----
 #Assign colors to the categories
 ColPlots = vector('character', length=cols)
 for (i in 1:cols){
@@ -1799,6 +1897,8 @@ for (i in 1:cols){
     ColPlots[i] = colos[13]
   }
 }
+rm(i)
+
 # Aggregated----
 #Assign colors to the categories
 ColPlots_Agg = vector('character', length=length(colnames(EEs05_b_mua)[-which(colnames(EEs05_b_mua) %in% ColsAggregated)]))
@@ -1835,8 +1935,9 @@ for (i in 1:length(colnames(EEs05_b_mua)[-which(colnames(EEs05_b_mua) %in% ColsA
     ColPlots_Agg[i] = 'darkgray'
   }
 }
+rm(i)
 
-#Make plots of the sd vs. mu----
+#Make plots of the sd vs. mu of EEs - basin----
 png('EE05_sdVsMu_b.png', res = 300, units = 'in', height = 7, width = 7)
 plot(x = muEEs05_b, y = sdEEs05_b, pch = 16, xlab = 'Mean of the Elementary Effect', ylab = 'Standard Deviation of the Elementary Effect', main = 'Metric: SAE for Lower 5th Percentile of Flow', col = ColPlots)
 legend('bottomleft', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos)
@@ -1862,18 +1963,18 @@ plot(x = muEEsTNMed_b, y = sdEEsTNMed_b, pch = 16, xlab = 'Mean of the Elementar
 legend('bottomleft', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos)
 dev.off()
 
-#Make plots of the ranking for mean absolute value----
+#Make plots of the ranking for mean absolute value - basin----
 png('EE05_mua_b.png', res = 300, units = 'in', height = 7, width = 7)
 barplot(height = EEs05_b_mua_m[1:nrow(ParamRanges)]/max(EEs05_b_mua_95[1:nrow(ParamRanges)]), ylab = 'Normalized Mean Abs. Val. of Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Lower 5th Percentile of Flow', col = ColPlots, border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,300))
 arrows(seq(0.5,nrow(ParamRanges)-0.5,1), EEs05_b_mua_05[1:nrow(ParamRanges)]/max(EEs05_b_mua_95[1:nrow(ParamRanges)]), seq(0.5,nrow(ParamRanges)-0.5,1), EEs05_b_mua_95[1:nrow(ParamRanges)]/max(EEs05_b_mua_95[1:nrow(ParamRanges)]), length=0.05, angle=90, code=3)
-lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(RanksMua05_b[Top10,2]/max(EEs05_b_mua_95[1:nrow(ParamRanges)]),RanksMua05_b[Top10,2]/max(EEs05_b_mua_95[1:nrow(ParamRanges)])), col = 'black', lwd = 2)
+lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(RanksMua05_b[Top1005,2]/max(EEs05_b_mua_95[1:nrow(ParamRanges)]),RanksMua05_b[Top1005,2]/max(EEs05_b_mua_95[1:nrow(ParamRanges)])), col = 'black', lwd = 2)
 legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
 dev.off()
 
 png('EE05_mua_b_Agg.png', res = 300, units = 'in', height = 7, width = 7)
 barplot(height = EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]), ylab = 'Normalized Mean Abs. Val. of Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Lower 5th Percentile of Flow', col = ColPlots_Agg, border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,300))
 arrows(seq(0.5,length(EEs05_b_mua_05[-which(names(EEs05_b_mua_m) %in% ColsAggregated)])-0.5,1), EEs05_b_mua_05[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]), seq(0.5,length(EEs05_b_mua_05[-which(names(EEs05_b_mua_m) %in% ColsAggregated)])-0.5,1), EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]), length=0.05, angle=90, code=3)
-lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(as.numeric(sort(EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10_Agg])/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]), as.numeric(sort(EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10_Agg])/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)])), col = 'black', lwd = 2)
+lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(as.numeric(sort(EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top1005_Agg])/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]), as.numeric(sort(EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top1005_Agg])/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)])), col = 'black', lwd = 2)
 legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
 dev.off()
 
@@ -1900,14 +2001,14 @@ dev.off()
 png('EE95_mua_b.png', res = 300, units = 'in', height = 7, width = 7)
 barplot(height = EEs95_b_mua_m[1:nrow(ParamRanges)]/max(EEs95_b_mua_95[1:nrow(ParamRanges)]), ylab = 'Normalized Mean Abs. Val. of Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Upper 5th Percentile of Flow', col = ColPlots, border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,300))
 arrows(seq(0.5,nrow(ParamRanges)-0.5,1), EEs95_b_mua_05[1:nrow(ParamRanges)]/max(EEs95_b_mua_95[1:nrow(ParamRanges)]), seq(0.5,nrow(ParamRanges)-0.5,1), EEs95_b_mua_95[1:nrow(ParamRanges)]/max(EEs95_b_mua_95[1:nrow(ParamRanges)]), length=0.05, angle=90, code=3)
-lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(RanksMua95_b[Top10,2]/max(EEs95_b_mua_95[1:nrow(ParamRanges)]),RanksMua95_b[Top10,2]/max(EEs95_b_mua_95[1:nrow(ParamRanges)])), col = 'black', lwd = 2)
+lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(RanksMua95_b[Top1095,2]/max(EEs95_b_mua_95[1:nrow(ParamRanges)]),RanksMua95_b[Top1095,2]/max(EEs95_b_mua_95[1:nrow(ParamRanges)])), col = 'black', lwd = 2)
 legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
 dev.off()
 
 png('EE95_mua_b_Agg.png', res = 300, units = 'in', height = 7, width = 7)
 barplot(height = EEs95_b_mua_m[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]/max(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]), ylab = 'Normalized Mean Abs. Val. of Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Upper 5th Percentile of Flow', col = ColPlots_Agg, border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,300))
 arrows(seq(0.5,length(EEs95_b_mua_05[-which(names(EEs95_b_mua_m) %in% ColsAggregated)])-0.5,1), EEs95_b_mua_05[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]/max(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]), seq(0.5,length(EEs95_b_mua_05[-which(names(EEs95_b_mua_m) %in% ColsAggregated)])-0.5,1), EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]/max(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]), length=0.05, angle=90, code=3)
-lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(as.numeric(sort(EEs95_b_mua_m[-which(names(EEs95_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10_Agg])/max(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]), as.numeric(sort(EEs95_b_mua_m[-which(names(EEs95_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10_Agg])/max(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)])), col = 'black', lwd = 2)
+lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(as.numeric(sort(EEs95_b_mua_m[-which(names(EEs95_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top1095_Agg])/max(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]), as.numeric(sort(EEs95_b_mua_m[-which(names(EEs95_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top1095_Agg])/max(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)])), col = 'black', lwd = 2)
 legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
 dev.off()
 
@@ -1934,14 +2035,14 @@ dev.off()
 png('EEot_mua_b.png', res = 300, units = 'in', height = 7, width = 7)
 barplot(height = EEsot_b_mua_m[1:nrow(ParamRanges)]/max(EEsot_b_mua_95[1:nrow(ParamRanges)]), ylab = 'Normalized Mean Abs. Val. of Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for 5th-95th Percentile Flows', col = ColPlots, border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,300))
 arrows(seq(0.5,nrow(ParamRanges)-0.5,1), EEsot_b_mua_05[1:nrow(ParamRanges)]/max(EEsot_b_mua_95[1:nrow(ParamRanges)]), seq(0.5,nrow(ParamRanges)-0.5,1), EEsot_b_mua_95[1:nrow(ParamRanges)]/max(EEsot_b_mua_95[1:nrow(ParamRanges)]), length=0.05, angle=90, code=3)
-lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(RanksMuaot_b[Top10,2]/max(EEsot_b_mua_95[1:nrow(ParamRanges)]),RanksMuaot_b[Top10,2]/max(EEsot_b_mua_95[1:nrow(ParamRanges)])), col = 'black', lwd = 2)
+lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(RanksMuaot_b[Top10ot,2]/max(EEsot_b_mua_95[1:nrow(ParamRanges)]),RanksMuaot_b[Top10ot,2]/max(EEsot_b_mua_95[1:nrow(ParamRanges)])), col = 'black', lwd = 2)
 legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
 dev.off()
 
 png('EEot_mua_b_Agg.png', res = 300, units = 'in', height = 7, width = 7)
 barplot(height = EEsot_b_mua_m[-which(names(EEsot_b_mua_m) %in% ColsAggregated)]/max(EEsot_b_mua_95[-which(names(EEsot_b_mua_m) %in% ColsAggregated)]), ylab = 'Normalized Mean Abs. Val. of Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for 5th-95th Percentile Flows', col = ColPlots_Agg, border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,300))
 arrows(seq(0.5,length(EEsot_b_mua_05[-which(names(EEsot_b_mua_m) %in% ColsAggregated)])-0.5,1), EEsot_b_mua_05[-which(names(EEsot_b_mua_m) %in% ColsAggregated)]/max(EEsot_b_mua_95[-which(names(EEsot_b_mua_m) %in% ColsAggregated)]), seq(0.5,length(EEsot_b_mua_05[-which(names(EEsot_b_mua_m) %in% ColsAggregated)])-0.5,1), EEsot_b_mua_95[-which(names(EEsot_b_mua_m) %in% ColsAggregated)]/max(EEsot_b_mua_95[-which(names(EEsot_b_mua_m) %in% ColsAggregated)]), length=0.05, angle=90, code=3)
-lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(as.numeric(sort(EEsot_b_mua_m[-which(names(EEsot_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10_Agg])/max(EEsot_b_mua_95[-which(names(EEsot_b_mua_m) %in% ColsAggregated)]), as.numeric(sort(EEsot_b_mua_m[-which(names(EEsot_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10_Agg])/max(EEsot_b_mua_95[-which(names(EEsot_b_mua_m) %in% ColsAggregated)])), col = 'black', lwd = 2)
+lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(as.numeric(sort(EEsot_b_mua_m[-which(names(EEsot_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10ot_Agg])/max(EEsot_b_mua_95[-which(names(EEsot_b_mua_m) %in% ColsAggregated)]), as.numeric(sort(EEsot_b_mua_m[-which(names(EEsot_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10ot_Agg])/max(EEsot_b_mua_95[-which(names(EEsot_b_mua_m) %in% ColsAggregated)])), col = 'black', lwd = 2)
 legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
 dev.off()
 
@@ -1968,14 +2069,14 @@ dev.off()
 png('EETN05_mua_b.png', res = 300, units = 'in', height = 7, width = 7)
 barplot(height = EEsTN05_b_mua_m[1:nrow(ParamRanges)]/max(EEsTN05_b_mua_95[1:nrow(ParamRanges)]), ylab = 'Normalized Mean Abs. Val. of Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Lower 5th Quantile of TN', col = ColPlots, border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,300))
 arrows(seq(0.5,nrow(ParamRanges)-0.5,1), EEsTN05_b_mua_05[1:nrow(ParamRanges)]/max(EEsTN05_b_mua_95[1:nrow(ParamRanges)]), seq(0.5,nrow(ParamRanges)-0.5,1), EEsTN05_b_mua_95[1:nrow(ParamRanges)]/max(EEsTN05_b_mua_95[1:nrow(ParamRanges)]), length=0.05, angle=90, code=3)
-lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(RanksMuaTN05_b[Top10,2]/max(EEsTN05_b_mua_95[1:nrow(ParamRanges)]),RanksMuaTN05_b[Top10,2]/max(EEsTN05_b_mua_95[1:nrow(ParamRanges)])), col = 'black', lwd = 2)
+lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(RanksMuaTN05_b[Top10TN05,2]/max(EEsTN05_b_mua_95[1:nrow(ParamRanges)]),RanksMuaTN05_b[Top10TN05,2]/max(EEsTN05_b_mua_95[1:nrow(ParamRanges)])), col = 'black', lwd = 2)
 legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
 dev.off()
 
 png('EETN05_mua_b_Agg.png', res = 300, units = 'in', height = 7, width = 7)
 barplot(height = EEsTN05_b_mua_m[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)]/max(EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)]), ylab = 'Normalized Mean Abs. Val. of Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Lower 5th Quantile of TN', col = ColPlots_Agg, border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,300))
 arrows(seq(0.5,length(EEsTN05_b_mua_05[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)])-0.5,1), EEsTN05_b_mua_05[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)]/max(EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)]), seq(0.5,length(EEsTN05_b_mua_05[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)])-0.5,1), EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)]/max(EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)]), length=0.05, angle=90, code=3)
-lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(as.numeric(sort(EEsTN05_b_mua_m[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10_Agg])/max(EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)]), as.numeric(sort(EEsTN05_b_mua_m[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10_Agg])/max(EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)])), col = 'black', lwd = 2)
+lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(as.numeric(sort(EEsTN05_b_mua_m[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10TN05_Agg])/max(EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)]), as.numeric(sort(EEsTN05_b_mua_m[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10TN05_Agg])/max(EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)])), col = 'black', lwd = 2)
 legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
 dev.off()
 
@@ -2002,14 +2103,14 @@ dev.off()
 png('EETN95_mua_b.png', res = 300, units = 'in', height = 7, width = 7)
 barplot(height = EEsTN95_b_mua_m[1:nrow(ParamRanges)]/max(EEsTN95_b_mua_95[1:nrow(ParamRanges)]), ylab = 'Normalized Mean Abs. Val. of Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Upper 5th Quantile of TN', col = ColPlots, border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,300))
 arrows(seq(0.5,nrow(ParamRanges)-0.5,1), EEsTN95_b_mua_05[1:nrow(ParamRanges)]/max(EEsTN95_b_mua_95[1:nrow(ParamRanges)]), seq(0.5,nrow(ParamRanges)-0.5,1), EEsTN95_b_mua_95[1:nrow(ParamRanges)]/max(EEsTN95_b_mua_95[1:nrow(ParamRanges)]), length=0.05, angle=90, code=3)
-lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(RanksMuaTN95_b[Top10,2]/max(EEsTN95_b_mua_95[1:nrow(ParamRanges)]),RanksMuaTN95_b[Top10,2]/max(EEsTN95_b_mua_95[1:nrow(ParamRanges)])), col = 'black', lwd = 2)
+lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(RanksMuaTN95_b[Top10TN95,2]/max(EEsTN95_b_mua_95[1:nrow(ParamRanges)]),RanksMuaTN95_b[Top10TN95,2]/max(EEsTN95_b_mua_95[1:nrow(ParamRanges)])), col = 'black', lwd = 2)
 legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
 dev.off()
 
 png('EETN95_mua_b_Agg.png', res = 300, units = 'in', height = 7, width = 7)
 barplot(height = EEsTN95_b_mua_m[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)]/max(EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)]), ylab = 'Normalized Mean Abs. Val. of Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Upper 5th Quantile of TN', col = ColPlots_Agg, border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,300))
 arrows(seq(0.5,length(EEsTN95_b_mua_05[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)])-0.5,1), EEsTN95_b_mua_05[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)]/max(EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)]), seq(0.5,length(EEsTN95_b_mua_05[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)])-0.5,1), EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)]/max(EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)]), length=0.05, angle=90, code=3)
-lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(as.numeric(sort(EEsTN95_b_mua_m[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10_Agg])/max(EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)]), as.numeric(sort(EEsTN95_b_mua_m[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10_Agg])/max(EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)])), col = 'black', lwd = 2)
+lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(as.numeric(sort(EEsTN95_b_mua_m[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10TN95_Agg])/max(EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)]), as.numeric(sort(EEsTN95_b_mua_m[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10TN95_Agg])/max(EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)])), col = 'black', lwd = 2)
 legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
 dev.off()
 
@@ -2036,14 +2137,14 @@ dev.off()
 png('EETNMed_mua_b.png', res = 300, units = 'in', height = 7, width = 7)
 barplot(height = EEsTNMed_b_mua_m[1:nrow(ParamRanges)]/max(EEsTNMed_b_mua_95[1:nrow(ParamRanges)]), ylab = 'Normalized Mean Abs. Val. of Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Mean of TN', col = ColPlots, border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,300))
 arrows(seq(0.5,nrow(ParamRanges)-0.5,1), EEsTNMed_b_mua_05[1:nrow(ParamRanges)]/max(EEsTNMed_b_mua_95[1:nrow(ParamRanges)]), seq(0.5,nrow(ParamRanges)-0.5,1), EEsTNMed_b_mua_95[1:nrow(ParamRanges)]/max(EEsTNMed_b_mua_95[1:nrow(ParamRanges)]), length=0.05, angle=90, code=3)
-lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(RanksMuaTN95_b[Top10,2]/max(EEsTNMed_b_mua_95[1:nrow(ParamRanges)]),RanksMuaTN95_b[Top10,2]/max(EEsTNMed_b_mua_95[1:nrow(ParamRanges)])), col = 'black', lwd = 2)
+lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(RanksMuaTNMed_b[Top10TNMed,2]/max(EEsTNMed_b_mua_95[1:nrow(ParamRanges)]),RanksMuaTNMed_b[Top10TNMed,2]/max(EEsTNMed_b_mua_95[1:nrow(ParamRanges)])), col = 'black', lwd = 2)
 legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
 dev.off()
 
 png('EETNMed_mua_b_Agg.png', res = 300, units = 'in', height = 7, width = 7)
 barplot(height = EEsTNMed_b_mua_m[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)]/max(EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)]), ylab = 'Normalized Mean Abs. Val. of Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Mean of TN', col = ColPlots_Agg, border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,300))
 arrows(seq(0.5,length(EEsTNMed_b_mua_05[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)])-0.5,1), EEsTNMed_b_mua_05[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)]/max(EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)]), seq(0.5,length(EEsTNMed_b_mua_05[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)])-0.5,1), EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)]/max(EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)]), length=0.05, angle=90, code=3)
-lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(as.numeric(sort(EEsTNMed_b_mua_m[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10_Agg])/max(EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)]), as.numeric(sort(EEsTNMed_b_mua_m[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10_Agg])/max(EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)])), col = 'black', lwd = 2)
+lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(as.numeric(sort(EEsTNMed_b_mua_m[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10TNMed_Agg])/max(EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)]), as.numeric(sort(EEsTNMed_b_mua_m[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10TNMed_Agg])/max(EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)])), col = 'black', lwd = 2)
 legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
 dev.off()
 
@@ -2068,7 +2169,7 @@ legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9',
 dev.off()
 
 #Hillslope Plots for mua----
-# Normalized EE value----
+# Normalized EE value - not used----
 colPal = colorRampPalette(colors = rev(c('red', 'orange', 'yellow', 'green', 'blue')))
 scaleRange = c(0, 1)
 scaleBy = 0.1
@@ -2080,15 +2181,16 @@ png('HillNormalizedTop12.png', res = 300, height = 6, width = 6, units = 'in')
 for (h in 1:length(uhills)){
   #Loop over the top 10% ranks for basin
   for (j in 1:length(SortRanksMua_b)){
-    plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,15), pch = 15, xlab = 'Hillslope ID', ylab = 'Parameter', col = colFun(RanksMua95_h[[h]]$EE05_h[RanksMua95_h[[h]]$Param == SortRanksMua_b[j]] / max(RanksMua95_h[[h]]$EE05_h)), axes = FALSE)
+    plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,15), pch = 15, xlab = 'Hillslope ID', ylab = 'Parameter', col = colFun(RanksMua95_h[[h]][RanksMua95_h[[h]]$Param == SortRanksMua_b[j],2] / max(RanksMua95_h[[h]][,2])), axes = FALSE)
     par(new=TRUE)
   }
 }
+rm(h,j)
 axis(side = 1, at = seq(1,14,1), labels = TRUE)
 axis(side = 2, at = seq(1,14,1), labels = FALSE)
 dev.off()
 
-# Rank order----
+# Rank order of EEs----
 colPal = colorRampPalette(colors = rev(c('red', 'orange', 'gray', 'green', 'blue')))
 scaleRange = c(0, 50)
 scaleBy = 15
@@ -2108,6 +2210,7 @@ for (h in 1:length(uhills)){
     Ranks = c(Ranks,which(RanksMua95_h[[h]]$Param == SortRanksMua_b[j]))
   }
 }
+rm(h,j)
 par(new=FALSE)
 axis(side = 1, at = seq(1,14,1), labels = TRUE, pos = 0.5)
 axis(side = 2, at = seq(1,14,1), labels = SortRanksMua_b, las = 1)
@@ -2115,23 +2218,24 @@ axis(side = 2, at = seq(1,14,1), labels = SortRanksMua_b, las = 1)
 legend('right', title = expression(bold('Rank')), legend = c('1 - 14', '15 - 29', '30 - 44', '45 - 60', '61 - 101'), pch = 15, col = colFun(seq(0,60,15)), inset = -0.3, xpd = TRUE)
 dev.off()
 
-# Plots that drop the multiplier variables and use only the aggregated variables----
-#  Normalized EE value----
+# Same but dropping using only the aggregated variables----
+#  Normalized EE value - not used----
 colPal = colorRampPalette(colors = rev(c('red', 'orange', 'yellow', 'green', 'blue')))
 scaleRange = c(0, 1)
 scaleBy = 0.1
 Pal = colPal((scaleRange[2] - scaleRange[1])/scaleBy + 1)
 
 #Make a grid of the parameters in top 10% for hillslopes
-SortRanksMua_b_Agg = RanksMua_b_Agg
+SortRanksMua_b_Agg = unique(c(RanksMua_b_Agg, RanksMuaTN_b_Agg))[c(1,9,10,4,12,13,2,7,15,3,6,8,11,14,5)]
 png('HillNormalizedTop12_Agg.png', res = 300, height = 6, width = 6, units = 'in')
 for (h in 1:length(uhills)){
   #Loop over the top 10% ranks for basin
   for (j in 1:length(SortRanksMua_b_Agg)){
-    plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,13), pch = 15, xlab = 'Hillslope ID', ylab = 'Parameter', col = colFun(RanksMua95_h_Agg[[h]]$EE95_h[RanksMua95_h_Agg[[h]]$Param == SortRanksMua_b_Agg[j]] / max(RanksMua95_h[[h]]$EE95_h)), axes = FALSE)
+    plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,length(SortRanksMua_b_Agg)), pch = 15, xlab = 'Hillslope ID', ylab = 'Parameter', col = colFun(RanksMua95_h_Agg[[h]][RanksMua95_h_Agg[[h]]$Param == SortRanksMua_b_Agg[j], 2] / max(RanksMua95_h_Agg[[h]][,2])), axes = FALSE)
     par(new=TRUE)
   }
 }
+rm(h,j)
 axis(side = 1, at = seq(1,14,1), labels = TRUE)
 axis(side = 2, at = seq(1,14,1), labels = FALSE)
 dev.off()
@@ -2148,20 +2252,308 @@ for (h in 1:length(uhills)){
   #Loop over the top 10% ranks for basin
   for (j in 1:length(SortRanksMua_b_Agg)){
     if(j == 1){
-      plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,15), pch = 15, xlab = 'Hillslope ID', ylab = 'Parameter', col = colFun(which(RanksMua95_h_Agg[[h]]$Param == SortRanksMua_b_Agg[j])), axes = FALSE, cex.lab = 1.5)
+      plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,length(SortRanksMua_b_Agg)), pch = 15, xlab = 'Hillslope ID', ylab = 'Parameter', col = colFun(which(RanksMua95_h_Agg[[h]]$Param == SortRanksMua_b_Agg[j])), axes = FALSE, cex.lab = 1.5)
     }else{
-      plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,15), pch = 15, xlab = '', ylab = '', col = colFun(which(RanksMua95_h_Agg[[h]]$Param == SortRanksMua_b_Agg[j])), axes = FALSE)
+      plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,length(SortRanksMua_b_Agg)), pch = 15, xlab = '', ylab = '', col = colFun(which(RanksMua95_h_Agg[[h]]$Param == SortRanksMua_b_Agg[j])), axes = FALSE)
     }
     par(new=TRUE)
     Ranks_Agg = c(Ranks_Agg,which(RanksMua95_h_Agg[[h]]$Param == SortRanksMua_b_Agg[j]))
   }
 }
+rm(h,j)
 par(new=FALSE)
 axis(side = 1, at = seq(1,14,1), labels = TRUE, pos = 0.5)
-axis(side = 2, at = seq(1,13,1), labels = SortRanksMua_b_Agg, las = 1)
+axis(side = 2, at = seq(1,length(SortRanksMua_b_Agg),1), labels = SortRanksMua_b_Agg, las = 1)
 #legend('top', title = expression(bold('Parameter Sensitivity Rank')), legend = c('1 - 14', '15 - 29', '30 - 44', '45 - 60', '61 - 101'), horiz = TRUE, pch = 15, col = colFun(seq(0,60,15)), inset = -0.1, xpd = TRUE)
 legend('right', title = expression(bold('Rank')), legend = c('1 - 14', '15 - 29', '30 - 44', '45 - 60', '61 - 101'), pch = 15, col = colFun(seq(0,60,15)), inset = -0.3, xpd = TRUE)
 dev.off()
+
+#Hillslope Plots for mua with all parameters with EEs > 95% of 10% threshold----
+SortRanksMua_b_Agg = unique(c(ParamSelect_b_Agg, ParamSelectTN_b_Agg))[c(1,2,16,17,13,14,12,18,4,3,19,20,5,6,7,9,10,11,15,21,8)]
+SortRanksMua_h_Agg = unique(c(ParamSelect_b_Agg, ParamSelectTN_b_Agg, ParamSelect_h_Agg, ParamSelectTN_h_Agg))[c(1,2,16,17,24,28,30,13,29,22,23,33,14,12,18,3,4,19,20,5,6,7,31,9,10,11,15,21,25,26,27,35,32,34,8)]
+# Aggregated Rank order----
+colPal = colorRampPalette(colors = rev(c('red', 'orange', 'gray', 'green', 'blue')))
+scaleRange = c(0, 50)
+scaleBy = 15
+Pal = colPal((scaleRange[2] - scaleRange[1])/scaleBy + 1)
+Ranks05_Agg = Ranksot_Agg = Ranks95_Agg = RanksTN05_Agg = RanksTNMed_Agg = RanksTN95_Agg = NULL
+#  Streamflow 5th %-ile----
+png('HillRankTop1295_05s_Agg.png', res = 300, height = 6, width = 6, units = 'in')
+par(mar = c(1,11,0,5))
+for (h in 1:length(uhills)){
+  #Loop over the top 10% ranks for basin
+  for (j in 1:length(SortRanksMua_b_Agg)){
+    if(j == 1){
+      plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,length(SortRanksMua_b_Agg)), pch = 15, xlab = 'Hillslope ID', ylab = 'Parameter', col = colFun(which(RanksMua05_h_Agg[[h]]$Param == SortRanksMua_b_Agg[j])), axes = FALSE, cex.lab = 1.5)
+    }else{
+      plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,length(SortRanksMua_b_Agg)), pch = 15, xlab = '', ylab = '', col = colFun(which(RanksMua05_h_Agg[[h]]$Param == SortRanksMua_b_Agg[j])), axes = FALSE)
+    }
+    par(new=TRUE)
+    Ranks05_Agg = c(Ranks05_Agg,which(RanksMua05_h_Agg[[h]]$Param == SortRanksMua_b_Agg[j]))
+  }
+}
+rm(h,j)
+par(new=FALSE)
+axis(side = 1, at = seq(1,14,1), labels = TRUE, pos = 0.5)
+axis(side = 2, at = seq(1,length(SortRanksMua_b_Agg),1), labels = SortRanksMua_b_Agg, las = 1)
+#legend('top', title = expression(bold('Parameter Sensitivity Rank')), legend = c('1 - 14', '15 - 29', '30 - 44', '45 - 60', '61 - 101'), horiz = TRUE, pch = 15, col = colFun(seq(0,60,15)), inset = -0.1, xpd = TRUE)
+legend('right', title = expression(bold('Rank')), legend = c('1 - 14', '15 - 29', '30 - 44', '45 - 60', '61 - 101'), pch = 15, col = colFun(seq(0,60,15)), inset = -0.3, xpd = TRUE)
+dev.off()
+
+#  Streamflow 5th-95th %-ile----
+png('HillRankTop1295_ots_Agg.png', res = 300, height = 6, width = 6, units = 'in')
+par(mar = c(1,11,0,5))
+for (h in 1:length(uhills)){
+  #Loop over the top 10% ranks for basin
+  for (j in 1:length(SortRanksMua_b_Agg)){
+    if(j == 1){
+      plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,length(SortRanksMua_b_Agg)), pch = 15, xlab = 'Hillslope ID', ylab = 'Parameter', col = colFun(which(RanksMuaot_h_Agg[[h]]$Param == SortRanksMua_b_Agg[j])), axes = FALSE, cex.lab = 1.5)
+    }else{
+      plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,length(SortRanksMua_b_Agg)), pch = 15, xlab = '', ylab = '', col = colFun(which(RanksMuaot_h_Agg[[h]]$Param == SortRanksMua_b_Agg[j])), axes = FALSE)
+    }
+    par(new=TRUE)
+    Ranksot_Agg = c(Ranksot_Agg,which(RanksMuaot_h_Agg[[h]]$Param == SortRanksMua_b_Agg[j]))
+  }
+}
+rm(h,j)
+par(new=FALSE)
+axis(side = 1, at = seq(1,14,1), labels = TRUE, pos = 0.5)
+axis(side = 2, at = seq(1,length(SortRanksMua_b_Agg),1), labels = SortRanksMua_b_Agg, las = 1)
+#legend('top', title = expression(bold('Parameter Sensitivity Rank')), legend = c('1 - 14', '15 - 29', '30 - 44', '45 - 60', '61 - 101'), horiz = TRUE, pch = 15, col = colFun(seq(0,60,15)), inset = -0.1, xpd = TRUE)
+legend('right', title = expression(bold('Rank')), legend = c('1 - 14', '15 - 29', '30 - 44', '45 - 60', '61 - 101'), pch = 15, col = colFun(seq(0,60,15)), inset = -0.3, xpd = TRUE)
+dev.off()
+
+#  Streamflow 95th %-ile----
+png('HillRankTop1295_95s_Agg.png', res = 300, height = 6, width = 6, units = 'in')
+par(mar = c(1,11,0,5))
+for (h in 1:length(uhills)){
+  #Loop over the top 10% ranks for basin
+  for (j in 1:length(SortRanksMua_b_Agg)){
+    if(j == 1){
+      plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,length(SortRanksMua_b_Agg)), pch = 15, xlab = 'Hillslope ID', ylab = 'Parameter', col = colFun(which(RanksMua95_h_Agg[[h]]$Param == SortRanksMua_b_Agg[j])), axes = FALSE, cex.lab = 1.5)
+    }else{
+      plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,length(SortRanksMua_b_Agg)), pch = 15, xlab = '', ylab = '', col = colFun(which(RanksMua95_h_Agg[[h]]$Param == SortRanksMua_b_Agg[j])), axes = FALSE)
+    }
+    par(new=TRUE)
+    Ranks95_Agg = c(Ranks95_Agg,which(RanksMua95_h_Agg[[h]]$Param == SortRanksMua_b_Agg[j]))
+  }
+}
+rm(h,j)
+par(new=FALSE)
+axis(side = 1, at = seq(1,14,1), labels = TRUE, pos = 0.5)
+axis(side = 2, at = seq(1,length(SortRanksMua_b_Agg),1), labels = SortRanksMua_b_Agg, las = 1)
+#legend('top', title = expression(bold('Parameter Sensitivity Rank')), legend = c('1 - 14', '15 - 29', '30 - 44', '45 - 60', '61 - 101'), horiz = TRUE, pch = 15, col = colFun(seq(0,60,15)), inset = -0.1, xpd = TRUE)
+legend('right', title = expression(bold('Rank')), legend = c('1 - 14', '15 - 29', '30 - 44', '45 - 60', '61 - 101'), pch = 15, col = colFun(seq(0,60,15)), inset = -0.3, xpd = TRUE)
+dev.off()
+
+#  TN 5th %-ile----
+png('HillRankTop1295_TN05_Agg.png', res = 300, height = 6, width = 6, units = 'in')
+par(mar = c(1,11,0,5))
+for (h in 1:length(uhills)){
+  #Loop over the top 10% ranks for basin
+  for (j in 1:length(SortRanksMua_b_Agg)){
+    if(j == 1){
+      plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,length(SortRanksMua_b_Agg)), pch = 15, xlab = 'Hillslope ID', ylab = 'Parameter', col = colFun(which(RanksMuaTN05_h_Agg[[h]]$Param == SortRanksMua_b_Agg[j])), axes = FALSE, cex.lab = 1.5)
+    }else{
+      plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,length(SortRanksMua_b_Agg)), pch = 15, xlab = '', ylab = '', col = colFun(which(RanksMuaTN05_h_Agg[[h]]$Param == SortRanksMua_b_Agg[j])), axes = FALSE)
+    }
+    par(new=TRUE)
+    RanksTN05_Agg = c(RanksTN05_Agg,which(RanksMuaTN05_h_Agg[[h]]$Param == SortRanksMua_b_Agg[j]))
+  }
+}
+rm(h,j)
+par(new=FALSE)
+axis(side = 1, at = seq(1,14,1), labels = TRUE, pos = 0.5)
+axis(side = 2, at = seq(1,length(SortRanksMua_b_Agg),1), labels = SortRanksMua_b_Agg, las = 1)
+#legend('top', title = expression(bold('Parameter Sensitivity Rank')), legend = c('1 - 14', '15 - 29', '30 - 44', '45 - 60', '61 - 101'), horiz = TRUE, pch = 15, col = colFun(seq(0,60,15)), inset = -0.1, xpd = TRUE)
+legend('right', title = expression(bold('Rank')), legend = c('1 - 14', '15 - 29', '30 - 44', '45 - 60', '61 - 101'), pch = 15, col = colFun(seq(0,60,15)), inset = -0.3, xpd = TRUE)
+dev.off()
+
+#  TN 5th-95th %-ile----
+png('HillRankTop1295_TNMed_Agg.png', res = 300, height = 6, width = 6, units = 'in')
+par(mar = c(1,11,0,5))
+for (h in 1:length(uhills)){
+  #Loop over the top 10% ranks for basin
+  for (j in 1:length(SortRanksMua_b_Agg)){
+    if(j == 1){
+      plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,length(SortRanksMua_b_Agg)), pch = 15, xlab = 'Hillslope ID', ylab = 'Parameter', col = colFun(which(RanksMuaTNMed_h_Agg[[h]]$Param == SortRanksMua_b_Agg[j])), axes = FALSE, cex.lab = 1.5)
+    }else{
+      plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,length(SortRanksMua_b_Agg)), pch = 15, xlab = '', ylab = '', col = colFun(which(RanksMuaTNMed_h_Agg[[h]]$Param == SortRanksMua_b_Agg[j])), axes = FALSE)
+    }
+    par(new=TRUE)
+    RanksTNMed_Agg = c(RanksTNMed_Agg,which(RanksMuaTNMed_h_Agg[[h]]$Param == SortRanksMua_b_Agg[j]))
+  }
+}
+rm(h,j)
+par(new=FALSE)
+axis(side = 1, at = seq(1,14,1), labels = TRUE, pos = 0.5)
+axis(side = 2, at = seq(1,length(SortRanksMua_b_Agg),1), labels = SortRanksMua_b_Agg, las = 1)
+#legend('top', title = expression(bold('Parameter Sensitivity Rank')), legend = c('1 - 14', '15 - 29', '30 - 44', '45 - 60', '61 - 101'), horiz = TRUE, pch = 15, col = colFun(seq(0,60,15)), inset = -0.1, xpd = TRUE)
+legend('right', title = expression(bold('Rank')), legend = c('1 - 14', '15 - 29', '30 - 44', '45 - 60', '61 - 101'), pch = 15, col = colFun(seq(0,60,15)), inset = -0.3, xpd = TRUE)
+dev.off()
+
+#  TN 95th %-ile----
+png('HillRankTop1295_TN95_Agg.png', res = 300, height = 6, width = 6, units = 'in')
+par(mar = c(1,11,0,5))
+for (h in 1:length(uhills)){
+  #Loop over the top 10% ranks for basin
+  for (j in 1:length(SortRanksMua_b_Agg)){
+    if(j == 1){
+      plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,length(SortRanksMua_b_Agg)), pch = 15, xlab = 'Hillslope ID', ylab = 'Parameter', col = colFun(which(RanksMuaTN95_h_Agg[[h]]$Param == SortRanksMua_b_Agg[j])), axes = FALSE, cex.lab = 1.5)
+    }else{
+      plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,length(SortRanksMua_b_Agg)), pch = 15, xlab = '', ylab = '', col = colFun(which(RanksMuaTN95_h_Agg[[h]]$Param == SortRanksMua_b_Agg[j])), axes = FALSE)
+    }
+    par(new=TRUE)
+    RanksTN95_Agg = c(RanksTN95_Agg,which(RanksMuaTN95_h_Agg[[h]]$Param == SortRanksMua_b_Agg[j]))
+  }
+}
+rm(h,j)
+par(new=FALSE)
+axis(side = 1, at = seq(1,14,1), labels = TRUE, pos = 0.5)
+axis(side = 2, at = seq(1,length(SortRanksMua_b_Agg),1), labels = SortRanksMua_b_Agg, las = 1)
+#legend('top', title = expression(bold('Parameter Sensitivity Rank')), legend = c('1 - 14', '15 - 29', '30 - 44', '45 - 60', '61 - 101'), horiz = TRUE, pch = 15, col = colFun(seq(0,60,15)), inset = -0.1, xpd = TRUE)
+legend('right', title = expression(bold('Rank')), legend = c('1 - 14', '15 - 29', '30 - 44', '45 - 60', '61 - 101'), pch = 15, col = colFun(seq(0,60,15)), inset = -0.3, xpd = TRUE)
+dev.off()
+
+#  Streamflow 5th %-ile - hillslope params top 10%----
+png('HillRankTop1295_05s_h_Agg.png', res = 300, height = 7, width = 7, units = 'in')
+par(mar = c(1,14,0,5))
+for (h in 1:length(uhills)){
+  #Loop over the top 10% ranks for basin
+  for (j in 1:length(SortRanksMua_h_Agg)){
+    if(j == 1){
+      plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,length(SortRanksMua_h_Agg)), pch = 15, xlab = 'Hillslope ID', ylab = '', col = colFun(which(RanksMua05_h_Agg[[h]]$Param == SortRanksMua_h_Agg[j])), axes = FALSE, cex.lab = 1.5)
+    }else{
+      plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,length(SortRanksMua_h_Agg)), pch = 15, xlab = '', ylab = '', col = colFun(which(RanksMua05_h_Agg[[h]]$Param == SortRanksMua_h_Agg[j])), axes = FALSE)
+    }
+    par(new=TRUE)
+    Ranks05_Agg = c(Ranks05_Agg,which(RanksMua05_h_Agg[[h]]$Param == SortRanksMua_h_Agg[j]))
+  }
+}
+rm(h,j)
+par(new=FALSE)
+axis(side = 1, at = seq(1,14,1), labels = TRUE, pos = 0.5)
+axis(side = 2, at = seq(1,length(SortRanksMua_h_Agg),1), labels = SortRanksMua_h_Agg, las = 1)
+#legend('top', title = expression(bold('Parameter Sensitivity Rank')), legend = c('1 - 14', '15 - 29', '30 - 44', '45 - 60', '61 - 101'), horiz = TRUE, pch = 15, col = colFun(seq(0,60,15)), inset = -0.1, xpd = TRUE)
+legend('right', title = expression(bold('Rank')), legend = c('1 - 14', '15 - 29', '30 - 44', '45 - 60', '61 - 101'), pch = 15, col = colFun(seq(0,60,15)), inset = -0.3, xpd = TRUE)
+dev.off()
+
+#  Streamflow 5th-95th %-ile - hillslope params top 10%----
+png('HillRankTop1295_ots_h_Agg.png', res = 300, height = 7, width = 7, units = 'in')
+par(mar = c(1,14,0,5))
+for (h in 1:length(uhills)){
+  #Loop over the top 10% ranks for basin
+  for (j in 1:length(SortRanksMua_h_Agg)){
+    if(j == 1){
+      plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,length(SortRanksMua_h_Agg)), pch = 15, xlab = 'Hillslope ID', ylab = '', col = colFun(which(RanksMuaot_h_Agg[[h]]$Param == SortRanksMua_h_Agg[j])), axes = FALSE, cex.lab = 1.5)
+    }else{
+      plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,length(SortRanksMua_h_Agg)), pch = 15, xlab = '', ylab = '', col = colFun(which(RanksMuaot_h_Agg[[h]]$Param == SortRanksMua_h_Agg[j])), axes = FALSE)
+    }
+    par(new=TRUE)
+    Ranksot_Agg = c(Ranksot_Agg,which(RanksMuaot_h_Agg[[h]]$Param == SortRanksMua_h_Agg[j]))
+  }
+}
+rm(h,j)
+par(new=FALSE)
+axis(side = 1, at = seq(1,14,1), labels = TRUE, pos = 0.5)
+axis(side = 2, at = seq(1,length(SortRanksMua_h_Agg),1), labels = SortRanksMua_h_Agg, las = 1)
+#legend('top', title = expression(bold('Parameter Sensitivity Rank')), legend = c('1 - 14', '15 - 29', '30 - 44', '45 - 60', '61 - 101'), horiz = TRUE, pch = 15, col = colFun(seq(0,60,15)), inset = -0.1, xpd = TRUE)
+legend('right', title = expression(bold('Rank')), legend = c('1 - 14', '15 - 29', '30 - 44', '45 - 60', '61 - 101'), pch = 15, col = colFun(seq(0,60,15)), inset = -0.3, xpd = TRUE)
+dev.off()
+
+#  Streamflow 95th %-ile - hillslope params top 10%----
+png('HillRankTop1295_95s_h_Agg.png', res = 300, height = 7, width = 7, units = 'in')
+par(mar = c(1,14,0,5))
+for (h in 1:length(uhills)){
+  #Loop over the top 10% ranks for basin
+  for (j in 1:length(SortRanksMua_h_Agg)){
+    if(j == 1){
+      plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,length(SortRanksMua_h_Agg)), pch = 15, xlab = 'Hillslope ID', ylab = '', col = colFun(which(RanksMua95_h_Agg[[h]]$Param == SortRanksMua_h_Agg[j])), axes = FALSE, cex.lab = 1.5)
+    }else{
+      plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,length(SortRanksMua_h_Agg)), pch = 15, xlab = '', ylab = '', col = colFun(which(RanksMua95_h_Agg[[h]]$Param == SortRanksMua_h_Agg[j])), axes = FALSE)
+    }
+    par(new=TRUE)
+    Ranks95_Agg = c(Ranks95_Agg,which(RanksMua95_h_Agg[[h]]$Param == SortRanksMua_h_Agg[j]))
+  }
+}
+rm(h,j)
+par(new=FALSE)
+axis(side = 1, at = seq(1,14,1), labels = TRUE, pos = 0.5)
+axis(side = 2, at = seq(1,length(SortRanksMua_h_Agg),1), labels = SortRanksMua_h_Agg, las = 1)
+#legend('top', title = expression(bold('Parameter Sensitivity Rank')), legend = c('1 - 14', '15 - 29', '30 - 44', '45 - 60', '61 - 101'), horiz = TRUE, pch = 15, col = colFun(seq(0,60,15)), inset = -0.1, xpd = TRUE)
+legend('right', title = expression(bold('Rank')), legend = c('1 - 14', '15 - 29', '30 - 44', '45 - 60', '61 - 101'), pch = 15, col = colFun(seq(0,60,15)), inset = -0.3, xpd = TRUE)
+dev.off()
+
+#  TN 5th %-ile - hillslope params top 10%----
+png('HillRankTop1295_TN05_h_Agg.png', res = 300, height = 7, width = 7, units = 'in')
+par(mar = c(1,14,0,5))
+for (h in 1:length(uhills)){
+  #Loop over the top 10% ranks for basin
+  for (j in 1:length(SortRanksMua_h_Agg)){
+    if(j == 1){
+      plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,length(SortRanksMua_h_Agg)), pch = 15, xlab = 'Hillslope ID', ylab = '', col = colFun(which(RanksMuaTN05_h_Agg[[h]]$Param == SortRanksMua_h_Agg[j])), axes = FALSE, cex.lab = 1.5)
+    }else{
+      plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,length(SortRanksMua_h_Agg)), pch = 15, xlab = '', ylab = '', col = colFun(which(RanksMuaTN05_h_Agg[[h]]$Param == SortRanksMua_h_Agg[j])), axes = FALSE)
+    }
+    par(new=TRUE)
+    RanksTN05_Agg = c(RanksTN05_Agg,which(RanksMuaTN05_h_Agg[[h]]$Param == SortRanksMua_h_Agg[j]))
+  }
+}
+rm(h,j)
+par(new=FALSE)
+axis(side = 1, at = seq(1,14,1), labels = TRUE, pos = 0.5)
+axis(side = 2, at = seq(1,length(SortRanksMua_h_Agg),1), labels = SortRanksMua_h_Agg, las = 1)
+#legend('top', title = expression(bold('Parameter Sensitivity Rank')), legend = c('1 - 14', '15 - 29', '30 - 44', '45 - 60', '61 - 101'), horiz = TRUE, pch = 15, col = colFun(seq(0,60,15)), inset = -0.1, xpd = TRUE)
+legend('right', title = expression(bold('Rank')), legend = c('1 - 14', '15 - 29', '30 - 44', '45 - 60', '61 - 101'), pch = 15, col = colFun(seq(0,60,15)), inset = -0.3, xpd = TRUE)
+dev.off()
+
+#  TN 5th-95th %-ile - hillslope params top 10%----
+png('HillRankTop1295_TNMed_h_Agg.png', res = 300, height = 7, width = 7, units = 'in')
+par(mar = c(1,14,0,5))
+for (h in 1:length(uhills)){
+  #Loop over the top 10% ranks for basin
+  for (j in 1:length(SortRanksMua_h_Agg)){
+    if(j == 1){
+      plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,length(SortRanksMua_h_Agg)), pch = 15, xlab = 'Hillslope ID', ylab = '', col = colFun(which(RanksMuaTNMed_h_Agg[[h]]$Param == SortRanksMua_h_Agg[j])), axes = FALSE, cex.lab = 1.5)
+    }else{
+      plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,length(SortRanksMua_h_Agg)), pch = 15, xlab = '', ylab = '', col = colFun(which(RanksMuaTNMed_h_Agg[[h]]$Param == SortRanksMua_h_Agg[j])), axes = FALSE)
+    }
+    par(new=TRUE)
+    RanksTNMed_Agg = c(RanksTNMed_Agg,which(RanksMuaTNMed_h_Agg[[h]]$Param == SortRanksMua_h_Agg[j]))
+  }
+}
+rm(h,j)
+par(new=FALSE)
+axis(side = 1, at = seq(1,14,1), labels = TRUE, pos = 0.5)
+axis(side = 2, at = seq(1,length(SortRanksMua_h_Agg),1), labels = SortRanksMua_h_Agg, las = 1)
+#legend('top', title = expression(bold('Parameter Sensitivity Rank')), legend = c('1 - 14', '15 - 29', '30 - 44', '45 - 60', '61 - 101'), horiz = TRUE, pch = 15, col = colFun(seq(0,60,15)), inset = -0.1, xpd = TRUE)
+legend('right', title = expression(bold('Rank')), legend = c('1 - 14', '15 - 29', '30 - 44', '45 - 60', '61 - 101'), pch = 15, col = colFun(seq(0,60,15)), inset = -0.3, xpd = TRUE)
+dev.off()
+
+#  TN 95th %-ile - hillslope params top 10%----
+png('HillRankTop1295_TN95_h_Agg.png', res = 300, height = 7, width = 7, units = 'in')
+par(mar = c(1,14,0,5))
+for (h in 1:length(uhills)){
+  #Loop over the top 10% ranks for basin
+  for (j in 1:length(SortRanksMua_h_Agg)){
+    if(j == 1){
+      plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,length(SortRanksMua_h_Agg)), pch = 15, xlab = 'Hillslope ID', ylab = '', col = colFun(which(RanksMuaTN95_h_Agg[[h]]$Param == SortRanksMua_h_Agg[j])), axes = FALSE, cex.lab = 1.5)
+    }else{
+      plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,length(SortRanksMua_h_Agg)), pch = 15, xlab = '', ylab = '', col = colFun(which(RanksMuaTN95_h_Agg[[h]]$Param == SortRanksMua_h_Agg[j])), axes = FALSE)
+    }
+    par(new=TRUE)
+    RanksTN95_Agg = c(RanksTN95_Agg,which(RanksMuaTN95_h_Agg[[h]]$Param == SortRanksMua_h_Agg[j]))
+  }
+}
+rm(h,j)
+par(new=FALSE)
+axis(side = 1, at = seq(1,14,1), labels = TRUE, pos = 0.5)
+axis(side = 2, at = seq(1,length(SortRanksMua_h_Agg),1), labels = SortRanksMua_h_Agg, las = 1)
+#legend('top', title = expression(bold('Parameter Sensitivity Rank')), legend = c('1 - 14', '15 - 29', '30 - 44', '45 - 60', '61 - 101'), horiz = TRUE, pch = 15, col = colFun(seq(0,60,15)), inset = -0.1, xpd = TRUE)
+legend('right', title = expression(bold('Rank')), legend = c('1 - 14', '15 - 29', '30 - 44', '45 - 60', '61 - 101'), pch = 15, col = colFun(seq(0,60,15)), inset = -0.3, xpd = TRUE)
+dev.off()
+
+#Fixme: Show SA metrics for the basin and for each hillslope - ranks, and maps for hillslope----
 
 #Compare the parameters affected by multipliers after aggregating constrained parameters to see if they are different in sensitivity----
 #Using m as an example for now because it's in the top 12
@@ -2171,14 +2563,8 @@ dev.off()
 
 # Fixme: Compare using the bootstrapped distributions----
 
-#Parameter corrleation plots----
-#?sensitivity::pcc()
-#?sensitivity::plot3d.morris()
-#?sensitivity::morrisMultOut()
-#?sensitivity::morris()
-
 #Compute the correlation of parameters that have non-zero EEs----
-#Norm of a vector
+#Squared norm (L2) of a vector
 norm_vec <- function(x){
   sqrt(sum(x^2))
 }
@@ -2188,16 +2574,12 @@ CorCols = length(which(RanksMua05_b$EE05_b != 0))
 CosPhi05_b = CosPhi95_b = CosPhiot_b = matrix(NA, nrow = CorCols, ncol = CorCols)
 for (i in 1:CorCols){
   for (j in 1:CorCols){
-    CosPhi05_b[i,j] = abs(t(EEs05_b[,which(muaEEs05_b != 0)][,i]) %*% EEs05_b[,which(muaEEs05_b != 0)][,j])/norm_vec(EEs05_b[,which(muaEEs05_b != 0)][,i])/norm_vec(EEs05_b[,which(muaEEs05_b != 0)][,j])
-    CosPhi95_b[i,j] = abs(t(EEs95_b[,which(muaEEs95_b != 0)][,i]) %*% EEs95_b[,which(muaEEs95_b != 0)][,j])/norm_vec(EEs95_b[,which(muaEEs95_b != 0)][,i])/norm_vec(EEs95_b[,which(muaEEs95_b != 0)][,j])
-    CosPhiot_b[i,j] = abs(t(EEsot_b[,which(muaEEsot_b != 0)][,i]) %*% EEsot_b[,which(muaEEsot_b != 0)][,j])/norm_vec(EEsot_b[,which(muaEEsot_b != 0)][,i])/norm_vec(EEsot_b[,which(muaEEsot_b != 0)][,j])
+    CosPhi05_b[i,j] = abs(t(EEs05_b[,which((colnames(EEs05_b) %in% ParamRanges$NumberedParams))][,which(muaEEs05_b != 0)][,i]) %*% EEs05_b[,which((colnames(EEs05_b) %in% ParamRanges$NumberedParams))][,which(muaEEs05_b != 0)][,j])/norm_vec(EEs05_b[,which((colnames(EEs05_b) %in% ParamRanges$NumberedParams))][,which(muaEEs05_b != 0)][,i])/norm_vec(EEs05_b[,which((colnames(EEs05_b) %in% ParamRanges$NumberedParams))][,which(muaEEs05_b != 0)][,j])
+    CosPhi95_b[i,j] = abs(t(EEs95_b[,which((colnames(EEs95_b) %in% ParamRanges$NumberedParams))][,which(muaEEs95_b != 0)][,i]) %*% EEs95_b[,which((colnames(EEs95_b) %in% ParamRanges$NumberedParams))][,which(muaEEs95_b != 0)][,j])/norm_vec(EEs95_b[,which((colnames(EEs95_b) %in% ParamRanges$NumberedParams))][,which(muaEEs95_b != 0)][,i])/norm_vec(EEs95_b[,which((colnames(EEs95_b) %in% ParamRanges$NumberedParams))][,which(muaEEs95_b != 0)][,j])
+    CosPhiot_b[i,j] = abs(t(EEsot_b[,which((colnames(EEsot_b) %in% ParamRanges$NumberedParams))][,which(muaEEsot_b != 0)][,i]) %*% EEsot_b[,which((colnames(EEsot_b) %in% ParamRanges$NumberedParams))][,which(muaEEsot_b != 0)][,j])/norm_vec(EEsot_b[,which((colnames(EEsot_b) %in% ParamRanges$NumberedParams))][,which(muaEEsot_b != 0)][,i])/norm_vec(EEsot_b[,which((colnames(EEsot_b) %in% ParamRanges$NumberedParams))][,which(muaEEsot_b != 0)][,j])
   }
 }
-
-#Set NA values to 0
-CosPhi05_b[is.na(CosPhi05_b)] = 0
-CosPhi95_b[is.na(CosPhi95_b)] = 0
-CosPhiot_b[is.na(CosPhiot_b)] = 0
+rm(i,j)
 
 colnames(CosPhi05_b) = colnames(OrigParams[which(muaEEs05_b != 0)])
 colnames(CosPhi95_b) = colnames(OrigParams[which(muaEEs95_b != 0)])
@@ -2206,7 +2588,7 @@ rownames(CosPhi05_b) = colnames(OrigParams[which(muaEEs05_b != 0)])
 rownames(CosPhi95_b) = colnames(OrigParams[which(muaEEs95_b != 0)])
 rownames(CosPhiot_b) = colnames(OrigParams[which(muaEEsot_b != 0)])
 
-#Heatmap
+#Heatmaps----
 png('ParamCorrelations_EE05.png', res = 300, height = 8, width = 8, units = 'in')
 heatmap(x = CosPhi05_b, na.rm = TRUE, symm = TRUE, revC = TRUE)
 dev.off()
@@ -2219,15 +2601,400 @@ png('ParamCorrelations_EEot.png', res = 300, height = 8, width = 8, units = 'in'
 heatmap(x = CosPhiot_b, na.rm = TRUE, symm = TRUE, revC = TRUE)
 dev.off()
 
-#Perform heirarchical clustering for discovering variable clusters
-#https://uc-r.github.io/hc_clustering
+# Aggregated----
+CorCols_Agg = length(which(RanksMua05_b_Agg$EE05_b != 0))
+CosPhi05_b_Agg = CosPhi95_b_Agg = CosPhiot_b_Agg = matrix(NA, nrow = CorCols_Agg, ncol = CorCols_Agg)
+#Save the length of the norm for use in selecting total number of parameters
+NormLen05_b_Agg = NormLen95_b_Agg = NormLenot_b_Agg = vector('numeric', length = CorCols_Agg)
 
-#List the variables that are highly similar
+for (i in 1:CorCols_Agg){
+  for (j in 1:CorCols_Agg){
+    CosPhi05_b_Agg[i,j] = abs(t(EEs05_b[,which((!(colnames(EEs05_b) %in% ColsAggregated)) & (EEs05_b_mua_m != 0))][,i]) %*% EEs05_b[,which((!(colnames(EEs05_b) %in% ColsAggregated)) & (EEs05_b_mua_m != 0))][,j])/norm_vec(EEs05_b[,which((!(colnames(EEs05_b) %in% ColsAggregated)) & (EEs05_b_mua_m != 0))][,i])/norm_vec(EEs05_b[,which((!(colnames(EEs05_b) %in% ColsAggregated)) & (EEs05_b_mua_m != 0))][,j])
+    CosPhi95_b_Agg[i,j] = abs(t(EEs95_b[,which((!(colnames(EEs95_b) %in% ColsAggregated)) & (EEs95_b_mua_m != 0))][,i]) %*% EEs95_b[,which((!(colnames(EEs95_b) %in% ColsAggregated)) & (EEs95_b_mua_m != 0))][,j])/norm_vec(EEs95_b[,which((!(colnames(EEs95_b) %in% ColsAggregated)) & (EEs95_b_mua_m != 0))][,i])/norm_vec(EEs95_b[,which((!(colnames(EEs95_b) %in% ColsAggregated)) & (EEs95_b_mua_m != 0))][,j])
+    CosPhiot_b_Agg[i,j] = abs(t(EEsot_b[,which((!(colnames(EEsot_b) %in% ColsAggregated)) & (EEsot_b_mua_m != 0))][,i]) %*% EEsot_b[,which((!(colnames(EEsot_b) %in% ColsAggregated)) & (EEsot_b_mua_m != 0))][,j])/norm_vec(EEsot_b[,which((!(colnames(EEsot_b) %in% ColsAggregated)) & (EEsot_b_mua_m != 0))][,i])/norm_vec(EEsot_b[,which((!(colnames(EEsot_b) %in% ColsAggregated)) & (EEsot_b_mua_m != 0))][,j])
+  }
+  NormLen05_b_Agg[i] = norm_vec(EEs05_b[,which((!(colnames(EEs05_b) %in% ColsAggregated)) & (EEs05_b_mua_m != 0))][,i])
+  NormLen95_b_Agg[i] = norm_vec(EEs95_b[,which((!(colnames(EEs95_b) %in% ColsAggregated)) & (EEs95_b_mua_m != 0))][,i])
+  NormLenot_b_Agg[i] = norm_vec(EEsot_b[,which((!(colnames(EEsot_b) %in% ColsAggregated)) & (EEsot_b_mua_m != 0))][,i])
+}
+rm(i,j)
 
-#Show SA metrics for the basin and for each hillslope - ranks, and maps for hillslope----
+colnames(CosPhi05_b_Agg) = colnames(EEs05_b[,which((!(colnames(EEs05_b) %in% ColsAggregated)) & (EEs05_b_mua_m != 0))])
+colnames(CosPhi95_b_Agg) = colnames(EEs95_b[,which((!(colnames(EEs95_b) %in% ColsAggregated)) & (EEs95_b_mua_m != 0))])
+colnames(CosPhiot_b_Agg) = colnames(EEsot_b[,which((!(colnames(EEsot_b) %in% ColsAggregated)) & (EEsot_b_mua_m != 0))])
+rownames(CosPhi05_b_Agg) = colnames(EEs05_b[,which((!(colnames(EEs05_b) %in% ColsAggregated)) & (EEs05_b_mua_m != 0))])
+rownames(CosPhi95_b_Agg) = colnames(EEs95_b[,which((!(colnames(EEs95_b) %in% ColsAggregated)) & (EEs95_b_mua_m != 0))])
+rownames(CosPhiot_b_Agg) = colnames(EEsot_b[,which((!(colnames(EEsot_b) %in% ColsAggregated)) & (EEsot_b_mua_m != 0))])
+
+#Get the parameters whose lengths are within 2.5% percentage of the maximum vector length. These will be evaluated for clustering
+ParamsCluster = sort(unique(c(colnames(EEs05_b[,which((!(colnames(EEs05_b) %in% ColsAggregated)) & (EEs05_b_mua_m != 0))][,which(NormLen05_b_Agg >= max(NormLen05_b_Agg)*.025)]),
+              colnames(EEs95_b[,which((!(colnames(EEs95_b) %in% ColsAggregated)) & (EEs95_b_mua_m != 0))][,which(NormLen95_b_Agg >= max(NormLen95_b_Agg)*.025)]),
+              colnames(EEsot_b[,which((!(colnames(EEsot_b) %in% ColsAggregated)) & (EEsot_b_mua_m != 0))][,which(NormLenot_b_Agg >= max(NormLenot_b_Agg)*.025)]))))
+
+png('ParamCorrelations_EE05_Agg.png', res = 300, height = 8, width = 8, units = 'in')
+heatmap(x = CosPhi05_b_Agg[which(rownames(CosPhi05_b_Agg) %in% ParamsCluster),which(colnames(CosPhi05_b_Agg) %in% ParamsCluster)], symm = TRUE, revC = TRUE)
+dev.off()
+
+png('ParamCorrelations_EE95_Agg.png', res = 300, height = 8, width = 8, units = 'in')
+heatmap(x = CosPhi95_b_Agg[which(rownames(CosPhi95_b_Agg) %in% ParamsCluster),which(colnames(CosPhi95_b_Agg) %in% ParamsCluster)], symm = TRUE, revC = TRUE)
+dev.off()
+
+png('ParamCorrelations_EEot_Agg.png', res = 300, height = 8, width = 8, units = 'in')
+heatmap(x = CosPhiot_b_Agg[which(rownames(CosPhiot_b_Agg) %in% ParamsCluster),which(colnames(CosPhiot_b_Agg) %in% ParamsCluster)], symm = TRUE, revC = TRUE)
+dev.off()
+
+#Fixme: Evaluate total number of selected parameters as a function of correlation----
+#Fixme: Make a 3D plot of total parameters selected as function of threshold and correlation----
+
+#Evaluate correlations for the selected parameters----
+RankSelParams_Agg = sort(unique(c(ParamSelect_b_Agg, ParamSelectTN_b_Agg)))
+RankSelParams_h_Agg = sort(unique(c(ParamSelect_b_Agg, ParamSelectTN_b_Agg, ParamSelect_h_Agg, ParamSelectTN_h_Agg)))
+
+# Loop over the variables and get the parameters correlated by a certain amount
+CorParams = CorParams_h = NULL
+corr = 0.5
+for (i in 1:length(RankSelParams_Agg)){
+  CorParams = unique(c(CorParams, 
+                       names(CosPhi05_b_Agg[,which(colnames(CosPhi05_b_Agg) %in% RankSelParams_Agg)][,i][which(CosPhi05_b_Agg[,which(colnames(CosPhi05_b_Agg) %in% RankSelParams_Agg)][,i] > corr)][!(names(CosPhi05_b_Agg[,which(colnames(CosPhi05_b_Agg) %in% RankSelParams_Agg)][,i][which(CosPhi05_b_Agg[,which(colnames(CosPhi05_b_Agg) %in% RankSelParams_Agg)][,i] > corr)]) %in% RankSelParams_Agg)]),
+                       names(CosPhi95_b_Agg[,which(colnames(CosPhi95_b_Agg) %in% RankSelParams_Agg)][,i][which(CosPhi95_b_Agg[,which(colnames(CosPhi95_b_Agg) %in% RankSelParams_Agg)][,i] > corr)][!(names(CosPhi95_b_Agg[,which(colnames(CosPhi95_b_Agg) %in% RankSelParams_Agg)][,i][which(CosPhi95_b_Agg[,which(colnames(CosPhi95_b_Agg) %in% RankSelParams_Agg)][,i] > corr)]) %in% RankSelParams_Agg)]),
+                       names(CosPhiot_b_Agg[,which(colnames(CosPhiot_b_Agg) %in% RankSelParams_Agg)][,i][which(CosPhiot_b_Agg[,which(colnames(CosPhiot_b_Agg) %in% RankSelParams_Agg)][,i] > corr)][!(names(CosPhiot_b_Agg[,which(colnames(CosPhiot_b_Agg) %in% RankSelParams_Agg)][,i][which(CosPhiot_b_Agg[,which(colnames(CosPhiot_b_Agg) %in% RankSelParams_Agg)][,i] > corr)]) %in% RankSelParams_Agg)])))
+}
+rm(i)
+RankCorSelParams_Agg = unique(c(CorParams, RankSelParams_Agg))
+
+for (i in 1:length(RankSelParams_h_Agg)){
+  CorParams_h = unique(c(CorParams_h, 
+                       names(CosPhi05_b_Agg[,which(colnames(CosPhi05_b_Agg) %in% RankSelParams_h_Agg)][,i][which(CosPhi05_b_Agg[,which(colnames(CosPhi05_b_Agg) %in% RankSelParams_h_Agg)][,i] > corr)][!(names(CosPhi05_b_Agg[,which(colnames(CosPhi05_b_Agg) %in% RankSelParams_h_Agg)][,i][which(CosPhi05_b_Agg[,which(colnames(CosPhi05_b_Agg) %in% RankSelParams_h_Agg)][,i] > corr)]) %in% RankSelParams_h_Agg)]),
+                       names(CosPhi95_b_Agg[,which(colnames(CosPhi95_b_Agg) %in% RankSelParams_h_Agg)][,i][which(CosPhi95_b_Agg[,which(colnames(CosPhi95_b_Agg) %in% RankSelParams_h_Agg)][,i] > corr)][!(names(CosPhi95_b_Agg[,which(colnames(CosPhi95_b_Agg) %in% RankSelParams_h_Agg)][,i][which(CosPhi95_b_Agg[,which(colnames(CosPhi95_b_Agg) %in% RankSelParams_h_Agg)][,i] > corr)]) %in% RankSelParams_h_Agg)]),
+                       names(CosPhiot_b_Agg[,which(colnames(CosPhiot_b_Agg) %in% RankSelParams_h_Agg)][,i][which(CosPhiot_b_Agg[,which(colnames(CosPhiot_b_Agg) %in% RankSelParams_h_Agg)][,i] > corr)][!(names(CosPhiot_b_Agg[,which(colnames(CosPhiot_b_Agg) %in% RankSelParams_h_Agg)][,i][which(CosPhiot_b_Agg[,which(colnames(CosPhiot_b_Agg) %in% RankSelParams_h_Agg)][,i] > corr)]) %in% RankSelParams_h_Agg)])))
+}
+rm(i)
+RankCorSelParams_h_Agg = unique(c(CorParams_h, RankSelParams_h_Agg))
+
+# Make plot of the number of variables as a function of the correlation----
+xcor = seq(0.5,1,0.01)
+NumParamsCor = vector('numeric', length(xcor))
+EEsum = vector('numeric', length(xcor))
+for (ci in 1:length(xcor)){
+  CorParams_plt = NULL
+  for (i in 1:length(RankSelParams_Agg)){
+    CorParams_plt = unique(c(CorParams_plt, 
+                         names(CosPhi05_b_Agg[,which(colnames(CosPhi05_b_Agg) %in% RankSelParams_Agg)][,i][which(CosPhi05_b_Agg[,which(colnames(CosPhi05_b_Agg) %in% RankSelParams_Agg)][,i] > xcor[ci])][!(names(CosPhi05_b_Agg[,which(colnames(CosPhi05_b_Agg) %in% RankSelParams_Agg)][,i][which(CosPhi05_b_Agg[,which(colnames(CosPhi05_b_Agg) %in% RankSelParams_Agg)][,i] > xcor[ci])]) %in% RankSelParams_Agg)]),
+                         names(CosPhi95_b_Agg[,which(colnames(CosPhi95_b_Agg) %in% RankSelParams_Agg)][,i][which(CosPhi95_b_Agg[,which(colnames(CosPhi95_b_Agg) %in% RankSelParams_Agg)][,i] > xcor[ci])][!(names(CosPhi95_b_Agg[,which(colnames(CosPhi95_b_Agg) %in% RankSelParams_Agg)][,i][which(CosPhi95_b_Agg[,which(colnames(CosPhi95_b_Agg) %in% RankSelParams_Agg)][,i] > xcor[ci])]) %in% RankSelParams_Agg)]),
+                         names(CosPhiot_b_Agg[,which(colnames(CosPhiot_b_Agg) %in% RankSelParams_Agg)][,i][which(CosPhiot_b_Agg[,which(colnames(CosPhiot_b_Agg) %in% RankSelParams_Agg)][,i] > xcor[ci])][!(names(CosPhiot_b_Agg[,which(colnames(CosPhiot_b_Agg) %in% RankSelParams_Agg)][,i][which(CosPhiot_b_Agg[,which(colnames(CosPhiot_b_Agg) %in% RankSelParams_Agg)][,i] > xcor[ci])]) %in% RankSelParams_Agg)])))
+  }
+  NumParamsCor[ci] = length(unique(c(CorParams_plt, RankSelParams_Agg)))
+  EEsum[ci] = sum(EEs95_b_mua_m[names(EEs95_b_mua_m) %in% unique(c(CorParams_plt, RankSelParams_Agg))])
+}
+rm(ci, CorParams_plt, i)
+
+png('TotalParamsCorr_Agg.png', res = 300, units = 'in', width = 5, height = 5)
+plot(x = xcor, y = NumParamsCor, type = 'l', xlab = 'Similarity Index Cutoff', ylab = 'Number of Parameters Selected', ylim = c(0,100), xlim = c(0.5,1), main = 'Threshold = 10%')
+dev.off()
+
+png('TotalParamsCorr_CumulativeEE_Agg.png', res = 300, units = 'in', width = 5, height = 5)
+plot(x = xcor, y = EEsum, type = 'l', xlab = 'Similarity Index Cutoff', ylab = 'Sum of Normalized Elementary Effects', ylim = c(0,1000), xlim = c(0.5,1), main = 'Threshold = 10%')
+dev.off()
+
+#Perform heirarchical clustering for discovering variable clusters----
+#Inspired by blog post: https://uc-r.github.io/hc_clustering
+# methods to assess
+ClustMethods <- c( "average", "single", "complete", "ward")
+names(ClustMethods) <- c( "average", "single", "complete", "ward")
+
+#All variables----
+df = (EEs05_b[,which((!(colnames(EEs05_b) %in% ColsAggregated)) & (EEs05_b_mua_m != 0))])
+#Seems to be very odd clusters when they are scaled, but good clusters when they are not scaled
+# for (i in 1:ncol(df)){
+#   #Get column mean and sd to normalize
+#   df[,i] = (df[,i] - colMeans(x = df)[i])/sd(df[,i])
+# }
+# rm(i)
+
+# function to compute coefficient
+ac <- function(x) {
+  agnes(t(df), method = x)$ac
+}
+
+map_dbl(ClustMethods, ac)
+
+pltree(agnes(t(df), method = 'ward'), cex = 0.6, hang = -1, main = "Dendrogram of agnes", )
+pltree(agnes(t(df), method = 'complete'), cex = 0.6, hang = -1, main = "Dendrogram of agnes", )
+
+#Only the ParamsCluster----
+# Streamflow 5th %-ile----
+df = (EEs05_b[,which((colnames(EEs05_b) %in% ParamsCluster))])
+for (i in 1:ncol(df)){
+  #Get column mean and sd to normalize
+  df[,i] = (df[,i] - colMeans(x = df)[i])/sd(df[,i])
+}
+rm(i)
+
+# function to compute coefficient
+ac <- function(x) {
+  agnes(t(df), method = x)$ac
+}
+
+map_dbl(ClustMethods, ac)
+
+d05 = agnes(t(df), method = 'ward')
+for (k in seq(15,35,5)){
+  png(paste0('d05_',k,'.png'), res = 300, units = 'in', width = 7, height = 5)
+  #pltree(agnes(t(df), method = 'ward'), cex = 0.6, hang = -1, main = "Dendrogram of agnes")
+  plot(as.hclust(agnes(t(df), method = 'ward')), cex = 0.6, hang = -1)
+  rect.hclust(as.hclust(agnes(t(df), method = 'ward')), k = k, border = rainbow(45))
+  axis(side = 1, at = seq(.8,50.8,1), labels = d05$order.lab, tick = 0, line = -7.95, las = 2, cex.axis = 0.6)
+  axis(side = 1, at = seq(.8,50.8,1), labels = round(as.numeric(EEs05_b_mua_95[which(names(EEs05_b_mua_m) %in% d05$order.lab)][match(d05$order.lab, names(EEs05_b_mua_m)[which(names(EEs05_b_mua_m) %in% d05$order.lab)])]), 0), tick = 0, line = -1, cex.axis = 0.3, col.axis = 'blue')
+  axis(side = 1, at = seq(.8,50.8,1), labels = round(as.numeric(EEsot_b_mua_95[which(names(EEsot_b_mua_m) %in% d05$order.lab)][match(d05$order.lab, names(EEsot_b_mua_m)[which(names(EEsot_b_mua_m) %in% d05$order.lab)])]), 0), tick = 0, line = -0.8, cex.axis = 0.3)
+  axis(side = 1, at = seq(.8,50.8,1), labels = round(as.numeric(EEs95_b_mua_95[which(names(EEs95_b_mua_m) %in% d05$order.lab)][match(d05$order.lab, names(EEs95_b_mua_m)[which(names(EEs95_b_mua_m) %in% d05$order.lab)])]), 0), tick = 0, line = -0.6, cex.axis = 0.3)
+  axis(side = 1, at = seq(.8,50.8,1), labels = round(as.numeric(EEsTN05_b_mua_95[which(names(EEsTN05_b_mua_m) %in% d05$order.lab)][match(d05$order.lab, names(EEsTN05_b_mua_m)[which(names(EEsTN05_b_mua_m) %in% d05$order.lab)])]), 0), tick = 0, line = -0.4, cex.axis = 0.3)
+  axis(side = 1, at = seq(.8,50.8,1), labels = round(as.numeric(EEsTNMed_b_mua_95[which(names(EEsTNMed_b_mua_m) %in% d05$order.lab)][match(d05$order.lab, names(EEsTNMed_b_mua_m)[which(names(EEsTNMed_b_mua_m) %in% d05$order.lab)])]), 0), tick = 0, line = -0.2, cex.axis = 0.3)
+  axis(side = 1, at = seq(.8,50.8,1), labels = round(as.numeric(EEsTN95_b_mua_95[which(names(EEsTN95_b_mua_m) %in% d05$order.lab)][match(d05$order.lab, names(EEsTN95_b_mua_m)[which(names(EEsTN95_b_mua_m) %in% d05$order.lab)])]), 0), tick = 0, line = 0, cex.axis = 0.3)
+  axis(side = 1, at = seq(.8,50.8,1)[d05$order.lab %in% RankSelParams_h_Agg], labels = d05$order.lab[d05$order.lab %in% RankSelParams_h_Agg], tick = 0, line = -7.95, las = 2, cex.axis = 0.6, col.axis = 'red')
+  dev.off()
+}
+
+#Somewhere from 12-17 clusters seems appropriate
+fviz_nbclust(x = df, FUNcluster = hcut, method = 'wss', k.max = 35)
+fviz_nbclust(x = df, FUNcluster = hcut, method = 'silhouette', k.max = 35)
+gap_stat = clusGap(df, FUNcluster = hcut, K.max = 35, B = 100, d.power = 2, )
+fviz_gap_stat(gap_stat)
+
+sort(cutree(as.hclust(agnes(t(df), method = 'ward')), k = 30))
+fviz_cluster(list(data = t(df), cluster = cutree(as.hclust(agnes(t(df), method = 'ward')), k = 35)))
+
+#Panel plot with PCAs
+fviz_cluster(list(data = t(df), cluster = cutree(as.hclust(agnes(t(df), method = 'ward')), k = 15)), stand = TRUE, show.clust.cent = FALSE, ellipse = TRUE, shape = 16, geom = 'point', axes = c(1,2))
+
+# Streamflow 5th-95th %-ile----
+df = (EEsot_b[,which((colnames(EEsot_b) %in% ParamsCluster))])
+for (i in 1:ncol(df)){
+  #Get column mean and sd to normalize
+  df[,i] = (df[,i] - colMeans(x = df)[i])/sd(df[,i])
+}
+rm(i)
+
+# function to compute coefficient
+ac <- function(x) {
+  agnes(t(df), method = x)$ac
+}
+
+map_dbl(ClustMethods, ac)
+
+pltree(agnes(t(df), method = 'ward'), cex = 0.6, hang = -1, main = "Dendrogram of agnes", )
+
+dot = agnes(t(df), method = 'ward')
+for (k in seq(15,35,5)){
+  png(paste0('dot_',k,'.png'), res = 300, units = 'in', width = 7, height = 5)
+  #pltree(agnes(t(df), method = 'ward'), cex = 0.6, hang = -1, main = "Dendrogram of agnes")
+  plot(as.hclust(agnes(t(df), method = 'ward')), cex = 0.6, hang = -1)
+  rect.hclust(as.hclust(agnes(t(df), method = 'ward')), k = k, border = rainbow(45))
+  axis(side = 1, at = seq(.8,50.8,1), labels = dot$order.lab, tick = 0, line = -7.95, las = 2, cex.axis = 0.6)
+  axis(side = 1, at = seq(.8,50.8,1), labels = round(as.numeric(EEs05_b_mua_95[which(names(EEs05_b_mua_m) %in% dot$order.lab)][match(dot$order.lab, names(EEs05_b_mua_m)[which(names(EEs05_b_mua_m) %in% dot$order.lab)])]), 0), tick = 0, line = -1, cex.axis = 0.3)
+  axis(side = 1, at = seq(.8,50.8,1), labels = round(as.numeric(EEsot_b_mua_95[which(names(EEsot_b_mua_m) %in% dot$order.lab)][match(dot$order.lab, names(EEsot_b_mua_m)[which(names(EEsot_b_mua_m) %in% dot$order.lab)])]), 0), tick = 0, line = -0.8, cex.axis = 0.3, col.axis = 'blue')
+  axis(side = 1, at = seq(.8,50.8,1), labels = round(as.numeric(EEs95_b_mua_95[which(names(EEs95_b_mua_m) %in% dot$order.lab)][match(dot$order.lab, names(EEs95_b_mua_m)[which(names(EEs95_b_mua_m) %in% dot$order.lab)])]), 0), tick = 0, line = -0.6, cex.axis = 0.3)
+  axis(side = 1, at = seq(.8,50.8,1), labels = round(as.numeric(EEsTN05_b_mua_95[which(names(EEsTN05_b_mua_m) %in% dot$order.lab)][match(dot$order.lab, names(EEsTN05_b_mua_m)[which(names(EEsTN05_b_mua_m) %in% dot$order.lab)])]), 0), tick = 0, line = -0.4, cex.axis = 0.3)
+  axis(side = 1, at = seq(.8,50.8,1), labels = round(as.numeric(EEsTNMed_b_mua_95[which(names(EEsTNMed_b_mua_m) %in% dot$order.lab)][match(dot$order.lab, names(EEsTNMed_b_mua_m)[which(names(EEsTNMed_b_mua_m) %in% dot$order.lab)])]), 0), tick = 0, line = -0.2, cex.axis = 0.3)
+  axis(side = 1, at = seq(.8,50.8,1), labels = round(as.numeric(EEsTN95_b_mua_95[which(names(EEsTN95_b_mua_m) %in% dot$order.lab)][match(dot$order.lab, names(EEsTN95_b_mua_m)[which(names(EEsTN95_b_mua_m) %in% dot$order.lab)])]), 0), tick = 0, line = 0, cex.axis = 0.3)
+  axis(side = 1, at = seq(.8,50.8,1)[dot$order.lab %in% RankSelParams_h_Agg], labels = dot$order.lab[dot$order.lab %in% RankSelParams_h_Agg], tick = 0, line = -7.95, las = 2, cex.axis = 0.6, col.axis = 'red')
+  dev.off()
+}
+
+#Somewhere from 12-17 clusters seems appropriate
+fviz_nbclust(x = df, FUNcluster = hcut, method = 'wss', k.max = 35)
+fviz_nbclust(x = df, FUNcluster = hcut, method = 'silhouette', k.max = 35)
+gap_stat = clusGap(df, FUNcluster = hcut, K.max = 35, B = 100, d.power = 2, )
+fviz_gap_stat(gap_stat)
+
+sort(cutree(as.hclust(agnes(t(df), method = 'ward')), k = 15))
+plot(as.hclust(agnes(t(df), method = 'ward')), cex = 0.6, hang = -1)
+rect.hclust(as.hclust(agnes(t(df), method = 'ward')), k = 15, border = 2:16)
+fviz_cluster(list(data = t(df), cluster = cutree(as.hclust(agnes(t(df), method = 'ward')), k = 15)))
+
+#Panel plot with PCAs
+fviz_cluster(list(data = t(df), cluster = cutree(as.hclust(agnes(t(df), method = 'ward')), k = 15)), stand = TRUE, show.clust.cent = FALSE, ellipse = TRUE, shape = 16, geom = 'point', axes = c(1,2))
+
+# Streamflow 95th %-ile----
+df = (EEs95_b[,which((colnames(EEs95_b) %in% ParamsCluster))])
+for (i in 1:ncol(df)){
+ #Get column mean and sd to normalize
+ df[,i] = (df[,i] - colMeans(x = df)[i])/sd(df[,i])
+}
+rm(i)
+
+# function to compute coefficient
+ac <- function(x) {
+  agnes(t(df), method = x)$ac
+}
+
+map_dbl(ClustMethods, ac)
+
+pltree(agnes(t(df), method = 'ward'), cex = 0.6, hang = -1, main = "Dendrogram of agnes", )
+
+d95 = agnes(t(df), method = 'ward')
+for (k in seq(15,35,5)){
+  png(paste0('d95_',k,'.png'), res = 300, units = 'in', width = 7, height = 5)
+  #pltree(agnes(t(df), method = 'ward'), cex = 0.6, hang = -1, main = "Dendrogram of agnes")
+  plot(as.hclust(agnes(t(df), method = 'ward')), cex = 0.6, hang = -1)
+  rect.hclust(as.hclust(agnes(t(df), method = 'ward')), k = k, border = rainbow(45))
+  axis(side = 1, at = seq(.8,50.8,1), labels = d95$order.lab, tick = 0, line = -7.95, las = 2, cex.axis = 0.6)
+  axis(side = 1, at = seq(.8,50.8,1), labels = round(as.numeric(EEs05_b_mua_95[which(names(EEs05_b_mua_m) %in% d95$order.lab)][match(d95$order.lab, names(EEs05_b_mua_m)[which(names(EEs05_b_mua_m) %in% d95$order.lab)])]), 0), tick = 0, line = -1, cex.axis = 0.3)
+  axis(side = 1, at = seq(.8,50.8,1), labels = round(as.numeric(EEsot_b_mua_95[which(names(EEsot_b_mua_m) %in% d95$order.lab)][match(d95$order.lab, names(EEsot_b_mua_m)[which(names(EEsot_b_mua_m) %in% d95$order.lab)])]), 0), tick = 0, line = -0.8, cex.axis = 0.3)
+  axis(side = 1, at = seq(.8,50.8,1), labels = round(as.numeric(EEs95_b_mua_95[which(names(EEs95_b_mua_m) %in% d95$order.lab)][match(d95$order.lab, names(EEs95_b_mua_m)[which(names(EEs95_b_mua_m) %in% d95$order.lab)])]), 0), tick = 0, line = -0.6, cex.axis = 0.3, col.axis = 'blue')
+  axis(side = 1, at = seq(.8,50.8,1), labels = round(as.numeric(EEsTN05_b_mua_95[which(names(EEsTN05_b_mua_m) %in% d95$order.lab)][match(d95$order.lab, names(EEsTN05_b_mua_m)[which(names(EEsTN05_b_mua_m) %in% d95$order.lab)])]), 0), tick = 0, line = -0.4, cex.axis = 0.3)
+  axis(side = 1, at = seq(.8,50.8,1), labels = round(as.numeric(EEsTNMed_b_mua_95[which(names(EEsTNMed_b_mua_m) %in% d95$order.lab)][match(d95$order.lab, names(EEsTNMed_b_mua_m)[which(names(EEsTNMed_b_mua_m) %in% d95$order.lab)])]), 0), tick = 0, line = -0.2, cex.axis = 0.3)
+  axis(side = 1, at = seq(.8,50.8,1), labels = round(as.numeric(EEsTN95_b_mua_95[which(names(EEsTN95_b_mua_m) %in% d95$order.lab)][match(d95$order.lab, names(EEsTN95_b_mua_m)[which(names(EEsTN95_b_mua_m) %in% d95$order.lab)])]), 0), tick = 0, line = 0, cex.axis = 0.3)
+  axis(side = 1, at = seq(.8,50.8,1)[d95$order.lab %in% RankSelParams_h_Agg], labels = d95$order.lab[d95$order.lab %in% RankSelParams_h_Agg], tick = 0, line = -7.95, las = 2, cex.axis = 0.6, col.axis = 'red')
+  dev.off()
+}
+
+#Somewhere from 12-17 clusters seems appropriate
+fviz_nbclust(x = df, FUNcluster = hcut, method = 'wss', k.max = 35)
+fviz_nbclust(x = df, FUNcluster = hcut, method = 'silhouette', k.max = 35)
+gap_stat = clusGap(df, FUNcluster = hcut, K.max = 35, B = 100, d.power = 2, )
+fviz_gap_stat(gap_stat)
+
+sort(cutree(as.hclust(agnes(t(df), method = 'ward')), k = 15))
+plot(as.hclust(agnes(t(df), method = 'ward')), cex = 0.6, hang = -1)
+rect.hclust(as.hclust(agnes(t(df), method = 'ward')), k = 15, border = 2:16)
+fviz_cluster(list(data = t(df), cluster = cutree(as.hclust(agnes(t(df), method = 'ward')), k = 15)))
+
+#Panel plot with PCAs
+fviz_cluster(list(data = t(df), cluster = cutree(as.hclust(agnes(t(df), method = 'ward')), k = 15)), stand = TRUE, show.clust.cent = FALSE, ellipse = TRUE, shape = 16, geom = 'point', axes = c(1,2))
 
 
-#Diagnose problems with EEs----
+# TN 5th %-ile----
+df = (EEsTN05_b[,which((colnames(EEs05_b) %in% ParamsCluster))])
+for (i in 1:ncol(df)){
+  #Get column mean and sd to normalize
+  df[,i] = (df[,i] - colMeans(x = df)[i])/sd(df[,i])
+}
+rm(i)
+
+map_dbl(ClustMethods, ac)
+
+dTN05 = agnes(t(df), method = 'ward')
+for (k in seq(15,35,5)){
+  png(paste0('dTN05_',k,'.png'), res = 300, units = 'in', width = 7, height = 5)
+  plot(as.hclust(agnes(t(df), method = 'ward')), cex = 0.6, hang = -1)
+  rect.hclust(as.hclust(agnes(t(df), method = 'ward')), k = k, border = rainbow(45))
+  axis(side = 1, at = seq(.8,50.8,1), labels = dTN05$order.lab, tick = 0, line = -7.95, las = 2, cex.axis = 0.6)
+  axis(side = 1, at = seq(.8,50.8,1), labels = round(as.numeric(EEs05_b_mua_95[which(names(EEs05_b_mua_m) %in% dTN05$order.lab)][match(dTN05$order.lab, names(EEs05_b_mua_m)[which(names(EEs05_b_mua_m) %in% dTN05$order.lab)])]), 0), tick = 0, line = -1, cex.axis = 0.3)
+  axis(side = 1, at = seq(.8,50.8,1), labels = round(as.numeric(EEsot_b_mua_95[which(names(EEsot_b_mua_m) %in% dTN05$order.lab)][match(dTN05$order.lab, names(EEsot_b_mua_m)[which(names(EEsot_b_mua_m) %in% dTN05$order.lab)])]), 0), tick = 0, line = -0.8, cex.axis = 0.3)
+  axis(side = 1, at = seq(.8,50.8,1), labels = round(as.numeric(EEs95_b_mua_95[which(names(EEs95_b_mua_m) %in% dTN05$order.lab)][match(dTN05$order.lab, names(EEs95_b_mua_m)[which(names(EEs95_b_mua_m) %in% dTN05$order.lab)])]), 0), tick = 0, line = -0.6, cex.axis = 0.3)
+  axis(side = 1, at = seq(.8,50.8,1), labels = round(as.numeric(EEsTN05_b_mua_95[which(names(EEsTN05_b_mua_m) %in% dTN05$order.lab)][match(dTN05$order.lab, names(EEsTN05_b_mua_m)[which(names(EEsTN05_b_mua_m) %in% dTN05$order.lab)])]), 0), tick = 0, line = -0.4, cex.axis = 0.3, col.axis = 'blue')
+  axis(side = 1, at = seq(.8,50.8,1), labels = round(as.numeric(EEsTNMed_b_mua_95[which(names(EEsTNMed_b_mua_m) %in% dTN05$order.lab)][match(dTN05$order.lab, names(EEsTNMed_b_mua_m)[which(names(EEsTNMed_b_mua_m) %in% dTN05$order.lab)])]), 0), tick = 0, line = -0.2, cex.axis = 0.3)
+  axis(side = 1, at = seq(.8,50.8,1), labels = round(as.numeric(EEsTN95_b_mua_95[which(names(EEsTN95_b_mua_m) %in% dTN05$order.lab)][match(dTN05$order.lab, names(EEsTN95_b_mua_m)[which(names(EEsTN95_b_mua_m) %in% dTN05$order.lab)])]), 0), tick = 0, line = 0, cex.axis = 0.3)
+  axis(side = 1, at = seq(.8,50.8,1)[dTN05$order.lab %in% RankSelParams_h_Agg], labels = dTN05$order.lab[dTN05$order.lab %in% RankSelParams_h_Agg], tick = 0, line = -7.95, las = 2, cex.axis = 0.6, col.axis = 'red')
+  dev.off()
+}
+
+# TN 50th %-ile----
+df = (EEsTNMed_b[,which((colnames(EEs05_b) %in% ParamsCluster))])
+for (i in 1:ncol(df)){
+  #Get column mean and sd to normalize
+  df[,i] = (df[,i] - colMeans(x = df)[i])/sd(df[,i])
+}
+rm(i)
+
+map_dbl(ClustMethods, ac)
+
+dTNMed = agnes(t(df), method = 'ward')
+for (k in seq(15,35,5)){
+  png(paste0('dTNMed_',k,'.png'), res = 300, units = 'in', width = 7, height = 5)
+  plot(as.hclust(agnes(t(df), method = 'ward')), cex = 0.6, hang = -1)
+  rect.hclust(as.hclust(agnes(t(df), method = 'ward')), k = k, border = rainbow(45))
+  axis(side = 1, at = seq(.8,50.8,1), labels = dTNMed$order.lab, tick = 0, line = -7.95, las = 2, cex.axis = 0.6)
+  axis(side = 1, at = seq(.8,50.8,1), labels = round(as.numeric(EEs05_b_mua_95[which(names(EEs05_b_mua_m) %in% dTNMed$order.lab)][match(dTNMed$order.lab, names(EEs05_b_mua_m)[which(names(EEs05_b_mua_m) %in% dTNMed$order.lab)])]), 0), tick = 0, line = -1, cex.axis = 0.3)
+  axis(side = 1, at = seq(.8,50.8,1), labels = round(as.numeric(EEsot_b_mua_95[which(names(EEsot_b_mua_m) %in% dTNMed$order.lab)][match(dTNMed$order.lab, names(EEsot_b_mua_m)[which(names(EEsot_b_mua_m) %in% dTNMed$order.lab)])]), 0), tick = 0, line = -0.8, cex.axis = 0.3)
+  axis(side = 1, at = seq(.8,50.8,1), labels = round(as.numeric(EEs95_b_mua_95[which(names(EEs95_b_mua_m) %in% dTNMed$order.lab)][match(dTNMed$order.lab, names(EEs95_b_mua_m)[which(names(EEs95_b_mua_m) %in% dTNMed$order.lab)])]), 0), tick = 0, line = -0.6, cex.axis = 0.3)
+  axis(side = 1, at = seq(.8,50.8,1), labels = round(as.numeric(EEsTN05_b_mua_95[which(names(EEsTN05_b_mua_m) %in% dTNMed$order.lab)][match(dTNMed$order.lab, names(EEsTN05_b_mua_m)[which(names(EEsTN05_b_mua_m) %in% dTNMed$order.lab)])]), 0), tick = 0, line = -0.4, cex.axis = 0.3, col.axis = 'blue')
+  axis(side = 1, at = seq(.8,50.8,1), labels = round(as.numeric(EEsTNMed_b_mua_95[which(names(EEsTNMed_b_mua_m) %in% dTNMed$order.lab)][match(dTNMed$order.lab, names(EEsTNMed_b_mua_m)[which(names(EEsTNMed_b_mua_m) %in% dTNMed$order.lab)])]), 0), tick = 0, line = -0.2, cex.axis = 0.3)
+  axis(side = 1, at = seq(.8,50.8,1), labels = round(as.numeric(EEsTN95_b_mua_95[which(names(EEsTN95_b_mua_m) %in% dTNMed$order.lab)][match(dTNMed$order.lab, names(EEsTN95_b_mua_m)[which(names(EEsTN95_b_mua_m) %in% dTNMed$order.lab)])]), 0), tick = 0, line = 0, cex.axis = 0.3)
+  axis(side = 1, at = seq(.8,50.8,1)[dTNMed$order.lab %in% RankSelParams_h_Agg], labels = dTNMed$order.lab[dTNMed$order.lab %in% RankSelParams_h_Agg], tick = 0, line = -7.95, las = 2, cex.axis = 0.6, col.axis = 'red')
+  dev.off()
+}
+
+# TN 5th %-ile----
+df = (EEsTN95_b[,which((colnames(EEs05_b) %in% ParamsCluster))])
+for (i in 1:ncol(df)){
+  #Get column mean and sd to normalize
+  df[,i] = (df[,i] - colMeans(x = df)[i])/sd(df[,i])
+}
+rm(i)
+
+map_dbl(ClustMethods, ac)
+
+dTN95 = agnes(t(df), method = 'ward')
+for (k in seq(15,35,5)){
+  png(paste0('dTN95_',k,'.png'), res = 300, units = 'in', width = 7, height = 5)
+  plot(as.hclust(agnes(t(df), method = 'ward')), cex = 0.6, hang = -1)
+  rect.hclust(as.hclust(agnes(t(df), method = 'ward')), k = k, border = rainbow(45))
+  axis(side = 1, at = seq(.8,50.8,1), labels = dTN95$order.lab, tick = 0, line = -7.95, las = 2, cex.axis = 0.6)
+  axis(side = 1, at = seq(.8,50.8,1), labels = round(as.numeric(EEs05_b_mua_95[which(names(EEs05_b_mua_m) %in% dTN95$order.lab)][match(dTN95$order.lab, names(EEs05_b_mua_m)[which(names(EEs05_b_mua_m) %in% dTN95$order.lab)])]), 0), tick = 0, line = -1, cex.axis = 0.3)
+  axis(side = 1, at = seq(.8,50.8,1), labels = round(as.numeric(EEsot_b_mua_95[which(names(EEsot_b_mua_m) %in% dTN95$order.lab)][match(dTN95$order.lab, names(EEsot_b_mua_m)[which(names(EEsot_b_mua_m) %in% dTN95$order.lab)])]), 0), tick = 0, line = -0.8, cex.axis = 0.3)
+  axis(side = 1, at = seq(.8,50.8,1), labels = round(as.numeric(EEs95_b_mua_95[which(names(EEs95_b_mua_m) %in% dTN95$order.lab)][match(dTN95$order.lab, names(EEs95_b_mua_m)[which(names(EEs95_b_mua_m) %in% dTN95$order.lab)])]), 0), tick = 0, line = -0.6, cex.axis = 0.3)
+  axis(side = 1, at = seq(.8,50.8,1), labels = round(as.numeric(EEsTN05_b_mua_95[which(names(EEsTN05_b_mua_m) %in% dTN95$order.lab)][match(dTN95$order.lab, names(EEsTN05_b_mua_m)[which(names(EEsTN05_b_mua_m) %in% dTN95$order.lab)])]), 0), tick = 0, line = -0.4, cex.axis = 0.3, col.axis = 'blue')
+  axis(side = 1, at = seq(.8,50.8,1), labels = round(as.numeric(EEsTNMed_b_mua_95[which(names(EEsTNMed_b_mua_m) %in% dTN95$order.lab)][match(dTN95$order.lab, names(EEsTNMed_b_mua_m)[which(names(EEsTNMed_b_mua_m) %in% dTN95$order.lab)])]), 0), tick = 0, line = -0.2, cex.axis = 0.3)
+  axis(side = 1, at = seq(.8,50.8,1), labels = round(as.numeric(EEsTN95_b_mua_95[which(names(EEsTN95_b_mua_m) %in% dTN95$order.lab)][match(dTN95$order.lab, names(EEsTN95_b_mua_m)[which(names(EEsTN95_b_mua_m) %in% dTN95$order.lab)])]), 0), tick = 0, line = 0, cex.axis = 0.3)
+  axis(side = 1, at = seq(.8,50.8,1)[dTN95$order.lab %in% RankSelParams_h_Agg], labels = dTN95$order.lab[dTN95$order.lab %in% RankSelParams_h_Agg], tick = 0, line = -7.95, las = 2, cex.axis = 0.6, col.axis = 'red')
+  dev.off()
+}
+
+#Save parameters to be used for calibration in a new file----
+#Dendrograms suggest clustering in different ways for different metrics. Will need all variables if we want to parse out the important variables for each metric.
+#Select top 35 ParamRanges[ParamRanges$NumberedParams %in% RankSelParams_h_Agg,1:4]
+#And also disaggregate variables to add to that list.
+RankSelParams_h_Disagg = c(RankSelParams_h_Agg[-which(RankSelParams_h_Agg %in% ColsAggregated_key)], ColsAggregated[which(ColsAggregated_key %in% RankSelParams_h_Agg[which(RankSelParams_h_Agg %in% colnames(EEs05_b_mua[,272:291]))])])
+#Also remove the landuse % impervious. That will not be considered uncertain because it will be assigned from land use maps
+RankSelParams_h_Disagg = RankSelParams_h_Disagg[-grep(RankSelParams_h_Disagg, pattern = '.percent_impervious', fixed = TRUE)]
+ParamRanges_Cal = ParamRanges[ParamRanges$NumberedParams %in% RankSelParams_h_Disagg,1:4]
+
+#Add all of the parameters of the likelihood function as well
+# (kurotsis) beta=-1: uniform, beta=0: Gaussian, beta=1: double exponential
+# (skewness) xi=1: symmetric, xi<1: negatively skewed, xi>1: positively skewed
+# (standard deviation when mean=0)
+# (linear rate of change in standard deviation with mean)
+# (lag-1 auto-correlation), phi_1=0: no auto-correlation, phi_1=1: perfect auto-correlation
+# (mean bias factor)
+LikelihoodParams = cbind(c('PL_beta', 'PL_xi', 'PL_sigma_0', 'PL_sigma_1', 'PL_phi_1', 'PL_mu_h'), c('beta', 'xi', 'sigma_0', 'sigma_1', 'phi_1', 'mu_h'), 
+                         c(-1, 0, 0, 0, 0, 0), c(1, 10, 1, 1, 1, 100))
+colnames(LikelihoodParams) = colnames(ParamRanges_Cal)
+ParamRanges_Cal_Likes = rbind(ParamRanges_Cal, LikelihoodParams)
+
+write.csv(ParamRanges_Cal, file = "C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\RHESSysFilePreparation\\defs_Calibration\\BaismanCalibrationParameterProblemFile.csv", row.names = FALSE)
+write.csv(ParamRanges_Cal_Likes, file = "C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\RHESSysFilePreparation\\defs_Calibration\\BaismanCalibrationParameterProblemFile_LikelihoodParams.csv", row.names = FALSE)
+
+#Save a file of chain starting locations for these parameters----
+# Take a random sample of N from the 100 most likely, where N is number of chains----
+N = 39
+TopLikes = seq(1,100,1)
+set.seed(8356)
+#Sample without replacement to get the N starting locations
+SelTopLikes = vector('numeric', length = N)
+for (i in 1:N){
+  IndTop = round(runif(n = 1, min = 1, max = length(TopLikes)),0)
+  SelTopLikes[i] = TopLikes[IndTop]
+  TopLikes = TopLikes[-IndTop]
+}
+rm(i)
+SelTopLikes = sort(SelTopLikes)
+
+# Load in the likelihoods of the SA runs----
+Likes = 
+
+# Gather the selected likelihood run indices----
+RunIndsTopLikes = 
+
+#Get the parameters for those run indices into a matrix - use only the calibration parameters
+ChainStarts = matrix()
+
+write.csv(ChainStarts, file = 'BaismanChainStarts.txt', sep = '\t', row.names = FALSE, col.names = TRUE)
+
+
+#Write a file of the MCMC chain starting locations----
+
+#Pre-2020 Diagnosis of problems with EEs----
 for (i in 1:cols){
   ind = i+(1+cols)*(t-1)
   parm = which((OrigParams[ind+1,] - OrigParams[ind,]) != 0)
@@ -2236,6 +3003,7 @@ for (i in 1:cols){
     break
   }
 }
+rm(i, ind, parm)
 
 #For all of these, the input parameter did not change when it was supposed to (it did change in the original input file)
 #(3365 and 3366) for v102_epc.frootlitr_fcel is NaN because delta and change in values are 0
@@ -2250,6 +3018,7 @@ for (i in 1:r){
     print(j)
   }
 }
+rm(i,j)
 
 #Resample values for the NaN replicates
 #644:
@@ -2266,42 +3035,3 @@ set.seed(5388)
 runif(n = 1, min = 0.1, max = .909091)
 #5837
 #set manually to 0.4 because both Ksat0 and Ksat0v needed adjustment from lower bound
-
-#Save parameters to be used for calibration in a new file----
-ParamRanges_Cal = ParamRanges[,]
-#Add all of the parameters of the likelihood function as well
-# (kurotsis) beta=-1: uniform, beta=0: Gaussian, beta=1: double exponential
-# (skewness) xi=1: symmetric, xi<1: negatively skewed, xi>1: positively skewed
-# (standard deviation when mean=0)
-# (linear rate of change in standard deviation with mean)
-# (lag-1 auto-correlation), phi_1=0: no auto-correlation, phi_1=1: perfect auto-correlation
-# (mean bias factor)
-LikelihoodParams = cbind(c('PL_beta', 'PL_xi', 'PL_sigma_0', 'PL_sigma_1', 'PL_phi_1', 'PL_mu_h'), c('beta', 'xi', 'sigma_0', 'sigma_1', 'phi_1', 'mu_h'), 
-                         c(-1, 0, 0, 0, 0, 0), c(1, 10, 1, 1, 1, 100))
-ParamRanges_Cal = rbind(ParamRanges_Cal, LikelihoodParams)
-
-write.csv(ParamRanges_Cal, file = 'BaismanCalibrationParameterProblemFile.csv', row.names = FALSE, col.names = TRUE)
-
-#Save a file of chain starting locations for these parameters----
-# Take a random sample of N from the 100 most likely, where N is number of chains----
-N = 30
-TopLikes = seq(1,100,1)
-set.seed(8356)
-#Sample without replacement to get the 30 starting locations
-SelTopLikes = vector('numeric', length = N)
-for (i in 1:N){
-  IndTop = round(runif(n = 1, min = 1, max = length(TopLikes)),0)
-  SelTopLikes[i] = TopLikes[IndTop]
-  TopLikes = TopLikes[-IndTop]
-}
-SelTopLikes = sort(SelTopLikes)
-
-# Load in the likelihoods of the SA runs----
-
-# Gather the selected likelihood run indices----
-RunIndsTopLikes = 
-
-#Get the parameters for those run indices into a matrix - use only the calibration parameters
-ChainStarts = matrix()
-
-write.csv(ChainStarts, file = 'BaismanChainStarts.txt', sep = '\t', row.names = FALSE, col.names = TRUE)
