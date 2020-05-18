@@ -484,3 +484,20 @@ write.table(EEsTN95_h, file = paste0(getwd(), '/EEsTN95_h_All_Add5.txt'), sep = 
 write.table(Deltas, file = paste0(getwd(), '/Deltas_All_Add5.txt'), sep = '\t', row.names = FALSE, col.names = TRUE)
 
 save.image("C:/Users/js4yd/OneDrive - University of Virginia/BES_Data/BES_Data/RHESSysFiles/BR&POBR/EEs_All_Add5.RData")
+#Make transposed streamflow and TN datasets for likelihood analysis script----
+BasinSF = read.table(file = 'SAResults_BasinStreamflow_p4_Reordered_Add5.txt', sep = '\t', stringsAsFactors = FALSE, header = TRUE, check.names = FALSE)
+BasinTNMed = read.table(file = 'SAResults_BasinTNMed_p3_All_Reordered_Add5.txt', sep = '\t', stringsAsFactors = FALSE, header = TRUE, check.names = FALSE)
+
+#Columns are Date followed by Replicate#
+tBasinSF = t(BasinSF)
+tBasinSF = tBasinSF[-1,]
+tBasinSF = cbind(rownames(tBasinSF), tBasinSF)
+colnames(tBasinSF) = c('Date', paste0('Replicate', seq(1,nrow(BasinSF),1)))
+write.table(tBasinSF, file = 'SAResults_BasinStreamflow_p4_Reordered_Add5_Likes.txt', row.names = FALSE, col.names = TRUE, sep = '\t')
+
+#Columns are Date followed by Replicate#
+tBasinTNMed = t(BasinTNMed)
+tBasinTNMed = tBasinTNMed[-1,]
+tBasinTNMed = cbind(rownames(tBasinTNMed), tBasinTNMed)
+colnames(tBasinTNMed) = c('Date', paste0('Replicate', seq(1,nrow(BasinTNMed),1)))
+write.table(tBasinTNMed, file = 'SAResults_BasinTNMed_p3_All_Reordered_Add5_Likes.txt', row.names = FALSE, col.names = TRUE, sep = '\t')
