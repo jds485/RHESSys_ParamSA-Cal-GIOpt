@@ -2949,6 +2949,12 @@ RankSelParams_h_Disagg = c(RankSelParams_h_Agg[-which(RankSelParams_h_Agg %in% C
 #Also remove the landuse % impervious. That will not be considered uncertain because it will be assigned from land use maps
 RankSelParams_h_Disagg = RankSelParams_h_Disagg[-grep(RankSelParams_h_Disagg, pattern = '.percent_impervious', fixed = TRUE)]
 ParamRanges_Cal = ParamRanges[ParamRanges$NumberedParams %in% RankSelParams_h_Disagg,1:4]
+#Edit several lower bounds that changed since SA run
+ParamRanges_Cal$Lower[ParamRanges_Cal$NumberedParams == 's9_Ksat_0_v'] = 0.2
+ParamRanges_Cal$Lower[ParamRanges_Cal$NumberedParams == 's109_Ksat_0_v'] = 0.05
+ParamRanges_Cal$Lower[ParamRanges_Cal$NumberedParams == 's8_Ksat_0_v'] = 0.2
+ParamRanges_Cal$Lower[ParamRanges_Cal$NumberedParams == 's108_Ksat_0_v'] = 0.05
+ParamRanges_Cal$Lower[ParamRanges_Cal$NumberedParams == 'l4_septic_water_load'] = 0
 
 #Add all of the parameters of the likelihood function as well
 # (kurotsis) beta=-1: uniform, beta=0: Gaussian, beta=1: double exponential
@@ -2962,8 +2968,10 @@ LikelihoodParams = cbind(c('PL_beta', 'PL_xi', 'PL_sigma_0', 'PL_sigma_1', 'PL_p
 colnames(LikelihoodParams) = colnames(ParamRanges_Cal)
 ParamRanges_Cal_Likes = rbind(ParamRanges_Cal, LikelihoodParams)
 
+options(scipen = 999)
 write.csv(ParamRanges_Cal, file = "C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\RHESSysFilePreparation\\defs_Calibration\\BaismanCalibrationParameterProblemFile.csv", row.names = FALSE)
 write.csv(ParamRanges_Cal_Likes, file = "C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\RHESSysFilePreparation\\defs_Calibration\\BaismanCalibrationParameterProblemFile_LikelihoodParams.csv", row.names = FALSE)
+options(scipen = 0)
 
 #Save a file of chain starting locations for these parameters----
 # Take a random sample of N from the 100 most likely, where N is number of chains----
@@ -2995,43 +3003,43 @@ write.csv(ChainStarts, file = 'BaismanChainStarts.txt', sep = '\t', row.names = 
 #Write a file of the MCMC chain starting locations----
 
 #Pre-2020 Diagnosis of problems with EEs----
-for (i in 1:cols){
-  ind = i+(1+cols)*(t-1)
-  parm = which((OrigParams[ind+1,] - OrigParams[ind,]) != 0)
-  if(parm == 65){
-    print(i)
-    break
-  }
-}
-rm(i, ind, parm)
-
-#For all of these, the input parameter did not change when it was supposed to (it did change in the original input file)
-#(3365 and 3366) for v102_epc.frootlitr_fcel is NaN because delta and change in values are 0
-#(4913 and 4914) for v102_epc.frootlitr_fcel is NaN
-#(5837 and 5838) for "s8_Ksat_0_v" is NaN
-#(644 and 645) for "s109_Ksat_0_v" is NaN
-#(5388 and 5389) for "s109_Ksat_0_v" is NaN
-
-for (i in 1:r){
-  j = which(Deltas[r,] == min(abs(Deltas)))
-  if (length(j) > 0){
-    print(j)
-  }
-}
-rm(i,j)
-
-#Resample values for the NaN replicates
-#644:
-set.seed(644)
-runif(n = 1, min = 0.1, max = 0.36767)
-#3365:
-set.seed(3365)
-runif(n = 1, min = 0.4, max = 0.5)
-#4913:
-set.seed(4913)
-runif(n = 1, min = 0.4, max = 0.5)
-#5388
-set.seed(5388)
-runif(n = 1, min = 0.1, max = .909091)
-#5837
-#set manually to 0.4 because both Ksat0 and Ksat0v needed adjustment from lower bound
+# for (i in 1:cols){
+#   ind = i+(1+cols)*(t-1)
+#   parm = which((OrigParams[ind+1,] - OrigParams[ind,]) != 0)
+#   if(parm == 65){
+#     print(i)
+#     break
+#   }
+# }
+# rm(i, ind, parm)
+# 
+# #For all of these, the input parameter did not change when it was supposed to (it did change in the original input file)
+# #(3365 and 3366) for v102_epc.frootlitr_fcel is NaN because delta and change in values are 0
+# #(4913 and 4914) for v102_epc.frootlitr_fcel is NaN
+# #(5837 and 5838) for "s8_Ksat_0_v" is NaN
+# #(644 and 645) for "s109_Ksat_0_v" is NaN
+# #(5388 and 5389) for "s109_Ksat_0_v" is NaN
+# 
+# for (i in 1:r){
+#   j = which(Deltas[r,] == min(abs(Deltas)))
+#   if (length(j) > 0){
+#     print(j)
+#   }
+# }
+# rm(i,j)
+# 
+# #Resample values for the NaN replicates
+# #644:
+# set.seed(644)
+# runif(n = 1, min = 0.1, max = 0.36767)
+# #3365:
+# set.seed(3365)
+# runif(n = 1, min = 0.4, max = 0.5)
+# #4913:
+# set.seed(4913)
+# runif(n = 1, min = 0.4, max = 0.5)
+# #5388
+# set.seed(5388)
+# runif(n = 1, min = 0.1, max = .909091)
+# #5837
+# #set manually to 0.4 because both Ksat0 and Ksat0v needed adjustment from lower bound
