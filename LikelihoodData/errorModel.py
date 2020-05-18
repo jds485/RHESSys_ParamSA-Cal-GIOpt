@@ -16,10 +16,11 @@ TrueQ['Date'] = pd.to_datetime(TrueQ['Date'],format="%Y-%m-%d")
 TrueTN['Date'] = pd.to_datetime(TrueTN['Date'],format="%Y-%m-%d")
 
 #load simulated Q and TN from SA experiment (11-15-99 through 9-30-10)
-#Fixme: update with the filled-in 5 SA replicates
-#Fixme: This file is formatted differently than the other files I have with the same name
-SimQ = pd.read_csv('C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\SAResults_BasinStreamflow_p4.txt',delimiter='\t')
-SimTN = pd.read_csv('C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\SAResults_BasinTNMed_p3.txt',delimiter='\t')
+#Dec. 2019:
+#SimQ_used = pd.read_csv('C:\\Users\\js4yd\\OneDrive - University of Virginia\\RHESSys_ParameterSA\\LikelihoodData\\SAResults_BasinStreamflow_p4.txt',delimiter='\t')
+#SimTN_used = pd.read_csv('C:\\Users\\js4yd\\OneDrive - University of Virginia\\RHESSys_ParameterSA\\LikelihoodData\\SAResults_BasinTNMed_p3.txt',delimiter='\t')
+SimQ = pd.read_csv('C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\SAResults_BasinStreamflow_p4_Reordered_Add5_Likes.txt',delimiter='\t')
+SimTN = pd.read_csv('C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\SAResults_BasinTNMed_p3_All_Reordered_Add5_Likes.txt',delimiter='\t')
 
 SimQ['Date'] = pd.to_datetime(SimQ['Date'],format="%Y-%m-%d")
 SimTN['Date'] = pd.to_datetime(SimTN['Date'],format="%Y-%m-%d")
@@ -49,11 +50,11 @@ TrueQ_BC, Qlambda = ss.boxcox(TrueQ['Flow']+0.001) #19 0-flow days; next lowest 
 _, TNlambda = ss.boxcox(TrueTN['TN'].dropna()+0.001) # no 0 concentrations, but has to be 0 on no-flow days, so add 0.001 (flow and TN ~same mean)
 TrueTN_BC = ((TrueTN['TN']+0.001)**TNlambda-1)/TNlambda
 
-SimQ_BC = SimQ
+SimQ_BC = SimQ.copy()
 for col in columns[1:]:
     SimQ_BC[col] = ((SimQ[col]+0.001)**Qlambda-1)/Qlambda
     
-SimTN_BC = SimTN
+SimTN_BC = SimTN.copy()
 for col in columns[1:]:
     SimTN_BC[col] = ((SimTN[col]+0.001)**TNlambda-1)/TNlambda
 
@@ -136,11 +137,11 @@ fig.clf()
 TrueQ_log = np.log(TrueQ['Flow']+0.001) #19 0-flow days; next lowest 0.01; add constant of 0.001
 TrueTN_log = np.log(TrueTN['TN']+0.001) # no 0 concentrations, but has to be 0 on no-flow days, so add 0.001 (flow and TN ~same mean)
 
-SimQ_log = SimQ
+SimQ_log = SimQ.copy()
 for col in columns[1:]:
     SimQ_log[col] = np.log(SimQ[col]+0.001)
     
-SimTN_log = SimTN
+SimTN_log = SimTN.copy()
 for col in columns[1:]:
     SimTN_log[col] = np.log(SimTN[col]+0.001)
 
