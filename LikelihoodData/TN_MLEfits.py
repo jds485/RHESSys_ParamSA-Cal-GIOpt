@@ -5,24 +5,22 @@ from likelihood import generalizedLikelihoodFunction
 #from matplotlib import pyplot as plt
 from mpi4py import MPI
 import math
+import pyDOE
 
 # load TN observations
-TrueTN = pd.read_csv('TN_Cal.txt',delimiter='\t') #11-15-99 through 09-30-13
+TrueTN = pd.read_csv('C:\\Users\\js4yd\\Dropbox\\Jared-Julie-Share\\Data\\TN_Cal.txt',delimiter='\t') #11-15-99 through 09-30-13
 TrueTN['Date'] = pd.to_datetime(TrueTN['Date'],format="%Y-%m-%d")
 
-SimTN = pd.read_csv('SAResults_BasinTNMed_p3.txt',delimiter='\t') #(11-15-99 through 9-30-10)
+# load TN simulations
+#Dec. 2019
+#SimTN = pd.read_csv('SAResults_BasinTNMed_p3.txt',delimiter='\t')
+SimTN = pd.read_csv('C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\SAResults_BasinTNMed_p3_All_Reordered_Add5_Likes.txt',delimiter='\t') #(11-15-99 through 9-30-10)
 SimTN['Date'] = pd.to_datetime(SimTN['Date'],format="%Y-%m-%d")
 
 columns = SimTN.columns
 
-# find MLE fits for each simulation
-# params = [beta, xi, sigma_0, sigma_1, phi_1, mu_h]
-# initialize parameter estimates at beta=1 (double exponential), xi=0.5 (negatively skewed), 
-# sigma_0 = 0.1, sigma_1 = 0.1, phi_1 = 0.7 (high auto-correlation), mu_h = 0.0 (unbiased)
-paramsInit = [1.0,0.5,0.1,0.1,0.7,0.0]
-
 # create data frame to store parameter estimates, likelihood and SSE
-TNdf = pd.DataFrame(columns=['Replicate','beta','xi','sigma_0','sigma_1','phi_1','mu_h','logL','SSE'])
+TNdf = pd.DataFrame(columns=['Replicate','beta','xi','sigma_0','sigma_1','phi_1','mu_h','logL','SSE','success','mess'])
 data = np.array(TrueTN['TN'].iloc[1782:3973].dropna())
 tIndex = TrueTN['TN'].iloc[1782:3973].dropna().index
 
@@ -45,13 +43,47 @@ else:
 	start = remainder*(count+1) + (rank-remainder)*count
 	stop = start + count
 
+#Number of samples to take for the multi-start gradient descent algorithm
+numsamps = 1000
+
 for i in range(start,stop):
     comparedata = np.array(SimTN['Replicate' + str(i+1)].iloc[TrueTN['TN'].iloc[1782:3973].dropna().index])
     ObjFunc = lambda params: generalizedLikelihoodFunction(data,comparedata,tIndex,params)
-    optParams = sciOpt.minimize(ObjFunc, paramsInit, method='TNC', bounds=[[-1,1],[0,10],[0.01,1],[0.01,1],[0,1],[0,100]])
-    TNdf = TNdf.append({'Replicate': i+1, 'beta': optParams.x[0], 'xi': optParams.x[1], 'sigma_0': optParams.x[2],
-                'sigma_1': optParams.x[3], 'phi_1': optParams.x[4], 'mu_h': optParams.x[5],
-                'logL': -optParams.fun, 'SSE': np.sum((data-comparedata)**2)}, ignore_index=True)
+    
+    # find MLE fits for each simulation
+    # params = [beta, xi, sigma_0, sigma_1, phi_1, mu_h]
+    # initialize parameter estimates at beta=1 (double exponential), xi=0.5 (negatively skewed), 
+    # sigma_0 = 0.1, sigma_1 = 0.1, phi_1 = 0.7 (high auto-correlation), mu_h = 0.0 (unbiased)
+    #Make an LHS sample of the initial parameters to try for each replicate. Random seed is the index
+    np.random.seed(seed=i+185)
+    paramsInit = pyDOE.lhs(n=6, samples=numsamps)
+    
+    #Get all of the parameters into their expected ranges
+    #Fixme: try with different bounds that are adjusted based on SA run values.
+    paramsInit[:,0] = paramsInit[:,0]*2. - 1.
+    paramsInit[:,1] = paramsInit[:,1]*10.
+    paramsInit[:,2] = paramsInit[:,2]*(1.-.01)+.01
+    paramsInit[:,3] = paramsInit[:,3]*(1.-.01)+.01
+    #4 is on [0,1]
+    paramsInit[:,5] = paramsInit[:,5]*(100.)
+
+    #Loop over the initial starting locations and select the most optimal parameter set
+    for j in range(numsamps):
+        optParams = sciOpt.minimize(ObjFunc, 
+                                    paramsInit[j,:], 
+                                    method='TNC', 
+                                    bounds=[[-1,1],[0,10],[0.01,1],[0.01,1],[0,1],[0,100]],
+                                    options={'maxiter': 100, 'disp': True})
+        if j == 0:
+            OptChoice = optParams
+        elif (-optParams.fun < -OptChoice.fun):
+            OptChoice = optParams
+    
+    #Assign the best parameter values to this ith replicate
+    TNdf = TNdf.append({'Replicate': i+1, 'beta': OptChoice.x[0], 'xi': OptChoice.x[1], 'sigma_0': OptChoice.x[2],
+                'sigma_1': OptChoice.x[3], 'phi_1': OptChoice.x[4], 'mu_h': OptChoice.x[5],
+                'logL': -OptChoice.fun, 'SSE': np.sum((data-comparedata)**2), 'success': OptChoice.success,
+                      'mess': OptChoice.message}, ignore_index=True)
     
 # write data frame to file
 TNdf.to_csv('SA_Params_logL_Baisman_TN_rank' + str(rank) + '.csv')
