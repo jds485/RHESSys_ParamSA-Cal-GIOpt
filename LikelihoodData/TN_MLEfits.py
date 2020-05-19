@@ -44,7 +44,9 @@ else:
 	stop = start + count
 
 #Number of samples to take for the multi-start gradient descent algorithm
-numsamps = 1000
+numsamps = 100
+#Create dataframe to store successful parameter sets
+TNdf_success = pd.DataFrame(columns=['beta','xi','sigma_0','sigma_1','phi_1','mu_h','logL'])
 
 for i in range(start,stop):
     comparedata = np.array(SimTN['Replicate' + str(i+1)].iloc[TrueTN['TN'].iloc[1782:3973].dropna().index])
@@ -60,10 +62,10 @@ for i in range(start,stop):
     
     #Get all of the parameters into their expected ranges
     #Fixme: try with different bounds that are adjusted based on SA run values.
-    paramsInit[:,0] = paramsInit[:,0]*2. - 1.
+    paramsInit[:,0] = paramsInit[:,0]*3. - 1.
     paramsInit[:,1] = paramsInit[:,1]*10.
-    paramsInit[:,2] = paramsInit[:,2]*(1.-.01)+.01
-    paramsInit[:,3] = paramsInit[:,3]*(1.-.01)+.01
+    paramsInit[:,2] = paramsInit[:,2]*(1.-.000000001)+.000000001
+    #3 is on [0,1]
     #4 is on [0,1]
     paramsInit[:,5] = paramsInit[:,5]*(100.)
 
@@ -71,19 +73,26 @@ for i in range(start,stop):
     for j in range(numsamps):
         optParams = sciOpt.minimize(ObjFunc, 
                                     paramsInit[j,:], 
-                                    method='TNC', 
-                                    bounds=[[-1,1],[0,10],[0.01,1],[0.01,1],[0,1],[0,100]],
-                                    options={'maxiter': 100, 'disp': True})
+                                    method='SLSQP', 
+                                    bounds=[[-1,2],[0,10],[0.000000001,1],[0,1],[0,1],[0,100]],
+                                    options={'maxiter': 1000, 'disp': False})
         if j == 0:
             OptChoice = optParams
-        elif (-optParams.fun < -OptChoice.fun):
+        elif ((optParams.fun < OptChoice.fun) & (optParams.success == True)):
             OptChoice = optParams
-    
+            
+        #Used to see the distribution of parameter values with different starting locations
+        if (optParams.success == True):
+            #Save parameter vector
+            TNdf_success = TNdf_success.append({'beta': optParams.x[0], 'xi': optParams.x[1], 'sigma_0': optParams.x[2],
+                        'sigma_1': optParams.x[3], 'phi_1': optParams.x[4], 'mu_h': optParams.x[5],
+                        'logL': -optParams.fun}, ignore_index=True)
+            
     #Assign the best parameter values to this ith replicate
     TNdf = TNdf.append({'Replicate': i+1, 'beta': OptChoice.x[0], 'xi': OptChoice.x[1], 'sigma_0': OptChoice.x[2],
-                'sigma_1': OptChoice.x[3], 'phi_1': OptChoice.x[4], 'mu_h': OptChoice.x[5],
-                'logL': -OptChoice.fun, 'SSE': np.sum((data-comparedata)**2), 'success': OptChoice.success,
-                      'mess': OptChoice.message}, ignore_index=True)
+                        'sigma_1': OptChoice.x[3], 'phi_1': OptChoice.x[4], 'mu_h': OptChoice.x[5],
+                        'logL': -OptChoice.fun, 'SSE': np.sum((data-comparedata)**2), 'success': OptChoice.success,
+                        'mess': OptChoice.message}, ignore_index=True)
     
 # write data frame to file
 TNdf.to_csv('SA_Params_logL_Baisman_TN_rank' + str(rank) + '.csv')
