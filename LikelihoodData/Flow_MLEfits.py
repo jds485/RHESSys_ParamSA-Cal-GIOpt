@@ -44,7 +44,7 @@ else:
 	stop = start + count
 
 #Number of samples to take for the multi-start gradient descent algorithm
-numsamps = 100
+numsamps = 20
 #Create dataframe to store successful parameter sets
 Qdf_success = pd.DataFrame(columns=['beta','xi','sigma_0','sigma_1','phi_1','mu_h','logL'])
 
@@ -62,7 +62,7 @@ for i in range(start,stop):
     
     #Get all of the parameters into their expected ranges
     #Fixme: try with different bounds that are adjusted based on SA run values.
-    paramsInit[:,0] = paramsInit[:,0]*3. - 1.
+    paramsInit[:,0] = paramsInit[:,0]*11. - 1.
     paramsInit[:,1] = paramsInit[:,1]*10.
     paramsInit[:,2] = paramsInit[:,2]*(1.-.000000001)+.000000001
     #3 is on [0,1]
@@ -74,7 +74,7 @@ for i in range(start,stop):
         optParams = sciOpt.minimize(ObjFunc, 
                                     paramsInit[j,:], 
                                     method='SLSQP', 
-                                    bounds=[[-1,2],[0,10],[0.000000001,1],[0,1],[0,1],[0,100]],
+                                    bounds=[[-1,10],[0,10],[0.000000001,1],[0,1],[0,1],[0,100]],
                                     options={'maxiter': 1000, 'disp': False})
         if j == 0:
             OptChoice = optParams
@@ -95,7 +95,7 @@ for i in range(start,stop):
                       'mess': OptChoice.message}, ignore_index=True)
 
 # write data frame to file
-Qdf.to_csv('SA_Params_logL_Baisman_Flow_rank' + str(rank) + '.csv')
+Qdf.to_csv('SA_Params_logL_Baisman_Flow_rank' + str(rank) + '.csv', index=False)
 
 # sanity check: sort by -logL and SSE and compare ranks
 # logLranks = np.argsort(Qdf['logL'])[::-1]
