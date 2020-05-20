@@ -44,7 +44,7 @@ else:
 	stop = start + count
 
 #Number of samples to take for the multi-start gradient descent algorithm
-numsamps = 100
+numsamps = 20
 #Create dataframe to store successful parameter sets
 TNdf_success = pd.DataFrame(columns=['beta','xi','sigma_0','sigma_1','phi_1','mu_h','logL'])
 
@@ -95,7 +95,7 @@ for i in range(start,stop):
                         'mess': OptChoice.message}, ignore_index=True)
     
 # write data frame to file
-TNdf.to_csv('SA_Params_logL_Baisman_TN_rank' + str(rank) + '.csv')
+TNdf.to_csv('SA_Params_logL_Baisman_TN_rank' + str(rank) + '.csv', index=False)
 
 # sanity check: sort by -logL and SSE and compare ranks
 # logLranks = np.argsort(TNdf['logL'])[::-1]
