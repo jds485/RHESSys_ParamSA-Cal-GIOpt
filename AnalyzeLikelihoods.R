@@ -24,7 +24,7 @@ for (h in 1:length(uhills)){
 }
 rm(h)
 
-#Make the worldfile a spatial dataframe to get a map. Plot information in the worldfile on the maps----
+# Make the worldfile a spatial dataframe to get a map. Plot information in the worldfile on the maps----
 coordinates(world) = c('patchX', 'patchY')
 proj4string(world) = CRS('+init=epsg:26918')
 #Change to degrees
@@ -32,7 +32,7 @@ world=spTransform(world, CRSobj = CRS('+init=epsg:4326'))
 
 cols = rainbow(n = length(uhills))
 
-#Baisman Map----
+# Baisman Map----
 #Fixme: add stream to this map (white?)
 png('hillslopeMap.png', res = 300, height = 6, width = 6, units ='in')
 par(mar= c(2.5,2.5,1,1))
@@ -151,7 +151,7 @@ dev.off()
 q1 = quantile(x = LikesAll$logLAll, probs = .99)
 SelLikes = LikesAll[LikesAll$logLAll >= q1,]
 
-#Using these replicates, plot the basin and hillslope streamflow and TN graphs
+#Using these replicates, plot the basin and hillslope streamflow and TN graphs----
 #Basin:
 #Replicates on y axis
 #Time on x axis
@@ -526,7 +526,7 @@ LikesAll$weights = (LikesAll$logLAll-min(LikesAll$logLAll))/sum(LikesAll$logLAll
 
 #Use the distribution of weights as an empirical distribution
 
-#Parallel axis plot of the parameters on x-axis and likelihood coloring
+#Parallel axis plot of the parameters on x-axis and likelihood coloring----
 InputParams = read.csv("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\RHESSysFilePreparation\\defs\\MorrisSampleLocs\\MorrisSamples_AfterProcessing.csv", stringsAsFactors = FALSE)
 
 #Remove all of the parameters with _orig. They were not modified
@@ -534,6 +534,6 @@ InputParams = InputParams[-grep(x = colnames(InputParams), pattern = '_orig', fi
 #Get the number of parameters
 cols = ncol(InputParams)
 
-#Export csv of parameters and likelihood
+#Export csv of parameters and likelihood----
 LikesParams = cbind(SelLikes$logL, InputParams[SelLikes$Replicate, which(colnames(InputParams) %in% SortRanksMua_b)])
 write.csv(LikesParams, 'LikelihoodParamsParAxis.csv', row.names = FALSE)
