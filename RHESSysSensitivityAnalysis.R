@@ -2963,7 +2963,9 @@ ParamRanges_Cal$Lower[ParamRanges_Cal$NumberedParams == 'l4_septic_water_load'] 
 # (linear rate of change in standard deviation with mean)
 # (lag-1 auto-correlation), phi_1=0: no auto-correlation, phi_1=1: perfect auto-correlation
 # (mean bias factor)
-LikelihoodParams = cbind(c('PL_beta', 'PL_xi', 'PL_sigma_0', 'PL_sigma_1', 'PL_phi_1', 'PL_mu_h'), c('beta', 'xi', 'sigma_0', 'sigma_1', 'phi_1', 'mu_h'), 
+LikelihoodParams = cbind(c('PL_beta', 'PL_xi', 'PL_sigma_0', 'PL_sigma_1', 'PL_phi_1', 'PL_mu_h', 
+                           'PL_beta_TN', 'PL_xi_TN', 'PL_sigma_0_TN', 'PL_sigma_1_TN', 'PL_phi_1_TN', 'PL_mu_h_TN'), 
+                         c('beta', 'xi', 'sigma_0', 'sigma_1', 'phi_1', 'mu_h', 'beta', 'xi', 'sigma_0', 'sigma_1', 'phi_1', 'mu_h'), 
                          c(-1, 0, 0, 0, 0, 0), c(1, 10, 1, 1, 1, 100))
 colnames(LikelihoodParams) = colnames(ParamRanges_Cal)
 ParamRanges_Cal_Likes = rbind(ParamRanges_Cal, LikelihoodParams)
