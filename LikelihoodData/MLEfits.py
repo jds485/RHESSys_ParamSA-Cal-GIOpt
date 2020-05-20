@@ -9,7 +9,10 @@ TrueQ = pd.read_csv('BaismanStreamflow_Cal.txt',delimiter='\t') #11-15-99 throug
 TrueQ['Date'] = pd.to_datetime(TrueQ['Date'],format="%Y-%m-%d")
 
 # load flow simulations
-SimQ = pd.read_csv('SAResults_BasinStreamflow_p4.txt',delimiter='\t') #(11-15-99 through 9-30-10)
+#Dec. 2019
+#SimQ = pd.read_csv('SAResults_BasinStreamflow_p4.txt',delimiter='\t') #(11-15-99 through 9-30-10)
+SimQ = pd.read_csv('C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\SAResults_BasinStreamflow_p4_Reordered_Add5_Likes.txt',delimiter='\t')
+
 SimQ['Date'] = pd.to_datetime(SimQ['Date'],format="%Y-%m-%d")
 
 columns = SimQ.columns
@@ -19,6 +22,8 @@ columns = SimQ.columns
 # initialize parameter estimates at beta=1 (double exponential), xi=0.5 (negatively skewed), 
 # sigma_0 = 0.1, sigma_1 = 0.1, phi_1 = 0.7 (high auto-correlation), mu_h = 0.0 (unbiased)
 paramsInit = [1.0,0.5,0.1,0.1,0.7,0.0]
+
+#Fixme: Multi-start positions using uniform Monte Carlo random sampling?
 
 # create data frame to store parameter estimates, likelihood and SSE
 Qdf = pd.DataFrame(columns=['Replicate','beta','xi','sigma_0','sigma_1','phi_1','mu_h','logL','SSE'])
@@ -50,7 +55,9 @@ plt.clf()
 TrueTN = pd.read_csv('TN_Cal.txt',delimiter='\t') #11-15-99 through 09-30-13
 TrueTN['Date'] = pd.to_datetime(TrueTN['Date'],format="%Y-%m-%d")
 
-SimTN = pd.read_csv('SAResults_BasinTNMed_p3.txt',delimiter='\t') #(11-15-99 through 9-30-10)
+#Dec. 2019
+#SimTN = pd.read_csv('SAResults_BasinTNMed_p3.txt',delimiter='\t')
+SimTN = pd.read_csv('C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\SAResults_BasinTNMed_p3_All_Reordered_Add5_Likes.txt',delimiter='\t') #(11-15-99 through 9-30-10)
 SimTN['Date'] = pd.to_datetime(SimTN['Date'],format="%Y-%m-%d")
 
 # find MLE fits for each simulation
