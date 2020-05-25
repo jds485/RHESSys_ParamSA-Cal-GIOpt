@@ -38,7 +38,7 @@ def __standartChecksBeforeStart(data, comparedata):
 #         measerror[measerror == 0.0] = np.random.uniform(0.01, 0.1, size)
 #     return measerror
 
-def generalizedLikelihoodFunction(data, comparedata, tIndex, params):
+def generalizedLikelihoodFunction(data, comparedata, tIndex, params, month=None):
     #measerror=None: excluded; assuming no measurement error for now; added tIndex in case time step inconsistent
     """
     Under the assumption of having correlated, heteroscedastic, and non‐Gaussian errors and assuming that the data are
@@ -78,10 +78,23 @@ def generalizedLikelihoodFunction(data, comparedata, tIndex, params):
 
     __standartChecksBeforeStart(data, comparedata)
     errorArr = __calcSimpleDeviation(data, comparedata)
+    
+    comparedata = np.array(comparedata)
+    
+    if month is not None:
+        # remove seasonality in residuals
+        for m in range(12):
+            #Get all of the residuals for that month
+            inds = np.where(month == (m+1))[0]
+            Mu = np.mean(errorArr[inds])
+            Sigma = np.std(errorArr[inds])
+            errorArr[inds] = (errorArr[inds] - Mu) / Sigma
+            #Also adjust the comparedata
+            comparedata[inds] = (comparedata[inds] - Mu) / Sigma
+    
     #if measerror is None:
     #    measerror = __generateMeaserror(data)
     #measerror = np.array(measerror)
-    comparedata = np.array(comparedata)
     #measerror = __jitter_measerror_if_needed("generalizedLikelihoodFunction", measerror)
 
     beta = params[0]
@@ -113,9 +126,9 @@ def generalizedLikelihoodFunction(data, comparedata, tIndex, params):
     # So, mu_h is "a bias parameter to be inferred from the data." (cite, page 3, formula (3))
 
     #mu_t = np.mean(muh * comparedata) # this was the formula in the function, I changed it to:
-    mu_t = np.exp(mu_h * comparedata)
+    mu_t = np.exp(mu_h * abs(comparedata))
 
-    E_t = comparedata * mu_t
+    E_t = abs(comparedata) * mu_t
 
     sigma_t = sigma_0 + sigma_1 * E_t
     
