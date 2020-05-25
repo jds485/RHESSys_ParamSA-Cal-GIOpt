@@ -4,13 +4,10 @@ from scipy.signal import periodogram
 from matplotlib import pyplot as plt
 from scipy import stats as ss
 import statsmodels.api as sm
-import os
-
-os.chdir('C:\\Users\\js4yd\\Dropbox\\Jared-Julie-Share\\Data')
 
 #Load the observed flow and TN, and convert date to the correct format
-TrueQ = pd.read_csv('BaismanStreamflow_Cal.txt',delimiter='\t') #11-15-99 through 9-30-13
-TrueTN = pd.read_csv('TN_Cal.txt',delimiter='\t') #11-15-99 through 09-30-13
+TrueQ = pd.read_csv('C:\\Users\\js4yd\\Dropbox\\Jared-Julie-Share\\Data\\BaismanStreamflow_Cal.txt',delimiter='\t') #11-15-99 through 9-30-13
+TrueTN = pd.read_csv('C:\\Users\\js4yd\\Dropbox\\Jared-Julie-Share\\Data\\TN_Cal.txt',delimiter='\t') #11-15-99 through 09-30-13
 
 TrueQ['Date'] = pd.to_datetime(TrueQ['Date'],format="%Y-%m-%d")
 TrueTN['Date'] = pd.to_datetime(TrueTN['Date'],format="%Y-%m-%d")
