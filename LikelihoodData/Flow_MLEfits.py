@@ -6,6 +6,8 @@ from likelihood import generalizedLikelihoodFunction
 from mpi4py import MPI
 import math
 import pyDOE
+from scipy import stats as ss
+#from scipy.signal import periodogram
 
 # load flow observations
 TrueQ = pd.read_csv('C:\\Users\\js4yd\\Dropbox\\Jared-Julie-Share\\Data\\BaismanStreamflow_Cal.txt',delimiter='\t') #11-15-99 through 9-30-13
@@ -19,10 +21,17 @@ SimQ['Date'] = pd.to_datetime(SimQ['Date'],format="%Y-%m-%d")
 
 columns = SimQ.columns
 
+# perform Box-Cox transformation of data - MLE lambda
+TrueQ_BC, Qlambda = ss.boxcox(TrueQ['Flow']+0.001) #19 0-flow days; next lowest 0.01; add constant of 0.001
+#Transform simulated data
+for col in columns[1:]:
+    SimQ[col] = ((SimQ[col]+0.001)**Qlambda-1)/Qlambda
+
 # create data frame to store parameter estimates, likelihood and SSE
 Qdf = pd.DataFrame(columns=['Replicate','beta','xi','sigma_0','sigma_1','phi_1','mu_h','logL','SSE','success','mess'])
-data = np.array(TrueQ['Flow'].iloc[1782:3973])
+data = np.array(TrueQ_BC[1782:3973])
 tIndex = TrueQ['Flow'].iloc[1782:3973].index
+month = TrueQ['Date'].iloc[1782:3973].dt.month
 
 # Begin parallel simulation
 comm = MPI.COMM_WORLD
@@ -50,7 +59,7 @@ Qdf_success = pd.DataFrame(columns=['beta','xi','sigma_0','sigma_1','phi_1','mu_
 
 for i in range(start,stop):
     comparedata = np.array(SimQ['Replicate' + str(i+1)].iloc[1782:])
-    ObjFunc = lambda params: generalizedLikelihoodFunction(data,comparedata,tIndex,params)
+    ObjFunc = lambda params: generalizedLikelihoodFunction(data,comparedata,tIndex,params,month)
     
     # find MLE fits for each simulation
     # params = [beta, xi, sigma_0, sigma_1, phi_1, mu_h]
@@ -77,9 +86,13 @@ for i in range(start,stop):
                                     bounds=[[-1,10],[0,10],[0.000000001,1],[0,1],[0,1],[0,100]],
                                     options={'maxiter': 1000, 'disp': False})
         if j == 0:
+            #Save the optimal successful convergence and unsuccessful convergence
             OptChoice = optParams
+            OptFailed = optParams
         elif ((optParams.fun < OptChoice.fun) & (optParams.success == True)):
             OptChoice = optParams
+        elif ((optParams.fun < OptFailed.fun) & (optParams.success == False)):
+            OptFailed = optParams
 
         #Used to see the distribution of parameter values with different starting locations
         if (optParams.success == True):
@@ -88,11 +101,19 @@ for i in range(start,stop):
                         'sigma_1': optParams.x[3], 'phi_1': optParams.x[4], 'mu_h': optParams.x[5],
                         'logL': -optParams.fun}, ignore_index=True)
     
-    #Assign the best parameter values to this ith replicate
-    Qdf = Qdf.append({'Replicate': i+1, 'beta': OptChoice.x[0], 'xi': OptChoice.x[1], 'sigma_0': OptChoice.x[2],
-                      'sigma_1': OptChoice.x[3], 'phi_1': OptChoice.x[4], 'mu_h': OptChoice.x[5],
-                      'logL': -OptChoice.fun, 'SSE': np.sum((data-comparedata)**2), 'success': OptChoice.success,
-                      'mess': OptChoice.message}, ignore_index=True)
+    #Check if there are any successes
+    if OptChoice.success == True:
+        #Assign the best parameter values to this ith replicate
+        Qdf = Qdf.append({'Replicate': i+1, 'beta': OptChoice.x[0], 'xi': OptChoice.x[1], 'sigma_0': OptChoice.x[2],
+                          'sigma_1': OptChoice.x[3], 'phi_1': OptChoice.x[4], 'mu_h': OptChoice.x[5],
+                          'logL': -OptChoice.fun, 'SSE': np.sum((data-comparedata)**2), 'success': OptChoice.success,
+                          'mess': OptChoice.message}, ignore_index=True)
+    else:
+        #No successful convergence. Use the OptFailed
+        Qdf = Qdf.append({'Replicate': i+1, 'beta': OptFailed.x[0], 'xi': OptFailed.x[1], 'sigma_0': OptFailed.x[2],
+                          'sigma_1': OptFailed.x[3], 'phi_1': OptFailed.x[4], 'mu_h': OptFailed.x[5],
+                          'logL': -OptFailed.fun, 'SSE': np.sum((data-comparedata)**2), 'success': OptFailed.success,
+                          'mess': OptFailed.message}, ignore_index=True)
 
 # write data frame to file
 Qdf.to_csv('SA_Params_logL_Baisman_Flow_rank' + str(rank) + '.csv', index=False)
