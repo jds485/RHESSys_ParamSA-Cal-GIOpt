@@ -2,7 +2,6 @@ import pandas as pd
 import numpy as np
 from scipy import optimize as sciOpt
 from likelihood import generalizedLikelihoodFunction
-#from matplotlib import pyplot as plt
 from mpi4py import MPI
 import math
 import pyDOE
@@ -61,28 +60,28 @@ for i in range(start,stop):
     paramsInit = pyDOE.lhs(n=6, samples=numsamps)
     
     #Get all of the parameters into their expected ranges
-    #Fixme: try with different bounds that are adjusted based on SA run values.
-    paramsInit[:,0] = paramsInit[:,0]*3. - 1.
-    paramsInit[:,1] = paramsInit[:,1]*10.
+    #Initial bounds were [-1,2], [0,10], same, same, same, [0,100]
+    paramsInit[:,0] = paramsInit[:,0]*4. - 1.
+    paramsInit[:,1] = paramsInit[:,1]*5.
     paramsInit[:,2] = paramsInit[:,2]*(1.-.000000001)+.000000001
     #3 is on [0,1]
     #4 is on [0,1]
-    paramsInit[:,5] = paramsInit[:,5]*(100.)
+    paramsInit[:,5] = paramsInit[:,5]*(30.)
 
     #Loop over the initial starting locations and select the most optimal parameter set
     for j in range(numsamps):
         optParams = sciOpt.minimize(ObjFunc, 
                                     paramsInit[j,:], 
                                     method='SLSQP', 
-                                    bounds=[[-1,2],[0,10],[0.000000001,1],[0,1],[0,1],[0,100]],
+                                    bounds=[[-1,3],[0,5],[0.000000001,1],[0,1],[0,1],[0,30]],
                                     options={'maxiter': 1000, 'disp': False})
         if j == 0:
             #Save the optimal successful convergence and unsuccessful convergence
             OptChoice = optParams
             OptFailed = optParams
-        elif ((optParams.fun < OptChoice.fun) & (optParams.success == True)):
+        elif (((optParams.fun < OptChoice.fun) & (optParams.success == True)) | (np.isnan(OptChoice.fun) & (np.isnan(optParams.fun) == False))):
             OptChoice = optParams
-        elif ((optParams.fun < OptFailed.fun) & (optParams.success == False)):
+        elif (((optParams.fun < OptFailed.fun) & (optParams.success == False)) | (np.isnan(OptFailed.fun) & (np.isnan(optParams.fun) == False))):
             OptFailed = optParams
             
         #Used to see the distribution of parameter values with different starting locations
@@ -108,13 +107,3 @@ for i in range(start,stop):
     
 # write data frame to file
 TNdf.to_csv('SA_Params_logL_Baisman_TN_rank' + str(rank) + '.csv', index=False)
-
-# sanity check: sort by -logL and SSE and compare ranks
-# logLranks = np.argsort(TNdf['logL'])[::-1]
-# SSEranks = np.argsort(TNdf['SSE'])
-# plt.scatter(logLranks,SSEranks)
-# plt.title('Spearman Correlation= ' + str(np.corrcoef(logLranks,SSEranks)[0,1]))
-# plt.xlabel('Ranks by logL')
-# plt.ylabel('Ranks by SSE')
-# plt.savefig('TN_Ranks_logL_v_SSE.png')
-# plt.clf()
