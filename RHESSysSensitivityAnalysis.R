@@ -2976,34 +2976,6 @@ write.csv(ParamRanges_Cal_Likes, file = "C:\\Users\\js4yd\\OneDrive - University
 options(scipen = 0)
 
 #Save a file of chain starting locations for these parameters----
-# Take a random sample of N from the 100 most likely, where N is number of chains----
-N = 39
-TopLikes = seq(1,100,1)
-set.seed(8356)
-#Sample without replacement to get the N starting locations
-SelTopLikes = vector('numeric', length = N)
-for (i in 1:N){
-  IndTop = round(runif(n = 1, min = 1, max = length(TopLikes)),0)
-  SelTopLikes[i] = TopLikes[IndTop]
-  TopLikes = TopLikes[-IndTop]
-}
-rm(i)
-SelTopLikes = sort(SelTopLikes)
-
-# Load in the likelihoods of the SA runs----
-Likes = 
-
-# Gather the selected likelihood run indices----
-RunIndsTopLikes = 
-
-#Get the parameters for those run indices into a matrix - use only the calibration parameters
-ChainStarts = matrix()
-
-write.csv(ChainStarts, file = 'BaismanChainStarts.txt', sep = '\t', row.names = FALSE, col.names = TRUE)
-
-
-#Write a file of the MCMC chain starting locations----
-
 #Pre-2020 Diagnosis of problems with EEs----
 # for (i in 1:cols){
 #   ind = i+(1+cols)*(t-1)
