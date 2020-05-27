@@ -164,6 +164,27 @@ dev.off()
 q1 = quantile(x = LikesAll$logLAll, probs = .975)
 SelLikes = LikesAll[LikesAll$logLAll >= q1,]
 
+#Histograms for the top 2.5%
+png('HistsLikeParams_Top2p5.png', res = 300, width = 10, height = 10, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+hist(SelLikes$beta, breaks = 10, freq = TRUE, main = 'Kurtosis (Beta)', xlab = '', xlim = c(-1,7))
+hist(SelLikes$xi, breaks = 10, freq = TRUE, main = 'Skewness (Xi)', xlab = '', xlim = c(0,5))
+hist(SelLikes$sigma_0, breaks = 10, freq = TRUE, main = 'Standard Deviation when Mean = 0 (sigma_0)', xlab = '', xlim = c(0,1))
+hist(SelLikes$sigma_1, breaks = 10, freq = TRUE, main = 'Linear Change in Std. Dev. with Mean (sigma_1)', xlab = '', xlim = c(0,1))
+hist(SelLikes$phi_1, breaks = 10, freq = TRUE, main = 'Lag 1 Autocorrelation (phi_1)', xlab = '', xlim = c(0,1))
+hist(SelLikes$mu_h, breaks = 10, freq = TRUE, main = 'Mean Bias Factor (muh)', xlab = '', xlim = c(0,30))
+dev.off()
+
+png('HistsLikeTNParams_Top2p5.png', res = 300, width = 10, height = 10, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+hist(SelLikes$beta_TN, breaks = 10, freq = TRUE, main = 'Kurtosis for TN (Beta)', xlab = '', xlim = c(-1,3))
+hist(SelLikes$xi_TN, breaks = 10, freq = TRUE, main = 'Skewness for TN (Xi)', xlab = '', xlim = c(0,5))
+hist(SelLikes$sigma_0_TN, breaks = 10, freq = TRUE, main = 'Standard Deviation when Mean = 0 \n for TN (sigma_0)', xlab = '', xlim = c(0,1))
+hist(SelLikes$sigma_1_TN, breaks = 10, freq = TRUE, main = 'Linear Change in Std. Dev. with Mean \n for TN (sigma_1)', xlab = '', xlim = c(0,1))
+hist(SelLikes$phi_1_TN, breaks = 10, freq = TRUE, main = 'Lag 1 Autocorrelation for TN (phi_1)', xlab = '', xlim = c(0,1))
+hist(SelLikes$mu_h_TN, breaks = 10, freq = TRUE, main = 'Mean Bias Factor for TN (muh)', xlab = '', xlim = c(0,30))
+dev.off()
+
 #Using these replicates, plot the basin and hillslope streamflow and TN graphs----
 #Basin:
 #Replicates on y axis
@@ -267,7 +288,7 @@ colnames(HillLikes95) = colnames(HillLikesTN) = colnames(HillLikesNormTN) = c('H
 colnames(Means95Hill) = colnames(MeansTNLoadsHill) = c('HillID', 'Mean')
 colnames(SDs95Hill) = colnames(SDsTNLoadsHill) = c('HillID', 'SD')
 
-#Map of hillslope mean Upper 5th Percentile Flow----
+# Map of hillslope mean Upper 5th Percentile Flow----
 colPal = colorRampPalette(colors = rev(c('red', 'orange', 'yellow', 'green', 'blue')))
 scaleRange = c(0.1, 0.9)
 scaleBy = 0.1
@@ -292,7 +313,7 @@ box(which = 'figure', lwd = 2)
 dev.off()
 rm(h)
 
-#Map of hillslope SD Upper 5th Percentile Flow----
+# Map of hillslope SD Upper 5th Percentile Flow----
 colPal = colorRampPalette(colors = c('skyblue', 'blue', 'darkblue'))
 scaleRange = c(0, 0.2)
 scaleBy = .05
@@ -317,7 +338,7 @@ box(which = 'figure', lwd = 2)
 dev.off()
 rm(h)
 
-#Map of hillslope mean TN load----
+# Map of hillslope mean TN load----
 colPal = colorRampPalette(colors = rev(c('red', 'orange', 'yellow', 'green', 'blue')))
 scaleRange = c(0, 300)
 scaleBy = 100
@@ -342,7 +363,7 @@ box(which = 'figure', lwd = 2)
 dev.off()
 rm(h)
 
-#Map of hillslope SD TN load----
+# Map of hillslope SD TN load----
 colPal = colorRampPalette(colors = c('skyblue', 'blue', 'darkblue'))
 scaleRange = c(0, 100)
 scaleBy = 20
@@ -367,7 +388,7 @@ box(which = 'figure', lwd = 2)
 dev.off()
 rm(h)
 
-#Map of hillslope mean normalized TN load----
+# Map of hillslope mean normalized TN load----
 colPal = colorRampPalette(colors = rev(c('red', 'orange', 'yellow', 'green', 'blue')))
 scaleRange = c(250, 1500)
 scaleBy = 250
@@ -392,7 +413,7 @@ box(which = 'figure', lwd = 2)
 dev.off()
 rm(h)
 
-#Map of hillslope CV normalized TN load----
+# Map of hillslope CV normalized TN load----
 #SD colors
 #colPal = colorRampPalette(colors = c('skyblue', 'blue', 'darkblue'))
 #scaleRange = c(150, 650)
@@ -424,7 +445,7 @@ box(which = 'figure', lwd = 2)
 dev.off()
 rm(h)
 
-#Side by side Flow and TN plots for Hillslope Replicates: MLE and 1 other high-likelihood replicate----
+# Side by side Flow and TN plots for Hillslope Replicates: MLE and 1 other high-likelihood replicate----
 #Flow Maximum Likelihood Map
 colPal = colorRampPalette(colors = rev(c('red', 'orange', 'yellow', 'green', 'blue')))
 scaleRange = c(0.1, 0.9)
@@ -516,7 +537,7 @@ box(which = 'figure', lwd = 2)
 dev.off()
 rm(h)
 
-#Make a plot of the weighted prediction based on the likelihoods of the replicates----
+# Make a plot of the weighted prediction based on the likelihoods of the replicates----
 #LikesAll$weights = (LikesAll$logLAll-min(LikesAll$logLAll))/sum(LikesAll$logLAll-min(LikesAll$logLAll))
 #Use the distribution of weights as an empirical distribution
 
@@ -579,31 +600,21 @@ SelTopLikes = sort(SelTopLikes)
 RunIndsTopLikes = LikesAll_sort$Replicate[SelTopLikes]
 
 #Get the parameters for those run indices into a matrix
-ChainStarts = InputParams[as.numeric(rownames(InputParams)) %in% SelTopLikes,]
+ChainStarts = InputParams[as.numeric(rownames(InputParams)) %in% RunIndsTopLikes,]
 #Add likelihood parameters
-ChainStartsLikes = cbind(ChainStarts, matrix(NA, nrow = nrow(ChainStarts), ncol = 12))
-for (i in 1:N){
-  ChainStartsLikes[i,] = cbind(ChainStarts[i,], LikesAll_sort[which(LikesAll_sort$Replicate == as.numeric(rownames(ChainStarts))[i]), c(2:7, 13:18)])
-}
-colnames(ChainStartsLikes) = c(colnames(ChainStarts), 'PL_beta', 'PL_xi', 'PL_sigma_0', 'PL_sigma_1', 'PL_phi_1', 'PL_mu_h', 'PL_beta_TN', 'PL_xi_TN', 'PL_sigma_0_TN', 'PL_sigma_1_TN', 'PL_phi_1_TN', 'PL_mu_h_TN')
+ChainStartsLikes = InputParams_Likes[as.numeric(rownames(InputParams)) %in% RunIndsTopLikes,]
 
-#Remove all variables that will not be considered because they are spatially distributed now----
-ChainStarts = ChainStarts[-which(colnames(ChainStarts) %in% c('l3_landuse.percent_impervious', 'l4_landuse.percent_impervious'))]
-ChainStartsLikes = ChainStartsLikes[-which(colnames(ChainStartsLikes) %in% c('l3_landuse.percent_impervious', 'l4_landuse.percent_impervious'))]
-
-#Change all of the variables that will be fixed in calibration to their mean/most likely values----
-#determine which parameters are being fixed
-FixedParamsCal = ParamRanges[,1][-which(ParamRanges[,1] %in% ParamRanges_Cal[,1])]
-for (i in 1:length(FixedParamsCal)){
-  ChainSampsParams[,colnames(ChainSampsParams) == FixedParamsCal[i]] = mean(c(ParamRanges[ParamRanges[,1] == FixedParamsCal[i], 3], ParamRanges[ParamRanges[,1] == FixedParamsCal[i], 4]))
-}
+#Remove all variables that will not be calibrated----
+ChainStarts = ChainStarts[,which(colnames(ChainStarts) %in% ParamsCal$NumberedParams)]
+ChainStartsLikes = ChainStartsLikes[,c(which(colnames(ChainStartsLikes) %in% ParamsCal$NumberedParams), (ncol(InputParams)+1):ncol(ChainStartsLikes))]
 
 #Write a file of the MCMC chain starting locations----
 write.table(ChainStarts, file = 'BaismanChainStarts.txt', sep = '\t', row.names = FALSE, col.names = TRUE)
 
 #Evaluate histograms of the parameters to be calibrated from the most likely sets to evaluate bound changes----
-for (i in 1:nrow(ParamRanges_Cal)){
-  png(paste0('LikelihoodParamValues_', ParamRanges_Cal$NumberedParams[i],'.png'), units = 'in', height = 5, width = 5, res = 200)
-  hist(LikesAll[TopLikes, ParamRanges_Cal$NumberedParams[i]], breaks = 20, main = ParamRanges_Cal$NumberedParams[i], xlim = c(ParamRanges_Cal$Lower[i], ParamRanges_Cal$Upper[i]))
+for (i in 1:nrow(ParamsCal)){
+  png(paste0('LikelihoodParamValues_', ParamsCal$NumberedParams[i],'.png'), units = 'in', height = 5, width = 5, res = 200)
+  hist(InputParams_Likes[which(InputParams_Likes$logLAll >= min(SelLikes$logLAll)), ParamsCal$NumberedParams[i]], breaks = 20, main = ParamsCal$NumberedParams[i], xlim = c(ParamsCal$Lower[i], ParamsCal$Upper[i]))
   dev.off()
 }
+rm(i)
