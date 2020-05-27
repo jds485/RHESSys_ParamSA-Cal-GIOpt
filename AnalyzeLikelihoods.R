@@ -2,6 +2,7 @@ setwd("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\
 
 library(GISTools)
 library(rgdal)
+library(vroom)
 
 source('ColorFunctions.R')
 
@@ -53,6 +54,17 @@ box(which = 'figure', lwd = 2)
 dev.off()
 rm(h)
 
+#Load in the streamflow data for the basin and hillslopes----
+BasinSF = vroom(file = 'SAResults_BasinStreamflow_p4_Reordered_Add5.txt', delim = '\t', col_names = TRUE, col_types = cols(.default=col_double()), progress = FALSE)
+HillSF = vroom(file = 'SAResults_HillStreamflow_p6_Reordered_Add5.txt', delim = '\t', col_names = TRUE, col_types = cols(.default=col_double()), progress = FALSE)
+BasinTNMed = vroom(file = 'SAResults_BasinTNMed_p3_All_Reordered_Add5.txt', delim = '\t', col_names = TRUE, col_types = cols(.default=col_double()), progress = FALSE)
+HillTNMed = vroom(file = 'SAResults_HillTNMed_p3_All_Reordered_Add5.txt', delim = '\t', col_names = TRUE, col_types = cols(.default=col_double()), progress = FALSE)
+
+BasinSF = BasinSF[, c(1, which(as.Date(colnames(BasinSF[,-1])) >= as.Date('2004-10-01'))+1)]
+HillSF = HillSF[, c(1, 2, which(as.Date(colnames(HillSF[,-c(1,2)])) >= as.Date('2004-10-01'))+2)]
+BasinTNMed = BasinTNMed[, c(1, which(as.Date(colnames(BasinTNMed[,-1])) >= as.Date('2004-10-01'))+1)]
+HillTNMed = HillTNMed[, c(1, 2, which(as.Date(colnames(HillTNMed[,-c(1,2)])) >= as.Date('2004-10-01'))+2)]
+
 #Load the observed streamflow record----
 obs = read.table("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\RHESSysFilePreparation\\obs\\BaismanStreamflow_Cal.txt", header = TRUE, check.names = FALSE, stringsAsFactors = FALSE, sep = '\t')
 #Remove observations later than 9/30/2010 (SA timeperiod end)
@@ -69,34 +81,31 @@ obsTN = obsTN[as.Date(obsTN$Date) >= as.Date('2004-10-01'),]
 #Remove all NA days
 obsTN = obsTN[!is.na(obsTN$TN),]
 
-#Read in the replicate information (reordered to match Morris scheme)----
-Likes = read.csv(file = 'SA_Params_logL_Baisman_Flow_Reordered.csv', check.names = FALSE, stringsAsFactors = FALSE)
-LikesTN = read.csv(file = 'SA_Params_logL_Baisman_TN_Reordered.csv', check.names = FALSE, stringsAsFactors = FALSE)
-
-#Load in the streamflow data for the basin and hillslopes----
-BasinSF = read.table(file = 'SAResults_BasinStreamflow_p4_Reordered.txt', sep = '\t', stringsAsFactors = FALSE, header = TRUE, check.names = FALSE)
-HillSF = read.table(file = 'SAResults_HillStreamflow_p6_Reordered.txt', sep = '\t', stringsAsFactors = FALSE, header = TRUE, check.names = FALSE)
-BasinTNMed = read.table(file = 'SAResults_BasinTNMed_p3_All_Reordered.txt', sep = '\t', stringsAsFactors = FALSE, header = TRUE, check.names = FALSE)
-HillTNMed = read.table(file = 'SAResults_HillTNMed_p3_All_Reordered.txt', sep = '\t', stringsAsFactors = FALSE, header = TRUE, check.names = FALSE)
-
-BasinSF = BasinSF[, c(1, which(as.Date(colnames(BasinSF[,-1])) >= as.Date('2004-10-01'))+1)]
-HillSF = HillSF[, c(1, 2, which(as.Date(colnames(HillSF[,-c(1,2)])) >= as.Date('2004-10-01'))+2)]
-BasinTNMed = BasinTNMed[, c(1, which(as.Date(colnames(BasinTNMed[,-1])) >= as.Date('2004-10-01'))+1)]
-HillTNMed = HillTNMed[, c(1, 2, which(as.Date(colnames(HillTNMed[,-c(1,2)])) >= as.Date('2004-10-01'))+2)]
+#Read in the replicate likelihood information (reordered to match Morris scheme)----
+Likes = read.csv(file = 'SA_Params_logL_Baisman_Flow_SQL_max1000_20samps.csv', check.names = FALSE, stringsAsFactors = FALSE)
+LikesTN = read.csv(file = 'SA_Params_logL_Baisman_TN_SQL_max1000_20samps.csv', check.names = FALSE, stringsAsFactors = FALSE)
 
 #Select only the unique streamflow and TN records.----
-#Non-unique records exist because some parameters had no affect on output
-UniqueReps = which(duplicated(x = BasinSF[,-1]) == FALSE)
+#Non-unique records exist because some parameters had no effect on output
+UniqueReps = which(duplicated(x = BasinSF[,-1]) == FALSE, arr.ind = TRUE)
+#Check that the order of replicates is the same for Likes and LikesTN as for BasinSF
+any((Likes$Replicate - BasinSF$Replicate) != 0)
+any((LikesTN$Replicate - BasinSF$Replicate) != 0)
+any((BasinTNMed$Replicate - BasinSF$Replicate) != 0)
+
 BasinSF = BasinSF[UniqueReps,]
 Likes = Likes[UniqueReps,]
 LikesTN = LikesTN[UniqueReps,]
-HillSF = HillSF[which(HillSF$Replicate %in% UniqueReps),]
 BasinTNMed = BasinTNMed[UniqueReps,]
+HillSF = HillSF[which(HillSF$Replicate %in% UniqueReps),]
 HillTNMed = HillTNMed[which(HillTNMed$Replicate %in% UniqueReps),]
 
-#Make a new file for the multiplication of the likelihood functions (which is summing the log likelihoods)----
+#Make a new file for the multiplication of the likelihood functions (which is summing the log likelihoods, normalized by record length)----
 LikesAll = cbind(Likes, LikesTN)
-LikesAll$logLAll = Likes$logL + LikesTN$logL
+LikesAll$logLAll = Likes$logL/nrow(obs) + LikesTN$logL/nrow(obsTN)
+colnames(LikesAll) = c(colnames(Likes), paste0(colnames(LikesTN), '_TN'), 'logLAll')
+
+write.csv(LikesAll, file = 'SA_Params_logL_Baisman_Combined_SQL_max1000_20samps', row.names = FALSE)
 
 #Plots for Likelihoods----
 #log-likelihoods vs. scale----
@@ -107,7 +116,6 @@ plot(Likes$logL, Likes$sigma_1, xlab = 'Log Likelihood', ylab = 'Sigma_1', pch =
 
 plot(x = LikesTN$logL, y = LikesTN$sigma_0, xlab = 'Log Likelihood', ylab = 'Sigma_0', pch = 16, main = 'TN', cex = 0.5)
 plot(x = LikesTN$logL, y = LikesTN$sigma_1, xlab = 'Log Likelihood', ylab = 'Sigma_1', pch = 16, main = 'TN', cex = 0.5)
-
 dev.off()
 
 #Histograms of the parameters for each of flow and TN----
@@ -120,35 +128,40 @@ dev.off()
 
 png('HistsLikeParams.png', res = 300, width = 10, height = 10, units = 'in')
 layout(rbind(c(1,2), c(3,4), c(5,6)))
-hist(Likes$beta, breaks = 100, freq = TRUE, main = 'Kurtosis (Beta)', xlab = '', xlim = c(-1,1))
-hist(Likes$xi, breaks = 100, freq = TRUE, main = 'Skewness (Xi)', xlab = '', xlim = c(0,10))
-hist(Likes$sigma_0, breaks = 100, freq = TRUE, main = 'Standard Deviation when Mean = 0 (sigma_0)', xlab = '', xlim = c(0,1))
-hist(Likes$sigma_1, breaks = 100, freq = TRUE, main = 'Linear Change in Std. Dev. with Mean (sigma_1)', xlab = '', xlim = c(0,1))
-hist(Likes$phi_1, breaks = 100, freq = TRUE, main = 'Lag 1 Autocorrelation (phi_1)', xlab = '', xlim = c(0,1))
-hist(Likes$mu_h, breaks = 100, freq = TRUE, main = 'Mean Bias Factor (muh)', xlab = '', xlim = c(0,100))
+hist(Likes$beta, breaks = 20, freq = TRUE, main = 'Kurtosis (Beta)', xlab = '', xlim = c(-1,7))
+hist(Likes$xi, breaks = 20, freq = TRUE, main = 'Skewness (Xi)', xlab = '', xlim = c(0,5))
+hist(Likes$sigma_0, breaks = 20, freq = TRUE, main = 'Standard Deviation when Mean = 0 (sigma_0)', xlab = '', xlim = c(0,1))
+hist(Likes$sigma_1, breaks = 20, freq = TRUE, main = 'Linear Change in Std. Dev. with Mean (sigma_1)', xlab = '', xlim = c(0,1))
+hist(Likes$phi_1, breaks = 20, freq = TRUE, main = 'Lag 1 Autocorrelation (phi_1)', xlab = '', xlim = c(0,1))
+hist(Likes$mu_h, breaks = 20, freq = TRUE, main = 'Mean Bias Factor (muh)', xlab = '', xlim = c(0,30))
 dev.off()
 
 png('HistsLikeTNParams.png', res = 300, width = 10, height = 10, units = 'in')
 layout(rbind(c(1,2), c(3,4), c(5,6)))
-hist(LikesTN$beta, breaks = 100, freq = TRUE, main = 'Kurtosis for TN (Beta)', xlab = '', xlim = c(-1,1))
-hist(LikesTN$xi, breaks = 100, freq = TRUE, main = 'Skewness for TN (Xi)', xlab = '', xlim = c(0,10))
-hist(LikesTN$sigma_0, breaks = 100, freq = TRUE, main = 'Standard Deviation when Mean = 0 \n for TN (sigma_0)', xlab = '', xlim = c(0,1))
-hist(LikesTN$sigma_1, breaks = 100, freq = TRUE, main = 'Linear Change in Std. Dev. with Mean \n for TN (sigma_1)', xlab = '', xlim = c(0,1))
-hist(LikesTN$phi_1, breaks = 100, freq = TRUE, main = 'Lag 1 Autocorrelation for TN (phi_1)', xlab = '', xlim = c(0,1))
-hist(LikesTN$mu_h, breaks = 100, freq = TRUE, main = 'Mean Bias Factor for TN (muh)', xlab = '', xlim = c(0,100))
+hist(LikesTN$beta, breaks = 20, freq = TRUE, main = 'Kurtosis for TN (Beta)', xlab = '', xlim = c(-1,3))
+hist(LikesTN$xi, breaks = 20, freq = TRUE, main = 'Skewness for TN (Xi)', xlab = '', xlim = c(0,5))
+hist(LikesTN$sigma_0, breaks = 20, freq = TRUE, main = 'Standard Deviation when Mean = 0 \n for TN (sigma_0)', xlab = '', xlim = c(0,1))
+hist(LikesTN$sigma_1, breaks = 20, freq = TRUE, main = 'Linear Change in Std. Dev. with Mean \n for TN (sigma_1)', xlab = '', xlim = c(0,1))
+hist(LikesTN$phi_1, breaks = 20, freq = TRUE, main = 'Lag 1 Autocorrelation for TN (phi_1)', xlab = '', xlim = c(0,1))
+hist(LikesTN$mu_h, breaks = 20, freq = TRUE, main = 'Mean Bias Factor for TN (muh)', xlab = '', xlim = c(0,30))
 dev.off()
-
 
 #eCDF plot to see if there is a significant change in the log-likelihood at a certain percentile
 png('eCDFsLikes.png', res = 300, width = 9, height = 3, units = 'in')
 layout(rbind(c(1,2,3)))
-plot(ecdf(Likes$logL), main = 'Streamflow', xlab = 'Log Likelihood')
-plot(ecdf(LikesTN$logL), main = 'TN', xlab = 'Log Likelihood')
-plot(ecdf(LikesAll$logLAll), main = 'Streamflow + TN', xlab = 'Log Likelihood')
+plot(ecdf(Likes$logL/nrow(obs)), main = 'Streamflow', xlab = 'Normalized Log Likelihood')
+lines(c(-1,1), c(0.975,0.975))
+lines(c(-1,1), c(0.95,0.95))
+plot(ecdf(LikesTN$logL/nrow(obsTN)), main = 'TN', xlab = 'Normalized Log Likelihood')
+lines(c(-1,1), c(0.975,0.975))
+lines(c(-1,1), c(0.95,0.95))
+plot(ecdf(LikesAll$logLAll), main = 'Streamflow + TN', xlab = 'Normalized Log Likelihood')
+lines(c(-1,1), c(0.975,0.975))
+lines(c(-1,1), c(0.95,0.95))
 dev.off()
 
-#Gather the top 1% of the log-likelihoods for timeseries plotting----
-q1 = quantile(x = LikesAll$logLAll, probs = .99)
+#Gather the top 2.5% of the log-likelihoods for timeseries plotting----
+q1 = quantile(x = LikesAll$logLAll, probs = .975)
 SelLikes = LikesAll[LikesAll$logLAll >= q1,]
 
 #Using these replicates, plot the basin and hillslope streamflow and TN graphs----
@@ -163,47 +176,40 @@ SDs = apply(X = BasinSF[which(BasinSF$Replicate %in% SelLikes$Replicate),-1], MA
 SDsTN = apply(X = BasinTNMed[which(BasinTNMed$Replicate %in% SelLikes$Replicate),-1], MARGIN = 2, FUN = sd)
 MeansTN = apply(X = BasinTNMed[which(BasinTNMed$Replicate %in% SelLikes$Replicate),-1], MARGIN = 2, FUN = mean)
 
-png('SDMostLikey1p.png', res = 300, width = 6, height = 10, units = 'in')
+png('SDMostLikey2p5.png', res = 300, width = 6, height = 10, units = 'in')
 layout(c(1,2))
-plot(x = as.Date(colnames(BasinSF[-1])), y = SDs, pch = 16, cex = 0.5, ylim = c(0,10), ylab = 'Standard Deviation of Flow (cfs)', xlab = 'Year', main = 'Standard Deviation of Flow \n Most Likely 1% of Replicates', type = 'o', cex.axis=1.5, cex.lab=1.5,cex.main=1.5)
-plot(x = as.Date(colnames(BasinTNMed[-1])), y = SDsTN, pch = 16, cex = 0.5, ylim = c(0,.5), ylab = 'Standard Deviation of TN (mg/L)', xlab = 'Year', main = 'Standard Deviation of TN \n Most Likely 1% of Replicates', type = 'o', cex.axis=1.5, cex.lab=1.5,cex.main=1.5)
+plot(x = as.Date(colnames(BasinSF[-1])), y = SDs, pch = 16, cex = 0.5, ylim = c(0,10), ylab = 'Standard Deviation of Flow (cfs)', xlab = 'Year', main = 'Standard Deviation of Flow \n Most Likely 2.5% of Replicates', type = 'o', cex.axis=1.5, cex.lab=1.5,cex.main=1.5)
+plot(x = as.Date(colnames(BasinTNMed[-1])), y = SDsTN, pch = 16, cex = 0.5, ylim = c(0,.5), ylab = 'Standard Deviation of TN (mg/L)', xlab = 'Year', main = 'Standard Deviation of TN \n Most Likely 2.5% of Replicates', type = 'o', cex.axis=1.5, cex.lab=1.5,cex.main=1.5)
 dev.off()
 
-png('MeanMostLikey1p.png', res = 300, width = 6, height = 10, units = 'in')
+png('MeanMostLikey2p5.png', res = 300, width = 6, height = 10, units = 'in')
 layout(c(1,2))
-plot(x = as.Date(colnames(BasinSF[-1])), y = Means, pch = 16, cex = 0.5, ylim = c(0,20), ylab = 'Mean of Flow (cfs)', xlab = 'Year', main = 'Mean of Flow \n Most Likely 1% of Replicates', type = 'o', cex.axis=1.5, cex.lab=1.5,cex.main=1.5)
-plot(x = as.Date(colnames(BasinTNMed[-1])), y = MeansTN, pch = 16, cex = 0.5, ylim = c(0,3), ylab = 'Mean of TN (mg/L)', xlab = 'Year', main = 'Mean of TN \n Most Likely 1% of Replicates', type = 'o', cex.axis=1.5, cex.lab=1.5,cex.main=1.5)
+plot(x = as.Date(colnames(BasinSF[-1])), y = Means, pch = 16, cex = 0.5, ylim = c(0,20), ylab = 'Mean of Flow (cfs)', xlab = 'Year', main = 'Mean of Flow \n Most Likely 2.5% of Replicates', type = 'o', cex.axis=1.5, cex.lab=1.5,cex.main=1.5)
+plot(x = as.Date(colnames(BasinTNMed[-1])), y = MeansTN, pch = 16, cex = 0.5, ylim = c(0,3), ylab = 'Mean of TN (mg/L)', xlab = 'Year', main = 'Mean of TN \n Most Likely 2.5% of Replicates', type = 'o', cex.axis=1.5, cex.lab=1.5,cex.main=1.5)
 dev.off()
 
-png('RepsObsMostLikey1p.png', res = 300, width = 6, height = 10, units = 'in')
+png('RepsObsMostLikey2p5.png', res = 300, width = 6, height = 10, units = 'in')
 layout(c(1,2))
-plot(x = as.Date(colnames(BasinSF[-1])), y = obs$Flow, pch = 16, cex = 0.5, ylim = c(0,30), ylab = 'Flow (cfs)', xlab = 'Year', main = 'Basin Outlet Streamflow \n Most Likely 1% of Replicates', type = 'l', cex.axis=1.5, cex.lab=1.5,cex.main=1.5, col = 'red')
+plot(x = as.Date(colnames(BasinSF[-1])), y = obs$Flow, pch = 16, cex = 0.5, ylim = c(0,30), ylab = 'Flow (cfs)', xlab = 'Year', main = 'Basin Outlet Streamflow \n Most Likely 2.5% of Replicates', type = 'l', cex.axis=1.5, cex.lab=1.5,cex.main=1.5, col = 'red')
 par(new = TRUE)
 matplot(x = as.Date(colnames(BasinSF[-1])), y = t(BasinSF[which(BasinSF$Replicate %in% SelLikes$Replicate),-1]), type = 'l', ylim = c(0,30), ylab = '', xlab = '', main = '', cex.axis=1.5, cex.lab=1.5,cex.main=1.5, col = adjustcolor('gray', alpha.f = 0.1), axes=FALSE)
 par(new = TRUE)
 plot(x = as.Date(colnames(BasinSF[-1])), y = obs$Flow, pch = 16, cex = 0.5, ylim = c(0,30), ylab = '', xlab = '', main = '', type = 'l', cex.axis=1.5, cex.lab=1.5,cex.main=1.5, col = 'red', axes=FALSE)
 
-plot(x = as.Date(colnames(BasinTNMed[-1])), y = obsTN$TN, pch = 16, cex = 0.5, ylim = c(0,3), ylab = 'Mean of TN (mg/L)', xlab = 'Year', main = 'Mean of TN \n Most Likely 1% of Replicates', type = 'p', cex.axis=1.5, cex.lab=1.5,cex.main=1.5, col='red')
+plot(x = as.Date(obsTN$Date), y = obsTN$TN, pch = 16, cex = 0.5, ylim = c(0,3), ylab = 'Mean of TN (mg/L)', xlab = 'Year', main = 'Mean of TN \n Most Likely 1% of Replicates', type = 'p', cex.axis=1.5, cex.lab=1.5,cex.main=1.5, col='red')
 par(new = TRUE)
 matplot(x = as.Date(colnames(BasinTNMed[-1])), y = t(BasinTNMed[which(BasinTNMed$Replicate %in% SelLikes$Replicate),-1]), type = 'l', ylim = c(0,3), ylab = '', xlab = '', main = '', cex.axis=1.5, cex.lab=1.5,cex.main=1.5, col = adjustcolor('gray', alpha.f = 0.1), axes=FALSE)
 par(new = TRUE)
-plot(x = as.Date(colnames(BasinTNMed[-1])), y = obsTN$TN, pch = 16, cex = 0.5, ylim = c(0,3), ylab = '', xlab = '', main = '', type = 'p', cex.axis=1.5, cex.lab=1.5,cex.main=1.5, col='red', axes=FALSE)
+plot(x = as.Date(obsTN$Date), y = obsTN$TN, pch = 16, cex = 0.5, ylim = c(0,3), ylab = '', xlab = '', main = '', type = 'p', cex.axis=1.5, cex.lab=1.5,cex.main=1.5, col='red', axes=FALSE)
 dev.off()
 
-png('CVMostLikey1p.png', res = 300, width = 6, height = 10, units = 'in')
+png('CVMostLikey2p5.png', res = 300, width = 6, height = 10, units = 'in')
 layout(c(1,2))
-plot(x = as.Date(colnames(BasinSF[-1])), y = SDs/Means, pch = 16, cex = 0.5, ylim = c(0,1), ylab = 'CV of Flow (-)', xlab = 'Year', main = 'CV of Flow \n Most Likely 1% of Replicates', type = 'o', cex.axis=1.5, cex.lab=1.5,cex.main=1.5)
-plot(x = as.Date(colnames(BasinTNMed[-1])), y = SDsTN/MeansTN, pch = 16, cex = 0.5, ylim = c(0,.5), ylab = 'CV of TN (-)', xlab = 'Year', main = 'CV of TN \n Most Likely 1% of Replicates', type = 'o', cex.axis=1.5, cex.lab=1.5,cex.main=1.5)
+plot(x = as.Date(colnames(BasinSF[-1])), y = SDs/Means, pch = 16, cex = 0.5, ylim = c(0,1), ylab = 'CV of Flow (-)', xlab = 'Year', main = 'CV of Flow \n Most Likely 2.5% of Replicates', type = 'o', cex.axis=1.5, cex.lab=1.5,cex.main=1.5)
+plot(x = as.Date(colnames(BasinTNMed[-1])), y = SDsTN/MeansTN, pch = 16, cex = 0.5, ylim = c(0,.5), ylab = 'CV of TN (-)', xlab = 'Year', main = 'CV of TN \n Most Likely 2.5% of Replicates', type = 'o', cex.axis=1.5, cex.lab=1.5,cex.main=1.5)
 dev.off()
 
-#for (i in 1:(ncol(BasinSF)-1)){
-#  plot(x = as.Date(colnames(BasinSF[-1])), y = test, ncol(BasinSF)-1), pch = 15, col = rainbow(4000))
-#  par(new=TRUE)
-#}
-
-#Maybe multiply to get flux of nitrogen, and plot that spatially as a result to show differences in variability across the top 100 scenarios
-
-#Hillslope Plots----
+# Hillslope Plots----
 MeansHill = SDsHill = MeansTNHill = SDsTNHill = matrix(NA, nrow = length(unique(HillSF$HillID)), ncol = ncol(BasinSF)-1)
 for (i in 1:length(unique(HillSF$HillID))){
   MeansHill[i,] = apply(X = HillSF[which((HillSF$Replicate %in% SelLikes$Replicate) & (HillSF$HillID == i)),-c(1,2)], MARGIN = 2, FUN = mean)
@@ -213,28 +219,28 @@ for (i in 1:length(unique(HillSF$HillID))){
 }
 rm(i)
 
-png('SDMostLikey1p_Hill.png', res = 300, width = 10, height = 14, units = 'in')
+png('SDMostLikey2p5_Hill.png', res = 300, width = 10, height = 14, units = 'in')
 layout(rbind(c(1,2), c(3,4), c(5,6), c(7,8), c(9,10), c(11,12), c(13,14)))
 for (i in 1:length(unique(HillSF$HillID))){
-  plot(x = as.Date(colnames(BasinSF[-1])), y = SDsHill[i,], pch = 16, cex = 0.5, ylab = 'Standard Deviation of Flow (cfs)', xlab = 'Year', main = paste0('Hillslope ', i, ' Standard Deviation of Flow \n Most Likely 1% of Replicates'), type = 'o', cex.axis=1.5, cex.lab=1.5,cex.main=1.5, col = cols[i])
+  plot(x = as.Date(colnames(BasinSF[-1])), y = SDsHill[i,], pch = 16, cex = 0.5, ylab = 'Standard Deviation of Flow (cfs)', xlab = 'Year', main = paste0('Hillslope ', i, ' Standard Deviation of Flow \n Most Likely 2.5% of Replicates'), type = 'o', cex.axis=1.5, cex.lab=1.5,cex.main=1.5, col = cols[i])
 }
 dev.off()
 
-png('SDMostLikey1p_Hill_sameY.png', res = 300, width = 10, height = 14, units = 'in')
+png('SDMostLikey2p5_Hill_sameY.png', res = 300, width = 10, height = 14, units = 'in')
 layout(rbind(c(1,2), c(3,4), c(5,6), c(7,8), c(9,10), c(11,12), c(13,14)))
 for (i in 1:length(unique(HillSF$HillID))){
-  plot(x = as.Date(colnames(BasinSF[-1])), y = SDsHill[i,], pch = 16, cex = 0.5, ylim = c(0,5), ylab = 'Standard Deviation of Flow (cfs)', xlab = 'Year', main = paste0('Hillslope ', i, ' Standard Deviation of Flow \n Most Likely 1% of Replicates'), type = 'o', cex.axis=1.5, cex.lab=1.5,cex.main=1.5, col = cols[i])
+  plot(x = as.Date(colnames(BasinSF[-1])), y = SDsHill[i,], pch = 16, cex = 0.5, ylim = c(0,5), ylab = 'Standard Deviation of Flow (cfs)', xlab = 'Year', main = paste0('Hillslope ', i, ' Standard Deviation of Flow \n Most Likely 2.5% of Replicates'), type = 'o', cex.axis=1.5, cex.lab=1.5,cex.main=1.5, col = cols[i])
 }
 dev.off()
 
-png('SDMostLikey1p_HillTN.png', res = 300, width = 10, height = 14, units = 'in')
+png('SDMostLikey2p5_HillTN.png', res = 300, width = 10, height = 14, units = 'in')
 layout(rbind(c(1,2), c(3,4), c(5,6), c(7,8), c(9,10), c(11,12), c(13,14)))
 for (i in 1:length(unique(HillSF$HillID))){
-  plot(x = as.Date(colnames(BasinSF[-1])), y = SDsTNHill[i,], pch = 16, cex = 0.5, ylim = c(0,5), ylab = 'Standard Deviation of TN (mg/L)', xlab = 'Year', main = paste0('Hillslope ', i, ' Standard Deviation of TN \n Most Likely 1% of Replicates'), type = 'o', cex.axis=1.5, cex.lab=1.5,cex.main=1.5, col = cols[i])
+  plot(x = as.Date(colnames(BasinSF[-1])), y = SDsTNHill[i,], pch = 16, cex = 0.5, ylim = c(0,5), ylab = 'Standard Deviation of TN (mg/L)', xlab = 'Year', main = paste0('Hillslope ', i, ' Standard Deviation of TN \n Most Likely 2.5% of Replicates'), type = 'o', cex.axis=1.5, cex.lab=1.5,cex.main=1.5, col = cols[i])
 }
 dev.off()
 
-#Hillslope Maps for Upper 5th %-ile variability across most likely replicates, and TN loads mean and sd spatially----
+#Hillslope Maps for Upper 5th %-ile variability across top 2.5% most likely replicates, and TN loads mean and sd spatially----
 #Get the upper 5th percentile flow, and the TN load from each replicate and take the mean and sd
 #kg/d loading
 HillTNLoad = cbind(HillSF[,c(1,2)], HillSF[,-c(1,2)]*HillTNMed[,-c(1,2)]*1000/(100)^3*(2.54)^3*(12^3)/1000000*3600*24)
@@ -262,11 +268,6 @@ colnames(Means95Hill) = colnames(MeansTNLoadsHill) = c('HillID', 'Mean')
 colnames(SDs95Hill) = colnames(SDsTNLoadsHill) = c('HillID', 'SD')
 
 #Map of hillslope mean Upper 5th Percentile Flow----
-#colPal = colorRampPalette(colors = rev(c('red', 'orange', 'yellow', 'green', 'blue')))
-#scaleRange = c(0, 0.5)
-#scaleBy = .1
-#Pal = colPal((scaleRange[2] - scaleRange[1])/scaleBy + 1)
-
 colPal = colorRampPalette(colors = rev(c('red', 'orange', 'yellow', 'green', 'blue')))
 scaleRange = c(0.1, 0.9)
 scaleBy = 0.1
@@ -316,10 +317,9 @@ box(which = 'figure', lwd = 2)
 dev.off()
 rm(h)
 
-
 #Map of hillslope mean TN load----
 colPal = colorRampPalette(colors = rev(c('red', 'orange', 'yellow', 'green', 'blue')))
-scaleRange = c(0, 400)
+scaleRange = c(0, 300)
 scaleBy = 100
 Pal = colPal((scaleRange[2] - scaleRange[1])/scaleBy + 1)
 
@@ -330,7 +330,7 @@ for (h in 1:length(uhills)){
   plot(world[world$hillID == uhills[h],], pch = 22, add = TRUE, lwd=10)
   plot(world[world$hillID == uhills[h],], col = colFun(Data = MeansTNLoadsHill[uhills[h],2]), pch = 15, add = TRUE)
 }
-legend('bottomright', title = expression(bold('TN Load (kg/yr)')), legend=c('0 - < 100', '100 - < 200', '200 - < 300', '300 - < 400', '400 - < 500'), fill = colFun(seq(0,400,100)), border = 'black', ncol = 2)
+legend('bottomright', title = expression(bold('TN Load (kg/yr)')), legend=c('0 - < 100', '100 - < 200', '200 - < 300', '300 - < 400'), fill = colFun(seq(0,300,100)), border = 'black', ncol = 2)
 degAxis(side = 1, at = seq(-77,-76,.01), labels = FALSE)
 degAxis(side = 1, at = seq(-76.7,-76,.02))
 degAxis(side = 3, at = seq(-77,-76,.01), labels = FALSE)
@@ -344,8 +344,8 @@ rm(h)
 
 #Map of hillslope SD TN load----
 colPal = colorRampPalette(colors = c('skyblue', 'blue', 'darkblue'))
-scaleRange = c(0, 150)
-scaleBy = 30
+scaleRange = c(0, 100)
+scaleBy = 20
 Pal = colPal((scaleRange[2] - scaleRange[1])/scaleBy + 1)
 
 png('HillslopeSDTNLoadsMap.png', res = 300, height = 6, width = 6, units ='in')
@@ -355,7 +355,7 @@ for (h in 1:length(uhills)){
   plot(world[world$hillID == uhills[h],], pch = 22, add = TRUE, lwd=10)
   plot(world[world$hillID == uhills[h],], col = colFun(Data = SDsTNLoadsHill[uhills[h],2]), pch = 15, add = TRUE)
 }
-legend('bottomright', title = expression(bold('SD TN Load (kg/yr)')), legend=c('0 - < 30', '30 - < 60', '60 - < 90', '90 - < 120', '120 - < 150', '150 - < 180'), fill = colFun(seq(0,180,30)), border = 'black', ncol = 2)
+legend('bottomright', title = expression(bold('SD TN Load (kg/yr)')), legend=c('0 - < 20', '20 - < 40', '40 - < 60', '60 - < 80', '80 - < 100', '100 - < 120'), fill = colFun(seq(0,100,20)), border = 'black', ncol = 2)
 degAxis(side = 1, at = seq(-77,-76,.01), labels = FALSE)
 degAxis(side = 1, at = seq(-76.7,-76,.02))
 degAxis(side = 3, at = seq(-77,-76,.01), labels = FALSE)
@@ -369,8 +369,8 @@ rm(h)
 
 #Map of hillslope mean normalized TN load----
 colPal = colorRampPalette(colors = rev(c('red', 'orange', 'yellow', 'green', 'blue')))
-scaleRange = c(400, 1600)
-scaleBy = 400
+scaleRange = c(250, 1500)
+scaleBy = 250
 Pal = colPal((scaleRange[2] - scaleRange[1])/scaleBy + 1)
 
 png('HillslopeMeanTNLoadsNormMap.png', res = 300, height = 6, width = 6, units ='in')
@@ -380,7 +380,7 @@ for (h in 1:length(uhills)){
   plot(world[world$hillID == uhills[h],], pch = 22, add = TRUE, lwd=10)
   plot(world[world$hillID == uhills[h],], col = colFun(Data = MeansTNLoadsHillNorm[MeansTNLoadsHillNorm[,1] == uhills[h],2]), pch = 15, add = TRUE)
 }
-legend('bottomright', title = expression(bold(paste('TN Load (kg/yr/km'^2,')'))), legend=c('400 - < 800', '800 - < 1200', '1200 - < 1600', '1600 - < 1655'), fill = colFun(seq(400,2000,400)), border = 'black', ncol = 2)
+legend('bottomright', title = expression(bold(paste('TN Load (kg/yr/km'^2,')'))), legend=c('250 - < 500', '500 - < 750', '750 - < 1000', '1000 - < 1250', '1250 - < 1500'), fill = colFun(seq(250,1500,250)), border = 'black', ncol = 2)
 degAxis(side = 1, at = seq(-77,-76,.01), labels = FALSE)
 degAxis(side = 1, at = seq(-76.7,-76,.02))
 degAxis(side = 3, at = seq(-77,-76,.01), labels = FALSE)
@@ -393,7 +393,6 @@ dev.off()
 rm(h)
 
 #Map of hillslope CV normalized TN load----
-
 #SD colors
 #colPal = colorRampPalette(colors = c('skyblue', 'blue', 'darkblue'))
 #scaleRange = c(150, 650)
@@ -432,6 +431,7 @@ scaleRange = c(0.1, 0.9)
 scaleBy = 0.1
 Pal = colPal((scaleRange[2] - scaleRange[1])/scaleBy + 1)
 
+#MLE flow estimate
 png('HillslopeMaxLike95Map.png', res = 300, height = 6, width = 6, units ='in')
 par(mar= c(2.5,2.5,1,1))
 plot(world, col = 'white')
@@ -451,13 +451,13 @@ box(which = 'figure', lwd = 2)
 dev.off()
 rm(h)
 
-#1535
-png('HillslopeCompare153595Map.png', res = 300, height = 6, width = 6, units ='in')
+#5482
+png('HillslopeCompare548295Map.png', res = 300, height = 6, width = 6, units ='in')
 par(mar= c(2.5,2.5,1,1))
 plot(world, col = 'white')
 for (h in 1:length(uhills)){
   plot(world[world$hillID == uhills[h],], pch = 22, add = TRUE, lwd=10)
-  plot(world[world$hillID == uhills[h],], col = colFun(Data = HillLikes95[HillLikes95[,1] == uhills[h], which(colnames(HillLikes95) == 1535)]), pch = 15, add = TRUE)
+  plot(world[world$hillID == uhills[h],], col = colFun(Data = HillLikes95[HillLikes95[,1] == uhills[h], which(colnames(HillLikes95) == 5482)]), pch = 15, add = TRUE)
 }
 legend('bottomright', title = expression(bold(paste('95th Percentile Flow (cfs)'))), legend=c(paste0(seq(0.1,0.9,0.1), ' - < ', seq(0.2,1,0.1))), fill = colFun(seq(0.1,0.9,0.1)), border = 'black', ncol = 2)
 degAxis(side = 1, at = seq(-77,-76,.01), labels = FALSE)
@@ -471,15 +471,10 @@ box(which = 'figure', lwd = 2)
 dev.off()
 rm(h)
 
-#TN for MLE
+# TN Load for MLE----
 colPal = colorRampPalette(colors = rev(c('red', 'orange', 'yellow', 'green', 'blue')))
-scaleRange = c(0.1, 0.9)
-scaleBy = 0.1
-Pal = colPal((scaleRange[2] - scaleRange[1])/scaleBy + 1)
-
-colPal = colorRampPalette(colors = rev(c('red', 'orange', 'yellow', 'green', 'blue')))
-scaleRange = c(400, 1600)
-scaleBy = 400
+scaleRange = c(250, 1500)
+scaleBy = 250
 Pal = colPal((scaleRange[2] - scaleRange[1])/scaleBy + 1)
 
 png('HillslopeMaxLikeTNMap.png', res = 300, height = 6, width = 6, units ='in')
@@ -489,7 +484,7 @@ for (h in 1:length(uhills)){
   plot(world[world$hillID == uhills[h],], pch = 22, add = TRUE, lwd=10)
   plot(world[world$hillID == uhills[h],], col = colFun(Data = HillLikesNormTN[HillLikesNormTN[,1] == uhills[h], which(colnames(HillLikesNormTN) == LikesAll$Replicate[which(LikesAll$logLAll == max(LikesAll$logLAll))])]), pch = 15, add = TRUE)
 }
-legend('bottomright', title = expression(bold(paste('TN Load (kg/yr/km'^2,')'))), legend=c(paste0(seq(0.1,0.9,0.1), ' - < ', seq(0.2,1,0.1))), fill = colFun(seq(0.1,0.9,0.1)), border = 'black', ncol = 2)
+legend('bottomright', title = expression(bold(paste('TN Load (kg/yr/km'^2,')'))), legend=c(paste0(seq(250,1500,250), ' - < ', seq(500,1750,250))), fill = colFun(seq(250,1500,250)), border = 'black', ncol = 2)
 degAxis(side = 1, at = seq(-77,-76,.01), labels = FALSE)
 degAxis(side = 1, at = seq(-76.7,-76,.02))
 degAxis(side = 3, at = seq(-77,-76,.01), labels = FALSE)
@@ -501,15 +496,15 @@ box(which = 'figure', lwd = 2)
 dev.off()
 rm(h)
 
-#1535
-png('HillslopeCompare1535TNMap.png', res = 300, height = 6, width = 6, units ='in')
+#5482
+png('HillslopeCompare5482TNMap.png', res = 300, height = 6, width = 6, units ='in')
 par(mar= c(2.5,2.5,1,1))
 plot(world, col = 'white')
 for (h in 1:length(uhills)){
   plot(world[world$hillID == uhills[h],], pch = 22, add = TRUE, lwd=10)
-  plot(world[world$hillID == uhills[h],], col = colFun(Data = HillLikesNormTN[HillLikesNormTN[,1] == uhills[h], which(colnames(HillLikesNormTN) == 1535)]), pch = 15, add = TRUE)
+  plot(world[world$hillID == uhills[h],], col = colFun(Data = HillLikesNormTN[HillLikesNormTN[,1] == uhills[h], which(colnames(HillLikesNormTN) == 5482)]), pch = 15, add = TRUE)
 }
-legend('bottomright', title = expression(bold(paste('TN Load (kg/yr/km'^2,')'))), legend=c(paste0(seq(0.1,0.9,0.1), ' - < ', seq(0.2,1,0.1))), fill = colFun(seq(0.1,0.9,0.1)), border = 'black', ncol = 2)
+legend('bottomright', title = expression(bold(paste('TN Load (kg/yr/km'^2,')'))), legend=c(paste0(seq(250,1500,250), ' - < ', seq(500,1750,250))), fill = colFun(seq(250,1500,250)), border = 'black', ncol = 2)
 degAxis(side = 1, at = seq(-77,-76,.01), labels = FALSE)
 degAxis(side = 1, at = seq(-76.7,-76,.02))
 degAxis(side = 3, at = seq(-77,-76,.01), labels = FALSE)
@@ -522,18 +517,93 @@ dev.off()
 rm(h)
 
 #Make a plot of the weighted prediction based on the likelihoods of the replicates----
-LikesAll$weights = (LikesAll$logLAll-min(LikesAll$logLAll))/sum(LikesAll$logLAll-min(LikesAll$logLAll))
-
+#LikesAll$weights = (LikesAll$logLAll-min(LikesAll$logLAll))/sum(LikesAll$logLAll-min(LikesAll$logLAll))
 #Use the distribution of weights as an empirical distribution
 
 #Parallel axis plot of the parameters on x-axis and likelihood coloring----
-InputParams = read.csv("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\RHESSysFilePreparation\\defs\\MorrisSampleLocs\\MorrisSamples_AfterProcessing.csv", stringsAsFactors = FALSE)
+InputParams = read.csv("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\RHESSysFilePreparation\\defs\\MorrisSampleLocs\\MorrisSamples_AfterProcessing_EditToRerun5SA_comp.csv", stringsAsFactors = FALSE)
 
 #Remove all of the parameters with _orig. They were not modified
 InputParams = InputParams[-grep(x = colnames(InputParams), pattern = '_orig', fixed = TRUE)]
 #Get the number of parameters
 cols = ncol(InputParams)
 
-#Export csv of parameters and likelihood----
-LikesParams = cbind(SelLikes$logL, InputParams[SelLikes$Replicate, which(colnames(InputParams) %in% SortRanksMua_b)])
+#Load in file containing the parameters that will be calibrated----
+ParamsCal = read.csv(file = "C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\RHESSysFilePreparation\\defs_Calibration\\BaismanCalibrationParameterProblemFile.csv", header = TRUE, stringsAsFactors = FALSE)
+#Export csv of parameters and likelihood for parallel axis plot----
+LikesParams = cbind(SelLikes$logLAll, InputParams[SelLikes$Replicate, which(colnames(InputParams) %in% ParamsCal$NumberedParams)])
 write.csv(LikesParams, 'LikelihoodParamsParAxis.csv', row.names = FALSE)
+
+#Join the parameters to the likelihoods----
+#Remove duplicate rows in InputParams
+InputParams = InputParams[UniqueReps,]
+InputParams_Likes = cbind(InputParams, LikesAll)
+
+write.csv(InputParams_Likes, file = 'BaismanMorrisParamsLikelihoods.csv', row.names = FALSE)
+
+#Sort based on likelihood to set up for selection of top N----
+LikesAll_sort = LikesAll[order(LikesAll$logLAll, decreasing = TRUE),]
+
+# Take a random sample of N from the most likely 2.5%, where N is number of chains----
+N = 39
+TopLikes = seq(1, ceiling(nrow(LikesAll)*0.025),1)
+
+#Check the number of unique trajectories that are in the top 2.5% of most likely replicates.
+TopLikesTraj = vector('numeric', length = 40)
+for (i in 1:40){
+  TopLikesTraj[i] = length(which(LikesAll_sort$Replicate[TopLikes] %in% ((1+272*(i-1)):(272*(i)))))
+}
+rm(i)
+
+#Select one replicate from each trajectory in the top
+SelTopLikes = vector('numeric', length = N)
+set.seed(8356)
+for (i in 1:length(which(TopLikesTraj > 0))){
+  IndsTopTraj = which(LikesAll_sort$Replicate[TopLikes] %in% ((1+272*(which(TopLikesTraj > 0)[i]-1)):(272*(which(TopLikesTraj > 0)[i]))))
+  IndTop = IndsTopTraj[round(runif(n = 1, min = 1, max = TopLikesTraj[which(TopLikesTraj > 0)][i]),0)]
+  SelTopLikes[i] = TopLikes[IndTop]
+  TopLikes = TopLikes[-IndTop]
+}
+rm(IndsTopTraj, IndTop,i)
+
+#Randomly sample remaining without replacement to get the N starting locations
+for (i in which(SelTopLikes == 0)[1]:N){
+  IndTop = round(runif(n = 1, min = 1, max = length(TopLikes)),0)
+  SelTopLikes[i] = TopLikes[IndTop]
+  TopLikes = TopLikes[-IndTop]
+}
+rm(i, IndTop)
+SelTopLikes = sort(SelTopLikes)
+
+# Gather the selected likelihood replicate indices----
+RunIndsTopLikes = LikesAll_sort$Replicate[SelTopLikes]
+
+#Get the parameters for those run indices into a matrix
+ChainStarts = InputParams[as.numeric(rownames(InputParams)) %in% SelTopLikes,]
+#Add likelihood parameters
+ChainStartsLikes = cbind(ChainStarts, matrix(NA, nrow = nrow(ChainStarts), ncol = 12))
+for (i in 1:N){
+  ChainStartsLikes[i,] = cbind(ChainStarts[i,], LikesAll_sort[which(LikesAll_sort$Replicate == as.numeric(rownames(ChainStarts))[i]), c(2:7, 13:18)])
+}
+colnames(ChainStartsLikes) = c(colnames(ChainStarts), 'PL_beta', 'PL_xi', 'PL_sigma_0', 'PL_sigma_1', 'PL_phi_1', 'PL_mu_h', 'PL_beta_TN', 'PL_xi_TN', 'PL_sigma_0_TN', 'PL_sigma_1_TN', 'PL_phi_1_TN', 'PL_mu_h_TN')
+
+#Remove all variables that will not be considered because they are spatially distributed now----
+ChainStarts = ChainStarts[-which(colnames(ChainStarts) %in% c('l3_landuse.percent_impervious', 'l4_landuse.percent_impervious'))]
+ChainStartsLikes = ChainStartsLikes[-which(colnames(ChainStartsLikes) %in% c('l3_landuse.percent_impervious', 'l4_landuse.percent_impervious'))]
+
+#Change all of the variables that will be fixed in calibration to their mean/most likely values----
+#determine which parameters are being fixed
+FixedParamsCal = ParamRanges[,1][-which(ParamRanges[,1] %in% ParamRanges_Cal[,1])]
+for (i in 1:length(FixedParamsCal)){
+  ChainSampsParams[,colnames(ChainSampsParams) == FixedParamsCal[i]] = mean(c(ParamRanges[ParamRanges[,1] == FixedParamsCal[i], 3], ParamRanges[ParamRanges[,1] == FixedParamsCal[i], 4]))
+}
+
+#Write a file of the MCMC chain starting locations----
+write.table(ChainStarts, file = 'BaismanChainStarts.txt', sep = '\t', row.names = FALSE, col.names = TRUE)
+
+#Evaluate histograms of the parameters to be calibrated from the most likely sets to evaluate bound changes----
+for (i in 1:nrow(ParamRanges_Cal)){
+  png(paste0('LikelihoodParamValues_', ParamRanges_Cal$NumberedParams[i],'.png'), units = 'in', height = 5, width = 5, res = 200)
+  hist(LikesAll[TopLikes, ParamRanges_Cal$NumberedParams[i]], breaks = 20, main = ParamRanges_Cal$NumberedParams[i], xlim = c(ParamRanges_Cal$Lower[i], ParamRanges_Cal$Upper[i]))
+  dev.off()
+}
