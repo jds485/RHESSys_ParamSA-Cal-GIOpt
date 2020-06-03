@@ -1,0 +1,127 @@
+library(BayesianTools)
+library(parallel)
+library(foreach)
+library(doParallel)
+
+#Example from: https://cran.r-project.org/web/packages/BayesianTools/vignettes/BayesianTools.html#example
+set.seed(2759)
+sampleSize = 30
+x <- (-(sampleSize-1)/2):((sampleSize-1)/2)
+y <-  1 * x + 1*x^2 + rnorm(n=sampleSize,mean=0,sd=10)
+#plot(x,y, main="Test Data")
+
+#Likelihood definition
+likelihood1 <- function(param){
+  pred = param[1] + param[2]*x + param[3] * x^2
+  singlelikelihoods = dnorm(y, mean = pred, sd = 1/(param[4]^2), log = T)
+  return(sum(singlelikelihoods))  
+}
+
+#Posterior and prior definition
+setUp1 <- createBayesianSetup(likelihood1, lower = c(-5,-5,-5,0.01), upper = c(5,5,5,30))
+setUp1_par <- createBayesianSetup(likelihood1, lower = c(-5,-5,-5,0.01), upper = c(5,5,5,30), parallel = 7, parallelOptions = list(packages=list('BayesianTools'), variables=list('x','y'), dlls=NULL))
+
+#MCMC setup
+settings = list(iterations = 100000, gamma= NULL, eps = 0, e = 0.05, parallel = NULL, Z = NULL, ZupdateFrequency = 10, pSnooker = 0.1, DEpairs = 3,
+                nCR = 1, pCRupdate = TRUE, updateInterval = 100,
+                #burnin must be greater than adaptation.
+                burnin = 20000, adaptation = 20000, thin = 5, message = FALSE, startValue = 7)
+
+out1 <- runMCMC(bayesianSetup = setUp1, sampler = "DREAMzs", settings = settings)
+tracePlot(out1)
+summary(out1)
+
+#parallel
+#Note: setting the seed equal to the seed for serial does not result in identical runs. There must be a parallel random seed option that's different than serial.
+settings_par = list(iterations = 100000, gamma= NULL, eps = 0, e = 0.05, parallel = NULL, Z = NULL, ZupdateFrequency = 10, pSnooker = 0.1, DEpairs = 3,
+                nCR = 1, pCRupdate = TRUE, updateInterval = 100,
+                #burnin must be greater than adaptation.
+                burnin = 20000, adaptation = 20000, thin = 5, message = FALSE, startValue = 7)
+
+out1_par <- runMCMC(bayesianSetup = setUp1_par, sampler = "DREAMzs", settings = settings_par)
+tracePlot(out1_par)
+summary(out1_par)
+
+#Chain Length
+ceiling((100000/7 - 20000/7)/5) + 1
+
+stopParallel(setup_wholePar)
+
+#Internal parallelization----
+#This will execute the likelihood function using a Parapply
+
+#External parallelization----
+#This likelihood function must be able to do parallel allocation, and accept a matrix of chains as rows, parameters as columns, and return a vector of log-likelihoods, one element per chain.
+### Create cluster with n cores
+cl <- parallel::makeCluster(3)
+registerDoParallel(cl)
+
+## Definition of the likelihood which will be calculated in parallel. Instead of the parApply function, we could also define a costly parallelized likelihood
+likelihood_externalTest <- function(param){
+  #Check to see if there are any files of the format test_#.txt in the working directory
+  #setwd("C:/Users/jsmif/Documents/TestDREAM")
+  fs = list.files()
+  if (length(grep(fs,pattern = 'test_',ignore.case = FALSE,fixed = TRUE,value = FALSE)) == 0){
+    num = 1
+  }else{
+    num = read.csv(file = 'IterNum.txt', header = TRUE)$x[1] + 1
+  }
+  write.csv(x = num, file = 'IterNum.txt', row.names = FALSE)
+  print(paste('test', num))
+  print(param)
+  print(nrow(param))
+  print(ifelse(is.null(nrow(param)), 1, nrow(param)))
+  
+  #Write a file with the suggested parameter sets
+  write.table(x = matrix(param, nrow = ifelse(is.null(nrow(param)), 1, nrow(param)), ncol = ifelse(is.null(nrow(param)), length(param), ncol(param))), file = paste0('test_', num,'.txt'), sep = '\t', row.names = FALSE, col.names = TRUE)
+  
+  #Compute log likelihoods in parallel
+  lls = foreach::foreach(i=1:ifelse(is.null(nrow(param)), 1, nrow(param)), .combine = c, .inorder = TRUE, .export = c('x', 'y')) %dopar%{
+    pred = param[i,1] + param[i,2]*x + param[i,3] * x^2
+    singlelikelihoods = dnorm(y, mean = pred, sd = 1/(param[i,4]^2), log = T)
+    sum(singlelikelihoods)
+  }
+  return(lls)  
+}
+
+## export functions, dlls, libraries
+#parallel::clusterEvalQ(cl = cl, library(BayesianTools))
+#parallel::clusterExport(cl, varlist = list(likelihood))
+
+## create BayesianSetup
+setup_Parext = createBayesianSetup(likelihood_externalTest, lower = c(-5,-5,-5,0.01), upper = c(5,5,5,30), parallel = 'external', parallelOptions = list(packages=list('BayesianTools', 'foreach', 'doParallel'), variables=list('x','y','likelihood_externalTest','DREAMzs'), dlls=NULL))
+
+## For this case we want to parallelize the internal chains, therefore we create a n row matrix with startValues, if you parallelize a model in the likelihood, do not set a n*row Matrix for startValue
+settings_Parext = list(iterations = 100, gamma= NULL, eps = 0, e = 0.05, parallel = NULL, Z = NULL, ZupdateFrequency = 1, pSnooker = 0.1, DEpairs = 2,
+                       nCR = 2, pCRupdate = TRUE, updateInterval = 1,
+                       #burnin must be greater than adaptation.
+                       burnin = 20, adaptation = 20, thin = 1, message = FALSE, startValue = 3)
+
+## runMCMC
+set.seed(7377)
+out_Parext <- runMCMC(settings = settings_Parext, bayesianSetup = setup_Parext, sampler = "DREAMzs")
+
+stopCluster(cl)
+
+#Parallel Whole Chains and combine at end----
+#NOTE: must use at least 2 chains per core for this to work, so not a good option when code takes a long time to run.
+## Create BayesianSetup and settings
+setup_wholePar <- createBayesianSetup(likelihood1, lower = c(-5,-5,-5,0.01), upper = c(5,5,5,30), parallel = F)
+settings_wholePar = list(iterations = 100000, gamma= NULL, eps = 0, e = 0.05, parallel = NULL, Z = NULL, ZupdateFrequency = 10, pSnooker = 0.1, DEpairs = 2,
+                         nCR = 3, pCRupdate = FALSE, updateInterval = 10,
+                         #burnin must be greater than adaptation.
+                         burnin = 0, adaptation = .2, thin = 1, message = FALSE, startValue = 2)
+
+## Start cluster with n cores for n chains and export BayesianTools library
+cl <- parallel::makeCluster(7)
+parallel::clusterEvalQ(cl = cl, library(BayesianTools))
+parallel::clusterExport(cl = cl, varlist = c('setup_wholePar', 'settings_wholePar', 'x', 'y'))
+
+## calculate parallel n chains, for each chain the likelihood will be calculated on one core
+out <- parallel::parLapply(cl, 1:7, fun = function(X, bayesianSetup, settings) runMCMC(setup_wholePar, settings_wholePar, sampler = "DREAMzs"), setup_wholePar, settings_wholePar)
+
+## Combine the chains
+out <- createMcmcSamplerList(out)
+summary(out)
+
+stopCluster(cl)
