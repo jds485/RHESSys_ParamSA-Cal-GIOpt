@@ -81,7 +81,7 @@ likelihood_externalTest <- function(param){
     num = read.csv(file = 'IterNum.txt', header = TRUE)$x[1] + 1
   }
   write.csv(x = num, file = 'IterNum.txt', row.names = FALSE)
-  rm(num, fs)
+  rm(fs)
   #print(paste('test', num))
   #print(param)
   #print(nrow(param))
@@ -89,7 +89,7 @@ likelihood_externalTest <- function(param){
   
   #Write a file with the suggested parameter sets
   #write.table(x = matrix(param, nrow = ifelse(is.null(nrow(param)), 1, nrow(param)), ncol = ifelse(is.null(nrow(param)), length(param), ncol(param))), file = paste0('test_', num,'.txt'), sep = '\t', row.names = FALSE, col.names = TRUE)
-  
+  write.csv(x = matrix(param, nrow = ifelse(is.null(nrow(param)), 1, nrow(param)), ncol = ifelse(is.null(nrow(param)), length(param), ncol(param))), file = paste0('Chain_', num,'_AfterProcessing.csv'), row.names = FALSE)
   od = getwd()
   
   #Compute log likelihoods in parallel
