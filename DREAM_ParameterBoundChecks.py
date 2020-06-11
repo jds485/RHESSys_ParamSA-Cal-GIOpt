@@ -23,7 +23,7 @@ import string
 #3: directory of def files
 #4: round tolerance <= 10
 #5: problem file name with extension
-#6: chain parameter sample text file name without extension (e.g., 'BaismanChainStarts.txt', 'BaismanChain_1.txt' where 1 is chain iteration)
+#6: chain parameter sample text file name without extension (e.g., 'BaismanChainStarts', 'Chain_1' where 1 is chain iteration)
 
 #%% Set working directory
 #os.chdir('/scratch/js4yd/MorrisSA/RHESSysRuns')
@@ -97,7 +97,7 @@ for i in range(len(Chains_df.filter(regex='_Ksat_0$').columns)):
         
         #Save the original column
         #Fixme: not useful for calibration? Here and elsewhere in script.
-        Chains_df.loc[:, 'orig_' + ind1 + '_Ksat_0_orig'] = mc
+        #Chains_df.loc[:, 'orig_' + ind1 + '_Ksat_0_orig'] = mc
         
         #Go through the trajectories to check the condition.
         compare = mc > mu
@@ -145,7 +145,7 @@ for i in range(len(Chains_df.filter(regex='Ksat_0_v$').columns)):
     vKsat = Chains_df.loc[:, ind + '_Ksat_0_v']
     
     #Save the original column.
-    Chains_df.loc[:, 'orig_' + ind + '_Ksat_0_v_orig'] = vKsat
+    #Chains_df.loc[:, 'orig_' + ind + '_Ksat_0_v_orig'] = vKsat
     
     #Go through the trajectories to check the condition.
     compare = vKsat > Ksat
@@ -246,7 +246,7 @@ for i in range(len(Chains_df.filter(regex='_m$').columns)):
         mu = Chains_df.loc[:, ind2 + '_m']
         
         #Save the original column
-        Chains_df.loc[:, 'orig_' + ind1 + '_m_orig'] = mc
+        #Chains_df.loc[:, 'orig_' + ind1 + '_m_orig'] = mc
         
         #Go through the trajectories to check the condition.
         compare = mc > mu
@@ -296,7 +296,7 @@ for i in range(len(Chains_df.filter(regex='_porosity_0$').columns)):
         pu = Chains_df.loc[:, ind2 + '_porosity_0']
         
         #Save the original column
-        Chains_df.loc[:, 'orig_' + ind1 + '_porosity_0_orig'] = pc
+        #Chains_df.loc[:, 'orig_' + ind1 + '_porosity_0_orig'] = pc
         
         #Go through the trajectories to check the condition.
         compare = pc > pu

@@ -34,7 +34,7 @@ for h in range(len(Files)):
 del h
 #Now loop over these files
 for h in range(len(IndH)):
-    f = pd.read_table(Files[IndH[h]], delim_whitespace=True, header=None)
+    f = pd.read_csv(Files[IndH[h]], delim_whitespace=True, header=None)
     
     #Find the column index (name, so use loc) in veg corresponding to the def file f
     IndV = veg.iloc[5,:][veg.iloc[5,:] == str(f.iloc[f.iloc[:,1][(f.iloc[:,1] == 'stratum_default_ID') == True].index,0].values[0])].index

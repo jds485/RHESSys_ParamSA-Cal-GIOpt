@@ -14,7 +14,7 @@ import signal
 
 #sys.argv contains: 
 #0: unused - script call info
-#1: name of the chain parameter file (e.g., 'BaismanChain_1_AfterProcessing.csv')
+#1: name of the chain parameter file (e.g., 'Chain_1_AfterProcessing.csv')
 #2: RHESSysRuns directory for saving replicates "$BASEDIR"/RHESSysRuns
 #3: def file directory "$BASEDIR"/"$RHESSysNAME"/defs
 #4: grass GIS folder name "$RHESSysNAME"
@@ -53,13 +53,13 @@ for i in range(len(Chains_df.iloc[:,0])):
     #Save original wd
     od = os.getcwd()
     #Make new directory for the replicate. This is the directory where code to run GIS2RHESSys pre-processing will be
-    os.mkdir(od+'/Run'+sys.argv[7]+'_Ch'+str(i))
+    os.mkdir(od+'/Run'+sys.argv[7]+'_Ch'+str(i+1))
     #Make the directory in which the RHESSys simulation will be run
-    os.mkdir(od+'/Run'+sys.argv[7]+'_Ch'+str(i)+'/'+sys.argv[4])
+    os.mkdir(od+'/Run'+sys.argv[7]+'_Ch'+str(i+1)+'/'+sys.argv[4])
     #Make new directory for the def files in that folder
-    os.mkdir(od+'/Run'+sys.argv[7]+'_Ch'+str(i)+'/'+sys.argv[4]+'/defs')
+    os.mkdir(od+'/Run'+sys.argv[7]+'_Ch'+str(i+1)+'/'+sys.argv[4]+'/defs')
     #Change into that directory
-    os.chdir(od+'/Run'+sys.argv[7]+'_Ch'+str(i)+'/'+sys.argv[4]+'/defs')
+    os.chdir(od+'/Run'+sys.argv[7]+'_Ch'+str(i+1)+'/'+sys.argv[4]+'/defs')
     
     #%% Zone
     #Edit the zone file with the variables generated
@@ -83,7 +83,7 @@ for i in range(len(Chains_df.iloc[:,0])):
     #Check that all of the columns that are different from the original zone file correspond to the ones in the MorrisSample dataset
     checkCols = [(string.split(s=ck, sep='z_'))[1] for ck in Chains_df.columns[IndZ]]
     if not all(checkCols == zone.iloc[zone.index[((zone.iloc[:,0] != zc.iloc[:,0]) == True)],1].values):
-        print >> sys.stderr, 'PyERROR: Zone def file not constructed with parameter names correctly for Replicate = %s' % str(i)
+        print >> sys.stderr, 'PyERROR: Zone def file not constructed with parameter names correctly for Chain = %s' % str(i+1)
         os.kill(os.getppid(),signal.SIGTERM)
     del ck, checkCols
     
@@ -92,7 +92,7 @@ for i in range(len(Chains_df.iloc[:,0])):
     #If def files have parameters in the same order as listed in the Chains_df, it's guaranteed.
     checkVals = [float(ck) for ck in (zc.iloc[zc.index[((zone.iloc[:,0] != zc.iloc[:,0]) == True)],0].values)]
     if not all(Chains_df.iloc[i, IndZ].values.round(roundTol) == checkVals):
-        print >> sys.stderr, 'PyERROR: Zone def file not constructed with values correctly for Replicate = %s' % str(i)
+        print >> sys.stderr, 'PyERROR: Zone def file not constructed with values correctly for Chain = %s' % str(i+1)
         os.kill(os.getppid(),signal.SIGTERM)
     
     #Write new zone file
@@ -119,7 +119,7 @@ for i in range(len(Chains_df.iloc[:,0])):
     #Fixme: see above for guarantee of columns in same order
     checkCols = [(string.split(s=ck, sep='h_'))[1] for ck in Chains_df.columns[IndH]]
     if not all(checkCols == hill.iloc[hill.index[((hill.iloc[:,0] != hc.iloc[:,0]) == True)],1].values):
-        print >> sys.stderr, 'PyERROR: Hill def file not constructed with parameter names correctly for Replicate = %s' % str(i)
+        print >> sys.stderr, 'PyERROR: Hill def file not constructed with parameter names correctly for Chain = %s' % str(i+1)
         os.kill(os.getppid(),signal.SIGTERM)
     del ck, checkCols
     
@@ -128,7 +128,7 @@ for i in range(len(Chains_df.iloc[:,0])):
     #If def files have parameters in the same order as listed in the Chains_df, it's guaranteed.
     checkVals = [float(ck) for ck in (hc.iloc[hc.index[((hill.iloc[:,0] != hc.iloc[:,0]) == True)],0].values)]
     if not all(Chains_df.iloc[i, IndH].values.round(roundTol) == checkVals):
-        print >> sys.stderr, 'PyERROR: Hill def file not constructed with values correctly for Replicate = %s' % str(i)
+        print >> sys.stderr, 'PyERROR: Hill def file not constructed with values correctly for Chain = %s' % str(i+1)
         os.kill(os.getppid(),signal.SIGTERM)
     
     #Write new hillslope file
@@ -158,7 +158,7 @@ for i in range(len(Chains_df.iloc[:,0])):
 #    #Fixme: see above for guarantee of columns in same order
 #    checkCols = [(string.split(s=ck, sep='l1_'))[1] for ck in Chains_df.columns[IndL1]]
 #    if not all(checkCols == land_grass.iloc[land_grass.index[((land_grass.iloc[:,0] != l1c.iloc[:,0]) == True)],1].values):
-#        print >> sys.stderr, 'PyERROR: Grass land use def file not constructed with parameter names correctly for Replicate = %s' % str(i)
+#        print >> sys.stderr, 'PyERROR: Grass land use def file not constructed with parameter names correctly for Chain = %s' % str(i+1)
 #        os.kill(os.getppid(),signal.SIGTERM)
 #    del ck, checkCols
 #    
@@ -167,7 +167,7 @@ for i in range(len(Chains_df.iloc[:,0])):
 #    #If def files have parameters in the same order as listed in the Chains_df, it's guaranteed.
 #    checkVals = [float(ck) for ck in (l1c.iloc[l1c.index[((land_grass.iloc[:,0] != l1c.iloc[:,0]) == True)],0].values)]
 #    if not all(Chains_df.iloc[i, IndL1].values.round(roundTol) == checkVals):
-#        print >> sys.stderr, 'PyERROR: Grass land use def file not constructed with values correctly for Replicate = %s' % str(i)
+#        print >> sys.stderr, 'PyERROR: Grass land use def file not constructed with values correctly for Chain = %s' % str(i+1)
 #        os.kill(os.getppid(),signal.SIGTERM)
 #    
 #    #Write new land_grass file
@@ -195,7 +195,7 @@ for i in range(len(Chains_df.iloc[:,0])):
 #    #Fixme: see above for guarantee of columns in same order
 #    checkCols = [(string.split(s=ck, sep='l2_'))[1] for ck in Chains_df.columns[IndL2]]
 #    if not all(checkCols == land_undev.iloc[land_undev.index[((land_undev.iloc[:,0] != l2c.iloc[:,0]) == True)],1].values):
-#        print >> sys.stderr, 'PyERROR: Undeveloped land use def file not constructed with parameter names correctly for Replicate = %s' % str(i)
+#        print >> sys.stderr, 'PyERROR: Undeveloped land use def file not constructed with parameter names correctly for Chain = %s' % str(i+1)
 #        os.kill(os.getppid(),signal.SIGTERM)
 #    del ck, checkCols
 #    
@@ -204,7 +204,7 @@ for i in range(len(Chains_df.iloc[:,0])):
 #    #If def files have parameters in the same order as listed in the Chains_df, it's guaranteed.
 #    checkVals = [float(ck) for ck in (l2c.iloc[l2c.index[((land_undev.iloc[:,0] != l2c.iloc[:,0]) == True)],0].values)]
 #    if not all(Chains_df.iloc[i, IndL2].values.round(roundTol) == checkVals):
-#        print >> sys.stderr, 'PyERROR: Undeveloped land use def file not constructed with values correctly for Replicate = %s' % str(i)
+#        print >> sys.stderr, 'PyERROR: Undeveloped land use def file not constructed with values correctly for Chain = %s' % str(i+1)
 #        os.kill(os.getppid(),signal.SIGTERM)
 #    
 #    #Write new file
@@ -232,7 +232,7 @@ for i in range(len(Chains_df.iloc[:,0])):
 #    #Fixme: see above for guarantee of columns in same order
 #    checkCols = [(string.split(s=ck, sep='l3_'))[1] for ck in Chains_df.columns[IndL3]]
 #    if not all(checkCols == land_urban.iloc[land_urban.index[((land_urban.iloc[:,0] != l3c.iloc[:,0]) == True)],1].values):
-#        print >> sys.stderr, 'PyERROR: Urban land use def file not constructed with parameter names correctly for Replicate = %s' % str(i)
+#        print >> sys.stderr, 'PyERROR: Urban land use def file not constructed with parameter names correctly for Chain = %s' % str(i+1)
 #        os.kill(os.getppid(),signal.SIGTERM)
 #    del ck, checkCols
 #    
@@ -241,7 +241,7 @@ for i in range(len(Chains_df.iloc[:,0])):
 #    #If def files have parameters in the same order as listed in the Chains_df, it's guaranteed.
 #    checkVals = [float(ck) for ck in (l3c.iloc[l3c.index[((land_urban.iloc[:,0] != l3c.iloc[:,0]) == True)],0].values)]
 #    if not all(Chains_df.iloc[i, IndL3].values.round(roundTol) == checkVals):
-#        print >> sys.stderr, 'PyERROR: Urban land use def file not constructed with values correctly for Replicate = %s' % str(i)
+#        print >> sys.stderr, 'PyERROR: Urban land use def file not constructed with values correctly for Chain = %s' % str(i+1)
 #        os.kill(os.getppid(),signal.SIGTERM)
 #
 #    #Write new file
@@ -269,7 +269,7 @@ for i in range(len(Chains_df.iloc[:,0])):
     #Fixme: see above for guarantee of columns in same order
     checkCols = [(string.split(s=ck, sep='l4_'))[1] for ck in Chains_df.columns[IndL4]]
     if not all(checkCols == land_septic.iloc[land_septic.index[((land_septic.iloc[:,0] != l4c.iloc[:,0]) == True)],1].values):
-        print >> sys.stderr, 'PyERROR: Urban septic land use def file not constructed with parameter names correctly for Replicate = %s' % str(i)
+        print >> sys.stderr, 'PyERROR: Urban septic land use def file not constructed with parameter names correctly for Chain = %s' % str(i+1)
         os.kill(os.getppid(),signal.SIGTERM)
     del ck, checkCols
     
@@ -278,7 +278,7 @@ for i in range(len(Chains_df.iloc[:,0])):
     #If def files have parameters in the same order as listed in the Chains_df, it's guaranteed.
     checkVals = [float(ck) for ck in (l4c.iloc[l4c.index[((land_septic.iloc[:,0] != l4c.iloc[:,0]) == True)],0].values)]
     if not all(Chains_df.iloc[i, IndL4].values.round(roundTol) == checkVals):
-        print >> sys.stderr, 'PyERROR: Urban septic land use def file not constructed with values correctly for Replicate = %s' % str(i)
+        print >> sys.stderr, 'PyERROR: Urban septic land use def file not constructed with values correctly for Chain = %s' % str(i+1)
         os.kill(os.getppid(),signal.SIGTERM)
 
     #Write new file
@@ -307,7 +307,7 @@ for i in range(len(Chains_df.iloc[:,0])):
     #Sorting alphabetically to check columns are the same
     checkCols = sorted([(string.split(s=ck, sep='s9_'))[1] for ck in Chains_df.columns[IndS9]])
     if not (checkCols == sorted(soil_loam.iloc[soil_loam.index[((soil_loam.iloc[:,0] != s9.iloc[:,0]) == True)],1].values.tolist())):
-        print >> sys.stderr, 'PyERROR: Soil loam def file not constructed with parameter names correctly for Replicate = %s' % str(i)
+        print >> sys.stderr, 'PyERROR: Soil loam def file not constructed with parameter names correctly for Chain = %s' % str(i+1)
         os.kill(os.getppid(),signal.SIGTERM)
     del ck, checkCols
     
@@ -317,7 +317,7 @@ for i in range(len(Chains_df.iloc[:,0])):
     checkVals = sorted([str('%.10f' % round(ck,roundTol)) for ck in Chains_df.iloc[i,IndS9]])
     checkVals2 = sorted([str(ck) for ck in s9.iloc[s9.index[((soil_loam.iloc[:,0] != s9.iloc[:,0]) == True)],0].values])
     if not (checkVals2 == checkVals):
-        print >> sys.stderr, 'PyERROR: Soil loam def file not constructed with values correctly for Replicate = %s' % str(i)
+        print >> sys.stderr, 'PyERROR: Soil loam def file not constructed with values correctly for Chain = %s' % str(i+1)
         os.kill(os.getppid(),signal.SIGTERM)
     
     #Make edits to other variables that depend on the generated variables
@@ -352,7 +352,7 @@ for i in range(len(Chains_df.iloc[:,0])):
     #Sorting alphabetically to check columns are the same
     checkCols = sorted([(string.split(s=ck, sep='s109_'))[1] for ck in Chains_df.columns[Inds109]])
     if not (checkCols == sorted(soil_cloam.iloc[soil_cloam.index[((soil_cloam.iloc[:,0] != s109.iloc[:,0]) == True)],1].values.tolist())):
-        print >> sys.stderr, 'PyERROR: Soil compact loam def file not constructed with parameter names correctly for Replicate = %s' % str(i)
+        print >> sys.stderr, 'PyERROR: Soil compact loam def file not constructed with parameter names correctly for Chain = %s' % str(i+1)
         os.kill(os.getppid(),signal.SIGTERM)
     del ck, checkCols
     
@@ -362,7 +362,7 @@ for i in range(len(Chains_df.iloc[:,0])):
     checkVals = sorted([str('%.10f' % round(ck,roundTol)) for ck in Chains_df.iloc[i,Inds109]])
     checkVals2 = sorted([str(ck) for ck in s109.iloc[s109.index[((soil_cloam.iloc[:,0] != s109.iloc[:,0]) == True)],0].values])
     if not (checkVals2 == checkVals):
-        print >> sys.stderr, 'PyERROR: Soil compact loam def file not constructed with values correctly for Replicate = %s' % str(i)
+        print >> sys.stderr, 'PyERROR: Soil compact loam def file not constructed with values correctly for Chain = %s' % str(i+1)
         os.kill(os.getppid(),signal.SIGTERM)
     
     #Make edits to other variables that depend on the generated variables
@@ -397,7 +397,7 @@ for i in range(len(Chains_df.iloc[:,0])):
     #Sorting alphabetically to check columns are the same
     checkCols = sorted([(string.split(s=ck, sep='s8_'))[1] for ck in Chains_df.columns[Inds8]])
     if not (checkCols == sorted(soil_sloam.iloc[soil_sloam.index[((soil_sloam.iloc[:,0] != s8.iloc[:,0]) == True)],1].values.tolist())):
-        print >> sys.stderr, 'PyERROR: Soil silty loam def file not constructed with parameter names correctly for Replicate = %s' % str(i)
+        print >> sys.stderr, 'PyERROR: Soil silty loam def file not constructed with parameter names correctly for Chain = %s' % str(i+1)
         os.kill(os.getppid(),signal.SIGTERM)
     del ck, checkCols
     
@@ -407,7 +407,7 @@ for i in range(len(Chains_df.iloc[:,0])):
     checkVals = sorted([str('%.10f' % round(ck,roundTol)) for ck in Chains_df.iloc[i,Inds8]])
     checkVals2 = sorted([str(ck) for ck in s8.iloc[s8.index[((soil_sloam.iloc[:,0] != s8.iloc[:,0]) == True)],0].values])
     if not (checkVals2 == checkVals):
-        print >> sys.stderr, 'PyERROR: Soil silty loam def file not constructed with values correctly for Replicate = %s' % str(i)
+        print >> sys.stderr, 'PyERROR: Soil silty loam def file not constructed with values correctly for Chain = %s' % str(i+1)
         os.kill(os.getppid(),signal.SIGTERM)
     
     #Make edits to other variables that depend on the generated variables
@@ -442,7 +442,7 @@ for i in range(len(Chains_df.iloc[:,0])):
     #Sorting alphabetically to check columns are the same
     checkCols = sorted([(string.split(s=ck, sep='s108_'))[1] for ck in Chains_df.columns[Inds108]])
     if not (checkCols == sorted(soil_csloam.iloc[soil_csloam.index[((soil_csloam.iloc[:,0] != s108.iloc[:,0]) == True)],1].values.tolist())):
-        print >> sys.stderr, 'PyERROR: Soil compact silty loam def file not constructed with parameter names correctly for Replicate = %s' % str(i)
+        print >> sys.stderr, 'PyERROR: Soil compact silty loam def file not constructed with parameter names correctly for Chain = %s' % str(i+1)
         os.kill(os.getppid(),signal.SIGTERM)
     del ck, checkCols
     
@@ -452,7 +452,7 @@ for i in range(len(Chains_df.iloc[:,0])):
     checkVals = sorted([str('%.10f' % round(ck,roundTol)) for ck in Chains_df.iloc[i,Inds108]])
     checkVals2 = sorted([str(ck) for ck in s108.iloc[s108.index[((soil_csloam.iloc[:,0] != s108.iloc[:,0]) == True)],0].values])
     if not (checkVals2 == checkVals):
-        print >> sys.stderr, 'PyERROR: Soil compact silty loam def file not constructed with values correctly for Replicate = %s' % str(i)
+        print >> sys.stderr, 'PyERROR: Soil compact silty loam def file not constructed with values correctly for Chain = %s' % str(i+1)
         os.kill(os.getppid(),signal.SIGTERM)
     
     #Make edits to other variables that depend on the generated variables
@@ -489,7 +489,7 @@ for i in range(len(Chains_df.iloc[:,0])):
     #Sorting alphabetically to check columns are the same
     checkCols = sorted([(string.split(s=ck, sep='v102_'))[1] for ck in Chains_df.columns[Indv102]])
     if not (checkCols == sorted(veg_Tree.iloc[veg_Tree.index[((veg_Tree.iloc[:,0] != v102.iloc[:,0]) == True)],1].values.tolist())):
-        print >> sys.stderr, 'PyERROR: Vegetation tree def file not constructed with parameter names correctly for Replicate = %s' % str(i)
+        print >> sys.stderr, 'PyERROR: Vegetation tree def file not constructed with parameter names correctly for Chain = %s' % str(i+1)
         os.kill(os.getppid(),signal.SIGTERM)
     del ck, checkCols
     
@@ -500,7 +500,7 @@ for i in range(len(Chains_df.iloc[:,0])):
     checkVals = sorted([str('%.7f' % round(ck,roundTol)) for ck in Chains_df.iloc[i,Indv102]])
     checkVals2 = sorted([str('%.7f' % round(float(ck),roundTol)) for ck in v102.iloc[v102.index[((veg_Tree.iloc[:,0] != v102.iloc[:,0]) == True)],0].values])
     if not (checkVals2 == checkVals):
-        print >> sys.stderr, 'PyERROR: Vegetation tree def file not constructed with values correctly for Replicate = %s' % str(i)
+        print >> sys.stderr, 'PyERROR: Vegetation tree def file not constructed with values correctly for Chain = %s' % str(i+1)
         os.kill(os.getppid(),signal.SIGTERM)
 
     #Make edits to other variables that depend on the generated variables
@@ -510,7 +510,7 @@ for i in range(len(Chains_df.iloc[:,0])):
     
     #Ensure that the sum of these two variables = 1 because rounding has now been completed.
     if (float('%.10f' % (float(v102.loc[:,0][v102.loc[:,1] == 'epc.deadwood_flig']) + float(v102.loc[:,0][v102.loc[:,1] == 'epc.deadwood_fcel']))) != 1.0):
-        print >> sys.stderr, 'PyERROR: Vegetation tree epc.deadwood_flig + epc.deadwood_fcel != 1 for Replicate = %s' % str(i)
+        print >> sys.stderr, 'PyERROR: Vegetation tree epc.deadwood_flig + epc.deadwood_fcel != 1 for Chain = %s' % str(i+1)
         os.kill(os.getppid(),signal.SIGTERM)
     
     #Write new file
@@ -539,7 +539,7 @@ for i in range(len(Chains_df.iloc[:,0])):
     #Sorting alphabetically to check columns are the same
     checkCols = sorted([(string.split(s=ck, sep='v3_'))[1] for ck in Chains_df.columns[Indv3]])
     if not (checkCols == sorted(veg_grass.iloc[veg_grass.index[((veg_grass.iloc[:,0] != v3.iloc[:,0]) == True)],1].values.tolist())):
-        print >> sys.stderr, 'PyERROR: Vegetation grass def file not constructed with parameter names correctly for Replicate = %s' % str(i)
+        print >> sys.stderr, 'PyERROR: Vegetation grass def file not constructed with parameter names correctly for Chain = %s' % str(i+1)
         os.kill(os.getppid(),signal.SIGTERM)
     del ck, checkCols
     
@@ -550,7 +550,7 @@ for i in range(len(Chains_df.iloc[:,0])):
     checkVals = sorted([str('%.7f' % round(ck,roundTol)) for ck in Chains_df.iloc[i,Indv3]])
     checkVals2 = sorted([str('%.7f' % round(float(ck),roundTol)) for ck in v3.iloc[v3.index[((veg_grass.iloc[:,0] != v3.iloc[:,0]) == True)],0].values])
     if not (checkVals2 == checkVals):
-        print >> sys.stderr, 'PyERROR: Vegetation grass def file not constructed with values correctly for Replicate = %s' % str(i)
+        print >> sys.stderr, 'PyERROR: Vegetation grass def file not constructed with values correctly for Chain = %s' % str(i+1)
         os.kill(os.getppid(),signal.SIGTERM)
 
     #Make edits to other variables that depend on the generated variables
@@ -576,11 +576,11 @@ for i in range(len(Chains_df.iloc[:,0])):
     
     #Ensure that the sum of these variables = 1 because rounding has now been completed.
     if (float('%.10f' % (float(v3.loc[:,0][v3.loc[:,1] == 'K_reflectance']) + float(v3.loc[:,0][v3.loc[:,1] == 'K_absorptance']) + float(v3.loc[:,0][v3.loc[:,1] == 'K_transmittance']))) != 1.0):
-        print >> sys.stderr, 'PyERROR: Vegetation tree K reflectance + K absorptance + K transmittance != 1 for Replicate = %s' % str(i)
+        print >> sys.stderr, 'PyERROR: Vegetation tree K reflectance + K absorptance + K transmittance != 1 for Chain = %s' % str(i+1)
         os.kill(os.getppid(),signal.SIGTERM)
 
     if (float('%.10f' % (float(v3.loc[:,0][v3.loc[:,1] == 'PAR_reflectance']) + float(v3.loc[:,0][v3.loc[:,1] == 'PAR_absorptance']) + float(v3.loc[:,0][v3.loc[:,1] == 'PAR_transmittance']))) != 1.0):
-        print >> sys.stderr, 'PyERROR: Vegetation tree PAR reflectance + PAR absorptance + PAR transmittance != 1 for Replicate = %s' % str(i)
+        print >> sys.stderr, 'PyERROR: Vegetation tree PAR reflectance + PAR absorptance + PAR transmittance != 1 for Chain = %s' % str(i+1)
         os.kill(os.getppid(),signal.SIGTERM)
         
     #Write new file
@@ -609,7 +609,7 @@ for i in range(len(Chains_df.iloc[:,0])):
 #    #Sorting alphabetically to check columns are the same
 #    checkCols = sorted([(string.split(s=ck, sep='v4_'))[1] for ck in Chains_df.columns[Indv4]])
 #    if not (checkCols == sorted(veg_NonVeg.iloc[veg_NonVeg.index[((veg_NonVeg.iloc[:,0] != v4.iloc[:,0]) == True)],1].values.tolist())):
-#        print >> sys.stderr, 'PyERROR: Vegetation nonveg def file not constructed with parameter names correctly for Replicate = %s' % str(i)
+#        print >> sys.stderr, 'PyERROR: Vegetation nonveg def file not constructed with parameter names correctly for Chain = %s' % str(i+1)
 #        os.kill(os.getppid(),signal.SIGTERM)
 #    del ck, checkCols
 #    
@@ -620,7 +620,7 @@ for i in range(len(Chains_df.iloc[:,0])):
 #    checkVals = sorted([str('%.7f' % round(ck,roundTol)) for ck in Chains_df.iloc[i,Indv4]])
 #    checkVals2 = sorted([str('%.7f' % round(float(ck),roundTol)) for ck in v4.iloc[v4.index[((veg_NonVeg.iloc[:,0] != v4.iloc[:,0]) == True)],0].values])
 #    if not (checkVals2 == checkVals):
-#        print >> sys.stderr, 'PyERROR: Vegetation nonveg def file not constructed with values correctly for Replicate = %s' % str(i)
+#        print >> sys.stderr, 'PyERROR: Vegetation nonveg def file not constructed with values correctly for Chain = %s' % str(i+1)
 #        os.kill(os.getppid(),signal.SIGTERM)
 #    
 #    #Make edits to other variables that depend on the generated variables
@@ -630,7 +630,7 @@ for i in range(len(Chains_df.iloc[:,0])):
 #    
 #    #Ensure that the sum of these three variables = 1 because rounding has now been completed.
 #    if (float('%.10f' % (float(v4.loc[:,0][v4.loc[:,1] == 'K_reflectance']) + float(v4.loc[:,0][v4.loc[:,1] == 'K_absorptance']) + float(v4.loc[:,0][v4.loc[:,1] == 'K_transmittance']))) != 1.0):
-#        print >> sys.stderr, 'PyERROR: Vegetation nonveg K reflectance + K absorptance + K transmittance != 1 for Replicate = %s' % str(i)
+#        print >> sys.stderr, 'PyERROR: Vegetation nonveg K reflectance + K absorptance + K transmittance != 1 for Chain = %s' % str(i+1)
 #        os.kill(os.getppid(),signal.SIGTERM)
 #    
 #    #Write new file
