@@ -135,6 +135,7 @@ def generalizedLikelihoodFunction(data, comparedata, tIndex, params, month=None)
     # formula for a_xi_t is from page 3, (6)
     sum_a_xi_t = 0
     n = data.__len__()
+    
     for j in range(n - 1):
         t = j + 1
         if t > 0 and t < n and type(t) == type(1):

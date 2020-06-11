@@ -8,13 +8,15 @@ import pyDOE
 from scipy import stats as ss
 
 # load flow observations
-TrueQ = pd.read_csv('C:\\Users\\js4yd\\Dropbox\\Jared-Julie-Share\\Data\\BaismanStreamflow_Cal.txt',delimiter='\t') #11-15-99 through 9-30-13
+#TrueQ = pd.read_csv('C:\\Users\\js4yd\\Dropbox\\Jared-Julie-Share\\Data\\BaismanStreamflow_Cal.txt',delimiter='\t') #11-15-99 through 9-30-13
+TrueQ = pd.read_csv('BaismanStreamflow_Cal.txt',delimiter='\t') #11-15-99 through 9-30-13
 TrueQ['Date'] = pd.to_datetime(TrueQ['Date'],format="%Y-%m-%d")
 
 # load flow simulations
 #Dec. 2019
 #SimQ = pd.read_csv('SAResults_BasinStreamflow_p4.txt',delimiter='\t') #(11-15-99 through 9-30-10)
-SimQ = pd.read_csv('C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\SAResults_BasinStreamflow_p4_Reordered_Add5_Likes.txt',delimiter='\t')
+#SimQ = pd.read_csv('C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\SAResults_BasinStreamflow_p4_Reordered_Add5_Likes.txt',delimiter='\t')
+SimQ = pd.read_csv('SAResults_BasinStreamflow_p4_Reordered_Add5_Likes.txt',delimiter='\t')
 SimQ['Date'] = pd.to_datetime(SimQ['Date'],format="%Y-%m-%d")
 
 columns = SimQ.columns
@@ -53,7 +55,7 @@ else:
 #Number of samples to take for the multi-start gradient descent algorithm
 numsamps = 20
 #Create dataframe to store successful parameter sets
-Qdf_success = pd.DataFrame(columns=['beta','xi','sigma_0','sigma_1','phi_1','mu_h','logL'])
+#Qdf_success = pd.DataFrame(columns=['beta','xi','sigma_0','sigma_1','phi_1','mu_h','logL'])
 
 for i in range(start,stop):
     comparedata = np.array(SimQ['Replicate' + str(i+1)].iloc[1782:])
@@ -93,11 +95,11 @@ for i in range(start,stop):
             OptFailed = optParams
 
         #Used to see the distribution of parameter values with different starting locations
-        if (optParams.success == True):
-            #Save parameter vector
-            Qdf_success = Qdf_success.append({'beta': optParams.x[0], 'xi': optParams.x[1], 'sigma_0': optParams.x[2],
-                        'sigma_1': optParams.x[3], 'phi_1': optParams.x[4], 'mu_h': optParams.x[5],
-                        'logL': -optParams.fun}, ignore_index=True)
+        #if (optParams.success == True):
+        #    #Save parameter vector
+        #    Qdf_success = Qdf_success.append({'beta': optParams.x[0], 'xi': optParams.x[1], 'sigma_0': optParams.x[2],
+        #                'sigma_1': optParams.x[3], 'phi_1': optParams.x[4], 'mu_h': optParams.x[5],
+        #                'logL': -optParams.fun}, ignore_index=True)
     
     #Check if there are any successes
     if OptChoice.success == True:

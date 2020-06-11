@@ -7,13 +7,15 @@ import math
 import pyDOE
 
 # load TN observations
-TrueTN = pd.read_csv('C:\\Users\\js4yd\\Dropbox\\Jared-Julie-Share\\Data\\TN_Cal.txt',delimiter='\t') #11-15-99 through 09-30-13
+#TrueTN = pd.read_csv('C:\\Users\\js4yd\\Dropbox\\Jared-Julie-Share\\Data\\TN_Cal.txt',delimiter='\t') #11-15-99 through 09-30-13
+TrueTN = pd.read_csv('TN_Cal.txt',delimiter='\t') #11-15-99 through 09-30-13
 TrueTN['Date'] = pd.to_datetime(TrueTN['Date'],format="%Y-%m-%d")
 
 # load TN simulations
 #Dec. 2019
 #SimTN = pd.read_csv('SAResults_BasinTNMed_p3.txt',delimiter='\t')
-SimTN = pd.read_csv('C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\SAResults_BasinTNMed_p3_All_Reordered_Add5_Likes.txt',delimiter='\t') #(11-15-99 through 9-30-10)
+#SimTN = pd.read_csv('C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\SAResults_BasinTNMed_p3_All_Reordered_Add5_Likes.txt',delimiter='\t') #(11-15-99 through 9-30-10)
+SimTN = pd.read_csv('SAResults_BasinTNMed_p3_All_Reordered_Add5_Likes.txt',delimiter='\t') #(11-15-99 through 9-30-10)
 SimTN['Date'] = pd.to_datetime(SimTN['Date'],format="%Y-%m-%d")
 
 columns = SimTN.columns
@@ -45,7 +47,7 @@ else:
 #Number of samples to take for the multi-start gradient descent algorithm
 numsamps = 20
 #Create dataframe to store successful parameter sets
-TNdf_success = pd.DataFrame(columns=['beta','xi','sigma_0','sigma_1','phi_1','mu_h','logL'])
+#TNdf_success = pd.DataFrame(columns=['beta','xi','sigma_0','sigma_1','phi_1','mu_h','logL'])
 
 for i in range(start,stop):
     comparedata = np.array(SimTN['Replicate' + str(i+1)].iloc[TrueTN['TN'].iloc[1782:3973].dropna().index])
@@ -85,11 +87,11 @@ for i in range(start,stop):
             OptFailed = optParams
             
         #Used to see the distribution of parameter values with different starting locations
-        if (optParams.success == True):
-            #Save parameter vector
-            TNdf_success = TNdf_success.append({'beta': optParams.x[0], 'xi': optParams.x[1], 'sigma_0': optParams.x[2],
-                        'sigma_1': optParams.x[3], 'phi_1': optParams.x[4], 'mu_h': optParams.x[5],
-                        'logL': -optParams.fun}, ignore_index=True)
+        #if (optParams.success == True):
+        #    #Save parameter vector
+        #    TNdf_success = TNdf_success.append({'beta': optParams.x[0], 'xi': optParams.x[1], 'sigma_0': optParams.x[2],
+        #                'sigma_1': optParams.x[3], 'phi_1': optParams.x[4], 'mu_h': optParams.x[5],
+        #                'logL': -optParams.fun}, ignore_index=True)
     
     #Check if there are any successes
     if OptChoice.success == True:        
