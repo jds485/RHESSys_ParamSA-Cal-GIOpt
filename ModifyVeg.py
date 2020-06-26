@@ -5,6 +5,8 @@ Created on Mon Nov  4 09:24:36 2019
 @author: jsmif
 """
 
+print('Starting ModifyVeg.py')
+
 #Script for modifying the vegCollection.csv file and moving it to the project directory
 
 #sys.argv contains: 
@@ -47,3 +49,4 @@ for h in range(len(IndH)):
 
 #Write a new vegetation csv file in the output location
 veg.to_csv(sys.argv[2]+'/'+sys.argv[4], index=False, header=False)
+print('End ModifyVeg.py')
