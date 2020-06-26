@@ -370,8 +370,8 @@ likelihood_external <- function(param){
     
     #Compute likelihood for Q
     seedLQ = 518+i+39*(num-1)
-    #system(paste0("python /sfs/lustre/bahamut/scratch/js4yd/Baisman30mDREAMzs/LikelihoodFun/Flow_MLEfits.py '", num, "' '", i, "' '", seedLQ, "'"), intern=TRUE)
-    sysout = system2('python', args=c('/sfs/lustre/bahamut/scratch/js4yd/Baisman30mDREAMzs/LikelihoodFun/Flow_MLEfits.py', as.character(num), as.character(i), as.character(seedLQ)), stdout = TRUE, stderr = TRUE)
+    #system(paste0("python /sfs/lustre/bahamut/scratch/js4yd/Baisman30mDREAMzs/LikelihoodFun/Flow_MLEfits_Cal.py '", num, "' '", i, "' '", seedLQ, "'"), intern=TRUE)
+    sysout = system2('python', args=c('/sfs/lustre/bahamut/scratch/js4yd/Baisman30mDREAMzs/LikelihoodFun/Flow_MLEfits_Cal.py', as.character(num), as.character(i), as.character(seedLQ)), stdout = TRUE, stderr = TRUE)
     rm(seedLQ)
     
     cat(sysout, file=sout, append=TRUE, sep="\n")
@@ -379,8 +379,8 @@ likelihood_external <- function(param){
     
     #Compute likelihood for TN
     seedLTN = 185+i+39*(num-1)
-    #system(paste0("python /sfs/lustre/bahamut/scratch/js4yd/Baisman30mDREAMzs/LikelihoodFun/TN_MLEfits.py '", num, "' '", i, "' '", seedLTN, "'"), intern=TRUE)
-    sysout = system2('python', args=c('/sfs/lustre/bahamut/scratch/js4yd/Baisman30mDREAMzs/LikelihoodFun/TN_MLEfits.py', as.character(num), as.character(i), as.character(seedLTN)), stdout = TRUE, stderr = TRUE)
+    #system(paste0("python /sfs/lustre/bahamut/scratch/js4yd/Baisman30mDREAMzs/LikelihoodFun/TN_MLEfits_Cal.py '", num, "' '", i, "' '", seedLTN, "'"), intern=TRUE)
+    sysout = system2('python', args=c('/sfs/lustre/bahamut/scratch/js4yd/Baisman30mDREAMzs/LikelihoodFun/TN_MLEfits_Cal.py', as.character(num), as.character(i), as.character(seedLTN)), stdout = TRUE, stderr = TRUE)
     rm(seedLTN)
     
     cat(sysout, file=sout, append=TRUE, sep="\n")
