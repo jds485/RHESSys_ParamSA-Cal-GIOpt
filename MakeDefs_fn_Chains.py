@@ -12,6 +12,8 @@ import numpy as np
 import string
 import signal
 
+print('Starting MakeDefs_fn_Chains.py')
+
 #sys.argv contains: 
 #0: unused - script call info
 #1: name of the chain parameter file (e.g., 'Chain_1_AfterProcessing.csv')
@@ -21,6 +23,7 @@ import signal
 #5: name of the file that has parameter names and lower and upper bounds (BaismanCalibrationParameterProblemFile.csv)
 #6: rounding tolerance (10)
 #7: current chain iteration
+#8: chain number
 
 #%% Set working directory
 os.chdir(sys.argv[2])
@@ -49,7 +52,8 @@ veg_Tree = pd.read_csv(sys.argv[3]+'/stratum_deciduousBES.def', delim_whitespace
 veg_grass = pd.read_csv(sys.argv[3]+'/stratum_grass.def', delim_whitespace=True, header=None, dtype = 'object')
 veg_NonVeg = pd.read_csv(sys.argv[3]+'/stratum_nonveg.def', delim_whitespace=True, header=None, dtype = 'object')
 
-for i in range(len(Chains_df.iloc[:,0])):
+#for i in range(len(Chains_df.iloc[:,0])):
+for i in [int(sys.argv[8]) - 1]:
     #Save original wd
     od = os.getcwd()
     #Make new directory for the replicate. This is the directory where code to run GIS2RHESSys pre-processing will be
@@ -642,3 +646,5 @@ for i in range(len(Chains_df.iloc[:,0])):
     
     #Change back to od
     os.chdir(od)
+
+print('End MakeDefs_fn_Chains.py')
