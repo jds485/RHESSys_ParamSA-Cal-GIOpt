@@ -574,7 +574,7 @@ TopLikes = seq(1, ceiling(nrow(LikesAll)*0.025),1)
 #Check the number of unique trajectories that are in the top 2.5% of most likely replicates.
 TopLikesTraj = vector('numeric', length = 40)
 for (i in 1:40){
-  TopLikesTraj[i] = length(which(LikesAll_sort$Replicate[TopLikes] %in% ((1+272*(i-1)):(272*(i)))))
+  TopLikesTraj[i] = length(which(LikesAll_sort$Replicate[TopLikes] %in% ((1+(ncol(InputParams)+1)*(i-1)):((ncol(InputParams)+1)*i))))
 }
 rm(i)
 
@@ -582,7 +582,7 @@ rm(i)
 SelTopLikes = vector('numeric', length = N)
 set.seed(8356)
 for (i in 1:length(which(TopLikesTraj > 0))){
-  IndsTopTraj = which(LikesAll_sort$Replicate[TopLikes] %in% ((1+272*(which(TopLikesTraj > 0)[i]-1)):(272*(which(TopLikesTraj > 0)[i]))))
+  IndsTopTraj = which(LikesAll_sort$Replicate[TopLikes] %in% ((1+(ncol(InputParams)+1)*(which(TopLikesTraj > 0)[i]-1)):((ncol(InputParams)+1)*(which(TopLikesTraj > 0)[i]))))
   IndTop = IndsTopTraj[round(runif(n = 1, min = 1, max = TopLikesTraj[which(TopLikesTraj > 0)][i]),0)]
   SelTopLikes[i] = TopLikes[IndTop]
   TopLikes = TopLikes[-IndTop]
@@ -597,7 +597,6 @@ for (i in which(SelTopLikes == 0)[1]:N){
   TopLikes = TopLikes[-IndTop]
 }
 rm(i, IndTop)
-SelTopLikes = sort(SelTopLikes)
 
 #Alternative to random sample of the remaining - Use Latin Hypercube Sampling to select other 30 chain starting locations
 RemainingLHS = improvedLHS(NumRemaining, k = nrow(ParamsCal))
@@ -609,10 +608,13 @@ for (i in 1:nrow(ParamsCal)){
   RemainingLHS[,i] = RemainingLHS[,i]*(ParamsCal$Upper[i] - ParamsCal$Lower[i]) + ParamsCal$Lower[i]
 }
 rm(i)
+#Round to the same number of decimal places as replicate chains
+RemainingLHS = round(RemainingLHS, 9)
 
 # Gather the selected likelihood replicate indices----
-RunIndsTopLikes = LikesAll_sort$Replicate[SelTopLikes]
 RunIndsTopLikes_Alt = LikesAll_sort$Replicate[SelTopLikes[-c((length(SelTopLikes)-NumRemaining+1):length(SelTopLikes))]]
+SelTopLikes = sort(SelTopLikes)
+RunIndsTopLikes = LikesAll_sort$Replicate[SelTopLikes]
 
 #Get the parameters for those run indices into a matrix
 ChainStarts = InputParams[as.numeric(rownames(InputParams)) %in% RunIndsTopLikes,]
