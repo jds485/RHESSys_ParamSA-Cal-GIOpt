@@ -1,8 +1,10 @@
 setwd("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR")
 
 library(GISTools)
+library(sp)
 library(rgdal)
 library(vroom)
+library(lhs)
 
 source('ColorFunctions.R')
 
@@ -588,6 +590,7 @@ for (i in 1:length(which(TopLikesTraj > 0))){
 rm(IndsTopTraj, IndTop,i)
 
 #Randomly sample remaining without replacement to get the N starting locations
+NumRemaining = length(which(SelTopLikes == 0))
 for (i in which(SelTopLikes == 0)[1]:N){
   IndTop = round(runif(n = 1, min = 1, max = length(TopLikes)),0)
   SelTopLikes[i] = TopLikes[IndTop]
@@ -596,20 +599,40 @@ for (i in which(SelTopLikes == 0)[1]:N){
 rm(i, IndTop)
 SelTopLikes = sort(SelTopLikes)
 
+#Alternative to random sample of the remaining - Use Latin Hypercube Sampling to select other 30 chain starting locations
+RemainingLHS = improvedLHS(NumRemaining, k = nrow(ParamsCal))
+#Name the columns
+colnames(RemainingLHS) = ParamsCal$NumberedParams
+
+#Get all parameters into their specified ranges
+for (i in 1:nrow(ParamsCal)){
+  RemainingLHS[,i] = RemainingLHS[,i]*(ParamsCal$Upper[i] - ParamsCal$Lower[i]) + ParamsCal$Lower[i]
+}
+rm(i)
+
 # Gather the selected likelihood replicate indices----
 RunIndsTopLikes = LikesAll_sort$Replicate[SelTopLikes]
+RunIndsTopLikes_Alt = LikesAll_sort$Replicate[SelTopLikes[-c((length(SelTopLikes)-NumRemaining+1):length(SelTopLikes))]]
 
 #Get the parameters for those run indices into a matrix
 ChainStarts = InputParams[as.numeric(rownames(InputParams)) %in% RunIndsTopLikes,]
+ChainStarts_Alt = InputParams[as.numeric(rownames(InputParams)) %in% RunIndsTopLikes_Alt,]
 #Add likelihood parameters
 ChainStartsLikes = InputParams_Likes[as.numeric(rownames(InputParams)) %in% RunIndsTopLikes,]
+ChainStartsLikes_Alt = InputParams_Likes[as.numeric(rownames(InputParams)) %in% RunIndsTopLikes_Alt,]
 
 #Remove all variables that will not be calibrated----
 ChainStarts = ChainStarts[,which(colnames(ChainStarts) %in% ParamsCal$NumberedParams)]
 ChainStartsLikes = ChainStartsLikes[,c(which(colnames(ChainStartsLikes) %in% ParamsCal$NumberedParams), (ncol(InputParams)+1):ncol(ChainStartsLikes))]
 
+ChainStarts_Alt = ChainStarts_Alt[,which(colnames(ChainStarts_Alt) %in% ParamsCal$NumberedParams)]
+ChainStartsLikes_Alt = ChainStartsLikes_Alt[,c(which(colnames(ChainStartsLikes_Alt) %in% ParamsCal$NumberedParams), (ncol(InputParams)+1):ncol(ChainStartsLikes_Alt))]
+#For Alt method, join the LHS
+ChainStarts_Alt = rbind(ChainStarts_Alt, RemainingLHS)
+
 #Write a file of the MCMC chain starting locations----
 write.table(ChainStarts, file = 'BaismanChainStarts.txt', sep = '\t', row.names = FALSE, col.names = TRUE)
+write.table(ChainStarts_Alt, file = 'BaismanChainStarts_LHS.txt', sep = '\t', row.names = FALSE, col.names = TRUE)
 
 #Evaluate histograms of the parameters to be calibrated from the most likely sets to evaluate bound changes----
 for (i in 1:nrow(ParamsCal)){
