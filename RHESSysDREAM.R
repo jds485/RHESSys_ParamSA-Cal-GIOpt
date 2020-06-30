@@ -31,6 +31,17 @@ library(pracma)
 #17 - File that describes the parameter names and bounds (.csv file with headers)
 #18 - File with chain starting locations (.csv file with headers)
 #19 - Full path to working directory for chain runs (RHESSysRuns)
+#20 - iterations, Need at least one more iteration than the burnin to report a value to the output chain
+#21 - eps, normal noise to the proposal update.
+#22 - e, multiplier to gamma in proposal update 
+#23 - ZupdateFrequency, Z is not updated until after burnin if the update frequency is greater than 1. Making equal to updateInterval.
+#24 - pSnooker, chance of a snooker update as a proportion
+#25 - DEpairs, Number of chains used to compute the DE proposal update. In papers, randomly choose 1, 2, or 3 to use.
+#26 - nCR, nCR >=2 recommended in papers
+#27 - updateInterval, must be greater than or equal to nCR.
+#28 - burnin, must be greater than or equal to adaptation, or all of the adaptation steps must be manually removed before summarizing chains.
+#29 - adaptation, should be about 20 % of the total NFE. Doing this manually.
+#30 - thin, thin the chain, or set to 1 to allow for post-solver manual thinning
 
 arg = commandArgs(T)
 
@@ -180,7 +191,6 @@ likelihood_external <- function(param){
     #7: current chain iteration
     #8: chain number
     
-    #system(paste0("singularity exec /share/resources/containers/singularity/rhessys/rhessys_v3.img python /scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/MakeDefs_fn_Chains.py 'Chain_", num,"_AfterProcessing.csv' '/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/' '/scratch/js4yd/Baisman30mDREAMzs/RHESSys_Baisman30m_g74/defs/' 'RHESSys_Baisman30m_g74' 'BaismanCalibrationParameterProblemFile.csv' '10' '", num, "' '", i, "'"), intern = TRUE)
     sysout = system2('singularity', args=c('exec', '/share/resources/containers/singularity/rhessys/rhessys_v3.img', 'python', '/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/MakeDefs_fn_Chains.py', paste0('Chain_', num,'_AfterProcessing.csv'), '/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/', '/scratch/js4yd/Baisman30mDREAMzs/RHESSys_Baisman30m_g74/defs/', 'RHESSys_Baisman30m_g74', 'BaismanCalibrationParameterProblemFile.csv', '10', as.character(num), as.character(i)), stdout = TRUE, stderr = TRUE)
     
     cat(sysout, file=sout, append=TRUE, sep="\n")
@@ -201,7 +211,6 @@ likelihood_external <- function(param){
     file.copy(from = "/sfs/lustre/bahamut/scratch/js4yd/Baisman30mDREAMzs/GIS2RHESSys/vegCollection_modified_Cal.csv", to = './GIS2RHESSys')
     #The vegetation file needs to be modified by the def file data
     #Run the vegetation modification script
-    #system(paste0("singularity exec /share/resources/containers/singularity/rhessys/rhessys_v3.img python /scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/ModifyVeg.py '/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num, "_Ch", i, "/GIS2RHESSys' '/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num, "_Ch", i, "/RHESSys_Baisman30m_g74' '/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num, "_Ch", i, "/RHESSys_Baisman30m_g74/defs/' 'vegCollection_modified_Cal.csv'"), intern = TRUE)
     sysout = system2('singularity', args=c('exec', '/share/resources/containers/singularity/rhessys/rhessys_v3.img', 'python', '/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/ModifyVeg.py', paste0('/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run', num, '_Ch', i, '/GIS2RHESSys'), paste0('/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run', num, '_Ch', i, '/RHESSys_Baisman30m_g74'), paste0('/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run', num, '_Ch', i, '/RHESSys_Baisman30m_g74/defs/'), 'vegCollection_modified_Cal.csv'), stdout = TRUE, stderr = TRUE)
     
     cat(sysout, file=sout, append=TRUE, sep="\n")
@@ -295,14 +304,12 @@ likelihood_external <- function(param){
     system(paste0("echo additionalSurfaceDrainMAP addsurfdrain >> '/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/g2w_template.txt'"))
 
     #Run g2w script
-    #system(paste0("singularity exec /share/resources/containers/singularity/rhessys/rhessys_v3.img grass74 '/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/grass_dataset/g74_RHESSys_Baisman30m_g74/PERMANENT' --exec Rscript '/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/GIS2RHESSys/libraries/g2w_cf_RHESSysEC.R' '/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "' '/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/vegCollection_modified_Cal.csv' '/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/GIS2RHESSys/soilCollection_Cal.csv' '/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/GIS2RHESSys/lulcCollectionEC_Cal.csv' '/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/g2w_template.txt'"), intern = TRUE)
     sysout = system2('singularity', args=c('exec', '/share/resources/containers/singularity/rhessys/rhessys_v3.img', 'grass74', paste0('/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run', num,'_Ch', i, '/grass_dataset/g74_RHESSys_Baisman30m_g74/PERMANENT'), '--exec', 'Rscript', paste0('/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run', num,'_Ch', i, '/GIS2RHESSys/libraries/g2w_cf_RHESSysEC.R'), paste0('/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run', num,'_Ch', i), paste0('/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run', num,'_Ch', i, '/RHESSys_Baisman30m_g74/vegCollection_modified_Cal.csv'), paste0('/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run', num,'_Ch', i, '/GIS2RHESSys/soilCollection_Cal.csv'), paste0('/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run', num,'_Ch', i, '/GIS2RHESSys/lulcCollectionEC_Cal.csv'), paste0('/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run', num,'_Ch', i, '/RHESSys_Baisman30m_g74/g2w_template.txt')), stdout = TRUE, stderr = TRUE)
     
     cat(sysout, file=sout, append=TRUE, sep="\n")
     rm(sysout)
       
     #Run to create worldfile
-    #system(paste0("singularity exec /share/resources/containers/singularity/rhessys/rhessys_v3.img Rscript '/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/GIS2RHESSys/libraries/LIB_RHESSys_writeTable2World.R' NA '/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/worldfiles/worldfile.csv' '/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/worldfiles/worldfile'"), intern = TRUE)
     sysout = system2('singularity', args=c('exec', '/share/resources/containers/singularity/rhessys/rhessys_v3.img', 'Rscript', paste0('/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run', num,'_Ch', i, '/GIS2RHESSys/libraries/LIB_RHESSys_writeTable2World.R'), 'NA', paste0('/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run', num,'_Ch', i, '/RHESSys_Baisman30m_g74/worldfiles/worldfile.csv'), paste0('/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run', num,'_Ch', i, '/RHESSys_Baisman30m_g74/worldfiles/worldfile')), stdout = TRUE, stderr = TRUE)
     
     cat(sysout, file=sout, append=TRUE, sep="\n")
@@ -320,7 +327,6 @@ likelihood_external <- function(param){
     setwd(paste0("/sfs/lustre/bahamut/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74"))
     
     #Run RHESSys
-    #system(paste0('/sfs/lustre/bahamut/scratch/js4yd/RHESSysEastCoast_Optimized/rhessys5.20.0.develop_optimsize -st 1999 11 15 1 -ed 2013 10 1 1 -b -h -newcaprise -gwtoriparian -capMax 0.01 -slowDrain -t tecfiles/tec_daily_cal.txt -w worldfiles/worldfile -whdr worldfiles/worldfile.hdr -r flows/subflow.txt flows/surfflow.txt -pre output/Run', num, '_Ch', i, ' -s 1 1 1 -sv 1 1 -gw 1 1 -svalt 1 1 -vgsen 1 1 1 -snowTs 1 -snowEs 1 -capr 0.001'), intern = TRUE)
     sysout = system2('/sfs/lustre/bahamut/scratch/js4yd/RHESSysEastCoast_Optimized/rhessys5.20.0.develop_optimsize', args=c('-st', '1999', '11', '15', '1', '-ed', '2013', '10', '1', '1', '-b', '-h', '-newcaprise', '-gwtoriparian', '-capMax', '0.01', '-slowDrain', '-t', 'tecfiles/tec_daily_cal.txt', '-w', 'worldfiles/worldfile', '-whdr', 'worldfiles/worldfile.hdr', '-r', 'flows/subflow.txt', 'flows/surfflow.txt', '-pre', paste0('output/Run', num, '_Ch', i), '-s', '1', '1', '1', '-sv', '1', '1', '-gw', '1', '1', '-svalt', '1', '1', '-vgsen', '1', '1', '1', '-snowTs', '1', '-snowEs', '1', '-capr', '0.001'), stdout = TRUE, stderr = TRUE)
     
     cat(sysout, file=sout, append=TRUE, sep="\n")
@@ -438,15 +444,26 @@ setup_Parext = createBayesianSetup(likelihood = likelihood_external, prior = pri
 
 #Create settings----
 ## For this case we want to parallelize the internal chains, therefore we create a n row matrix with startValues, if you parallelize a model in the likelihood, do not set a n*row Matrix for startValue
-settings_Parext = list(iterations = 6, gamma= NULL, eps = 0, e = 0.05, parallel = NULL, Z = NULL, ZupdateFrequency = 1, pSnooker = 0.1, DEpairs = 2,
-                       nCR = 3, pCRupdate = TRUE, updateInterval = 1,
-                       #burnin must be greater than adaptation.
-                       burnin = 1, adaptation = 1, thin = 1, message = FALSE, startValue = startValues)
-
+settings_Parext = list(iterations = as.numeric(arg[20]), #Need at least one more iteration than the burnin to report a value to the output chain
+                        gamma= NULL, #Not used in code
+                        eps = as.numeric(arg[21]), #Not adding normal noise to the proposal update.
+                        e = as.numeric(arg[22]), #Multiplying gamma by 1.05 in proposal update 
+                        parallel = NULL, #Specified in setup
+                        Z = NULL, #Computed in code. Supply upon manual restart.
+                        ZupdateFrequency = as.numeric(arg[23]), #Z is not updated until after burnin if the update frequency is greater than 1. Making equal to updateInterval.
+                        pSnooker = as.numeric(arg[24]), #10% chance of a snooker update
+                        DEpairs = as.numeric(arg[25]), #Number of chains used to compute the DE proposal update. In papers, randomly choose 1, 2, or 3 to use.
+                        nCR = as.numeric(arg[26]), #Update about 12 variables each time. nCR >=2 recommended in papers.
+                        pCRupdate = TRUE, #Use crossover updates
+                        updateInterval = as.numeric(arg[27]), #Must be greater than or equal to nCR. Best to be smaller.
+                        burnin = as.numeric(arg[28]), #burnin must be greater than or equal to adaptation, or all of the adaptation steps must be manually removed before summarizing chains.
+                        adaptation = as.numeric(arg[29]), #Adaptation should be about 20 % of the total NFE. Doing this manually.
+                        thin = as.numeric(arg[30]), #Thin = 1 to allow for post-solver manual thinning
+                        message = FALSE, #Messages do not print to .out file.
+                        startValue = startValues) #Use the specified starting values for each chain.
 
 ## runMCMC----
 set.seed(as.numeric(arg[2]))
-#Fixme: Directory
 setwd(arg[19])
 out_Parext <- runMCMC(settings = settings_Parext, bayesianSetup = setup_Parext, sampler = "DREAMzs")
 
@@ -493,91 +510,9 @@ save.image(file = 'OutputWorkspace.RData', safe = FALSE)
 
 #out_Parext_Restart_1 <- runMCMC(bayesianSetup = temp, sampler = "DREAMzs")
 
-
-
-#Fixme: Move this to a separate script for plotting output. Too much for initial run.
-#Plot and summarize output----
 #Copy the IterNum.txt file because plots and summary info will run the likelihood function again. Want to continue using the old IterNum for that to avoid overwriting output files. But also want to save the end-of-chain IterNum.
 file.copy(from = paste0(arg[19], '/IterNum.txt'), to = paste0(arg[19], '/IterFinalNum_ChainRun.txt'))
 
-#print(out_Parext$settings$runtime)
-#summary(out_Parext)
+print(out_Parext$settings$runtime)
 
-#print(out_Parext_Restart$settings$runtime)
-#summary(out_Parext_Restart)
-#print(out_Parext_Restart_1$settings$runtime)
-#summary(out_Parext_Restart_1)
-
-#png('diagnosticplot_30.png', res = 300, units = 'in', width = 7, height = 7)
-#plotDiagnostic(out = out_Parext)
-#dev.off()
-#png('marginalplot_30.png', res = 300, units = 'in', width = 7, height = 7)
-#marginalPlot(x = out_Parext, prior = TRUE)
-#dev.off()
-#png('gelmanplot_30.png', res = 300, units = 'in', width = 7, height = 7)
-#gelmanDiagnostics(sampler = out_Parext, plot = TRUE)
-#dev.off()
-#png('corplot_30.png', res = 300, units = 'in', width = 14, height = 14)
-#correlationPlot(mat = out_Parext, scaleCorText = FALSE)
-#dev.off()
-#png('traceplot_30.png', res = 300, units = 'in', width = 5, height = 7)
-#plot(out_Parext)
-#dev.off()
-
-#Delete the new IterNum.txt file
-#Not doing this for now because it is being used to ensure files are not overwritten.
-#file.remove("/sfs/lustre/bahamut/scratch/js4yd/TestBayesianToolsDREAMzs/IterNum.txt")
-
-#Functions (including summary) assume connection to external parallel cores will still be available.
 stopCluster(cl)
-
-#Run convergence diagnostics----
-#R-hat - Gelman-Rubin within and between chain variance for all variables - target less than 1.05 for all
-#gelman.diag(chain)
-#Autocorrelation of chain for each parameter should drop quickly. This informs the amound of values to skip in MCMC
-
-#Stationarity of chain - Geweke
-
-#Effective sample size for each parameter should be similar
-
-#Parallel coordinate plot (mcmc_parcoord in bayesplot)
-
-#scatterplot matrix (mcmc_pairs in bayesplot)
-
-#Trace plots for all parameter values (mcmc_trace) - chains should look similar, not get stuck
-
-#Density overlay (mcmc_dens_overlay) - all chains should have similar densities
-
-#Posterior Predictive Checks----
-#Generate data from the parameter joint posterior distribution
-# compare to the calibrated observations (X and yRep), and/or to future values (XTilde and yTilde)
-# The true distribution of y should be similar to that of yRep.
-#  Look at density overlay of y and yRep for each of the parameter sets
-
-# Create a prediction function
-#createPredictions <- function(par){
-  # set the parameters that are not calibrated on default values 
-#  x = refPars$best
-#  x[parSel] = par
-#  predicted <- VSEM(x[1:11], PAR) # replace here VSEM with your model 
-#  return(predicted[,1] * 1000)
-#}
-
-# Create an error function
-#createError <- function(mean, par){
-#  return(rnorm(length(mean), mean = mean, sd = par[7]))
-#}
-
-# plot prior predictive distribution and prior predictive simulations
-#plotTimeSeriesResults(sampler = out, model = createPredictions, observed = obs[,1],
-#                      error = createError, prior = TRUE, main = "Prior predictive")
-
-# plot posterior predictive distribution and posterior predictive simulations
-#plotTimeSeriesResults(sampler = out, model = createPredictions, observed = obs[,1],
-#                      error = createError, main = "Posterior predictive")
-
-#% of observations within %-level prediction intervals
-#autocorrelation for time series data 
-#Bayesian p-values for evaluating model fit over the entire posterior distribution
-
-#Credible intervals as barplots and as areas (mcmc_areas and mcmc_intervals)
