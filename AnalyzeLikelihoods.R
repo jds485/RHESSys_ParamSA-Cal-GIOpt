@@ -611,6 +611,32 @@ rm(i)
 #Round to the same number of decimal places as replicate chains
 RemainingLHS = round(RemainingLHS, 9)
 
+#LHS with 10 chains
+LHS_10 = improvedLHS(n = 10, k = nrow(ParamsCal))
+#Name the columns
+colnames(LHS_10) = ParamsCal$NumberedParams
+
+#Get all parameters into their specified ranges
+for (i in 1:nrow(ParamsCal)){
+  LHS_10[,i] = LHS_10[,i]*(ParamsCal$Upper[i] - ParamsCal$Lower[i]) + ParamsCal$Lower[i]
+}
+rm(i)
+#Round to the same number of decimal places as replicate chains
+LHS_10 = round(LHS_10, 9)
+
+#LHS with 20 chains
+LHS_20 = improvedLHS(n = 20, k = nrow(ParamsCal))
+#Name the columns
+colnames(LHS_20) = ParamsCal$NumberedParams
+
+#Get all parameters into their specified ranges
+for (i in 1:nrow(ParamsCal)){
+  LHS_20[,i] = LHS_20[,i]*(ParamsCal$Upper[i] - ParamsCal$Lower[i]) + ParamsCal$Lower[i]
+}
+rm(i)
+#Round to the same number of decimal places as replicate chains
+LHS_20 = round(LHS_20, 9)
+
 # Gather the selected likelihood replicate indices----
 RunIndsTopLikes_Alt = LikesAll_sort$Replicate[SelTopLikes[-c((length(SelTopLikes)-NumRemaining+1):length(SelTopLikes))]]
 SelTopLikes = sort(SelTopLikes)
@@ -635,6 +661,8 @@ ChainStarts_Alt = rbind(ChainStarts_Alt, RemainingLHS)
 #Write a file of the MCMC chain starting locations----
 write.table(ChainStarts, file = 'BaismanChainStarts.txt', sep = '\t', row.names = FALSE, col.names = TRUE)
 write.table(ChainStarts_Alt, file = 'BaismanChainStarts_LHS.txt', sep = '\t', row.names = FALSE, col.names = TRUE)
+write.table(LHS_10, file = 'BaismanChainStarts_LHS10.txt', sep = '\t', row.names = FALSE, col.names = TRUE)
+write.table(LHS_20, file = 'BaismanChainStarts_LHS20.txt', sep = '\t', row.names = FALSE, col.names = TRUE)
 
 #Evaluate histograms of the parameters to be calibrated from the most likely sets to evaluate bound changes----
 for (i in 1:nrow(ParamsCal)){
