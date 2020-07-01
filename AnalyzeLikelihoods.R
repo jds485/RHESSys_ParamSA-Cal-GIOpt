@@ -637,6 +637,45 @@ rm(i)
 #Round to the same number of decimal places as replicate chains
 LHS_20 = round(LHS_20, 9)
 
+#LHS with 10 chains
+LHS_10_1 = improvedLHS(n = 10, k = nrow(ParamsCal))
+#Name the columns
+colnames(LHS_10_1) = ParamsCal$NumberedParams
+
+#Get all parameters into their specified ranges
+for (i in 1:nrow(ParamsCal)){
+  LHS_10_1[,i] = LHS_10_1[,i]*(ParamsCal$Upper[i] - ParamsCal$Lower[i]) + ParamsCal$Lower[i]
+}
+rm(i)
+#Round to the same number of decimal places as replicate chains
+LHS_10_1 = round(LHS_10_1, 9)
+
+#LHS with 10 chains
+LHS_10_2 = improvedLHS(n = 10, k = nrow(ParamsCal))
+#Name the columns
+colnames(LHS_10_2) = ParamsCal$NumberedParams
+
+#Get all parameters into their specified ranges
+for (i in 1:nrow(ParamsCal)){
+  LHS_10_2[,i] = LHS_10_2[,i]*(ParamsCal$Upper[i] - ParamsCal$Lower[i]) + ParamsCal$Lower[i]
+}
+rm(i)
+#Round to the same number of decimal places as replicate chains
+LHS_10_2 = round(LHS_10_2, 9)
+
+#LHS with 10 chains
+LHS_10_3 = improvedLHS(n = 10, k = nrow(ParamsCal))
+#Name the columns
+colnames(LHS_10_3) = ParamsCal$NumberedParams
+
+#Get all parameters into their specified ranges
+for (i in 1:nrow(ParamsCal)){
+  LHS_10_3[,i] = LHS_10_3[,i]*(ParamsCal$Upper[i] - ParamsCal$Lower[i]) + ParamsCal$Lower[i]
+}
+rm(i)
+#Round to the same number of decimal places as replicate chains
+LHS_10_3 = round(LHS_10_3, 9)
+
 # Gather the selected likelihood replicate indices----
 RunIndsTopLikes_Alt = LikesAll_sort$Replicate[SelTopLikes[-c((length(SelTopLikes)-NumRemaining+1):length(SelTopLikes))]]
 SelTopLikes = sort(SelTopLikes)
@@ -662,6 +701,9 @@ ChainStarts_Alt = rbind(ChainStarts_Alt, RemainingLHS)
 write.table(ChainStarts, file = 'BaismanChainStarts.txt', sep = '\t', row.names = FALSE, col.names = TRUE)
 write.table(ChainStarts_Alt, file = 'BaismanChainStarts_LHS.txt', sep = '\t', row.names = FALSE, col.names = TRUE)
 write.table(LHS_10, file = 'BaismanChainStarts_LHS10.txt', sep = '\t', row.names = FALSE, col.names = TRUE)
+write.table(LHS_10_1, file = 'BaismanChainStarts_LHS10_1.txt', sep = '\t', row.names = FALSE, col.names = TRUE)
+write.table(LHS_10_2, file = 'BaismanChainStarts_LHS10_2.txt', sep = '\t', row.names = FALSE, col.names = TRUE)
+write.table(LHS_10_3, file = 'BaismanChainStarts_LHS10_3.txt', sep = '\t', row.names = FALSE, col.names = TRUE)
 write.table(LHS_20, file = 'BaismanChainStarts_LHS20.txt', sep = '\t', row.names = FALSE, col.names = TRUE)
 
 #Evaluate histograms of the parameters to be calibrated from the most likely sets to evaluate bound changes----
