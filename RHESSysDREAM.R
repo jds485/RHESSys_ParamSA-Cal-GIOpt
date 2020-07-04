@@ -332,10 +332,18 @@ likelihood_external <- function(param){
     cat(sysout, file=sout, append=TRUE, sep="\n")
     rm(sysout)
     
-    #Remove the flows, tecfiles, and clim folders.
+    #Remove the flows, tecfiles, defs, and clim folders.
     unlink(paste0("/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/flows"), recursive = TRUE)
     unlink(paste0("/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/clim"), recursive = TRUE)
     unlink(paste0("/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/tecfiles"), recursive = TRUE)
+    unlink(paste0("/scratch/js4yd/Baisman30mDREAMzs-10Ch-3/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/defs"), recursive = TRUE)
+    #Remove some un-needed output
+    file.remove(paste0("/scratch/js4yd/Baisman30mDREAMzs-10Ch-3/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/output/Run", num,"_Ch", i, "_basin.hourly"))
+    file.remove(paste0("/scratch/js4yd/Baisman30mDREAMzs-10Ch-3/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/output/Run", num,"_Ch", i, "_basin.monthly"))
+    file.remove(paste0("/scratch/js4yd/Baisman30mDREAMzs-10Ch-3/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/output/Run", num,"_Ch", i, "_basin.yearly"))
+    file.remove(paste0("/scratch/js4yd/Baisman30mDREAMzs-10Ch-3/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/output/Run", num,"_Ch", i, "_hillslope.hourly"))
+    file.remove(paste0("/scratch/js4yd/Baisman30mDREAMzs-10Ch-3/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/output/Run", num,"_Ch", i, "_hillslope.monthly"))
+    file.remove(paste0("/scratch/js4yd/Baisman30mDREAMzs-10Ch-3/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/output/Run", num,"_Ch", i, "_hillslope.yearly"))
     
     #Read in simulated basin streamflow
     Q = vroom(paste0(getwd(), '/output/Run', num, '_Ch', i, '_basin.daily'), delim = ' ', col_names = TRUE, col_types = cols(.default=col_double()), progress = FALSE)
