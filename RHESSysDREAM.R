@@ -50,6 +50,7 @@ source(arg[3])
 #Remove unnecessary functions
 rm(estCrossVal, estSurfaces, FillTableNAs, modelEstimation, plotContours, run_WRTDS, runSurvReg, surfaceIndex)
 
+#Process observation timeseries to specified date range----
 #Load the observed streamflow record and trim to necessary days
 obs = read.table(arg[4], header = TRUE, check.names = FALSE, stringsAsFactors = FALSE, sep = '\t')
 #Remove observations later than 9/30/2013 (Cal timeperiod end)
@@ -76,7 +77,7 @@ write.table(x = obsTN, file = paste0(strsplit(arg[5], split = '.txt')[[1]], '_p.
 options(scipen = 0)
 nTN = nrow(obsTN[!is.na(obsTN$TN),])
 
-#Compute streamflow conversion factor
+#Compute streamflow conversion factor----
 world = read.csv(arg[8], stringsAsFactors = FALSE)
 res = as.numeric(arg[9])
 #Taking the unique patch IDs because strata can exist in more than one patch.
@@ -86,7 +87,7 @@ rm(world, res)
 conversion_b = Area.basin/1000/(.3048^3)/24/3600
 rm(Area.basin)
 
-#Load WRTDS tables
+#Load WRTDS tables----
 TabInt = as.matrix(read.table(file = arg[10], sep = '\t', header = TRUE, check.names = FALSE))
 TabYear = as.matrix(read.table(file = arg[11], sep = '\t', header = TRUE, check.names = FALSE))
 TabLogQ = as.matrix(read.table(file = arg[12], sep = '\t', header = TRUE, check.names = FALSE))
@@ -119,9 +120,9 @@ prior = createUniformPrior(lower = ParamRanges$Lower, upper = ParamRanges$Upper,
 #1 - check that params are within their constraints, and adjust if needed
 #---In parallel---
 #2 - update def files with those params and make directories for each chain's RHESSys run
-#3 - call GIS2RHESSys operations 
+#3 - call GIS2RHESSys operations to setup RHESSys
 #4 - Run RHESSys 
-#5 - Run WRTDS ECM models 
+#5 - Run WRTDS model to compute TN 
 #6 - Compute likelihoods
 likelihood_external <- function(param){
   od = getwd()
@@ -438,14 +439,15 @@ parallel::clusterExport(cl = cl, varlist = c('conversion_b', 'TabInt', 'TabYear'
 rm(conversion_b, obs, obsTN, TabInt, TabYear, TabLogQ, TabLogQ2, TabSinYear, TabCosYear, TabLogErr, predictWRTDS, rowt, colt, nQ, nTN)
 
 ## export libraries to the computing cores----
-parallel::clusterEvalQ(cl = cl, library(BayesianTools))
-parallel::clusterEvalQ(cl = cl, library(foreach))
-parallel::clusterEvalQ(cl = cl, library(iterators))
-parallel::clusterEvalQ(cl = cl, library(doParallel))
-parallel::clusterEvalQ(cl = cl, library(rlist))
-parallel::clusterEvalQ(cl = cl, library(vroom))
-parallel::clusterEvalQ(cl = cl, library(pracma))
-parallel::clusterEvalQ(cl = cl, library(EGRET))
+parallel::clusterEvalQ(cl = cl, library(BayesianTools, logical.return=TRUE))
+parallel::clusterEvalQ(cl = cl, library(foreach, logical.return=TRUE))
+parallel::clusterEvalQ(cl = cl, library(iterators, logical.return=TRUE))
+parallel::clusterEvalQ(cl = cl, library(doParallel, logical.return=TRUE))
+parallel::clusterEvalQ(cl = cl, library(rlist, logical.return=TRUE))
+parallel::clusterEvalQ(cl = cl, library(vroom, logical.return=TRUE))
+parallel::clusterEvalQ(cl = cl, library(pracma, logical.return=TRUE))
+#returning full list of loaded packages on last load
+parallel::clusterEvalQ(cl = cl, library(EGRET, logical.return=FALSE))
 
 ## create BayesianSetup----
 setup_Parext = createBayesianSetup(likelihood = likelihood_external, prior = prior, lower = NULL, upper = NULL, parallel = 'external', names = ParamRanges$NumberedParams)
