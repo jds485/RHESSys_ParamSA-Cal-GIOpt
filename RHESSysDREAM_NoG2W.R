@@ -107,7 +107,7 @@ ParamRanges = read.csv(arg[17], stringsAsFactors = FALSE)
 #Initially this is from the SA. This file should be the processed output from DREAM_ParameterBoundChecks_ChainStarts.py 
 #For restarts of DREAM, this is not needed because the output from DREAM knows the last point in the chain, which is the starting point for restarts.
 startValues = as.matrix(read.csv(file = arg[18], stringsAsFactors = FALSE))
-#startValues = as.matrix(read.csv(file = '/sfs/lustre/bahamut/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/BaismanChainStarts_AfterProcessing_Top3.csv', stringsAsFactors = FALSE))
+#startValues = as.matrix(read.csv(file = '/sfs/lustre/bahamut/scratch/js4yd/Baisman30mDREAMzs-10Ch/RHESSysRuns/BaismanChainStarts_AfterProcessing_Top3.csv', stringsAsFactors = FALSE))
 
 #Define the Multivariate Prior----
 prior = createUniformPrior(lower = ParamRanges$Lower, upper = ParamRanges$Upper, best = NULL)
@@ -129,7 +129,7 @@ likelihood_external <- function(param){
   
   #Check to see if there are any files of the format IterNum.txt in the working directory
   #Fixme: Directory
-  setwd("/sfs/lustre/bahamut/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/")
+  setwd("/sfs/lustre/bahamut/scratch/js4yd/Baisman30mDREAMzs-10Ch/RHESSysRuns/")
   if (length(grep(list.files(),pattern = 'IterNum',ignore.case = FALSE,fixed = TRUE,value = FALSE)) == 0){
     num = 1
   }else{
@@ -154,9 +154,9 @@ likelihood_external <- function(param){
   #6: chain parameter sample text file name without extension (e.g., 'BaismanChainStarts', 'Chain_1' where 1 is chain iteration)
   
   #Random seed for Python
-  seed = 75843 + num
+  seed = 1 + num
   #Fixme: Directories
-  system(paste0("singularity exec /share/resources/containers/singularity/rhessys/rhessys_v3.img python /scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/DREAM_ParameterBoundChecks.py '/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/' '", seed, "' '/scratch/js4yd/Baisman30mDREAMzs/RHESSys_Baisman30m_g74/defs/' '10' 'BaismanCalibrationParameterProblemFile.csv' 'Chain_", num,"'"), intern = TRUE)
+  system(paste0("singularity exec /share/resources/containers/singularity/rhessys/rhessys_v3.img python /scratch/js4yd/Baisman30mDREAMzs-10Ch/RHESSysRuns/DREAM_ParameterBoundChecks.py '/scratch/js4yd/Baisman30mDREAMzs-10Ch/RHESSysRuns/' '", seed, "' '/scratch/js4yd/Baisman30mDREAMzs-10Ch/RHESSys_Baisman30m_g74/defs/' '10' 'BaismanCalibrationParameterProblemFile.csv' 'Chain_", num,"'"), intern = TRUE)
   rm(seed)
   
   print(paste0('Files set up for chain step num ', num, '. Running lls loop over all chains.'))
@@ -170,11 +170,11 @@ likelihood_external <- function(param){
   # Run RHESSys, compute TN, and compute likelihoods in parallel
   #Fixme: export, maybe a no export on param?
   lls = foreach::foreach(i=1:ifelse(is.null(nrow(param)), 1, nrow(param)), .combine = c, .inorder = TRUE) %dopar%{
-    setwd("/sfs/lustre/bahamut/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/")
+    setwd("/sfs/lustre/bahamut/scratch/js4yd/Baisman30mDREAMzs-10Ch/RHESSysRuns/")
     
     #Create the .out file that will be used for system2 commands
     #The path must not have sfs because it will run in Singularity
-    sout = paste0('/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/output/Run', num, '_Ch', i, '.out')
+    sout = paste0('/scratch/js4yd/Baisman30mDREAMzs-10Ch/RHESSysRuns/output/Run', num, '_Ch', i, '.out')
     file.create(sout)
     
     #Files = c(ls(".GlobalEnv"), ls())
@@ -192,23 +192,23 @@ likelihood_external <- function(param){
     #7: current chain iteration
     #8: chain number
     
-    sysout = system2('singularity', args=c('exec', '/share/resources/containers/singularity/rhessys/rhessys_v3.img', 'python', '/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/MakeDefs_fn_Chains.py', paste0('Chain_', num,'_AfterProcessing.csv'), '/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/', '/scratch/js4yd/Baisman30mDREAMzs/RHESSys_Baisman30m_g74/defs/', 'RHESSys_Baisman30m_g74', 'BaismanCalibrationParameterProblemFile.csv', '10', as.character(num), as.character(i)), stdout = TRUE, stderr = TRUE)
+    sysout = system2('singularity', args=c('exec', '/share/resources/containers/singularity/rhessys/rhessys_v3.img', 'python', '/scratch/js4yd/Baisman30mDREAMzs-10Ch/RHESSysRuns/MakeDefs_fn_Chains.py', paste0('Chain_', num,'_AfterProcessing.csv'), '/scratch/js4yd/Baisman30mDREAMzs-10Ch/RHESSysRuns/', '/scratch/js4yd/Baisman30mDREAMzs-10Ch/RHESSys_Baisman30m_g74/defs/', 'RHESSys_Baisman30m_g74', 'BaismanCalibrationParameterProblemFile.csv', '10', as.character(num), as.character(i)), stdout = TRUE, stderr = TRUE)
     
     cat(sysout, file=sout, append=TRUE, sep="\n")
     rm(sysout)
     
     #Change into ith directory that was just made and copy in files needed to run RHESSys
     # full path to the project location;
-    setwd(paste0("/sfs/lustre/bahamut/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i))
+    setwd(paste0("/sfs/lustre/bahamut/scratch/js4yd/Baisman30mDREAMzs-10Ch/RHESSysRuns/Run", num,"_Ch", i))
     
     #Copy folders and files to ./"$RHESSysNAME"
-    file.copy(from = "/sfs/lustre/bahamut/scratch/js4yd/Baisman30mDREAMzs/RHESSys_Baisman30m_g74/worldfiles", to = './RHESSys_Baisman30m_g74', recursive = TRUE)
-    file.copy(from = "/sfs/lustre/bahamut/scratch/js4yd/Baisman30mDREAMzs/RHESSys_Baisman30m_g74/tecfiles", to = './RHESSys_Baisman30m_g74', recursive = TRUE)
-    file.copy(from = "/sfs/lustre/bahamut/scratch/js4yd/Baisman30mDREAMzs/RHESSys_Baisman30m_g74/output", to = './RHESSys_Baisman30m_g74', recursive = TRUE)
-    file.copy(from = "/sfs/lustre/bahamut/scratch/js4yd/Baisman30mDREAMzs/RHESSys_Baisman30m_g74/flows", to = './RHESSys_Baisman30m_g74', recursive = TRUE)
-    file.copy(from = "/sfs/lustre/bahamut/scratch/js4yd/Baisman30mDREAMzs/RHESSys_Baisman30m_g74/clim", to = './RHESSys_Baisman30m_g74', recursive = TRUE)
+    file.copy(from = "/sfs/lustre/bahamut/scratch/js4yd/Baisman30mDREAMzs-10Ch/RHESSys_Baisman30m_g74/worldfiles", to = './RHESSys_Baisman30m_g74', recursive = TRUE)
+    file.copy(from = "/sfs/lustre/bahamut/scratch/js4yd/Baisman30mDREAMzs-10Ch/RHESSys_Baisman30m_g74/tecfiles", to = './RHESSys_Baisman30m_g74', recursive = TRUE)
+    file.copy(from = "/sfs/lustre/bahamut/scratch/js4yd/Baisman30mDREAMzs-10Ch/RHESSys_Baisman30m_g74/output", to = './RHESSys_Baisman30m_g74', recursive = TRUE)
+    file.copy(from = "/sfs/lustre/bahamut/scratch/js4yd/Baisman30mDREAMzs-10Ch/RHESSys_Baisman30m_g74/flows", to = './RHESSys_Baisman30m_g74', recursive = TRUE)
+    file.copy(from = "/sfs/lustre/bahamut/scratch/js4yd/Baisman30mDREAMzs-10Ch/RHESSys_Baisman30m_g74/clim", to = './RHESSys_Baisman30m_g74', recursive = TRUE)
     
-    setwd(paste0("/sfs/lustre/bahamut/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74"))
+    setwd(paste0("/sfs/lustre/bahamut/scratch/js4yd/Baisman30mDREAMzs-10Ch/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74"))
     
     #Run RHESSys
     sysout = system2('/sfs/lustre/bahamut/scratch/js4yd/RHESSysEastCoast_Optimized/rhessys5.20.0.develop_optimsize', args=c('-st', '1999', '11', '15', '1', '-ed', '2013', '10', '1', '1', '-b', '-h', '-newcaprise', '-gwtoriparian', '-capMax', '0.01', '-slowDrain', '-t', 'tecfiles/tec_daily_cal.txt', '-w', 'worldfiles/worldfile', '-whdr', 'worldfiles/worldfile.hdr', '-r', 'flows/subflow.txt', 'flows/surfflow.txt', '-pre', paste0('output/Run', num, '_Ch', i), '-s', '1', '1', '1', '-sv', '1', '1', '-gw', '1', '1', '-svalt', '1', '1', '-vgsen', '1', '1', '1', '-snowTs', '1', '-snowEs', '1', '-capr', '0.001'), stdout = TRUE, stderr = TRUE)
@@ -217,17 +217,17 @@ likelihood_external <- function(param){
     rm(sysout)
     
     #Remove the flows, tecfiles, defs, and clim folders.
-    unlink(paste0("/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/flows"), recursive = TRUE)
-    unlink(paste0("/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/clim"), recursive = TRUE)
-    unlink(paste0("/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/tecfiles"), recursive = TRUE)
-    unlink(paste0("/scratch/js4yd/Baisman30mDREAMzs-10Ch-3/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/defs"), recursive = TRUE)
+    unlink(paste0("/scratch/js4yd/Baisman30mDREAMzs-10Ch/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/flows"), recursive = TRUE)
+    unlink(paste0("/scratch/js4yd/Baisman30mDREAMzs-10Ch/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/clim"), recursive = TRUE)
+    unlink(paste0("/scratch/js4yd/Baisman30mDREAMzs-10Ch/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/tecfiles"), recursive = TRUE)
+    unlink(paste0("/scratch/js4yd/Baisman30mDREAMzs-10Ch/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/defs"), recursive = TRUE)
     #Remove some un-needed output
-    file.remove(paste0("/scratch/js4yd/Baisman30mDREAMzs-10Ch-3/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/output/Run", num,"_Ch", i, "_basin.hourly"))
-    file.remove(paste0("/scratch/js4yd/Baisman30mDREAMzs-10Ch-3/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/output/Run", num,"_Ch", i, "_basin.monthly"))
-    file.remove(paste0("/scratch/js4yd/Baisman30mDREAMzs-10Ch-3/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/output/Run", num,"_Ch", i, "_basin.yearly"))
-    file.remove(paste0("/scratch/js4yd/Baisman30mDREAMzs-10Ch-3/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/output/Run", num,"_Ch", i, "_hillslope.hourly"))
-    file.remove(paste0("/scratch/js4yd/Baisman30mDREAMzs-10Ch-3/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/output/Run", num,"_Ch", i, "_hillslope.monthly"))
-    file.remove(paste0("/scratch/js4yd/Baisman30mDREAMzs-10Ch-3/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/output/Run", num,"_Ch", i, "_hillslope.yearly"))
+    file.remove(paste0("/scratch/js4yd/Baisman30mDREAMzs-10Ch/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/output/Run", num,"_Ch", i, "_basin.hourly"))
+    file.remove(paste0("/scratch/js4yd/Baisman30mDREAMzs-10Ch/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/output/Run", num,"_Ch", i, "_basin.monthly"))
+    file.remove(paste0("/scratch/js4yd/Baisman30mDREAMzs-10Ch/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/output/Run", num,"_Ch", i, "_basin.yearly"))
+    file.remove(paste0("/scratch/js4yd/Baisman30mDREAMzs-10Ch/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/output/Run", num,"_Ch", i, "_hillslope.hourly"))
+    file.remove(paste0("/scratch/js4yd/Baisman30mDREAMzs-10Ch/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/output/Run", num,"_Ch", i, "_hillslope.monthly"))
+    file.remove(paste0("/scratch/js4yd/Baisman30mDREAMzs-10Ch/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/output/Run", num,"_Ch", i, "_hillslope.yearly"))
     
     #Read in simulated basin streamflow
     Q = vroom(paste0(getwd(), '/output/Run', num, '_Ch', i, '_basin.daily'), delim = ' ', col_names = TRUE, col_types = cols(.default=col_double()), progress = FALSE)
@@ -267,18 +267,18 @@ likelihood_external <- function(param){
     rm(Q,TN)
     
     #Compute likelihood for Q
-    seedLQ = 518+i+39*(num-1)
-    #system(paste0("python /sfs/lustre/bahamut/scratch/js4yd/Baisman30mDREAMzs/LikelihoodFun/Flow_MLEfits_Cal.py '", num, "' '", i, "' '", seedLQ, "'"), intern=TRUE)
-    sysout = system2('python', args=c('/sfs/lustre/bahamut/scratch/js4yd/Baisman30mDREAMzs/LikelihoodFun/Flow_MLEfits_Cal.py', as.character(num), as.character(i), as.character(seedLQ)), stdout = TRUE, stderr = TRUE)
+    seedLQ = 1020+i+10*(num-1)
+    #system(paste0("python /sfs/lustre/bahamut/scratch/js4yd/Baisman30mDREAMzs-10Ch/LikelihoodFun/Flow_MLEfits_Cal.py '", num, "' '", i, "' '", seedLQ, "'"), intern=TRUE)
+    sysout = system2('python', args=c('/sfs/lustre/bahamut/scratch/js4yd/Baisman30mDREAMzs-10Ch/LikelihoodFun/Flow_MLEfits_Cal.py', as.character(num), as.character(i), as.character(seedLQ)), stdout = TRUE, stderr = TRUE)
     rm(seedLQ)
     
     cat(sysout, file=sout, append=TRUE, sep="\n")
     rm(sysout)
     
     #Compute likelihood for TN
-    seedLTN = 185+i+39*(num-1)
-    #system(paste0("python /sfs/lustre/bahamut/scratch/js4yd/Baisman30mDREAMzs/LikelihoodFun/TN_MLEfits_Cal.py '", num, "' '", i, "' '", seedLTN, "'"), intern=TRUE)
-    sysout = system2('python', args=c('/sfs/lustre/bahamut/scratch/js4yd/Baisman30mDREAMzs/LikelihoodFun/TN_MLEfits_Cal.py', as.character(num), as.character(i), as.character(seedLTN)), stdout = TRUE, stderr = TRUE)
+    seedLTN = 2010+i+10*(num-1)
+    #system(paste0("python /sfs/lustre/bahamut/scratch/js4yd/Baisman30mDREAMzs-10Ch/LikelihoodFun/TN_MLEfits_Cal.py '", num, "' '", i, "' '", seedLTN, "'"), intern=TRUE)
+    sysout = system2('python', args=c('/sfs/lustre/bahamut/scratch/js4yd/Baisman30mDREAMzs-10Ch/LikelihoodFun/TN_MLEfits_Cal.py', as.character(num), as.character(i), as.character(seedLTN)), stdout = TRUE, stderr = TRUE)
     rm(seedLTN)
     
     cat(sysout, file=sout, append=TRUE, sep="\n")
@@ -366,12 +366,12 @@ print('DREAM complete. Saving output')
 for (i in 1:length(out_Parext$chain)){
   out_Parext$chain[[i]] = signif(out_Parext$chain[[i]],6)
 }
-list.save(out_Parext$chain, 'OutputChains.yaml')
+list.save(out_Parext$chain, 'OutputChains-10Ch.yaml')
 
 # Save session information----
 Info = sessionInfo()
 # Save entire workspace info----
-save.image(file = 'OutputWorkspace.RData', safe = FALSE)
+save.image(file = 'OutputWorkspace-10Ch.RData', safe = FALSE)
 
 #Researting a DREAM run from output----
 #load(file = 'CurrentChain.RData', verbose = FALSE)
