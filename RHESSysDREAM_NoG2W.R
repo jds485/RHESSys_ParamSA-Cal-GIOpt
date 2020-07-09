@@ -201,129 +201,12 @@ likelihood_external <- function(param){
     # full path to the project location;
     setwd(paste0("/sfs/lustre/bahamut/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i))
     
-    #Make directories that RHESSys needs and copy only the required files into them
-    dir.create('./grass_dataset')
-    file.copy(from = "/sfs/lustre/bahamut/scratch/js4yd/Baisman30mDREAMzs/grass_dataset/g74_RHESSys_Baisman30m_g74", to = './grass_dataset', recursive = TRUE)
-  
-    dir.create('./GIS2RHESSys')
-    dir.create('./GIS2RHESSys/libraries')
-    file.copy(from = "/sfs/lustre/bahamut/scratch/js4yd/Baisman30mDREAMzs/GIS2RHESSys/lulcCollectionEC_Cal.csv", to = './GIS2RHESSys')
-    file.copy(from = "/sfs/lustre/bahamut/scratch/js4yd/Baisman30mDREAMzs/GIS2RHESSys/soilCollection_Cal.csv", to = './GIS2RHESSys')
-    file.copy(from = "/sfs/lustre/bahamut/scratch/js4yd/Baisman30mDREAMzs/GIS2RHESSys/vegCollection_modified_Cal.csv", to = './GIS2RHESSys')
-    #The vegetation file needs to be modified by the def file data
-    #Run the vegetation modification script
-    sysout = system2('singularity', args=c('exec', '/share/resources/containers/singularity/rhessys/rhessys_v3.img', 'python', '/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/ModifyVeg.py', paste0('/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run', num, '_Ch', i, '/GIS2RHESSys'), paste0('/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run', num, '_Ch', i, '/RHESSys_Baisman30m_g74'), paste0('/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run', num, '_Ch', i, '/RHESSys_Baisman30m_g74/defs/'), 'vegCollection_modified_Cal.csv'), stdout = TRUE, stderr = TRUE)
-    
-    cat(sysout, file=sout, append=TRUE, sep="\n")
-    rm(sysout)
-    
-    file.copy(from = "/sfs/lustre/bahamut/scratch/js4yd/Baisman30mDREAMzs/GIS2RHESSys/libraries/g2w_cf_RHESSysEC.R", to = './GIS2RHESSys/libraries')
-    file.copy(from = "/sfs/lustre/bahamut/scratch/js4yd/Baisman30mDREAMzs/GIS2RHESSys/libraries/LIB_RHESSys_writeTable2World.R", to = './GIS2RHESSys/libraries')
-    
-    dir.create('./Date_analysis')
-    file.copy(from = "/sfs/lustre/bahamut/scratch/js4yd/Baisman30mDREAMzs/Date_analysis/climate_extension.R", to = './Date_analysis')
-    file.copy(from = "/sfs/lustre/bahamut/scratch/js4yd/Baisman30mDREAMzs/Date_analysis/LIB_dailytimeseries3.R", to = './Date_analysis')
-    file.copy(from = "/sfs/lustre/bahamut/scratch/js4yd/Baisman30mDREAMzs/Date_analysis/LIB_misc.r", to = './Date_analysis')
-    
     #Copy folders and files to ./"$RHESSysNAME"
     file.copy(from = "/sfs/lustre/bahamut/scratch/js4yd/Baisman30mDREAMzs/RHESSys_Baisman30m_g74/worldfiles", to = './RHESSys_Baisman30m_g74', recursive = TRUE)
     file.copy(from = "/sfs/lustre/bahamut/scratch/js4yd/Baisman30mDREAMzs/RHESSys_Baisman30m_g74/tecfiles", to = './RHESSys_Baisman30m_g74', recursive = TRUE)
     file.copy(from = "/sfs/lustre/bahamut/scratch/js4yd/Baisman30mDREAMzs/RHESSys_Baisman30m_g74/output", to = './RHESSys_Baisman30m_g74', recursive = TRUE)
     file.copy(from = "/sfs/lustre/bahamut/scratch/js4yd/Baisman30mDREAMzs/RHESSys_Baisman30m_g74/flows", to = './RHESSys_Baisman30m_g74', recursive = TRUE)
     file.copy(from = "/sfs/lustre/bahamut/scratch/js4yd/Baisman30mDREAMzs/RHESSys_Baisman30m_g74/clim", to = './RHESSys_Baisman30m_g74', recursive = TRUE)
-    file.copy(from = "/sfs/lustre/bahamut/scratch/js4yd/Baisman30mDREAMzs/RHESSys_Baisman30m_g74/soil_cat_mukey.csv", to = './RHESSys_Baisman30m_g74')
-    file.copy(from = "/sfs/lustre/bahamut/scratch/js4yd/Baisman30mDREAMzs/RHESSys_Baisman30m_g74/lulcFrac30m.csv", to = './RHESSys_Baisman30m_g74')
-    
-    #Now update the worldfile
-    # set paths for RHESSys input files
-    # 1 = Yes, output this file; 0 = No, do not output this file
-    #Using > instead of >> here to clobber the old contents and start anew.
-    system(paste0("echo outputWorldfile \"/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/worldfiles/worldfile.csv\" 1 > '/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/g2w_template.txt'"))
-    system(paste0("echo outputWorldfileHDR \"/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/worldfiles/worldfile.hdr\" 0 >> '/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/g2w_template.txt'"))
-    system(paste0("echo outputDefs \"/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/defs\" 0 >> '/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/g2w_template.txt'"))
-    system(paste0("echo outputSurfFlow \"/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/flows/surfflow.txt\" 0 >> '/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/g2w_template.txt'"))
-    system(paste0("echo outputSubFlow \"/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/flows/subflow.txt\" 0 >> '/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/g2w_template.txt'"))
-    
-    # set climate station ID and file name
-    system(paste0("echo stationID 101 >> '/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/g2w_template.txt'"))
-    system(paste0("echo stationFile \"clim/Cal_Feb2020Revised.base\" >> '/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/g2w_template.txt'"))
-    
-    # the following maps that must be provided with syntax:
-    system(paste0("echo basinMap basin >> '/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/g2w_template.txt'"))
-    system(paste0("echo hillslopeMap hill >> '/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/g2w_template.txt'"))
-    system(paste0("echo zoneMAP zone_cluster >> '/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/g2w_template.txt'"))
-    system(paste0("echo patchMAP patch >> '/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/g2w_template.txt'"))
-    system(paste0("echo soilidMAP soil_texture >> '/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/g2w_template.txt'"))
-    system(paste0("echo xMAP xmap >> '/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/g2w_template.txt'"))
-    system(paste0("echo yMAP ymap >> '/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/g2w_template.txt'"))
-    system(paste0("echo demMAP dem >> '/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/g2w_template.txt'"))
-    system(paste0("echo slopeMap slope >> '/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/g2w_template.txt'"))
-    system(paste0("echo aspectMAP aspect >> '/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/g2w_template.txt'"))
-    system(paste0("echo twiMAP wetness_index >> '/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/g2w_template.txt'"))
-    system(paste0("echo whorizonMAP west_180 >> '/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/g2w_template.txt'"))
-    system(paste0("echo ehorizonMAP east_000 >> '/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/g2w_template.txt'"))
-    system(paste0("echo isohyetMAP isohyet >> '/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/g2w_template.txt'"))
-    system(paste0("echo rowMap rowmap >> '/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/g2w_template.txt'"))
-    system(paste0("echo colMap colmap >> '/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/g2w_template.txt'"))
-    system(paste0("echo drainMap drain >> '/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/g2w_template.txt'"))
-    # ... impervious and its breakdown
-    system(paste0("echo impFracMAP impFrac >> '/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/g2w_template.txt'"))
-    system(paste0("echo roofMAP roofFrac >> '/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/g2w_template.txt'"))
-    system(paste0("echo drivewayMAP drivewayFrac >> '/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/g2w_template.txt'"))
-    system(paste0("echo pavedRoadFracMAP pavedroadFrac >> '/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/g2w_template.txt'"))
-    # ... forest vegetations
-    system(paste0("echo forestFracMAP forestFrac >> '/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/g2w_template.txt'"))
-    system(paste0("echo tree1StratumID tree1StratumID >> '/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/g2w_template.txt'"))
-    system(paste0("echo tree1FFrac tree1FFrac >> '/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/g2w_template.txt'"))
-    system(paste0("echo tree1LAI tree1LAI >> '/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/g2w_template.txt'"))
-    # ... shrub vegetation
-    system(paste0("echo shrubFracMAP shrubFrac >> '/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/g2w_template.txt'"))
-    #echo shrub1StratumID shrub1StratumID >> "$templateFile"
-    #echo shrub1FFrac shrub1FFrac >> "$templateFile"
-    #echo shrub1LAI shrub1LAI >> "$templateFile"
-    # ... crop vegetation
-    system(paste0("echo cropFracMAP cropFrac >> '/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/g2w_template.txt'"))
-    #echo crop1StratumID crop1StratumID >> "$templateFile"
-    #echo crop1FFrac crop1FFrac >> "$templateFile"
-    #echo crop1LAI crop1LAI >> "$templateFile"
-    # ... lawn/pasture vegetation
-    system(paste0("echo grassFracMAP lawnFrac >> '/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/g2w_template.txt'"))
-    system(paste0("echo grass1StratumID grass1StratumID >> '/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/g2w_template.txt'"))
-    system(paste0("echo grass1FFrac grass1FFrac >> '/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/g2w_template.txt'"))
-    system(paste0("echo grass1LAI grass1LAI >> '/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/g2w_template.txt'"))
-    # ... modeling stream-grids
-    system(paste0("echo streamMap str >> '/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/g2w_template.txt'"))
-    # The following maps are optional; User can comment out the lines that do not apply using "#" up front.
-    system(paste0("echo streamFullExtension strExt >> '/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/g2w_template.txt'"))
-    #echo unpavedroadMap NA >> "$templateFile"
-    system(paste0("echo riparianMAP riparian_hands >> '/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/g2w_template.txt'"))
-    #echo sewercoverMAP sewercover >> "$templateFile"
-    system(paste0("echo septicMAP septic >> '/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/g2w_template.txt'"))
-    #echo pipecoverMAP NA >> "$templateFile"
-    system(paste0("echo stormdrainMAP roadExit >> '/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/g2w_template.txt'"))
-    system(paste0("echo compactedsoilMAP compactedsoil >> '/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/g2w_template.txt'"))
-    system(paste0("echo additionalSurfaceDrainMAP addsurfdrain >> '/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/g2w_template.txt'"))
-
-    #Run g2w script
-    sysout = system2('singularity', args=c('exec', '/share/resources/containers/singularity/rhessys/rhessys_v3.img', 'grass74', paste0('/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run', num,'_Ch', i, '/grass_dataset/g74_RHESSys_Baisman30m_g74/PERMANENT'), '--exec', 'Rscript', paste0('/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run', num,'_Ch', i, '/GIS2RHESSys/libraries/g2w_cf_RHESSysEC.R'), paste0('/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run', num,'_Ch', i), paste0('/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run', num,'_Ch', i, '/RHESSys_Baisman30m_g74/vegCollection_modified_Cal.csv'), paste0('/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run', num,'_Ch', i, '/GIS2RHESSys/soilCollection_Cal.csv'), paste0('/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run', num,'_Ch', i, '/GIS2RHESSys/lulcCollectionEC_Cal.csv'), paste0('/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run', num,'_Ch', i, '/RHESSys_Baisman30m_g74/g2w_template.txt')), stdout = TRUE, stderr = TRUE)
-    
-    cat(sysout, file=sout, append=TRUE, sep="\n")
-    rm(sysout)
-      
-    #Run to create worldfile
-    sysout = system2('singularity', args=c('exec', '/share/resources/containers/singularity/rhessys/rhessys_v3.img', 'Rscript', paste0('/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run', num,'_Ch', i, '/GIS2RHESSys/libraries/LIB_RHESSys_writeTable2World.R'), 'NA', paste0('/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run', num,'_Ch', i, '/RHESSys_Baisman30m_g74/worldfiles/worldfile.csv'), paste0('/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run', num,'_Ch', i, '/RHESSys_Baisman30m_g74/worldfiles/worldfile')), stdout = TRUE, stderr = TRUE)
-    
-    cat(sysout, file=sout, append=TRUE, sep="\n")
-    rm(sysout)
-    
-    #Delete the GRASS directory and code libraries for space concerns
-    unlink(paste0("/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/grass_dataset"), recursive=TRUE)
-    unlink(paste0("/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/Date_analysis"), recursive=TRUE)
-    unlink(paste0("/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/GIS2RHESSys"), recursive=TRUE)
-    file.remove(paste0("/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/lulcFrac30m.csv"))
-    file.remove(paste0("/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/soil_cat_mukey.csv"))
-    file.remove(paste0("/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/vegCollection_modified_Cal.csv"))
-    file.remove(paste0("/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74/g2w_template.txt"))
     
     setwd(paste0("/sfs/lustre/bahamut/scratch/js4yd/Baisman30mDREAMzs/RHESSysRuns/Run", num,"_Ch", i, "/RHESSys_Baisman30m_g74"))
     
