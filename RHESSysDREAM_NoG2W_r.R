@@ -1,4 +1,3 @@
-tic_Script = Sys.time()
 #install.packages("/home/js4yd/BayesianTools/BayesianTools", type = 'source', repos = NULL )
 library(BayesianTools)
 library(parallel)
@@ -29,7 +28,7 @@ library(pracma)
 #15 - WRTDS TabCosYear file (txt file, tab separated with headers)
 #16 - WRTDS TabLogErr file (txt file, tab separated with headers)
 #17 - File that describes the parameter names and bounds (.csv file with headers)
-#18 - File with chain starting locations (.csv file with headers)
+#18 - Data file from previous run (CurrentChain.RData)
 #19 - Full path to working directory for chain runs (RHESSysRuns)
 #20 - iterations, Need at least one more iteration than the burnin to report a value to the output chain
 #21 - eps, normal noise to the proposal update.
@@ -103,12 +102,6 @@ colt = as.numeric(colnames(TabInt))
 #Fixme: This could have the likelihood function hyperparameters included in it.
 ParamRanges = read.csv(arg[17], stringsAsFactors = FALSE)
 
-#Load the matrix of starting values to be used for the chains---- 
-#Initially this is from the SA. This file should be the processed output from DREAM_ParameterBoundChecks_ChainStarts.py 
-#For restarts of DREAM, this is not needed because the output from DREAM knows the last point in the chain, which is the starting point for restarts.
-startValues = as.matrix(read.csv(file = arg[18], stringsAsFactors = FALSE))
-#startValues = as.matrix(read.csv(file = '/sfs/lustre/bahamut/scratch/js4yd/Baisman30mDREAMzs-10Ch/RHESSysRuns/BaismanChainStarts_AfterProcessing_Top3.csv', stringsAsFactors = FALSE))
-
 #Define the Multivariate Prior----
 prior = createUniformPrior(lower = ParamRanges$Lower, upper = ParamRanges$Upper, best = NULL)
 
@@ -120,10 +113,9 @@ prior = createUniformPrior(lower = ParamRanges$Lower, upper = ParamRanges$Upper,
 #1 - check that params are within their constraints, and adjust if needed
 #---In parallel---
 #2 - update def files with those params and make directories for each chain's RHESSys run
-#3 - call GIS2RHESSys operations to setup RHESSys
-#4 - Run RHESSys 
-#5 - Run WRTDS model to compute TN 
-#6 - Compute likelihoods
+#3 - Run RHESSys 
+#4 - Run WRTDS model to compute TN 
+#5 - Compute likelihoods
 likelihood_external <- function(param){
   od = getwd()
   
@@ -335,55 +327,47 @@ parallel::clusterEvalQ(cl = cl, library(EGRET, logical.return=FALSE))
 ## create BayesianSetup----
 setup_Parext = createBayesianSetup(likelihood = likelihood_external, prior = prior, lower = NULL, upper = NULL, parallel = 'external', names = ParamRanges$NumberedParams)
 
-#Create settings----
-## For this case we want to parallelize the internal chains, therefore we create a n row matrix with startValues, if you parallelize a model in the likelihood, do not set a n*row Matrix for startValue
-settings_Parext = list(iterations = as.numeric(arg[20]), #Need at least one more iteration than the burnin to report a value to the output chain
-                        gamma= NULL, #Not used in code
-                        eps = as.numeric(arg[21]), #Not adding normal noise to the proposal update.
-                        e = as.numeric(arg[22]), #Multiplying gamma by 1.05 in proposal update 
-                        parallel = NULL, #Specified in setup
-                        Z = NULL, #Computed in code. Supply upon manual restart.
-                        ZupdateFrequency = as.numeric(arg[23]), #Z is not updated until after burnin if the update frequency is greater than 1. Making equal to updateInterval.
-                        pSnooker = as.numeric(arg[24]), #10% chance of a snooker update
-                        DEpairs = as.numeric(arg[25]), #Number of chains used to compute the DE proposal update. In papers, randomly choose 1, 2, or 3 to use.
-                        nCR = as.numeric(arg[26]), #Update about 12 variables each time. nCR >=2 recommended in papers.
-                        pCRupdate = TRUE, #Use crossover updates
-                        updateInterval = as.numeric(arg[27]), #Must be greater than or equal to nCR. Best to be smaller.
-                        burnin = as.numeric(arg[28]), #burnin must be greater than or equal to adaptation, or all of the adaptation steps must be manually removed before summarizing chains.
-                        adaptation = as.numeric(arg[29]), #Adaptation should be about 20 % of the total NFE. Doing this manually.
-                        thin = as.numeric(arg[30]), #Thin = 1 to allow for post-solver manual thinning
-                        message = FALSE, #Messages do not print to .out file.
-                        startValue = startValues) #Use the specified starting values for each chain.
+#Load previous run data----
+load(arg[18], verbose=FALSE)
+class(temp) = c('mcmcSampler', 'bayesianOutput')
+
+#Assign setup_Parext to replace old setup (needed because the likelihood function was edited since the previous run)
+temp$setup = setup_Parext
+
+#Assign new settings
+temp$settings$iterations = as.numeric(arg[20])
+temp$settings$eps = as.numeric(arg[21])
+temp$settings$e = as.numeric(arg[22])
+temp$settings$ZupdateFrequency = as.numeric(arg[23])
+temp$settings$pSnooker = as.numeric(arg[24])
+temp$settings$DEpairs = as.numeric(arg[25])
+temp$settings$nCR = as.numeric(arg[26])
+temp$settings$updateInterval = as.numeric(arg[27])
+temp$settings$burnin = as.numeric(arg[28])
+temp$settings$adaptation = as.numeric(arg[29])
+temp$settings$thin = as.numeric(arg[30])
+
+#Trim the archive be removing all randomly initialized states.
+#I checked that the range of values for each parameter were similar before doing this.
+temp$Z = temp$Z[-seq(1,length(temp$setup$prior$sampler(1))*10,1),]
 
 ## runMCMC----
 set.seed(as.numeric(arg[2]))
 setwd(arg[19])
-out_Parext <- runMCMC(settings = settings_Parext, bayesianSetup = setup_Parext, sampler = "DREAMzs")
+out_Parext_Restart <- runMCMC(bayesianSetup = temp, sampler = "DREAMzs")
 
 print('DREAM complete. Saving output')
 
 # Save list of chains----
-for (i in 1:length(out_Parext$chain)){
-  out_Parext$chain[[i]] = signif(out_Parext$chain[[i]],6)
+for (i in 1:length(out_Parext_Restart$chain)){
+  out_Parext_Restart$chain[[i]] = signif(out_Parext_Restart$chain[[i]],6)
 }
-list.save(out_Parext$chain, 'OutputChains-10Ch.yaml')
+list.save(out_Parext_Restart$chain, 'OutputChains-10Ch_r.yaml')
 
 # Save session information----
 Info = sessionInfo()
 # Save entire workspace info----
-save.image(file = 'OutputWorkspace-10Ch.RData', safe = FALSE)
-
-#Researting a DREAM run from output----
-#load(file = 'CurrentChain.RData', verbose = FALSE)
-#class(temp) = c('mcmcSampler', 'bayesianOutput')
-
-#Change the settings, if needed.
-#No adaptation and burnin needed for the restart.
-#temp$settings$burnin = 0
-#temp$settings$adaptation = 0
-#temp$settings$iterations = 1000
-
-#out_Parext_Restart <- runMCMC(bayesianSetup = temp, sampler = "DREAMzs")
+save.image(file = 'OutputWorkspace-10Ch_r.RData', safe = FALSE)
 
 #Researting a restarted DREAM run from output----
 #temp_1 = temp
@@ -404,8 +388,8 @@ save.image(file = 'OutputWorkspace-10Ch.RData', safe = FALSE)
 #out_Parext_Restart_1 <- runMCMC(bayesianSetup = temp, sampler = "DREAMzs")
 
 #Copy the IterNum.txt file because plots and summary info will run the likelihood function again. Want to continue using the old IterNum for that to avoid overwriting output files. But also want to save the end-of-chain IterNum.
-file.copy(from = paste0(arg[19], '/IterNum.txt'), to = paste0(arg[19], '/IterFinalNum_ChainRun.txt'))
+file.copy(from = paste0(arg[19], '/IterNum.txt'), to = paste0(arg[19], '/IterFinalNum_ChainRun_r.txt'))
 
-print(out_Parext$settings$runtime)
+print(out_Parext_Restart$settings$runtime)
 
 stopCluster(cl)
