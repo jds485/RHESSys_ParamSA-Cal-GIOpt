@@ -1,5 +1,7 @@
 setwd("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR")
 
+#Fixme: Numerical difference in v102_epc.frootlitr_fcel is a result of re-run replicates. Can set EE to 0.
+
 library(GISTools)
 library(sp)
 library(rgdal)
@@ -547,7 +549,7 @@ rm(h)
 InputParams = read.csv("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\RHESSysFilePreparation\\defs\\MorrisSampleLocs\\MorrisSamples_AfterProcessing_EditToRerun5SA_comp.csv", stringsAsFactors = FALSE)
 
 #Remove all of the parameters with _orig. They were not modified
-InputParams = InputParams[-grep(x = colnames(InputParams), pattern = '_orig', fixed = TRUE)]
+InputParams = InputParams[,-grep(x = colnames(InputParams), pattern = '_orig', fixed = TRUE)]
 #Get the number of parameters
 cols = ncol(InputParams)
 
