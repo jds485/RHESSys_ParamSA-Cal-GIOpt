@@ -15,6 +15,7 @@
 #GITHUBLIBRARIES="https://raw.githubusercontent.com/laurencelin/GIS2RHESSys/master/libraries"
 GITHUBLIBRARIES='/scratch/js4yd/MorrisSA/GIS2RHESSys/libraries'
 SSURGOLIBRARIES='/scratch/js4yd/MorrisSA/ssurgo_extraction'
+RLIBPATH='/home/js4yd/R/x86_64-pc-linux-gnu-library/3.5'
 
 ##################################################################################
 # 1.2 Set Desired File Names
@@ -137,7 +138,7 @@ grass74 "$LOCATION"/$MAPSET --exec v.rast.stats -c map=tmp raster=basin_ column_
 grass74 "$LOCATION"/$MAPSET --exec v.to.rast --overwrite input=tmp type=area where=select_average>0 output=tmp use=attr attribute_column=select_average
 
 
-grass74 "$LOCATION"/$MAPSET -text --exec Rscript "$GITHUBLIBRARIES"/basin_determine.R
+grass74 "$LOCATION"/$MAPSET -text --exec Rscript "$GITHUBLIBRARIES"/basin_determine.R "$RLIBPATH"
 
 grass74 "$LOCATION"/$MAPSET --exec r.watershed elevation=dem threshold=$GRASS_thresII stream=strExt --overwrite # full stream extension;
 
@@ -164,7 +165,8 @@ grass74 "$LOCATION"/$MAPSET --exec g.remove -f type=raster name=tmp
 
 ##################################################################################
 ## 1.6 Use cluster analysis of slope and aspect to determine zones
-grass74 "$LOCATION"/$MAPSET --exec Rscript "$GITHUBLIBRARIES"/zone_cluster.R dem slope aspect hill zone_cluster
+#Note the random seed number should be set by the user (last command in next line)
+grass74 "$LOCATION"/$MAPSET --exec Rscript "$GITHUBLIBRARIES"/zone_cluster.R dem slope aspect hill zone_cluster '2923' "$RLIBPATH"
 ####################################################################################
 ## 1.7 Calculate isohyets
 grass74 "$LOCATION"/$MAPSET --exec r.mapcalc --overwrite expression="isohyet = 1"
@@ -179,7 +181,7 @@ grass74 "$LOCATION"/$MAPSET --exec v.to.rast --overwrite input=ssurgo use=cat ou
 grass74 "$LOCATION"/$MAPSET --exec v.db.select --overwrite map=ssurgo separator=comma file="$PROJDIR"/"$RHESSysNAME"/soil_cat_mukey.csv
 
 grass74 "$LOCATION"/$MAPSET --exec Rscript "$SSURGOLIBRARIES"/ssurgo_extraction.R "$downloadedSSURGOdirectoryPATH"
-grass74 "$LOCATION"/$MAPSET --exec Rscript "$SSURGOLIBRARIES"/ssurgo_soiltexture2gis.R "$PROJDIR"/"$RHESSysNAME"/soil_cat_mukey.csv "$downloadedSSURGOdirectoryPATH"/soil_mukey_texture.csv
+grass74 "$LOCATION"/$MAPSET --exec Rscript "$SSURGOLIBRARIES"/ssurgo_soiltexture2gis.R "$PROJDIR"/"$RHESSysNAME"/soil_cat_mukey.csv "$downloadedSSURGOdirectoryPATH"/soil_mukey_texture.csv "$RLIBPATH"
 
 #Commenting out to report intermediate files.
 #rm -rf "$LOCATIONSOIL"
@@ -195,12 +197,12 @@ grass74 "$LOCATION"/$MAPSET --exec r.to.vect input=patch output=patch type=area
 grass74 "$LOCATIONLULC"/$MAPSET --exec v.proj location=$LOCATION_NAME mapset=$MAPSET input=patch output=patch$RESOLUTION'm'
 grass74 "$LOCATIONLULC"/$MAPSET --exec v.to.rast input=patch$RESOLUTION'm' output=patch$RESOLUTION'm' use=attr attribute_column=value
 
-grass74 "$LOCATIONLULC"/$MAPSET --exec Rscript "$GITHUBLIBRARIES"/aggregate_lulcFrac.R patch$RESOLUTION'm' lulcRAW "$PROJDIR"/"$RHESSysNAME"/lulcFrac$RESOLUTION'm.csv'
+grass74 "$LOCATIONLULC"/$MAPSET --exec Rscript "$GITHUBLIBRARIES"/aggregate_lulcFrac.R patch$RESOLUTION'm' lulcRAW "$PROJDIR"/"$RHESSysNAME"/lulcFrac$RESOLUTION'm.csv' "$RLIBPATH"
 
 #Assuming that a modified lulcFrac file has been made, this is from where the script would need to be re-run.
 # delete old lulcRAW folder, delete old g2w_template, delete old flows folder contents, delete old worldfile
 # modify old lulcFrac30m.csv, and make sure the lulc Chesapeake file is updated for GI lulc codes
-grass74 "$LOCATION"/$MAPSET --exec Rscript "$GITHUBLIBRARIES"/aggregate_lulcFrac_write2GIS.R patch "$PROJDIR"/"$RHESSysNAME"/lulcFrac$RESOLUTION'm.csv' "$PROJDIR"/GIS2RHESSys/lulc_1m_Chesapeake_Conservancy.csv
+grass74 "$LOCATION"/$MAPSET --exec Rscript "$GITHUBLIBRARIES"/aggregate_lulcFrac_write2GIS.R patch "$PROJDIR"/"$RHESSysNAME"/lulcFrac$RESOLUTION'm.csv' "$PROJDIR"/GIS2RHESSys/lulc_1m_Chesapeake_Conservancy.csv "$RLIBPATH"
 
 #Commenting out to report intermediate files.
 #rm -rf "$LOCATIONLULC"
@@ -240,7 +242,7 @@ grass74 "$LOCATION"/$MAPSET --exec v.to.rast --overwrite input=roads output=vect
 
 ###################################################################################
 ## 1.12 Analyze elevation flowpaths
-grass74 "$LOCATION"/$MAPSET --exec Rscript "$GITHUBLIBRARIES"/elevation_analysis.R dem colmap rowmap drain hill strExt
+grass74 "$LOCATION"/$MAPSET --exec Rscript "$GITHUBLIBRARIES"/elevation_analysis.R dem colmap rowmap drain hill strExt "$RLIBPATH"
 grass74 "$LOCATION"/$MAPSET --exec r.mapcalc expression="riparian_hands = if( handsDEM < 5, 1, null())" --overwrite
 
 ###################################################################################
@@ -355,5 +357,5 @@ echo additionalSurfaceDrainMAP addsurfdrain >> "$templateFile"
 ##################################################################################
 # 2.2
 #Fixme? Add option to uptate/not update land use. Would need a way to save the old land use info and reset what comes out of this function.
-grass74 "$LOCATION"/$MAPSET --exec Rscript "$GITHUBLIBRARIES"/g2w_cf_RHESSysEC.R "$PROJDIR" default default default "$templateFile"
-Rscript "$GITHUBLIBRARIES"/LIB_RHESSys_writeTable2World.R NA "$PROJDIR"/"$RHESSysNAME"/worldfiles/worldfile.csv "$PROJDIR"/"$RHESSysNAME"/worldfiles/worldfile
+grass74 "$LOCATION"/$MAPSET --exec Rscript "$GITHUBLIBRARIES"/g2w_cf_RHESSysEC.R "$PROJDIR" default default default "$templateFile" "$RLIBPATH"
+Rscript "$GITHUBLIBRARIES"/LIB_RHESSys_writeTable2World.R NA "$PROJDIR"/"$RHESSysNAME"/worldfiles/worldfile.csv "$PROJDIR"/"$RHESSysNAME"/worldfiles/worldfile "$RLIBPATH"
