@@ -2975,7 +2975,6 @@ write.csv(ParamRanges_Cal, file = "C:\\Users\\js4yd\\OneDrive - University of Vi
 write.csv(ParamRanges_Cal_Likes, file = "C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\RHESSysFilePreparation\\defs_Calibration\\BaismanCalibrationParameterProblemFile_LikelihoodParams.csv", row.names = FALSE)
 options(scipen = 0)
 
-#Save a file of chain starting locations for these parameters----
 #Pre-2020 Diagnosis of problems with EEs----
 # for (i in 1:cols){
 #   ind = i+(1+cols)*(t-1)
