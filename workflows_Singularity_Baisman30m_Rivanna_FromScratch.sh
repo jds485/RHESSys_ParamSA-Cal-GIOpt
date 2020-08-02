@@ -1,13 +1,12 @@
 #!/bin/bash
 
+#Fixme: This script should be submitted as a SLURM job
+
 # STEP 1: after login to Rivanna, you need to manually type in the following command to use the singularity image.
 # singularity shell /share/resources/containers/singularity/rhessys/rhessys_v3.img
-#
-# STEP 2: create a working directory in /scratch/<user>/ space and upload the "raw_data" to it
-# STEP 3: fill in the user information below and upload this script to Rivanna
-# STEP 4: in the singularity image, run command: sh workflows_Singularity_Baisman30m_Rivanna_FromScratch.sh
-# STEP 5: wait and check for errors.
-# STEP 6: after this fromScratch setup, you can run RHESSys models using a different shell script.
+# STEP 2: in the singularity image, run command: sh workflows_Singularity_Baisman30m_Rivanna_FromScratch.sh
+# STEP 3: wait and check for errors. Takes about 30 mins.
+# STEP 4: after this fromScratch setup, you can run RHESSys models using a different shell script.
 
 ##################################################################################
 # 1.1 Set directory locations
@@ -19,14 +18,13 @@ RLIBPATH='/home/js4yd/R/x86_64-pc-linux-gnu-library/3.5'
 
 ##################################################################################
 # 1.2 Set Desired File Names
-# please fill in the <user>, <foldername>, <rhessysfoldername> below
 # full Linux path to the project location. Folders will be created in this directory, and this directory should have the raw_data in it.
 PROJDIR='/scratch/js4yd/MorrisSA'
 
-#Set the desired projection system (or is this the projection system that the input data are in?)
+#Set the desired projection system
 EPSGCODE='EPSG:26918'
 
-#Desired spatial resolution (meters) of the raster grids
+#Desired spatial resolution (meters) of the raster grid cells
 RESOLUTION=30 
 
 #Location of GIS data to be generated
@@ -38,15 +36,14 @@ MAPSET=PERMANENT
 
 ### ... create project folder structures
 mkdir "$GISDBASE"
-#mkdir "$PROJDIR"/raw_data ##<<--------------- upload by scp -r command to the "$PROJDIR"
 
 #Set gauge location
 gageLat='39.47947' # catchment outlet WGS84 Lat (decimal degree)
-gageLong='-76.67803' # catchment outlet WGS84 Long (decimal degree; includes the negative sign if applied)
+gageLong='-76.67803' # catchment outlet WGS84 Long (decimal degree; includes the negative sign, if applicable)
 
 #Set expected area of watershed, and stream extent thresholds
 expectedDrainageArea=3807283 # meter sq.
-expectedThresholdModelStr=350000 # meter sq. # note to include Pond Branch as a channel; 390*900=351000
+expectedThresholdModelStr=350000 # meter sq. note to include Pond Branch as a channel; 390*900=351000
 expectedThresholdStrExt=100000 # meter sq.
 GRASS_thres=$(($expectedThresholdModelStr/$RESOLUTION/$RESOLUTION)) # grid cell for stream network and hillslope configuration
 GRASS_thresII=$(($expectedThresholdStrExt/$RESOLUTION/$RESOLUTION))
@@ -188,7 +185,7 @@ grass74 "$LOCATION"/$MAPSET --exec Rscript "$SSURGOLIBRARIES"/ssurgo_soiltexture
 
 ###################################################################################
 ## 1.9 Extract Land Use and Land Cover Information
-#Can add new land use land cover IDs needed to implement additional vegetation species
+#Can add new land use land cover IDs as needed to implement additional vegetation species
 
 downloadedLULCfile="$PROJDIR"/'raw_data'/'BARN_1mLC_UTM.tif'
 grass74 "$LOCATION"/$MAPSET --exec r.in.gdal -e --overwrite input="$downloadedLULCfile" output=lulcRAW location=lulcRAW
@@ -199,9 +196,9 @@ grass74 "$LOCATIONLULC"/$MAPSET --exec v.to.rast input=patch$RESOLUTION'm' outpu
 
 grass74 "$LOCATIONLULC"/$MAPSET --exec Rscript "$GITHUBLIBRARIES"/aggregate_lulcFrac.R patch$RESOLUTION'm' lulcRAW "$PROJDIR"/"$RHESSysNAME"/lulcFrac$RESOLUTION'm.csv' "$RLIBPATH"
 
-#Assuming that a modified lulcFrac file has been made, this is from where the script would need to be re-run.
+#If a modified lulcFrac file has been made manually or from an algorithm, this is from where the script would need to be re-run.
 # delete old lulcRAW folder, delete old g2w_template, delete old flows folder contents, delete old worldfile
-# modify old lulcFrac30m.csv, and make sure the lulc Chesapeake file is updated for GI lulc codes
+# make sure the lulc Chesapeake file is updated for GI lulc codes
 grass74 "$LOCATION"/$MAPSET --exec Rscript "$GITHUBLIBRARIES"/aggregate_lulcFrac_write2GIS.R patch "$PROJDIR"/"$RHESSysNAME"/lulcFrac$RESOLUTION'm.csv' "$PROJDIR"/GIS2RHESSys/lulc_1m_Chesapeake_Conservancy.csv "$RLIBPATH"
 
 #Commenting out to report intermediate files.
