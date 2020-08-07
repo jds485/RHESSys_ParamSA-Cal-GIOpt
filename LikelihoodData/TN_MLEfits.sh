@@ -11,4 +11,14 @@
 
 module purge
 module load gcc/7.1.0 openmpi/3.1.4 python/3.6.6 mpi4py
-mpirun python TN_MLEfits.py                        
+mpirun python TN_MLEfits.py
+
+#Untested use with commands to be more generic:
+#sys.argv contains: 
+#0: unused - script call info
+#1: initial random seed
+#2: Full path to streamflow observations .txt file
+#3: Full path to simulated streamflow .txt file
+#4: Number of initial locations for the multi-start MLE solver
+#5: Prefix for the output file name
+#mpirun python TN_MLEfits.py '185' 'TN_Cal.txt' 'SAResults_BasinTNMed_p3_All_Reordered_Add5_Likes.txt' '20' 'SA_Params_logL_Baisman'             

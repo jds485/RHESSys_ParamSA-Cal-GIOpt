@@ -1,15 +1,26 @@
 import pandas as pd
 import numpy as np
 from scipy import optimize as sciOpt
+from scipy import stats as ss
 from likelihood import generalizedLikelihoodFunction
 from mpi4py import MPI
 import math
 import pyDOE
-from scipy import stats as ss
+import sys
+
+#All commented out for now. Use of sys.argv is untested.
+#sys.argv contains: 
+#0: unused - script call info
+#1: initial random seed
+#2: Full path to streamflow observations .txt file
+#3: Full path to simulated streamflow .txt file
+#4: Number of initial locations for the multi-start MLE solver
+#5: Prefix for the output file name
 
 # load flow observations
 #TrueQ = pd.read_csv('C:\\Users\\js4yd\\Dropbox\\Jared-Julie-Share\\Data\\BaismanStreamflow_Cal.txt',delimiter='\t') #11-15-99 through 9-30-13
 TrueQ = pd.read_csv('BaismanStreamflow_Cal.txt',delimiter='\t') #11-15-99 through 9-30-13
+#TrueQ = pd.read_csv(sys.argv[2],delimiter='\t') #11-15-99 through 9-30-13
 TrueQ['Date'] = pd.to_datetime(TrueQ['Date'],format="%Y-%m-%d")
 
 # load flow simulations
@@ -17,6 +28,7 @@ TrueQ['Date'] = pd.to_datetime(TrueQ['Date'],format="%Y-%m-%d")
 #SimQ = pd.read_csv('SAResults_BasinStreamflow_p4.txt',delimiter='\t') #(11-15-99 through 9-30-10)
 #SimQ = pd.read_csv('C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\SAResults_BasinStreamflow_p4_Reordered_Add5_Likes.txt',delimiter='\t')
 SimQ = pd.read_csv('SAResults_BasinStreamflow_p4_Reordered_Add5_Likes.txt',delimiter='\t')
+#SimQ = pd.read_csv(sys.argv[3],delimiter='\t')
 SimQ['Date'] = pd.to_datetime(SimQ['Date'],format="%Y-%m-%d")
 
 columns = SimQ.columns
@@ -54,6 +66,7 @@ else:
 
 #Number of samples to take for the multi-start gradient descent algorithm
 numsamps = 20
+#numsamps = int(sys.argv[4])
 #Create dataframe to store successful parameter sets
 #Qdf_success = pd.DataFrame(columns=['beta','xi','sigma_0','sigma_1','phi_1','mu_h','logL'])
 
@@ -67,6 +80,7 @@ for i in range(start,stop):
     # sigma_0 = 0.1, sigma_1 = 0.1, phi_1 = 0.7 (high auto-correlation), mu_h = 0.0 (unbiased)
     #Make an LHS sample of the initial parameters to try for each replicate. Random seed is the index
     np.random.seed(seed=i+518)
+	#np.random.seed(seed=i+int(sys.argv[1]))
     paramsInit = pyDOE.lhs(n=6, samples=numsamps)
     
     #Get all of the parameters into their expected ranges
@@ -117,3 +131,4 @@ for i in range(start,stop):
 
 # write data frame to file
 Qdf.to_csv('SA_Params_logL_Baisman_Flow_rank' + str(rank) + '.csv', index=False)
+#Qdf.to_csv(sys.argv[5] + '_Flow_rank' + str(rank) + '.csv', index=False)
