@@ -9,21 +9,24 @@ import os
 
 print('Starting TN_MLEfits.py')
 
-#Change to function directory and load function
-owd = os.getcwd()
-os.chdir('/sfs/lustre/bahamut/scratch/js4yd/Baisman30mDREAMzs/LikelihoodFun/')
-from likelihood import generalizedLikelihoodFunction
-os.chdir(owd)
-
 #sys.argv contains: 
 #0: unused - script call info
 #1: step in chain, num
 #2: chain number, i
 #3: random seed - should be different for each step in chain. All chains processed at once in this script
+#4: path to likelihood functions
+#5: path to the processed observation .txt file
+#6: Number of initial locations for the multi-start MLE solver
+
+#Change to function directory and load function
+owd = os.getcwd()
+os.chdir(sys.argv[4])
+from likelihood import generalizedLikelihoodFunction
+os.chdir(owd)
 
 # load TN observations
 #10-01-04 through 09-30-13
-TrueTN = pd.read_csv('/scratch/js4yd/Baisman30mDREAMzs/obs/TN_Feb2020Revised_Cal_p.txt',delimiter='\t')
+TrueTN = pd.read_csv(sys.argv[5],delimiter='\t')
 TrueTN['Date'] = pd.to_datetime(TrueTN['Date'],format="%Y-%m-%d")
 
 # load TN simulations
@@ -38,7 +41,7 @@ data = np.array(TrueTN['TN'].dropna())
 tIndex = TrueTN['TN'].dropna().index
 
 #Number of samples to take for the multi-start gradient descent algorithm
-numsamps = 20
+numsamps = int(sys.argv[6])
 
 comparedata = np.array(SimTN['TN'].iloc[TrueTN['TN'].dropna().index])
 ObjFunc = lambda params: generalizedLikelihoodFunction(data,comparedata,tIndex,params)
