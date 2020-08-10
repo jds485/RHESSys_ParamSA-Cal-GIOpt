@@ -73,6 +73,7 @@ numsamps = 20
 for i in range(start,stop):
     comparedata = np.array(SimQ['Replicate' + str(i+1)].iloc[1782:])
     ObjFunc = lambda params: generalizedLikelihoodFunction(data,comparedata,tIndex,params)
+	#ObjFunc = lambda params: generalizedLikelihoodFunction(data,comparedata,tIndex,params,month)
     
     # find MLE fits for each simulation
     # params = [beta, xi, sigma_0, sigma_1, phi_1, mu_h]
