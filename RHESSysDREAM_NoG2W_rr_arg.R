@@ -50,7 +50,7 @@ rm(out_Parext_Restart, arg, cl, i, Info, likelihood_external, setup_Parext)
 #31 - path to container image file '/share/resources/containers/singularity/rhessys/rhessys_v3.img'
 #32 - path to def files '/scratch/js4yd/Baisman30mDREAMzs-10Ch/RHESSys_Baisman30m_g74/defs/'
 #33 - round tolerance for def files '10'
-#34 - 'BaismanCalibrationParameterProblemFile.csv'
+#34 - File that describes the parameter names and bounds 'BaismanCalibrationParameterProblemFile.csv'
 #35 - RHESSys project name 'RHESSys_Baisman30m_g74'
 #36 - full path to project directory '/scratch/js4yd/Baisman30mDREAMzs-10Ch/RHESSys_Baisman30m_g74/'
 #37 - path to RHESSys exe file '/scratch/js4yd/RHESSysEastCoast_Optimized/rhessys5.20.0.develop_optimsize'
