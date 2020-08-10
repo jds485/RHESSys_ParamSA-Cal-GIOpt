@@ -1,3 +1,11 @@
 /SALikelihoodHARDSCRABBLE/
 /LikelihoodData/*.txt
 /LikelihoodData/Conversation
+/LikelihoodData/__pycache__
+/GI_GeometryCheck/*.docx
+/GI_GeometryCheck/*.tif*
+/GI_GeometryCheck/*.tfw
+/GI_GeometryCheck/PatchGrid
+/GI_GeometryCheck/*.csv
+/*.docx
+/*.zip
