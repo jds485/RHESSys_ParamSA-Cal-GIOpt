@@ -354,5 +354,6 @@ echo additionalSurfaceDrainMAP addsurfdrain >> "$templateFile"
 ##################################################################################
 # 2.2
 #Fixme? Add option to uptate/not update land use. Would need a way to save the old land use info and reset what comes out of this function.
-grass74 "$LOCATION"/$MAPSET --exec Rscript "$GITHUBLIBRARIES"/g2w_cf_RHESSysEC.R "$PROJDIR" default default default "$templateFile" "$RLIBPATH"
+grass74 "$LOCATION"/$MAPSET --exec Rscript "$GITHUBLIBRARIES"/g2w_cf_RHESSysEC.R "$PROJDIR" '/scratch/js4yd/MorrisSA/GIS2RHESSys/vegCollection_modified_SA.csv' '/scratch/js4yd/MorrisSA/GIS2RHESSys/soilCollection_SA.csv' '/scratch/js4yd/MorrisSA/GIS2RHESSys/lulcCollectionEC_SA.csv' "$templateFile" "$RLIBPATH"
+
 Rscript "$GITHUBLIBRARIES"/LIB_RHESSys_writeTable2World.R NA "$PROJDIR"/"$RHESSysNAME"/worldfiles/worldfile.csv "$PROJDIR"/"$RHESSysNAME"/worldfiles/worldfile "$RLIBPATH"
