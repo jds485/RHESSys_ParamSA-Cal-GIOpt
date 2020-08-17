@@ -7,9 +7,13 @@
 /GI_GeometryCheck/*.tfw
 /GI_GeometryCheck/PatchGrid
 /GI_GeometryCheck/*.csv
-/GI_GeometryCheck/*.shp
+/GI_GeometryCheck/*.shp*
 /GI_GeometryCheck/*.shx
 /GI_GeometryCheck/*.dbf
 /GI_GeometryCheck/*.prj
+/GI_GeometryCheck/*.cpg
+/GI_GeometryCheck/*.sbn
+/GI_GeometryCheck/*.sbx
 /*.docx
 /*.zip
+.Rhistory
