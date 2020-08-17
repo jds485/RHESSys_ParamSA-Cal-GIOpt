@@ -1,12 +1,13 @@
 #Script to determine how much GI can be allocated to each grid cell
 
+#Set working directory----
+setwd("C:\\Users\\js4yd\\OneDrive - University of Virginia\\RHESSys_ParameterSA\\GI_GeometryCheck")
+
 #Load libraries----
 library(sp)
 library(rgdal)
 library(raster)
 library(rgeos)
-
-setwd("C:\\Users\\js4yd\\OneDrive - University of Virginia\\RHESSys_ParameterSA\\GI_GeometryCheck")
 
 #Load files----
 #Read in the grid cell centers and make into a spatial dataframe
@@ -77,19 +78,20 @@ for (p in 1:length(unique(Cells$patchID))){
 rm(p)
 
 #Implement constraints on the locations where GI may be placed----
-# 1. GI cannot be placed within a 1 m buffer from impervious surfaces----
+# 1. GI cannot be placed within a 2 m buffer from impervious surfaces----
 # Impervious surfaces (with and without vegetation cover) are lulc 7, 8, 9, 10, 11, and 12. 
-# Using a 1.5 m radial buffer from the grid cell center of an impervious cell to select corner cell centers 
-# whose cells are within 1 m away.
+# Using a 2.9 m radial buffer from the grid cell center of an impervious cell to select corner cell centers 
+# whose cells are within 2 m away.
 Impervious1 = lc1[lc1$BARN_1mLC_UTM %in% c(7:12),]
-ImpBuff = buffer(Impervious1, width = 1.5, dissolve = TRUE)
+ImpBuff = buffer(Impervious1, width = 2.9, dissolve = TRUE)
 
 #Remove these cells from the possible options for centers of GI.
+# Takes a while to do this step, but it cannot be sped up.
 CenterOptions = lc1[ImpBuff,]
 CenterOptions = lc1[-which(lc1$ID %in% CenterOptions$ID),]
 
 #Remove all cells with patchID = 0 (not in watershed)---- 
-# This has to be completed after buffering impervious surfaces so that roads located within 1.5 m of the watershed boundary inform placement of GI.
+# This has to be completed after buffering impervious surfaces so that roads located within 2.9 m of the watershed boundary inform placement of GI.
 lc1 = lc1[-which(lc1$patchID == 0),]
 CenterOptions = CenterOptions[-which(CenterOptions$patchID == 0),]
 
@@ -102,21 +104,32 @@ BufferOptions = BufferOptions[BufferOptions$BARN_1mLC_UTM != 12,]
 #Remove all roofs from GI buffer locations
 BufferOptions = BufferOptions[BufferOptions$BARN_1mLC_UTM != 7,]
 
-# 2. The center cell must be grass (lulc5) and the buffer cannot be tree (lulc3)----
+# 2. GI center location cannot be placed within 8 m of major roads
+#Load buffered roads file (Route 25)
+Rte25 = readOGR(dsn = "C:\\Users\\js4yd\\OneDrive - University of Virginia\\RHESSys_ParameterSA\\GI_GeometryCheck", layer = 'Route25_Buff8m', stringsAsFactors=FALSE)
+Rte25 = spTransform(Rte25, CRSobj = CRS('+init=epsg:26918'))
+Rte25_Cells = CenterOptions[Rte25,]
+CenterOptions = CenterOptions[-which(CenterOptions$ID %in% Rte25_Cells$ID),]
+
+# 3. The center cell must be grass (lulc5) and the buffer cannot be tree (lulc3)----
 CenterOptions = CenterOptions[CenterOptions$BARN_1mLC_UTM == 5,]
 BufferOptions = BufferOptions[BufferOptions$BARN_1mLC_UTM != 3,]
 
-# 3. No trees may be placed over the power line cells (a 15 m buffer is hand-drawn when digitized in Google Earth and ArcMap)
-#Load power line KML files, transform to CRS, and write as shapefiles
-PL1 = readOGR(dsn = "C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\Boundaries\\BaisPowerLine1.kml", stringsAsFactors = FALSE)
-PL2 = readOGR(dsn = "C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\Boundaries\\BaisPowerLine2.kml", stringsAsFactors = FALSE)
-PL1 = spTransform(PL1, CRSobj = CRS('+init=epsg:26918'))
-PL2 = spTransform(PL2, CRSobj = CRS('+init=epsg:26918'))
-writeOGR(PL1, dsn = "C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\Boundaries", layer = 'BaisPowerLine1', driver = 'ESRI Shapefile')
-writeOGR(PL2, dsn = "C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\Boundaries", layer = 'BaisPowerLine2', driver = 'ESRI Shapefile')
-rm(PL1, PL2)
+#Testing a buffer that is only grass
+BufferOptions_grass = BufferOptions[BufferOptions$BARN_1mLC_UTM == 5,]
 
-#Load in the processed files
+# 4. No trees may be placed over the power line cells (a 15 m buffer is hand-drawn when digitized in Google Earth and ArcMap)
+#Used to process power line KML to shapefile:
+#Load power line KML files, transform to CRS, and write as shapefiles
+#PL1 = readOGR(dsn = "C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\Boundaries\\BaisPowerLine1.kml", stringsAsFactors = FALSE)
+#PL2 = readOGR(dsn = "C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\Boundaries\\BaisPowerLine2.kml", stringsAsFactors = FALSE)
+#PL1 = spTransform(PL1, CRSobj = CRS('+init=epsg:26918'))
+#PL2 = spTransform(PL2, CRSobj = CRS('+init=epsg:26918'))
+#writeOGR(PL1, dsn = "C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\Boundaries", layer = 'BaisPowerLine1', driver = 'ESRI Shapefile')
+#writeOGR(PL2, dsn = "C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\Boundaries", layer = 'BaisPowerLine2', driver = 'ESRI Shapefile')
+#rm(PL1, PL2)
+
+#Load in the processed power line shapefiles
 PL1 = readOGR(dsn = "C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\Boundaries\\BaisPowerLine1.shp", stringsAsFactors = FALSE)
 PL2 = readOGR(dsn = "C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\Boundaries\\BaisPowerLine2.shp", stringsAsFactors = FALSE)
 PL1 = spTransform(PL1, CRSobj = CRS('+init=epsg:26918'))
@@ -133,7 +146,12 @@ PL2_Bound = BufferOptions[PL2,]
 BufferOptions = BufferOptions[-which(BufferOptions$ID %in% PL1_Bound$ID),]
 BufferOptions = BufferOptions[-which(BufferOptions$ID %in% PL2_Bound$ID),]
 
-# 4. GI should only be placed in the suburban hillslopes
+PL1_Boundgr = BufferOptions_grass[PL1,]
+PL2_Boundgr = BufferOptions_grass[PL2,]
+BufferOptions_grass = BufferOptions_grass[-which(BufferOptions_grass$ID %in% PL1_Boundgr$ID),]
+BufferOptions_grass = BufferOptions_grass[-which(BufferOptions_grass$ID %in% PL2_Boundgr$ID),]
+
+# 5. GI should only be placed in the suburban hillslopes
 # Hillslopes 1 - 8 are mostly all forrested, so remove all cells in those hillslopes
 for (h in 1:8){
   if (length(which(CenterOptions$patchID %in% Cells$patchID[Cells$hillID == h])) > 0){
@@ -142,15 +160,18 @@ for (h in 1:8){
   if (length(which(BufferOptions$patchID %in% Cells$patchID[Cells$hillID == h])) > 0){
     BufferOptions = BufferOptions[-which(BufferOptions$patchID %in% Cells$patchID[Cells$hillID == h]), ]
   }
+  if (length(which(BufferOptions_grass$patchID %in% Cells$patchID[Cells$hillID == h])) > 0){
+    BufferOptions_grass = BufferOptions_grass[-which(BufferOptions_grass$patchID %in% Cells$patchID[Cells$hillID == h]), ]
+  }
 }
 rm(h)
 
-# 5. GI should be limited on septic grid cells---- 
+# 6. GI should be limited on septic grid cells---- 
 # Septic cells are listed in the worldfile csv by patch ID number. Septic is PatchLandID 4.
 # assume that a minimum of 100 grass cells are needed for the septic tank. All others can have GI
 unique(Cells$patchID[Cells$patchLandID == 4])
 
-# 6. The spatial area increment for GI is a square of 9, 1 m2 cells that meet the constraints in steps 1 and 2. 
+# 7. The spatial area increment for GI is a square of 9, 1 m2 cells that meet the constraints in steps 1 and 2. 
 # Loop over the patches and return the maximum possible GI fraction. 
 
 #Find the maximum possible amount of GI for each patch----
@@ -160,10 +181,11 @@ lcMax[,1] = lc30$patchID
 #Loop over all of the 30 m patches for which a GI center can be located
 GI_p = unique(CenterOptions$patchID[CenterOptions$BARN_1mLC_UTM == 5])
 for (p in 1:length(GI_p)){
-  #Get the center and buffer cell options for this patch. These are sorted by ID, smallest to largest
+  #Get the center and buffer cell options for this patch. 
   co = CenterOptions[CenterOptions$patchID == GI_p[p],]
   bo = BufferOptions[BufferOptions$patchID == GI_p[p],]
   
+  #ID, smallest to largest
   #loop over the 1m patches to determine which can have GI trees
   #ID for all possible GI center and buffer. 
   ID = vector('numeric')
@@ -188,16 +210,54 @@ for (p in 1:length(GI_p)){
   }
   rm(b, selCells, l)
   
+  #ID, largest to smallest
+  #loop over the 1m patches to determine which can have GI trees
+  #ID for all possible GI center and buffer. 
+  IDls = vector('numeric')
+  Maxls = 0
+  co = co[order(co$ID, decreasing = TRUE),]
+  bo = BufferOptions[BufferOptions$patchID == GI_p[p],]
+  for (l in 1:length(co$ID)){
+    #Buffer the 1m cell center
+    b = buffer(co[co$ID == co$ID[l],], width = 1.5, dissolve = TRUE)
+    #Select all 1m cell centers within 1.5m in the buffer location dataset
+    selCells = bo[b,]
+    #If there are 9 cells, it can be a GI location
+    if (nrow(selCells) == 9){
+      #Add IDs to vector
+      IDls = c(IDls, selCells$ID)
+      
+      #Remove these IDs from the buffer location options
+      bo = bo[-which(bo$ID %in% selCells$ID),]
+      Maxls = Maxls + 9
+    }else if (nrow(selCells) > 9){
+      print(paste('More than 9 cells for location', co$ID[l]))
+      stop()
+    }
+  }
+  rm(b, selCells, l)
+  
   #Determine which land cover types are converted to GI land cover
   
-  lcMax[p,2] = Max
+  lcMax[p,2] = max(Max, Maxls)
 }
-rm(p, ID, Max, bo, co)
+rm(p, ID, Max, bo, co, Maxls, IDls)
 
 
+#Used to make plots of individual 30x30 m patches
 plot(CellGrid[CellGrid$value == GI_p[p],], col = NA, border = 'black')
-plot(CenterOptions[CenterOptions$patchID == GI_p[p],], pch = 15, add = T)
 plot(BufferOptions[BufferOptions$patchID == GI_p[p],], pch = 15, add = T, col = 'red')
+plot(CenterOptions[CenterOptions$patchID == GI_p[p],], pch = 15, add = T)
+plot(BufferOptions[BufferOptions$ID %in% ID,], pch = 15, add = T, col = 'green')
+plot(BufferOptions[BufferOptions$ID %in% IDls,], pch = 15, add = T, col = 'green')
+
+plot(Cells, pch = 15)
+plot(Cells[Cells$hillID %in% 1:8,], pch = 15, col = 'red', add = T)
+plot(Cells[which((Cells$hillID == 2) & (Cells$patchLandID == 1)),], pch = 15, col = 'purple', add = T)
+plot(BufferOptions, pch = 15, col = 'green', cex = 0.1, add = T)
+#Used to show impact of using grass-only in the buffer cells.
+#plot(BufferOptions_grass, pch = 15, col = 'yellow', cex = 0.1, add = T)
+plot(CenterOptions, pch = 15, col = 'darkgreen', cex = 0.1, add = T)
 
 #Write a file containing the maximum GI allocation for each cell
 write.csv( , 'MaxGI.csv', row.names = FALSE)
