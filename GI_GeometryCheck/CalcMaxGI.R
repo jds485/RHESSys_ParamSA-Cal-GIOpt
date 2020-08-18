@@ -1,7 +1,7 @@
 #Script to determine how much GI can be allocated to each grid cell
 
 #Set working directory----
-setwd("C:\\Users\\js4yd\\OneDrive - University of Virginia\\RHESSys_ParameterSA\\GI_GeometryCheck")
+setwd("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\Optimization\\GIAllocation")
 
 #Load libraries----
 library(sp)
@@ -23,7 +23,7 @@ coordinates(Cells) = c('patchX', 'patchY')
 proj4string(Cells) = CRS('+init=epsg:26918')
 
 #Read the polygon grid of 30 m patches
-CellGrid = readOGR(dsn = "C:\\Users\\js4yd\\OneDrive - University of Virginia\\RHESSys_ParameterSA\\GI_GeometryCheck\\PatchGrid", layer = 'patch', stringsAsFactors = FALSE)
+CellGrid = readOGR(dsn = "C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\Optimization\\GIAllocation\\PatchGrid", layer = 'patch', stringsAsFactors = FALSE)
 #Transform to same projection as Cells
 CellGrid = spTransform(CellGrid, CRSobj = CRS('+init=epsg:26918'))
 
@@ -43,12 +43,12 @@ Cells_buff30m = buffer(Cells, width = 30, dissolve = TRUE)
 Cells_buff30m = SpatialPolygonsDataFrame(Sr = Cells_buff30m, data = as.data.frame(1))
 
 #Save datasets
-writeOGR(Cells_buff30m, dsn = "C:\\Users\\js4yd\\OneDrive - University of Virginia\\RHESSys_ParameterSA\\GI_GeometryCheck", layer = 'PatchBuff30m', driver = 'ESRI Shapefile')
-writeOGR(lc1, dsn = "C:\\Users\\js4yd\\OneDrive - University of Virginia\\RHESSys_ParameterSA\\GI_GeometryCheck", layer = 'LULCCenters1m', driver = 'ESRI Shapefile')
+writeOGR(Cells_buff30m, dsn = "C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\Optimization\\GIAllocation", layer = 'PatchBuff30m', driver = 'ESRI Shapefile')
+writeOGR(lc1, dsn = "C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\Optimization\\GIAllocation", layer = 'LULCCenters1m', driver = 'ESRI Shapefile')
 
 #Clip lc1 to this buffer (takes 10 mins)
 lc1 = lc1[Cells_buff30m,]
-writeOGR(lc1, dsn = "C:\\Users\\js4yd\\OneDrive - University of Virginia\\RHESSys_ParameterSA\\GI_GeometryCheck", layer = 'LULCCenters1m_cpR', driver = 'ESRI Shapefile')
+writeOGR(lc1, dsn = "C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\Optimization\\GIAllocation", layer = 'LULCCenters1m_cpR', driver = 'ESRI Shapefile')
 
 #Number the cells
 lc1$ID = seq(1,nrow(lc1@data),1)
@@ -111,7 +111,7 @@ BufferOptions = BufferOptions[BufferOptions$BARN_1mLC_UTM != 7,]
 
 # 2. GI center location cannot be placed within 8 m of major roads----
 #Load buffered roads file (Route 25)
-Rte25 = readOGR(dsn = "C:\\Users\\js4yd\\OneDrive - University of Virginia\\RHESSys_ParameterSA\\GI_GeometryCheck", layer = 'Route25_Buff8m', stringsAsFactors=FALSE)
+Rte25 = readOGR(dsn = "C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\Optimization\\GIAllocation", layer = 'Route25_Buff8m', stringsAsFactors=FALSE)
 Rte25 = spTransform(Rte25, CRSobj = CRS('+init=epsg:26918'))
 Rte25_Cells = CenterOptions[Rte25,]
 CenterOptions = CenterOptions[-which(CenterOptions$ID %in% Rte25_Cells$ID),]
@@ -497,5 +497,8 @@ rm(h)
 #Write a file containing the maximum GI allocation for each cell----
 write.csv(lcMax_gr, 'MaxGI30m.csv', row.names = FALSE)
 
-#Save data
-save.image("C:/Users/js4yd/OneDrive - University of Virginia/RHESSys_ParameterSA/GI_GeometryCheck/CalcMaxGI_Aug17.RData")
+#Write a processed cell grid file for use in map plotting----
+writeOGR(CellGrid, dsn = 'PatchGrid', layer = 'patch_p', driver = 'ESRI Shapefile')
+
+#Save data----
+save.image("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\Optimization\\GIAllocation\\CalcMaxGI_Aug17.RData")
