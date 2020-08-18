@@ -7,9 +7,12 @@ print('Start GI Allocation')
 #1: random seed
 #2: path to csv file describing the maximum GI allocation for each patch
 #3: path to csv file with LULC for every patch
-#4: Number of hillslopes whose patches can have GI
-#5: Output filename
-arg = commandArgs(T)
+#4: directory to file #3
+#5: Number of hillslopes whose patches can have GI
+#6: Output filename
+#arg = commandArgs(T)
+
+#setwd(arg[4])
 
 #Fixme: read in an externally generated file?
 # It would be nice if this file in the name or in the contents contained an identifier 
@@ -24,10 +27,10 @@ HillPct = matrix(seq(0.1,0.27,0.01), nrow = 6, ncol = 3)
 #HillPct = matrix(rep(0,18), nrow = 6, ncol = 3)
 
 #Read in the maximum possible GI allocation amount for each patch.
-MaxGI = read.csv('C:\\Users\\js4yd\\OneDrive - University of Virginia\\RHESSys_ParameterSA\\GI_GeometryCheck\\MaxGI30m.csv', stringsAsFactors = FALSE)
+MaxGI = read.csv('C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\Optimization\\GIAllocation\\MaxGI30m.csv', stringsAsFactors = FALSE)
 
 #Read in the original aggregated 30 m res LULC file
-lc30 = read.csv('C:\\Users\\js4yd\\OneDrive - University of Virginia\\RHESSys_ParameterSA\\GI_GeometryCheck\\lulcFrac30m.csv', stringsAsFactors = FALSE)
+lc30 = read.csv('C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\Optimization\\GIAllocation\\lulcFrac30m.csv', stringsAsFactors = FALSE)
 #Add GI columns
 lc30$lulc16 = lc30$lulc15 = lc30$lulc14 = lc30$lulc13 = 0
 
@@ -112,3 +115,29 @@ if (any(rowSums(lc30[,-c(1,2)]) != 900)){
 write.csv(lc30, file = 'lulcFrac30m_GI.csv', row.names = FALSE)
 
 print('End GI Allocation')
+
+
+#Plot of the GI fraction in each patch as percentage of the maximum possible----
+library(sp)
+library(rgdal)
+
+#Load color functions - from JDS github repo: Geothermal_ESDA
+source('C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\Hydrology\\USGSGauges\\ColorFunctions.R')
+
+#Load processed cell grid file
+CellGrid = readOGR(dsn = "C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\Optimization\\GIAllocation\\PatchGrid", layer = 'patch_p', stringsAsFactors = FALSE)
+
+scaleRange = c(0,1)
+scaleBy = 0.2
+Pal = rev(rainbow((scaleRange[2] - scaleRange[1])/scaleBy))
+
+png('GI_pctMax.png', res = 300, units = 'in', width = 5, height = 5)
+par(mar= c(0,0,0,0))
+#All cells
+plot(CellGrid, col = 'white')
+#All possible GI locations
+plot(CellGrid[order(CellGrid$value, decreasing = FALSE),][MaxGI$MaxGI > 0,], pch = 15, col = 'black', add = T)
+#Where GI were located
+plot(CellGrid[order(CellGrid$value, decreasing = FALSE),][lc30$lulc13 > 0,], pch = 15, col = colFun(lc30$lulc13[lc30$lulc13 > 0]/MaxGI$MaxGI[lc30$lulc13 > 0]), add = T)
+legend('bottomright', title = expression(bold("GI / Max Possible")), legend = c("0", ">0 - <0.2", "0.2 - <0.4", "0.4 - <0.6", "0.6 - <0.8", "0.8 - 1", 'No GI Possible'), col = c('black', colFun(seq(scaleRange[1], scaleRange[2]-scaleBy, scaleBy)), 'black'), pch = c(rep(15,6), 22))
+dev.off()
