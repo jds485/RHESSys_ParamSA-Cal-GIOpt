@@ -2,11 +2,10 @@
 
 print('Start GI Allocation')
 
-#Fixme: Add once completed
 #Arguments:
 #1: random seed
-#2: path to csv file describing the maximum GI allocation for each patch ('MaxGI30m.csv')
-#3: path to csv file with LULC for every patch ('lulcFrac30m.csv')
+#2: csv file describing the maximum GI allocation for each patch ('MaxGI30m.csv')
+#3: csv file with LULC for every patch ('lulcFrac30m.csv')
 #4: directory to files #2 and #3 ('C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\Optimization\\GIAllocation')
 #5: Number of hillslopes whose patches can have GI (6)
 #6: Number of decision variables for each hillslope (3)
