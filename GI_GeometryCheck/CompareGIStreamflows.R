@@ -21,7 +21,7 @@ Q1$Date = as.Date(paste0(Q1$year, '-', Q1$month, '-', Q1$day))
 Q1 = as.data.frame(Q1[,c('Date','streamflow')])
 #Trim off spin-up years
 Q1 = Q1[which(as.Date(Q1$Date) >= as.Date('2004-10-01')),]
-Qmat = matrix(NA, nrow = nrow(Q1), ncol = 101)
+Qmat = SatDefMat = DetStoreMat = ETMat = matrix(NA, nrow = nrow(Q1), ncol = 101)
 for (i in 1:100){
   setwd(paste0('/scratch/js4yd/GI_RandomSeedEval/RHESSysRuns/Run', i, '/RHESSys_Baisman30m_g74/output'))
   #Read in simulated basin streamflow
@@ -30,34 +30,45 @@ for (i in 1:100){
   #Make a new Date column
   Q$Date = as.Date(paste0(Q$year, '-', Q$month, '-', Q$day))
   
-  #Retain only streamflow and Date columns for space
-  Q = as.data.frame(Q[,c('Date','streamflow')])
-  
   #Trim off spin-up years
   Q = Q[which(as.Date(Q$Date) >= as.Date('2004-10-01')),]
   
   #Convert simulated streamflow to cfs units
   Q$streamflow = round(Q$streamflow*conversion_b, 6)
   
+  #Add to Qmat
+  Qmat[,i+1] = Q$streamflow
+  SatDefMat[,i+1] = Q$sat_def
+  DetStoreMat[,i+1] = Q$detention_store
+  ETMat[,i+1] = Q$trans + Q$evap
+  
+  #Retain only streamflow and Date columns for space
+  Q = as.data.frame(Q[,c('Date','streamflow')])
+  
   #Write streamflow to file for loading in Python likelihood function
   options(scipen = 999)
   write.table(Q, file = paste0(getwd(), '/Q.txt'), col.names = TRUE, row.names = FALSE, sep = '\t')
   options(scipen = 0)
-  
-  #Add to Qmat
-  Qmat[,i+1] = Q$streamflow
 }
 
 #Convert to dataframe
 Qmat = as.data.frame(Qmat)
-colnames(Qmat) = c('Date', paste0('Run', seq(1,100,1)))
+SatDefMat = as.data.frame(SatDefMat)
+DetStoreMat = as.data.frame(DetStoreMat)
+ETMat = as.data.frame(ETMat)
+colnames(Qmat) = colnames(SatDefMat) = colnames(DetStoreMat) = colnames(ETMat) = c('Date', paste0('Run', seq(1,100,1)))
 
 #Add dates
-Qmat$Date = as.Date(Q1$Date)
+Qmat$Date = SatDefMat$Date = DetStoreMat$Date = ETMat$Date = as.Date(Q1$Date)
 
 #Save files
 setwd('/scratch/js4yd/GI_RandomSeedEval')
-write.csv(Qmat, 'FlowGI_c.csv', row.names=FALSE)
+options(scipen = 999)
+write.csv(Qmat, 'FlowGI_c.txt', col.names = TRUE, row.names = FALSE, sep = '\t')
+write.csv(SatDefMat, 'SatDefGI_c.txt', col.names = TRUE, row.names = FALSE, sep = '\t')
+write.csv(DetStoreMat, 'DetStoreGI_c.txt', col.names = TRUE, row.names = FALSE, sep = '\t')
+write.csv(ETMat, 'ETGI_c.txt', col.names = TRUE, row.names = FALSE, sep = '\t')
+options(scipen = 0)
 
 #plots
 png(paste0('GIstreamflowRepsBasin_Med.png'), res = 300, height = 5, width=5, units = 'in')
