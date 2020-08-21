@@ -64,10 +64,10 @@ Qmat$Date = SatDefMat$Date = DetStoreMat$Date = ETMat$Date = as.Date(Q1$Date)
 #Save files
 setwd('/scratch/js4yd/GI_RandomSeedEval')
 options(scipen = 999)
-write.csv(Qmat, 'FlowGI_c.txt', col.names = TRUE, row.names = FALSE, sep = '\t')
-write.csv(SatDefMat, 'SatDefGI_c.txt', col.names = TRUE, row.names = FALSE, sep = '\t')
-write.csv(DetStoreMat, 'DetStoreGI_c.txt', col.names = TRUE, row.names = FALSE, sep = '\t')
-write.csv(ETMat, 'ETGI_c.txt', col.names = TRUE, row.names = FALSE, sep = '\t')
+write.table(Qmat, 'FlowGI_c.txt', col.names = TRUE, row.names = FALSE, sep = '\t')
+write.table(SatDefMat, 'SatDefGI_c.txt', col.names = TRUE, row.names = FALSE, sep = '\t')
+write.table(DetStoreMat, 'DetStoreGI_c.txt', col.names = TRUE, row.names = FALSE, sep = '\t')
+write.table(ETMat, 'ETGI_c.txt', col.names = TRUE, row.names = FALSE, sep = '\t')
 options(scipen = 0)
 
 #plots
@@ -185,31 +185,31 @@ dev.off()
 
 
 
-#Maps----
-#  Make the worldfile a spatial dataframe to get a map. Plot information in the worldfile on the maps----
-coordinates(world) = c('patchX', 'patchY')
-proj4string(world) = CRS('+init=epsg:26918')
-#Change to degrees
-world=spTransform(world, CRSobj = CRS('+init=epsg:4326'))
-
-cols = rainbow(n = length(uhills))
-
-#Fixme: add stream to this map (white?)
-png('hillslopeMap.png', res = 300, height = 6, width = 6, units ='in')
-par(mar= c(2.5,2.5,1,1))
-plot(world, col = 'white')
-for (h in 1:length(uhills)){
-  plot(world[world$hillID == uhills[h],], pch = 22, add = TRUE, lwd=10)
-  plot(world[world$hillID == uhills[h],], col = cols[h], pch = 15, add = TRUE)
-}
-legend('bottomright', title = expression(bold('Hillslope')), legend=seq(1,length(uhills),1), fill = cols, border = 'black', ncol = 2)
-degAxis(side = 1, at = seq(-77,-76,.01), labels = FALSE)
-degAxis(side = 1, at = seq(-76.7,-76,.02))
-degAxis(side = 3, at = seq(-77,-76,.01), labels = FALSE)
-degAxis(side = 2, at = seq(39.45, 40,.01))
-degAxis(side = 4, at = seq(39.45, 40,.01), labels = FALSE)
-north.arrow(xb = -76.712, yb = 39.469, len = .0005, lab = 'N', tcol = 'black', col='black')
-text(x = -76.712, y = 39.467, 'WGS84')
-box(which = 'figure', lwd = 2)
-dev.off()
-rm(h)
+##Maps----
+##  Make the worldfile a spatial dataframe to get a map. Plot information in the worldfile on the maps----
+#coordinates(world) = c('patchX', 'patchY')
+#proj4string(world) = CRS('+init=epsg:26918')
+##Change to degrees
+#world=spTransform(world, CRSobj = CRS('+init=epsg:4326'))
+#
+#cols = rainbow(n = length(uhills))
+#
+##Fixme: add stream to this map (white?)
+#png('hillslopeMap.png', res = 300, height = 6, width = 6, units ='in')
+#par(mar= c(2.5,2.5,1,1))
+#plot(world, col = 'white')
+#for (h in 1:length(uhills)){
+#  plot(world[world$hillID == uhills[h],], pch = 22, add = TRUE, lwd=10)
+#  plot(world[world$hillID == uhills[h],], col = cols[h], pch = 15, add = TRUE)
+#}
+#legend('bottomright', title = expression(bold('Hillslope')), legend=seq(1,length(uhills),1), fill = cols, border = 'black', ncol = 2)
+#degAxis(side = 1, at = seq(-77,-76,.01), labels = FALSE)
+#degAxis(side = 1, at = seq(-76.7,-76,.02))
+#degAxis(side = 3, at = seq(-77,-76,.01), labels = FALSE)
+#degAxis(side = 2, at = seq(39.45, 40,.01))
+#degAxis(side = 4, at = seq(39.45, 40,.01), labels = FALSE)
+#north.arrow(xb = -76.712, yb = 39.469, len = .0005, lab = 'N', tcol = 'black', col='black')
+#text(x = -76.712, y = 39.467, 'WGS84')
+#box(which = 'figure', lwd = 2)
+#dev.off()
+#rm(h)
