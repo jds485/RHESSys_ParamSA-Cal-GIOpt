@@ -1,12 +1,18 @@
 #Script to compile streamflows into a matrix for hillslopes
+#Arguments:
+#1: patch resolution
+#2: main working directory
+#3: project directory name
+#4: number of replicates
+arg = commandArgs(T)
 
 library(vroom)
 
-numReps = 100
+numReps = as.numeric(arg[4])
 
 #Compute streamflow conversion factor----
-world = read.csv('/scratch/js4yd/GI_RandomSeedEval/RHESSys_Baisman30m_g74/worldfiles/worldfile.csv', stringsAsFactors = FALSE)
-res = 30
+world = read.csv(paste0(arg[2], arg[3], '/worldfiles/worldfile.csv'), stringsAsFactors = FALSE)
+res = as.numeric(arg[1])
 
 #Get hillslope areas and conversion factor for streamflow in hillslopes
 uhills = unique(world$hillID)
@@ -23,7 +29,7 @@ for (h in 1:length(uhills)){
 rm(h)
 
 #Aggregate into one file to matplot
-setwd('/scratch/js4yd/GI_RandomSeedEval/RHESSysRuns/Run1/RHESSys_Baisman30m_g74/output')
+setwd(paste0(arg[2], 'RHESSysRuns/Run1/', arg[3], '/output'))
 #Read in simulated basin streamflow
 Q1 = vroom(paste0(getwd(), '/Run1_basin.daily'), delim = ' ', col_names = TRUE, col_types = cols(.default=col_double()), progress = FALSE)
 #Make a new Date column
@@ -37,7 +43,7 @@ Q1 = Q1[which(as.Date(Q1$Date) >= as.Date('2004-10-01')),]
 HillStreamflow = HillSatDef = HillDetStore = HillET = matrix(NA, nrow = numReps*length(uhills), ncol = (2 + nrow(Q1)))
 
 for (i in 1:numReps){
-  setwd(paste0('/scratch/js4yd/GI_RandomSeedEval/RHESSysRuns/Run', i, '/RHESSys_Baisman30m_g74/output'))
+  setwd(paste0(arg[2], 'RHESSysRuns/Run', i, '/', arg[3], '/output'))
   hs = vroom(paste0(getwd(), '/Run', i, '_hillslope.daily'), delim = ' ', col_names = TRUE, col_types = cols(.default=col_double()), progress = FALSE)
   
   #Make a new date column
@@ -66,7 +72,7 @@ HillET = as.data.frame(HillET)
 colnames(HillStreamflow) = colnames(HillSatDef) = colnames(HillDetStore) = colnames(HillET) = c('Replicate', 'HillID', as.character(Q1$Date))
 
 #Save files
-setwd('/scratch/js4yd/GI_RandomSeedEval')
+setwd(arg[2])
 options(scipen = 999)
 write.table(HillStreamflow, file = paste0(getwd(), '/FlowGI_c_h.txt'), col.names = TRUE, row.names = FALSE, sep = '\t')
 write.table(HillSatDef, file = paste0(getwd(), '/SatDefGI_c_h.txt'), col.names = TRUE, row.names = FALSE, sep = '\t')

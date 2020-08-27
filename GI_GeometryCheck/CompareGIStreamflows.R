@@ -1,10 +1,15 @@
 #Script to compile streamflows into a matrix and plot
+#Arguments:
+#1: patch resolution
+#2: main working directory
+#3: project directory name
+arg = commandArgs(T)
 
 library(vroom)
 
 #Compute streamflow conversion factor----
-world = read.csv('/scratch/js4yd/GI_RandomSeedEval/RHESSys_Baisman30m_g74/worldfiles/worldfile.csv', stringsAsFactors = FALSE)
-res = 30
+world = read.csv(paste0(arg[2], arg[3], '/worldfiles/worldfile.csv'), stringsAsFactors = FALSE)
+res = as.numeric(arg[1])
 #Taking the unique patch IDs because strata can exist in more than one patch.
 Area.basin = length(unique(world$patchID))*res^2
 rm(world, res)
@@ -12,7 +17,7 @@ rm(world, res)
 conversion_b = Area.basin/1000/(.3048^3)/24/3600
 
 #Aggregate into one file to matplot
-setwd('/scratch/js4yd/GI_RandomSeedEval/RHESSysRuns/Run1/RHESSys_Baisman30m_g74/output')
+setwd(paste0(arg[2], 'RHESSysRuns/Run1/', arg[3], '/output'))
 #Read in simulated basin streamflow
 Q1 = vroom(paste0(getwd(), '/Run1_basin.daily'), delim = ' ', col_names = TRUE, col_types = cols(.default=col_double()), progress = FALSE)
 #Make a new Date column
@@ -23,7 +28,7 @@ Q1 = as.data.frame(Q1[,c('Date','streamflow')])
 Q1 = Q1[which(as.Date(Q1$Date) >= as.Date('2004-10-01')),]
 Qmat = SatDefMat = DetStoreMat = ETMat = matrix(NA, nrow = nrow(Q1), ncol = 101)
 for (i in 1:100){
-  setwd(paste0('/scratch/js4yd/GI_RandomSeedEval/RHESSysRuns/Run', i, '/RHESSys_Baisman30m_g74/output'))
+  setwd(paste0(arg[2], 'RHESSysRuns/Run', i, '/', arg[3], '/output'))
   #Read in simulated basin streamflow
   Q = vroom(paste0(getwd(), '/Run', i, '_basin.daily'), delim = ' ', col_names = TRUE, col_types = cols(.default=col_double()), progress = FALSE)
   
@@ -62,7 +67,7 @@ colnames(Qmat) = colnames(SatDefMat) = colnames(DetStoreMat) = colnames(ETMat) =
 Qmat$Date = SatDefMat$Date = DetStoreMat$Date = ETMat$Date = as.Date(Q1$Date)
 
 #Save files
-setwd('/scratch/js4yd/GI_RandomSeedEval')
+setwd(arg[2])
 options(scipen = 999)
 write.table(Qmat, 'FlowGI_c.txt', col.names = TRUE, row.names = FALSE, sep = '\t')
 write.table(SatDefMat, 'SatDefGI_c.txt', col.names = TRUE, row.names = FALSE, sep = '\t')
