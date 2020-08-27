@@ -76,6 +76,7 @@ SimH$ET = SimH$evap + SimH$trans
 for (h in 1:nrow(Area.Hills)){
   SimH$streamflow[SimH$hillID == h] = SimH$streamflow[SimH$hillID == h]*conversion_h[which(conversion_h[,1] == h),2]
 }
+rm(h)
 
 #Retain only streamflow, sat def, detention storage, ET, and Date columns for space
 SimH = as.data.frame(SimH[,c('hillID', 'Date', 'streamflow', 'sat_def', 'detention_store', 'ET')])
@@ -91,7 +92,44 @@ SatDef_h = read.table('SatDefGI_c_h.txt', header = TRUE, sep = '\t', stringsAsFa
 DetStore_h = read.table('DetStoreGI_c_h.txt', header = TRUE, sep = '\t', stringsAsFactors = FALSE, check.names = FALSE)
 ET_h = read.table('ETGI_c_h.txt', header = TRUE, sep = '\t', stringsAsFactors = FALSE, check.names = FALSE)
 
+#Upslope only
+setwd("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\Optimization\\GIAllocation_Up")
+Q_bu = read.table('FlowGI_c.txt', header = TRUE, sep = '\t', stringsAsFactors = FALSE)
+SatDef_bu = read.table('SatDefGI_c.txt', header = TRUE, sep = '\t', stringsAsFactors = FALSE)
+DetStore_bu = read.table('DetStoreGI_c.txt', header = TRUE, sep = '\t', stringsAsFactors = FALSE)
+ET_bu = read.table('ETGI_c.txt', header = TRUE, sep = '\t', stringsAsFactors = FALSE)
+
+Q_hu = read.table('FlowGI_c_h.txt', header = TRUE, sep = '\t', stringsAsFactors = FALSE, check.names = FALSE)
+SatDef_hu = read.table('SatDefGI_c_h.txt', header = TRUE, sep = '\t', stringsAsFactors = FALSE, check.names = FALSE)
+DetStore_hu = read.table('DetStoreGI_c_h.txt', header = TRUE, sep = '\t', stringsAsFactors = FALSE, check.names = FALSE)
+ET_hu = read.table('ETGI_c_h.txt', header = TRUE, sep = '\t', stringsAsFactors = FALSE, check.names = FALSE)
+
+#Midslope only
+setwd("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\Optimization\\GIAllocation_Mid")
+Q_bm = read.table('FlowGI_c.txt', header = TRUE, sep = '\t', stringsAsFactors = FALSE)
+SatDef_bm = read.table('SatDefGI_c.txt', header = TRUE, sep = '\t', stringsAsFactors = FALSE)
+DetStore_bm = read.table('DetStoreGI_c.txt', header = TRUE, sep = '\t', stringsAsFactors = FALSE)
+ET_bm = read.table('ETGI_c.txt', header = TRUE, sep = '\t', stringsAsFactors = FALSE)
+
+Q_hm = read.table('FlowGI_c_h.txt', header = TRUE, sep = '\t', stringsAsFactors = FALSE, check.names = FALSE)
+SatDef_hm = read.table('SatDefGI_c_h.txt', header = TRUE, sep = '\t', stringsAsFactors = FALSE, check.names = FALSE)
+DetStore_hm = read.table('DetStoreGI_c_h.txt', header = TRUE, sep = '\t', stringsAsFactors = FALSE, check.names = FALSE)
+ET_hm = read.table('ETGI_c_h.txt', header = TRUE, sep = '\t', stringsAsFactors = FALSE, check.names = FALSE)
+
+#Downslope only
+setwd("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\Optimization\\GIAllocation_Down")
+Q_bd = read.table('FlowGI_c.txt', header = TRUE, sep = '\t', stringsAsFactors = FALSE)
+SatDef_bd = read.table('SatDefGI_c.txt', header = TRUE, sep = '\t', stringsAsFactors = FALSE)
+DetStore_bd = read.table('DetStoreGI_c.txt', header = TRUE, sep = '\t', stringsAsFactors = FALSE)
+ET_bd = read.table('ETGI_c.txt', header = TRUE, sep = '\t', stringsAsFactors = FALSE)
+
+Q_hd = read.table('FlowGI_c_h.txt', header = TRUE, sep = '\t', stringsAsFactors = FALSE, check.names = FALSE)
+SatDef_hd = read.table('SatDefGI_c_h.txt', header = TRUE, sep = '\t', stringsAsFactors = FALSE, check.names = FALSE)
+DetStore_hd = read.table('DetStoreGI_c_h.txt', header = TRUE, sep = '\t', stringsAsFactors = FALSE, check.names = FALSE)
+ET_hd = read.table('ETGI_c_h.txt', header = TRUE, sep = '\t', stringsAsFactors = FALSE, check.names = FALSE)
+
 #Plots - Basin ----
+setwd("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\Optimization\\GIAllocation")
 # Compare observed and simulated streamflow----
 png(paste0('Q_ObsVsSim_b.png'), res = 300, height = 5, width=5, units = 'in')
 plot(x = as.Date(ObsQ$Date), y = ObsQ$Flow, col = 'black', xlab = 'Year', ylab = 'Streamflow (cfs)', type = 'l', axes=FALSE, cex.lab = 1.5)
@@ -1274,6 +1312,3440 @@ for (h in 9:length(uhills)){
 }
 dev.off()
 rm(h)
+
+#Plots - Basin Upslope ----
+setwd("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\Optimization\\GIAllocation_Up")
+# Streamflow----
+png(paste0('Q_MedGI_bu.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(Q_bu$Date), y = Q_bu[,-1], col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'Streamflow (cfs)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,50,2), labels = TRUE, cex.axis = 1.5)
+#Add quantiles
+quants = apply(X = Q_bu[,-1], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+qlty = c(3,2,1,2,3)
+par(new=TRUE)
+plot(x = as.Date(Q_bu$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+dev.off()
+rm(quants, qlty)
+
+png(paste0('Q_MedGI_2007_bu.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(Q_bu$Date[which((Q_bu$Date >= '2007-01-01') & (Q_bu$Date <= '2007-12-31'))]), y = Q_bu[which((Q_bu$Date >= '2007-01-01') & (Q_bu$Date <= '2007-12-31')),-1], col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'Streamflow (cfs)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,50,2), labels = TRUE, cex.axis = 1.5)
+#Add quantiles
+quants = apply(X = Q_bu[which((Q_bu$Date >= '2007-01-01') & (Q_bu$Date <= '2007-12-31')),-1], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+qlty = c(3,2,1,2,3)
+par(new=TRUE)
+plot(x = as.Date(Q_bu$Date[which((Q_bu$Date >= '2007-01-01') & (Q_bu$Date <= '2007-12-31'))]), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+dev.off()
+rm(quants, qlty)
+
+#Make a plot of the sd in streamflow for each day
+sdQ_bu = apply(X = Q_bu[,-1], MARGIN = 1, FUN = sd)
+meanQ_bu = apply(X = Q_bu[,-1], MARGIN = 1, FUN = mean)
+CVQ_bu = sdQ_bu/meanQ_bu
+
+png(paste0('Q_CVQ_bu.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(Q_bu$Date), y = CVQ_bu, xlab = 'Year', ylab = 'CV Streamflow (1)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,.1,0.001), labels = TRUE, cex.axis = 1.5)
+dev.off()
+
+png(paste0('Q_sdQ_bu.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(Q_bu$Date), y = sdQ_bu, xlab = 'Year', ylab = 'Std. Dev. Streamflow (cfs)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,.1,0.001), labels = TRUE, cex.axis = 1.5)
+dev.off()
+
+#Compare to without GI
+png(paste0('Q_GI+NoGI_bu.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(Q_bu$Date), y = Q_bu[,-1], col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'Streamflow (cfs)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,50,2), labels = TRUE, cex.axis = 1.5)
+par(new=TRUE)
+plot(x = as.Date(Q_bu$Date), y = SimB$streamflow, col = 'green', xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+dev.off()
+
+#Check that all GI streamflows are <= without GI
+for (i in 1:100){
+  if (!all(Q_bu[,1+i] < SimB$streamflow)){
+    print(paste('i = ', i, length(which(Q_bu[,1+i] >= SimB$streamflow))))
+  }
+}
+
+#Plots that compare reduction in streamflow
+png(paste0('Q_MinusGI_bu.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(Q_bu$Date), y = Q_bu[,-1] - SimB$streamflow, col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'Streamflow (cfs)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(1,-50,-0.01), labels = TRUE, cex.axis = 1.5)
+#Add quantiles
+quants = apply(X = Q_bu[,-1] - SimB$streamflow, MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+qlty = c(3,2,1,2,3)
+par(new=TRUE)
+plot(x = as.Date(Q_bu$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+dev.off()
+rm(quants, qlty)
+
+png(paste0('Q_MinusGI_2007_bu.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(Q_bu$Date[which((Q_bu$Date >= '2007-01-01') & (Q_bu$Date <= '2007-12-31'))]), y = Q_bu[which((Q_bu$Date >= '2007-01-01') & (Q_bu$Date <= '2007-12-31')),-1] - SimB$streamflow[which((Q_bu$Date >= '2007-01-01') & (Q_bu$Date <= '2007-12-31'))], col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'Streamflow (cfs)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(1,-50,-0.01), labels = TRUE, cex.axis = 1.5)
+#Add quantiles
+quants = apply(X = Q_bu[which((Q_bu$Date >= '2007-01-01') & (Q_bu$Date <= '2007-12-31')),-1] - SimB$streamflow[which((Q_bu$Date >= '2007-01-01') & (Q_bu$Date <= '2007-12-31'))], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+qlty = c(3,2,1,2,3)
+par(new=TRUE)
+plot(x = as.Date(Q_bu$Date[which((Q_bu$Date >= '2007-01-01') & (Q_bu$Date <= '2007-12-31'))]), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+dev.off()
+rm(quants, qlty)
+
+#Make a plot of the sd in streamflow for each day
+sdQ_MinGI_bu = apply(X = Q_bu[,-1] - SimB$streamflow, MARGIN = 1, FUN = sd)
+meanQ_MinGI_bu = apply(X = Q_bu[,-1] - SimB$streamflow, MARGIN = 1, FUN = mean)
+CVQ_MinGI_bu = sdQ_MinGI_bu/meanQ_MinGI_bu
+
+png(paste0('Q_MinusGI_CVQ_bu.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(Q_bu$Date), y = CVQ_MinGI_bu, xlab = 'Year', ylab = 'CV Streamflow (1)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(-1,1,0.1), labels = TRUE, cex.axis = 1.5)
+dev.off()
+
+png(paste0('Q_MinusGI_sdQ_bu.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(Q_bu$Date), y = sdQ_MinGI_bu, xlab = 'Year', ylab = 'Std. Dev. Streamflow (cfs)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,.1,0.001), labels = TRUE, cex.axis = 1.5)
+dev.off()
+
+
+# Sat Def----
+png(paste0('SatDef_MedGI_bu.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(SatDef_bu$Date), y = SatDef_bu[,-1], col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'Sat. Deficit (mm)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,5000,20), labels = TRUE, cex.axis = 1.5)
+#Add quantiles
+quants = apply(X = SatDef_bu[,-1], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+qlty = c(3,2,1,2,3)
+par(new=TRUE)
+plot(x = as.Date(SatDef_bu$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+dev.off()
+rm(quants, qlty)
+
+png(paste0('SatDef_MedGI_2007_bu.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(SatDef_bu$Date[which((SatDef_bu$Date >= '2007-01-01') & (SatDef_bu$Date <= '2007-12-31'))]), y = SatDef_bu[which((SatDef_bu$Date >= '2007-01-01') & (SatDef_bu$Date <= '2007-12-31')),-1], col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'Sat. Deficit (mm)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,5000,20), labels = TRUE, cex.axis = 1.5)
+#Add quantiles
+quants = apply(X = SatDef_bu[which((SatDef_bu$Date >= '2007-01-01') & (SatDef_bu$Date <= '2007-12-31')),-1], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+qlty = c(3,2,1,2,3)
+par(new=TRUE)
+plot(x = as.Date(SatDef_bu$Date[which((SatDef_bu$Date >= '2007-01-01') & (SatDef_bu$Date <= '2007-12-31'))]), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+dev.off()
+rm(quants, qlty)
+
+#Make a plot of the sd in streamflow for each day
+sdSatDef_bu = apply(X = SatDef_bu[,-1], MARGIN = 1, FUN = sd)
+meanSatDef_bu = apply(X = SatDef_bu[,-1], MARGIN = 1, FUN = mean)
+CVSatDef_bu = sdSatDef_bu/meanSatDef_bu
+
+png(paste0('SatDef_CV_bu.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(SatDef_bu$Date), y = CVSatDef_bu, xlab = 'Year', ylab = 'CV Sat. Def. (1)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,.1,0.0001), labels = TRUE, cex.axis = 1.5)
+dev.off()
+
+png(paste0('SatDef_sd_bu.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(SatDef_bu$Date), y = sdSatDef_bu, xlab = 'Year', ylab = 'Std. Dev. Sat. Deficit (mm)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,10,0.1), labels = TRUE, cex.axis = 1.5)
+dev.off()
+
+#Compare to without GI
+png(paste0('SatDef_GI+NoGI_bu.png'), res = 300, height = 5, width=5, units = 'in')
+plot(x = as.Date(SatDef_bu$Date), y = c(max(SatDef_bu[,-1]), min(SatDef_bu[,-1]), max(SimB$sat_def), min(SimB$sat_def), rep(median(SimB$sat_def), nrow(SatDef_bu)-4)), col = 'white', xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i")
+par(new=TRUE)
+matplot(x = as.Date(SatDef_bu$Date), y = SatDef_bu[,-1], col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'Sat. Deficit (mm)', type = 'l', axes=FALSE, cex.lab = 1.5, xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,5000,20), labels = TRUE, cex.axis = 1.5)
+par(new=TRUE)
+plot(x = as.Date(SatDef_bu$Date), y = SimB$sat_def, col = 'green', xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+dev.off()
+
+#Check that all GI sat def are >= without GI
+for (i in 1:100){
+  if (!all(SatDef_bu[,1+i] > SimB$sat_def)){
+    print(paste('i = ', i, length(which(SatDef_bu[,1+i] <= SimB$sat_def))))
+  }
+}
+
+#Plots that compare reduction in streamflow
+png(paste0('SatDef_MinusGI_bu.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(SatDef_bu$Date), y = SatDef_bu[,-1] - SimB$sat_def, col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'Sat. Deficit: GI - No GI (mm)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(1,500,5), labels = TRUE, cex.axis = 1.5)
+#Add quantiles
+quants = apply(X = SatDef_bu[,-1] - SimB$sat_def, MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+qlty = c(3,2,1,2,3)
+par(new=TRUE)
+plot(x = as.Date(SatDef_bu$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+dev.off()
+rm(quants, qlty)
+
+png(paste0('SatDef_MinusGI_2007_bu.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(SatDef_bu$Date[which((SatDef_bu$Date >= '2007-01-01') & (SatDef_bu$Date <= '2007-12-31'))]), y = SatDef_bu[which((SatDef_bu$Date >= '2007-01-01') & (SatDef_bu$Date <= '2007-12-31')),-1] - SimB$sat_def[which((SatDef_bu$Date >= '2007-01-01') & (SatDef_bu$Date <= '2007-12-31'))], col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'Sat. Deficit (mm)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(1,500,5), labels = TRUE, cex.axis = 1.5)
+#Add quantiles
+quants = apply(X = SatDef_bu[which((SatDef_bu$Date >= '2007-01-01') & (SatDef_bu$Date <= '2007-12-31')),-1] - SimB$sat_def[which((SatDef_bu$Date >= '2007-01-01') & (SatDef_bu$Date <= '2007-12-31'))], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+qlty = c(3,2,1,2,3)
+par(new=TRUE)
+plot(x = as.Date(SatDef_bu$Date[which((SatDef_bu$Date >= '2007-01-01') & (SatDef_bu$Date <= '2007-12-31'))]), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+dev.off()
+rm(quants, qlty)
+
+#Make a plot of the sd in streamflow for each day
+sdSatDef_MinGI_bu = apply(X = SatDef_bu[,-1] - SimB$sat_def, MARGIN = 1, FUN = sd)
+meanSatDef_MinGI_bu = apply(X = SatDef_bu[,-1] - SimB$sat_def, MARGIN = 1, FUN = mean)
+CVSatDef_MinGI_bu = sdSatDef_MinGI_bu/meanSatDef_MinGI_bu
+
+png(paste0('SatDef_MinusGI_CV_bu.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(SatDef_bu$Date), y = CVSatDef_MinGI_bu, xlab = 'Year', ylab = 'CV Sat. Def. (1)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(-1,1,0.01), labels = TRUE, cex.axis = 1.5)
+dev.off()
+
+png(paste0('SatDef_MinusGI_sd_bu.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(SatDef_bu$Date), y = sdSatDef_MinGI_bu, xlab = 'Year', ylab = 'Std. Dev. Sat. Deficit (mm)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,5,0.1), labels = TRUE, cex.axis = 1.5)
+dev.off()
+
+
+# Detention Storage - Same----
+sdDetStore_bu = apply(X = DetStore_bu[,-1], MARGIN = 1, FUN = sd)
+meanDetStore_bu = apply(X = DetStore_bu[,-1], MARGIN = 1, FUN = mean)
+CVDetStore_bu = sdDetStore_bu/meanDetStore_bu
+
+# ET----
+png(paste0('ET_MedGI_bu.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(ET_bu$Date), y = ET_bu[,-1], col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'ET (mm)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,50,2), labels = TRUE, cex.axis = 1.5)
+#Add quantiles
+quants = apply(X = ET_bu[,-1], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+qlty = c(3,2,1,2,3)
+par(new=TRUE)
+plot(x = as.Date(ET_bu$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+dev.off()
+rm(quants, qlty)
+
+png(paste0('ET_MedGI_2007_bu.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(ET_bu$Date[which((ET_bu$Date >= '2007-01-01') & (ET_bu$Date <= '2007-12-31'))]), y = ET_bu[which((ET_bu$Date >= '2007-01-01') & (ET_bu$Date <= '2007-12-31')),-1], col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'ET (mm)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,50,2), labels = TRUE, cex.axis = 1.5)
+#Add quantiles
+quants = apply(X = ET_bu[which((ET_bu$Date >= '2007-01-01') & (ET_bu$Date <= '2007-12-31')),-1], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+qlty = c(3,2,1,2,3)
+par(new=TRUE)
+plot(x = as.Date(ET_bu$Date[which((ET_bu$Date >= '2007-01-01') & (ET_bu$Date <= '2007-12-31'))]), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+dev.off()
+rm(quants, qlty)
+
+#Make a plot of the sd in streamflow for each day
+sdET_bu = apply(X = ET_bu[,-1], MARGIN = 1, FUN = sd)
+meanET_bu = apply(X = ET_bu[,-1], MARGIN = 1, FUN = mean)
+CVET_bu = sdET_bu/meanET_bu
+
+png(paste0('ET_CV_bu.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(ET_bu$Date), y = CVET_bu, xlab = 'Year', ylab = 'CV ET (1)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,.1,0.001), labels = TRUE, cex.axis = 1.5)
+dev.off()
+
+png(paste0('ET_sd_bu.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(ET_bu$Date), y = sdET_bu, xlab = 'Year', ylab = 'Std. Dev. ET (mm)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,.1,0.001), labels = TRUE, cex.axis = 1.5)
+dev.off()
+
+#Compare to without GI
+png(paste0('ET_GI+NoGI_bu.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(ET_bu$Date), y = ET_bu[,-1], col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'ET (mm)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,50,2), labels = TRUE, cex.axis = 1.5)
+par(new=TRUE)
+plot(x = as.Date(ET_bu$Date), y = SimB$ET, col = 'green', xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+dev.off()
+
+#Check that all GI streamflows are <= without GI
+for (i in 1:100){
+  if (!all(ET_bu[,1+i] > SimB$ET)){
+    print(paste('i = ', i, length(which(ET_bu[,1+i] <= SimB$ET))))
+  }
+}
+#Peak ET > with GI, but off peak can be less
+
+#Plots that compare reduction in streamflow
+png(paste0('ET_MinusGI_bu.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(ET_bu$Date), y = ET_bu[,-1] - SimB$ET, col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'ET (mm)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(1,-50,-0.1), labels = TRUE, cex.axis = 1.5)
+#Add quantiles
+quants = apply(X = ET_bu[,-1] - SimB$ET, MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+qlty = c(3,2,1,2,3)
+par(new=TRUE)
+plot(x = as.Date(ET_bu$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+dev.off()
+rm(quants, qlty)
+
+png(paste0('ET_MinusGI_2007_bu.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(ET_bu$Date[which((ET_bu$Date >= '2007-01-01') & (ET_bu$Date <= '2007-12-31'))]), y = ET_bu[which((ET_bu$Date >= '2007-01-01') & (ET_bu$Date <= '2007-12-31')),-1] - SimB$ET[which((ET_bu$Date >= '2007-01-01') & (ET_bu$Date <= '2007-12-31'))], col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'ET (mm)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(1,-50,-0.01), labels = TRUE, cex.axis = 1.5)
+#Add quantiles
+quants = apply(X = ET_bu[which((ET_bu$Date >= '2007-01-01') & (ET_bu$Date <= '2007-12-31')),-1] - SimB$ET[which((ET_bu$Date >= '2007-01-01') & (ET_bu$Date <= '2007-12-31'))], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+qlty = c(3,2,1,2,3)
+par(new=TRUE)
+plot(x = as.Date(ET_bu$Date[which((ET_bu$Date >= '2007-01-01') & (ET_bu$Date <= '2007-12-31'))]), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+dev.off()
+rm(quants, qlty)
+
+#Make a plot of the sd in streamflow for each day
+sdET_MinGI_bu = apply(X = ET_bu[,-1] - SimB$ET, MARGIN = 1, FUN = sd)
+meanET_MinGI_bu = apply(X = ET_bu[,-1] - SimB$ET, MARGIN = 1, FUN = mean)
+CVET_MinGI_bu = sdET_MinGI_bu/meanET_MinGI_bu
+
+png(paste0('ET_MinusGI_CV_bu.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(ET_bu$Date), y = CVET_MinGI_bu, xlab = 'Year', ylab = 'CV ET (1)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(-2000,2000,10), labels = TRUE, cex.axis = 1.5)
+dev.off()
+
+png(paste0('ET_MinusGI_sd_bu.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(ET_bu$Date), y = sdET_MinGI_bu, xlab = 'Year', ylab = 'Std. Dev. ET (mm)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,10,0.01), labels = TRUE, cex.axis = 1.5)
+dev.off()
+
+
+#Plots - Hillslope Upslope----
+# Streamflow----
+png(paste0('Q_MedGI_hu.png'), res = 300, height = 10, width=10, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  matplot(x = as.Date(Q_bu$Date), y = t(Q_hu[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]),
+          main = paste0('Hillslope ', uhills[h], ' Streamflow'), type = 'l', xlab = 'Year', ylab = 'Streamflow (cfs)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,50,.1), labels = TRUE, cex.axis = 1.5)
+  #Add quantiles
+  quants = apply(X = Q_hu[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)], MARGIN = 2, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+  qlty = c(3,2,1,2,3)
+  par(new=TRUE)
+  plot(x = as.Date(Q_bu$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, 
+       xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+}
+dev.off()
+rm(h, quants, qlty)
+
+png(paste0('Q_MedGI_2007_hu.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  matplot(x = as.Date(Q_bu$Date), y = t(Q_hu[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]),
+          main = paste0('Hillslope ', uhills[h], ' Streamflow'), type = 'l', xlab = 'Year', ylab = 'Streamflow (cfs)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5, xlim = c(as.Date('2007-01-01'), as.Date('2007-12-31')))
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,50,.1), labels = TRUE, cex.axis = 1.5)
+  #Add quantiles
+  quants = apply(X = Q_hu[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)], MARGIN = 2, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+  qlty = c(3,2,1,2,3)
+  par(new=TRUE)
+  plot(x = as.Date(Q_bu$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, 
+       xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+}
+dev.off()
+rm(h, quants, qlty)
+
+#Make a plot of the sd in streamflow for each day
+sdQ_hu = meanQ_hu = CVQ_hu = matrix(0, nrow = nrow(Area.Hills), ncol = length(Q_bu$Date))
+for (h in 1:nrow(sdQ_hu)){
+  sdQ_hu[h,] = apply(X = Q_hu[which(Q_hu$HillID == h),-c(1,2)], MARGIN = 2, FUN = sd)
+  meanQ_hu[h,] = apply(X = Q_hu[which(Q_hu$HillID == h),-c(1,2)], MARGIN = 2, FUN = mean)
+  CVQ_hu[h,] = sdQ_hu[h,]/meanQ_hu[h,]
+}
+rm(h)
+
+png(paste0('Q_CVQ_hu.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  plot(x = as.Date(Q_bu$Date), y = CVQ_hu[h,],
+       main = paste0('Hillslope ', uhills[h], ' CV Streamflow'), type = 'l', xlab = 'Year', ylab = 'CV Streamflow (1)',
+       col = 'black', axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,1,.01), labels = TRUE, cex.axis = 1.5)
+}
+dev.off()
+rm(h)
+
+png(paste0('Q_CVQ_hu_UnalteredSlopes.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6), c(7,8)))
+par(mar = c(3,3,3,0.5))
+for (h in 1:8){
+  plot(x = as.Date(Q_bu$Date), y = CVQ_hu[h,],
+       main = paste0('Hillslope ', uhills[h], ' CV Streamflow'), type = 'l', xlab = 'Year', ylab = 'CV Streamflow (1)',
+       col = 'black', axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,1,.01), labels = TRUE, cex.axis = 1.5)
+}
+dev.off()
+rm(h)
+
+png(paste0('Q_sdQ_hu.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  plot(x = as.Date(Q_bu$Date), y = sdQ_hu[h,],
+       main = paste0('Hillslope ', uhills[h], ' SD Streamflow'), type = 'l', xlab = 'Year', ylab = 'Std. Dev. Streamflow (cfs)',
+       col = 'black', axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,.1,0.001), labels = TRUE, cex.axis = 1.5)
+}
+dev.off()
+rm(h)
+
+png(paste0('Q_sdQ_hu_UnalteredSlopes.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6), c(7,8)))
+par(mar = c(3,3,3,0.5))
+for (h in 1:8){
+  plot(x = as.Date(Q_bu$Date), y = sdQ_hu[h,],
+       main = paste0('Hillslope ', uhills[h], ' SD Streamflow'), type = 'l', xlab = 'Year', ylab = 'Std. Dev. Streamflow (cfs)',
+       col = 'black', axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,.1,0.001), labels = TRUE, cex.axis = 1.5)
+}
+dev.off()
+rm(h)
+
+
+#Compare to without GI
+png(paste0('Q_GI+NoGI_hu.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  matplot(x = as.Date(Q_bu$Date), y = t(Q_hu[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]),
+          main = paste0('Hillslope ', uhills[h], ' Streamflow'), type = 'l', xlab = 'Year', ylab = 'Streamflow (cfs)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,50,.1), labels = TRUE, cex.axis = 1.5)
+  par(new=TRUE)
+  plot(x = as.Date(Q_bu$Date), y = SimH$streamflow[SimH$hillID == h], col = 'green', xlab = '', ylab = '', type = 'l', axes=FALSE, 
+       lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+}
+dev.off()
+
+#Compare to without GI
+png(paste0('Q_GI+NoGI_hu_UnalteredSlopes.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6), c(7,8)))
+par(mar = c(3,3,3,0.5))
+for (h in 1:8){
+  matplot(x = as.Date(Q_bu$Date), y = t(Q_hu[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]),
+          main = paste0('Hillslope ', uhills[h], ' Streamflow'), type = 'l', xlab = 'Year', ylab = 'Streamflow (cfs)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,50,.1), labels = TRUE, cex.axis = 1.5)
+  par(new=TRUE)
+  plot(x = as.Date(Q_bu$Date), y = SimH$streamflow[SimH$hillID == h], col = 'green', xlab = '', ylab = '', type = 'l', axes=FALSE, 
+       lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+}
+dev.off()
+
+#Plots that compare reduction in streamflow
+png(paste0('Q_MinusGI_hu.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  matplot(x = as.Date(Q_bu$Date), y = t(Q_hu[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$streamflow[SimH$hillID == h],
+          main = paste0('Hillslope ', uhills[h], ' GI - No GI Streamflow'), type = 'l', xlab = 'Year', ylab = 'Streamflow (cfs)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(1,-50,-.01), labels = TRUE, cex.axis = 1.5)
+  #Add quantiles
+  quants = apply(X = t(Q_hu[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$streamflow[SimH$hillID == h], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+  qlty = c(3,2,1,2,3)
+  par(new=TRUE)
+  plot(x = as.Date(Q_bu$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, 
+       xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+  lines(x = c(as.Date('2004-01-01'), as.Date('2014-01-01')), y = c(0,0), col = 'blue', type = 'l')
+}
+dev.off()
+rm(h, quants, qlty)
+
+png(paste0('Q_MinusGI_hu_UnalteredSlopes.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6), c(7,8)))
+par(mar = c(3,3,3,0.5))
+for (h in 1:8){
+  matplot(x = as.Date(Q_bu$Date), y = t(Q_hu[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$streamflow[SimH$hillID == h],
+          main = paste0('Hillslope ', uhills[h], ' GI - No GI Streamflow'), type = 'l', xlab = 'Year', ylab = 'Streamflow (cfs)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,-50,-.1), labels = TRUE, cex.axis = 1.5)
+  #Add quantiles
+  quants = apply(X = t(Q_hu[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$streamflow[SimH$hillID == h], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+  qlty = c(3,2,1,2,3)
+  par(new=TRUE)
+  plot(x = as.Date(Q_bu$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, 
+       xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+  lines(x = c(as.Date('2004-01-01'), as.Date('2014-01-01')), y = c(0,0), col = 'blue', type = 'l')
+}
+dev.off()
+rm(h, quants, qlty)
+
+png(paste0('Q_MinusGI_2007_hu.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  matplot(x = as.Date(Q_bu$Date), y = t(Q_hu[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$streamflow[SimH$hillID == h],
+          main = paste0('Hillslope ', uhills[h], ' GI - No GI Streamflow'), type = 'l', xlab = 'Year', ylab = 'Streamflow (cfs)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5, xlim = c(as.Date('2007-01-01'), as.Date('2007-12-31')))
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(1,-50,-.01), labels = TRUE, cex.axis = 1.5)
+  #Add quantiles
+  quants = apply(X = t(Q_hu[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$streamflow[SimH$hillID == h], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+  qlty = c(3,2,1,2,3)
+  par(new=TRUE)
+  plot(x = as.Date(Q_bu$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, 
+       xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+  lines(x = c(as.Date('2004-01-01'), as.Date('2014-01-01')), y = c(0,0), col = 'blue', type = 'l')
+}
+dev.off()
+rm(h, quants, qlty)
+
+png(paste0('Q_MinusGI_2007_hu_UnalteredSlopes.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6), c(7,8)))
+par(mar = c(3,3,3,0.5))
+for (h in 1:8){
+  matplot(x = as.Date(Q_bu$Date), y = t(Q_hu[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$streamflow[SimH$hillID == h],
+          main = paste0('Hillslope ', uhills[h], ' GI - No GI Streamflow'), type = 'l', xlab = 'Year', ylab = 'Streamflow (cfs)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5, xlim = c(as.Date('2007-01-01'), as.Date('2007-12-31')))
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(1,-50,-.01), labels = TRUE, cex.axis = 1.5)
+  #Add quantiles
+  quants = apply(X = t(Q_hu[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$streamflow[SimH$hillID == h], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+  qlty = c(3,2,1,2,3)
+  par(new=TRUE)
+  plot(x = as.Date(Q_bu$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, 
+       xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+  lines(x = c(as.Date('2004-01-01'), as.Date('2014-01-01')), y = c(0,0), col = 'blue', type = 'l')
+}
+dev.off()
+rm(h, quants, qlty)
+
+#Make a plot of the sd in streamflow for each day
+sdQ_MinGI_hu = meanQ_MinGI_hu = CVQ_MinGI_hu = matrix(0, nrow = nrow(Area.Hills), ncol = length(Q_bu$Date))
+for (h in 1:nrow(sdQ_MinGI_hu)){
+  sdQ_MinGI_hu[h,] = apply(X = t(Q_hu[which(Q_hu$HillID == h),-c(1,2)]) - SimH$streamflow[SimH$hillID == h], MARGIN = 1, FUN = sd)
+  meanQ_MinGI_hu[h,] = apply(X = t(Q_hu[which(Q_hu$HillID == h),-c(1,2)]) - SimH$streamflow[SimH$hillID == h], MARGIN = 1, FUN = mean)
+  CVQ_MinGI_hu[h,] = sdQ_MinGI_hu[h,]/meanQ_MinGI_hu[h,]
+}
+rm(h)
+
+png(paste0('Q_MinusGI_CVQ_hu.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  plot(x = as.Date(Q_bu$Date), y = CVQ_MinGI_hu[h,], xlab = 'Year', ylab = 'CV Streamflow (1)', type = 'l', axes=FALSE, cex.lab = 1.5,
+       main = paste0('Hillslope ', uhills[h], ' CV GI - No GI Streamflow'))
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(-1000,1000,1), labels = TRUE, cex.axis = 1.5)
+}
+dev.off()
+rm(h)
+
+png(paste0('Q_MinusGI_sdQ_hu.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  plot(x = as.Date(Q_bu$Date), y = sdQ_MinGI_hu[h,], xlab = 'Year', ylab = 'Std. Dev. Streamflow (1)', type = 'l', axes=FALSE, cex.lab = 1.5,
+       main = paste0('Hillslope ', uhills[h], ' SD GI - No GI Streamflow'))
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(-1000,1000,0.001), labels = TRUE, cex.axis = 1.5)
+}
+dev.off()
+rm(h)
+
+# Sat Def----
+png(paste0('SatDef_MedGI_hu.png'), res = 300, height = 10, width=10, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  matplot(x = as.Date(SatDef_bu$Date), y = t(SatDef_hu[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]),
+          main = paste0('Hillslope ', uhills[h], ' Sat. Def.'), type = 'l', xlab = 'Year', ylab = 'Sat. Def. (mm)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,5000,100), labels = TRUE, cex.axis = 1.5)
+  #Add quantiles
+  quants = apply(X = SatDef_hu[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)], MARGIN = 2, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+  qlty = c(3,2,1,2,3)
+  par(new=TRUE)
+  plot(x = as.Date(SatDef_bu$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, 
+       xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+}
+dev.off()
+rm(h, quants, qlty)
+
+png(paste0('SatDef_MedGI_2007_hu.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  matplot(x = as.Date(SatDef_bu$Date), y = t(SatDef_hu[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]),
+          main = paste0('Hillslope ', uhills[h], ' Sat. Def.'), type = 'l', xlab = 'Year', ylab = 'Sat. Def. (mm)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5, xlim = c(as.Date('2007-01-01'), as.Date('2007-12-31')))
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,5000,100), labels = TRUE, cex.axis = 1.5)
+  #Add quantiles
+  quants = apply(X = SatDef_hu[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)], MARGIN = 2, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+  qlty = c(3,2,1,2,3)
+  par(new=TRUE)
+  plot(x = as.Date(SatDef_bu$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, 
+       xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+}
+dev.off()
+rm(h, quants, qlty)
+
+#Make a plot of the sd in streamflow for each day
+sdSatDef_hu = meanSatDef_hu = CVSatDef_hu = matrix(0, nrow = nrow(Area.Hills), ncol = length(SatDef_bu$Date))
+for (h in 1:nrow(sdSatDef_hu)){
+  sdSatDef_hu[h,] = apply(X = SatDef_hu[which(SatDef_hu$HillID == h),-c(1,2)], MARGIN = 2, FUN = sd)
+  meanSatDef_hu[h,] = apply(X = SatDef_hu[which(SatDef_hu$HillID == h),-c(1,2)], MARGIN = 2, FUN = mean)
+  CVSatDef_hu[h,] = sdSatDef_hu[h,]/meanSatDef_hu[h,]
+}
+rm(h)
+
+png(paste0('SatDef_CV_hu.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  plot(x = as.Date(SatDef_bu$Date), y = CVSatDef_hu[h,],
+       main = paste0('Hillslope ', uhills[h], ' CV Sat. Def.'), type = 'l', xlab = 'Year', ylab = 'CV Sat. Def. (1)',
+       col = 'black', axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,10,.001), labels = TRUE, cex.axis = 1.5)
+}
+dev.off()
+rm(h)
+
+png(paste0('SatDef_CV_hu_UnalteredSlopes.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6), c(7,8)))
+par(mar = c(3,3,3,0.5))
+for (h in 1:8){
+  plot(x = as.Date(SatDef_bu$Date), y = CVSatDef_hu[h,],
+       main = paste0('Hillslope ', uhills[h], ' CV Sat. Def.'), type = 'l', xlab = 'Year', ylab = 'CV Sat. Def. (1)',
+       col = 'black', axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,1,.001), labels = TRUE, cex.axis = 1.5)
+}
+dev.off()
+rm(h)
+
+png(paste0('SatDef_sd_hu.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  plot(x = as.Date(SatDef_bu$Date), y = sdSatDef_hu[h,],
+       main = paste0('Hillslope ', uhills[h], ' SD Sat. Def.'), type = 'l', xlab = 'Year', ylab = 'Std. Dev. Sat. Def. (mm)',
+       col = 'black', axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,100,1), labels = TRUE, cex.axis = 1.5)
+}
+dev.off()
+rm(h)
+
+png(paste0('SatDef_sd_hu_UnalteredSlopes.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6), c(7,8)))
+par(mar = c(3,3,3,0.5))
+for (h in 1:8){
+  plot(x = as.Date(SatDef_bu$Date), y = sdSatDef_hu[h,],
+       main = paste0('Hillslope ', uhills[h], ' SD Sat. Def.'), type = 'l', xlab = 'Year', ylab = 'Std. Dev. Sat. Def. (mm)',
+       col = 'black', axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,1000,1), labels = TRUE, cex.axis = 1.5)
+}
+dev.off()
+rm(h)
+
+
+#Compare to without GI
+png(paste0('SatDef_GI+NoGI_hu.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  plot(x = as.Date(SatDef_bu$Date), y = c(max(t(SatDef_hu[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)])), min(t(SatDef_hu[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)])), max(SimH$sat_def[SimH$hillID == h]), min(SimH$sat_def[SimH$hillID == h]), rep(median(SimH$sat_def[SimH$hillID == h]), nrow(SatDef_bu)-4)), col = 'white', xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i")
+  par(new=TRUE)
+  matplot(x = as.Date(SatDef_bu$Date), y = t(SatDef_hu[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]),
+          main = paste0('Hillslope ', uhills[h], ' Sat. Def.'), type = 'l', xlab = 'Year', ylab = 'Sat. Def. (mm)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5, xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,5000,100), labels = TRUE, cex.axis = 1.5)
+  par(new=TRUE)
+  plot(x = as.Date(SatDef_bu$Date), y = SimH$sat_def[SimH$hillID == h], col = 'green', xlab = '', ylab = '', type = 'l', axes=FALSE, 
+       lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+}
+dev.off()
+
+#Compare to without GI
+png(paste0('SatDef_GI+NoGI_hu_UnalteredSlopes.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6), c(7,8)))
+par(mar = c(3,3,3,0.5))
+for (h in 1:8){
+  matplot(x = as.Date(SatDef_bu$Date), y = t(SatDef_hu[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]),
+          main = paste0('Hillslope ', uhills[h], ' Sat. Def.'), type = 'l', xlab = 'Year', ylab = 'Sat. Def. (mm)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,5000,100), labels = TRUE, cex.axis = 1.5)
+  par(new=TRUE)
+  plot(x = as.Date(SatDef_bu$Date), y = SimH$sat_def[SimH$hillID == h], col = 'green', xlab = '', ylab = '', type = 'l', axes=FALSE, 
+       lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+}
+dev.off()
+
+#Plots that compare reduction in streamflow
+png(paste0('SatDef_MinusGI_hu.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  matplot(x = as.Date(SatDef_bu$Date), y = t(SatDef_hu[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$sat_def[SimH$hillID == h],
+          main = paste0('Hillslope ', uhills[h], ' GI - No GI Sat. Def.'), type = 'l', xlab = 'Year', ylab = 'Sat. Def. (mm)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(-500,500,10), labels = TRUE, cex.axis = 1.5)
+  #Add quantiles
+  quants = apply(X = t(SatDef_hu[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$sat_def[SimH$hillID == h], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+  qlty = c(3,2,1,2,3)
+  par(new=TRUE)
+  plot(x = as.Date(SatDef_bu$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, 
+       xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+  lines(x = c(as.Date('2004-01-01'), as.Date('2014-01-01')), y = c(0,0), col = 'blue', type = 'l')
+}
+dev.off()
+rm(h, quants, qlty)
+
+png(paste0('SatDef_MinusGI_hu_UnalteredSlopes.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6), c(7,8)))
+par(mar = c(3,3,3,0.5))
+for (h in 1:8){
+  matplot(x = as.Date(SatDef_bu$Date), y = t(SatDef_hu[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$sat_def[SimH$hillID == h],
+          main = paste0('Hillslope ', uhills[h], ' GI - No GI Sat. Def.'), type = 'l', xlab = 'Year', ylab = 'Sat. Def. (mm)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(-500,500,0.001), labels = TRUE, cex.axis = 1.5)
+  #Add quantiles
+  quants = apply(X = t(SatDef_hu[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$sat_def[SimH$hillID == h], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+  qlty = c(3,2,1,2,3)
+  par(new=TRUE)
+  plot(x = as.Date(SatDef_bu$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, 
+       xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+  lines(x = c(as.Date('2004-01-01'), as.Date('2014-01-01')), y = c(0,0), col = 'blue', type = 'l')
+}
+dev.off()
+rm(h, quants, qlty)
+
+png(paste0('SatDef_MinusGI_2007_hu.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  matplot(x = as.Date(SatDef_bu$Date), y = t(SatDef_hu[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$sat_def[SimH$hillID == h],
+          main = paste0('Hillslope ', uhills[h], ' GI - No GI Sat. Def.'), type = 'l', xlab = 'Year', ylab = 'Sat. Def. (mm)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5, xlim = c(as.Date('2007-01-01'), as.Date('2007-12-31')))
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(-500,500,10), labels = TRUE, cex.axis = 1.5)
+  #Add quantiles
+  quants = apply(X = t(SatDef_hu[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$sat_def[SimH$hillID == h], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+  qlty = c(3,2,1,2,3)
+  par(new=TRUE)
+  plot(x = as.Date(SatDef_bu$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, 
+       xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+  lines(x = c(as.Date('2004-01-01'), as.Date('2014-01-01')), y = c(0,0), col = 'blue', type = 'l')
+}
+dev.off()
+rm(h, quants, qlty)
+
+png(paste0('SatDef_MinusGI_2007_hu_UnalteredSlopes.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6), c(7,8)))
+par(mar = c(3,3,3,0.5))
+for (h in 1:8){
+  matplot(x = as.Date(SatDef_bu$Date), y = t(SatDef_hu[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$sat_def[SimH$hillID == h],
+          main = paste0('Hillslope ', uhills[h], ' GI - No GI Sat. Def.'), type = 'l', xlab = 'Year', ylab = 'Sat. Def. (mm)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5, xlim = c(as.Date('2007-01-01'), as.Date('2007-12-31')))
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(-500,500,.001), labels = TRUE, cex.axis = 1.5)
+  #Add quantiles
+  quants = apply(X = t(SatDef_hu[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$sat_def[SimH$hillID == h], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+  qlty = c(3,2,1,2,3)
+  par(new=TRUE)
+  plot(x = as.Date(SatDef_bu$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, 
+       xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+  lines(x = c(as.Date('2004-01-01'), as.Date('2014-01-01')), y = c(0,0), col = 'blue', type = 'l')
+}
+dev.off()
+rm(h, quants, qlty)
+
+#Make a plot of the sd in streamflow for each day
+sdSatDef_MinGI_hu = meanSatDef_MinGI_hu = CVSatDef_MinGI_hu = matrix(0, nrow = nrow(Area.Hills), ncol = length(SatDef_bu$Date))
+for (h in 1:nrow(sdSatDef_MinGI_hu)){
+  sdSatDef_MinGI_hu[h,] = apply(X = t(SatDef_hu[which(SatDef_hu$HillID == h),-c(1,2)]) - SimH$sat_def[SimH$hillID == h], MARGIN = 1, FUN = sd)
+  meanSatDef_MinGI_hu[h,] = apply(X = t(SatDef_hu[which(SatDef_hu$HillID == h),-c(1,2)]) - SimH$sat_def[SimH$hillID == h], MARGIN = 1, FUN = mean)
+  CVSatDef_MinGI_hu[h,] = sdSatDef_MinGI_hu[h,]/meanSatDef_MinGI_hu[h,]
+}
+rm(h)
+
+png(paste0('SatDef_MinusGI_CV_hu.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  plot(x = as.Date(SatDef_bu$Date), y = CVSatDef_MinGI_hu[h,], xlab = 'Year', ylab = 'CV Sat. Def. (1)', type = 'l', axes=FALSE, cex.lab = 1.5,
+       main = paste0('Hillslope ', uhills[h], ' CV GI - No GI Sat. Def.'))
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(-1000,1000,0.01), labels = TRUE, cex.axis = 1.5)
+}
+dev.off()
+rm(h)
+
+png(paste0('SatDef_MinusGI_sd_hu.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  plot(x = as.Date(SatDef_bu$Date), y = sdSatDef_MinGI_hu[h,], xlab = 'Year', ylab = 'Std. Dev. Sat. Def. (1)', type = 'l', axes=FALSE, cex.lab = 1.5,
+       main = paste0('Hillslope ', uhills[h], ' SD GI - No GI Sat. Def.'))
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(-1000,1000,1), labels = TRUE, cex.axis = 1.5)
+}
+dev.off()
+rm(h)
+
+# ET----
+png(paste0('ET_MedGI_hu.png'), res = 300, height = 10, width=10, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  matplot(x = as.Date(ET_bu$Date), y = t(ET_hu[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]),
+          main = paste0('Hillslope ', uhills[h], ' ET'), type = 'l', xlab = 'Year', ylab = 'ET (mm)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,50,1), labels = TRUE, cex.axis = 1.5)
+  #Add quantiles
+  quants = apply(X = ET_hu[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)], MARGIN = 2, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+  qlty = c(3,2,1,2,3)
+  par(new=TRUE)
+  plot(x = as.Date(ET_bu$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, 
+       xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+}
+dev.off()
+rm(h, quants, qlty)
+
+png(paste0('ET_MedGI_2007_hu.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  matplot(x = as.Date(ET_bu$Date), y = t(ET_hu[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]),
+          main = paste0('Hillslope ', uhills[h], ' ET'), type = 'l', xlab = 'Year', ylab = 'ET (mm)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5, xlim = c(as.Date('2007-01-01'), as.Date('2007-12-31')))
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,50,1), labels = TRUE, cex.axis = 1.5)
+  #Add quantiles
+  quants = apply(X = ET_hu[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)], MARGIN = 2, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+  qlty = c(3,2,1,2,3)
+  par(new=TRUE)
+  plot(x = as.Date(ET_bu$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, 
+       xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+}
+dev.off()
+rm(h, quants, qlty)
+
+#Make a plot of the sd in streamflow for each day
+sdET_hu = meanET_hu = CVET_hu = matrix(0, nrow = nrow(Area.Hills), ncol = length(ET_bu$Date))
+for (h in 1:nrow(sdET_hu)){
+  sdET_hu[h,] = apply(X = ET_hu[which(ET_hu$HillID == h),-c(1,2)], MARGIN = 2, FUN = sd)
+  meanET_hu[h,] = apply(X = ET_hu[which(ET_hu$HillID == h),-c(1,2)], MARGIN = 2, FUN = mean)
+  CVET_hu[h,] = sdET_hu[h,]/meanET_hu[h,]
+}
+rm(h)
+
+png(paste0('ET_CV_hu.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  plot(x = as.Date(ET_bu$Date), y = CVET_hu[h,],
+       main = paste0('Hillslope ', uhills[h], ' CV ET'), type = 'l', xlab = 'Year', ylab = 'CV ET (1)',
+       col = 'black', axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,10,.01), labels = TRUE, cex.axis = 1.5)
+}
+dev.off()
+rm(h)
+
+png(paste0('ET_CV_hu_UnalteredSlopes.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6), c(7,8)))
+par(mar = c(3,3,3,0.5))
+for (h in 1:8){
+  plot(x = as.Date(ET_bu$Date), y = CVET_hu[h,],
+       main = paste0('Hillslope ', uhills[h], ' CV ET'), type = 'l', xlab = 'Year', ylab = 'CV ET (1)',
+       col = 'black', axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,1,.0001), labels = TRUE, cex.axis = 1.5)
+}
+dev.off()
+rm(h)
+
+png(paste0('ET_sd_hu.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  plot(x = as.Date(ET_bu$Date), y = sdET_hu[h,],
+       main = paste0('Hillslope ', uhills[h], ' SD ET'), type = 'l', xlab = 'Year', ylab = 'Std. Dev. ET (mm)',
+       col = 'black', axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,100,0.01), labels = TRUE, cex.axis = 1.5)
+}
+dev.off()
+rm(h)
+
+png(paste0('ET_sd_hu_UnalteredSlopes.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6), c(7,8)))
+par(mar = c(3,3,3,0.5))
+for (h in 1:8){
+  plot(x = as.Date(ET_bu$Date), y = sdET_hu[h,],
+       main = paste0('Hillslope ', uhills[h], ' SD ET'), type = 'l', xlab = 'Year', ylab = 'Std. Dev. ET (mm)',
+       col = 'black', axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,1,.0001), labels = TRUE, cex.axis = 1.5)
+}
+dev.off()
+rm(h)
+
+
+#Compare to without GI
+png(paste0('ET_GI+NoGI_hu.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  matplot(x = as.Date(ET_bu$Date), y = t(ET_hu[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]),
+          main = paste0('Hillslope ', uhills[h], ' ET'), type = 'l', xlab = 'Year', ylab = 'ET (mm)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,10,1), labels = TRUE, cex.axis = 1.5)
+  par(new=TRUE)
+  plot(x = as.Date(ET_bu$Date), y = SimH$ET[SimH$hillID == h], col = 'green', xlab = '', ylab = '', type = 'l', axes=FALSE, 
+       lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+}
+dev.off()
+
+#Compare to without GI
+png(paste0('ET_GI+NoGI_hu_UnalteredSlopes.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6), c(7,8)))
+par(mar = c(3,3,3,0.5))
+for (h in 1:8){
+  matplot(x = as.Date(ET_bu$Date), y = t(ET_hu[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]),
+          main = paste0('Hillslope ', uhills[h], ' ET'), type = 'l', xlab = 'Year', ylab = 'ET (mm)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,50,1), labels = TRUE, cex.axis = 1.5)
+  par(new=TRUE)
+  plot(x = as.Date(ET_bu$Date), y = SimH$ET[SimH$hillID == h], col = 'green', xlab = '', ylab = '', type = 'l', axes=FALSE, 
+       lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+}
+dev.off()
+
+#Plots that compare reduction in streamflow
+png(paste0('ET_MinusGI_hu.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  matplot(x = as.Date(ET_bu$Date), y = t(ET_hu[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$ET[SimH$hillID == h],
+          main = paste0('Hillslope ', uhills[h], ' GI - No GI ET'), type = 'l', xlab = 'Year', ylab = 'ET (mm)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(-50,50,0.2), labels = TRUE, cex.axis = 1.5)
+  #Add quantiles
+  quants = apply(X = t(ET_hu[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$ET[SimH$hillID == h], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+  qlty = c(3,2,1,2,3)
+  par(new=TRUE)
+  plot(x = as.Date(ET_bu$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, 
+       xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+  lines(x = c(as.Date('2004-01-01'), as.Date('2014-01-01')), y = c(0,0), col = 'blue', type = 'l')
+}
+dev.off()
+rm(h, quants, qlty)
+
+png(paste0('ET_MinusGI_hu_UnalteredSlopes.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6), c(7,8)))
+par(mar = c(3,3,3,0.5))
+for (h in 1:8){
+  matplot(x = as.Date(ET_bu$Date), y = t(ET_hu[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$ET[SimH$hillID == h],
+          main = paste0('Hillslope ', uhills[h], ' GI - No GI ET'), type = 'l', xlab = 'Year', ylab = 'ET (mm)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(-50,50,0.1), labels = TRUE, cex.axis = 1.5)
+  #Add quantiles
+  quants = apply(X = t(ET_hu[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$ET[SimH$hillID == h], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+  qlty = c(3,2,1,2,3)
+  par(new=TRUE)
+  plot(x = as.Date(ET_bu$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, 
+       xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+  lines(x = c(as.Date('2004-01-01'), as.Date('2014-01-01')), y = c(0,0), col = 'blue', type = 'l')
+}
+dev.off()
+rm(h, quants, qlty)
+
+png(paste0('ET_MinusGI_2007_hu.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  matplot(x = as.Date(ET_bu$Date), y = t(ET_hu[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$ET[SimH$hillID == h],
+          main = paste0('Hillslope ', uhills[h], ' GI - No GI ET'), type = 'l', xlab = 'Year', ylab = 'ET (mm)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5, xlim = c(as.Date('2007-01-01'), as.Date('2007-12-31')))
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(-50,50,1), labels = TRUE, cex.axis = 1.5)
+  #Add quantiles
+  quants = apply(X = t(ET_hu[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$ET[SimH$hillID == h], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+  qlty = c(3,2,1,2,3)
+  par(new=TRUE)
+  plot(x = as.Date(ET_bu$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, 
+       xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+  lines(x = c(as.Date('2004-01-01'), as.Date('2014-01-01')), y = c(0,0), col = 'blue', type = 'l')
+}
+dev.off()
+rm(h, quants, qlty)
+
+png(paste0('ET_MinusGI_2007_hu_UnalteredSlopes.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6), c(7,8)))
+par(mar = c(3,3,3,0.5))
+for (h in 1:8){
+  matplot(x = as.Date(ET_bu$Date), y = t(ET_hu[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$ET[SimH$hillID == h],
+          main = paste0('Hillslope ', uhills[h], ' GI - No GI ET'), type = 'l', xlab = 'Year', ylab = 'ET (mm)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5, xlim = c(as.Date('2007-01-01'), as.Date('2007-12-31')))
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(-50,50,.1), labels = TRUE, cex.axis = 1.5)
+  #Add quantiles
+  quants = apply(X = t(ET_hu[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$ET[SimH$hillID == h], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+  qlty = c(3,2,1,2,3)
+  par(new=TRUE)
+  plot(x = as.Date(ET_bu$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, 
+       xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+  lines(x = c(as.Date('2004-01-01'), as.Date('2014-01-01')), y = c(0,0), col = 'blue', type = 'l')
+}
+dev.off()
+rm(h, quants, qlty)
+
+#Make a plot of the sd in streamflow for each day
+sdET_MinGI_hu = meanET_MinGI_hu = CVET_MinGI_hu = matrix(0, nrow = nrow(Area.Hills), ncol = length(ET_bu$Date))
+for (h in 1:nrow(sdET_MinGI_hu)){
+  sdET_MinGI_hu[h,] = apply(X = t(ET_hu[which(ET_hu$HillID == h),-c(1,2)]) - SimH$ET[SimH$hillID == h], MARGIN = 1, FUN = sd)
+  meanET_MinGI_hu[h,] = apply(X = t(ET_hu[which(ET_hu$HillID == h),-c(1,2)]) - SimH$ET[SimH$hillID == h], MARGIN = 1, FUN = mean)
+  CVET_MinGI_hu[h,] = sdET_MinGI_hu[h,]/meanET_MinGI_hu[h,]
+}
+rm(h)
+
+png(paste0('ET_MinusGI_CV_hu.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  plot(x = as.Date(ET_bu$Date), y = CVET_MinGI_hu[h,], xlab = 'Year', ylab = 'CV ET (1)', type = 'l', axes=FALSE, cex.lab = 1.5,
+       main = paste0('Hillslope ', uhills[h], ' CV GI - No GI ET'))
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(-100,100,1), labels = TRUE, cex.axis = 1.5)
+}
+dev.off()
+rm(h)
+
+png(paste0('ET_MinusGI_sd_hu.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  plot(x = as.Date(ET_bu$Date), y = sdET_MinGI_hu[h,], xlab = 'Year', ylab = 'Std. Dev. ET (1)', type = 'l', axes=FALSE, cex.lab = 1.5,
+       main = paste0('Hillslope ', uhills[h], ' SD GI - No GI ET'))
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,100,.01), labels = TRUE, cex.axis = 1.5)
+}
+dev.off()
+rm(h)
+
+
+#Plots - Basin Midslope ----
+setwd("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\Optimization\\GIAllocation_Mid")
+# Streamflow----
+png(paste0('Q_MedGI_bm.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(Q_bm$Date), y = Q_bm[,-1], col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'Streamflow (cfs)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,50,2), labels = TRUE, cex.axis = 1.5)
+#Add quantiles
+quants = apply(X = Q_bm[,-1], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+qlty = c(3,2,1,2,3)
+par(new=TRUE)
+plot(x = as.Date(Q_bm$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+dev.off()
+rm(quants, qlty)
+
+png(paste0('Q_MedGI_2007_bm.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(Q_bm$Date[which((Q_bm$Date >= '2007-01-01') & (Q_bm$Date <= '2007-12-31'))]), y = Q_bm[which((Q_bm$Date >= '2007-01-01') & (Q_bm$Date <= '2007-12-31')),-1], col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'Streamflow (cfs)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,50,2), labels = TRUE, cex.axis = 1.5)
+#Add quantiles
+quants = apply(X = Q_bm[which((Q_bm$Date >= '2007-01-01') & (Q_bm$Date <= '2007-12-31')),-1], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+qlty = c(3,2,1,2,3)
+par(new=TRUE)
+plot(x = as.Date(Q_bm$Date[which((Q_bm$Date >= '2007-01-01') & (Q_bm$Date <= '2007-12-31'))]), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+dev.off()
+rm(quants, qlty)
+
+#Make a plot of the sd in streamflow for each day
+sdQ_bm = apply(X = Q_bm[,-1], MARGIN = 1, FUN = sd)
+meanQ_bm = apply(X = Q_bm[,-1], MARGIN = 1, FUN = mean)
+CVQ_bm = sdQ_bm/meanQ_bm
+
+png(paste0('Q_CVQ_bm.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(Q_bm$Date), y = CVQ_bm, xlab = 'Year', ylab = 'CV Streamflow (1)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,.1,0.001), labels = TRUE, cex.axis = 1.5)
+dev.off()
+
+png(paste0('Q_sdQ_bm.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(Q_bm$Date), y = sdQ_bm, xlab = 'Year', ylab = 'Std. Dev. Streamflow (cfs)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,.1,0.001), labels = TRUE, cex.axis = 1.5)
+dev.off()
+
+#Compare to without GI
+png(paste0('Q_GI+NoGI_bm.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(Q_bm$Date), y = Q_bm[,-1], col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'Streamflow (cfs)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,50,2), labels = TRUE, cex.axis = 1.5)
+par(new=TRUE)
+plot(x = as.Date(Q_bm$Date), y = SimB$streamflow, col = 'green', xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+dev.off()
+
+#Check that all GI streamflows are <= without GI
+for (i in 1:100){
+  if (!all(Q_bm[,1+i] < SimB$streamflow)){
+    print(paste('i = ', i, length(which(Q_bm[,1+i] >= SimB$streamflow))))
+  }
+}
+
+#Plots that compare reduction in streamflow
+png(paste0('Q_MinusGI_bm.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(Q_bm$Date), y = Q_bm[,-1] - SimB$streamflow, col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'Streamflow (cfs)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(1,-50,-0.01), labels = TRUE, cex.axis = 1.5)
+#Add quantiles
+quants = apply(X = Q_bm[,-1] - SimB$streamflow, MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+qlty = c(3,2,1,2,3)
+par(new=TRUE)
+plot(x = as.Date(Q_bm$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+dev.off()
+rm(quants, qlty)
+
+png(paste0('Q_MinusGI_2007_bm.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(Q_bm$Date[which((Q_bm$Date >= '2007-01-01') & (Q_bm$Date <= '2007-12-31'))]), y = Q_bm[which((Q_bm$Date >= '2007-01-01') & (Q_bm$Date <= '2007-12-31')),-1] - SimB$streamflow[which((Q_bm$Date >= '2007-01-01') & (Q_bm$Date <= '2007-12-31'))], col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'Streamflow (cfs)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(1,-50,-0.01), labels = TRUE, cex.axis = 1.5)
+#Add quantiles
+quants = apply(X = Q_bm[which((Q_bm$Date >= '2007-01-01') & (Q_bm$Date <= '2007-12-31')),-1] - SimB$streamflow[which((Q_bm$Date >= '2007-01-01') & (Q_bm$Date <= '2007-12-31'))], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+qlty = c(3,2,1,2,3)
+par(new=TRUE)
+plot(x = as.Date(Q_bm$Date[which((Q_bm$Date >= '2007-01-01') & (Q_bm$Date <= '2007-12-31'))]), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+dev.off()
+rm(quants, qlty)
+
+#Make a plot of the sd in streamflow for each day
+sdQ_MinGI_bm = apply(X = Q_bm[,-1] - SimB$streamflow, MARGIN = 1, FUN = sd)
+meanQ_MinGI_bm = apply(X = Q_bm[,-1] - SimB$streamflow, MARGIN = 1, FUN = mean)
+CVQ_MinGI_bm = sdQ_MinGI_bm/meanQ_MinGI_bm
+
+png(paste0('Q_MinusGI_CVQ_bm.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(Q_bm$Date), y = CVQ_MinGI_bm, xlab = 'Year', ylab = 'CV Streamflow (1)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(-1,1,0.1), labels = TRUE, cex.axis = 1.5)
+dev.off()
+
+png(paste0('Q_MinusGI_sdQ_bm.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(Q_bm$Date), y = sdQ_MinGI_bm, xlab = 'Year', ylab = 'Std. Dev. Streamflow (cfs)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,.1,0.001), labels = TRUE, cex.axis = 1.5)
+dev.off()
+
+
+# Sat Def----
+png(paste0('SatDef_MedGI_bm.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(SatDef_bm$Date), y = SatDef_bm[,-1], col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'Sat. Deficit (mm)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,5000,20), labels = TRUE, cex.axis = 1.5)
+#Add quantiles
+quants = apply(X = SatDef_bm[,-1], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+qlty = c(3,2,1,2,3)
+par(new=TRUE)
+plot(x = as.Date(SatDef_bm$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+dev.off()
+rm(quants, qlty)
+
+png(paste0('SatDef_MedGI_2007_bm.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(SatDef_bm$Date[which((SatDef_bm$Date >= '2007-01-01') & (SatDef_bm$Date <= '2007-12-31'))]), y = SatDef_bm[which((SatDef_bm$Date >= '2007-01-01') & (SatDef_bm$Date <= '2007-12-31')),-1], col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'Sat. Deficit (mm)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,5000,20), labels = TRUE, cex.axis = 1.5)
+#Add quantiles
+quants = apply(X = SatDef_bm[which((SatDef_bm$Date >= '2007-01-01') & (SatDef_bm$Date <= '2007-12-31')),-1], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+qlty = c(3,2,1,2,3)
+par(new=TRUE)
+plot(x = as.Date(SatDef_bm$Date[which((SatDef_bm$Date >= '2007-01-01') & (SatDef_bm$Date <= '2007-12-31'))]), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+dev.off()
+rm(quants, qlty)
+
+#Make a plot of the sd in streamflow for each day
+sdSatDef_bm = apply(X = SatDef_bm[,-1], MARGIN = 1, FUN = sd)
+meanSatDef_bm = apply(X = SatDef_bm[,-1], MARGIN = 1, FUN = mean)
+CVSatDef_bm = sdSatDef_bm/meanSatDef_bm
+
+png(paste0('SatDef_CV_bm.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(SatDef_bm$Date), y = CVSatDef_bm, xlab = 'Year', ylab = 'CV Sat. Def. (1)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,.1,0.0001), labels = TRUE, cex.axis = 1.5)
+dev.off()
+
+png(paste0('SatDef_sd_bm.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(SatDef_bm$Date), y = sdSatDef_bm, xlab = 'Year', ylab = 'Std. Dev. Sat. Deficit (mm)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,10,0.1), labels = TRUE, cex.axis = 1.5)
+dev.off()
+
+#Compare to without GI
+png(paste0('SatDef_GI+NoGI_bm.png'), res = 300, height = 5, width=5, units = 'in')
+plot(x = as.Date(SatDef_bm$Date), y = c(max(SatDef_bm[,-1]), min(SatDef_bm[,-1]), max(SimB$sat_def), min(SimB$sat_def), rep(median(SimB$sat_def), nrow(SatDef_bm)-4)), col = 'white', xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i")
+par(new=TRUE)
+matplot(x = as.Date(SatDef_bm$Date), y = SatDef_bm[,-1], col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'Sat. Deficit (mm)', type = 'l', axes=FALSE, cex.lab = 1.5, xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,5000,20), labels = TRUE, cex.axis = 1.5)
+par(new=TRUE)
+plot(x = as.Date(SatDef_bm$Date), y = SimB$sat_def, col = 'green', xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+dev.off()
+
+#Check that all GI sat def are >= without GI
+for (i in 1:100){
+  if (!all(SatDef_bm[,1+i] > SimB$sat_def)){
+    print(paste('i = ', i, length(which(SatDef_bm[,1+i] <= SimB$sat_def))))
+  }
+}
+
+#Plots that compare reduction in streamflow
+png(paste0('SatDef_MinusGI_bm.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(SatDef_bm$Date), y = SatDef_bm[,-1] - SimB$sat_def, col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'Sat. Deficit: GI - No GI (mm)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(1,500,5), labels = TRUE, cex.axis = 1.5)
+#Add quantiles
+quants = apply(X = SatDef_bm[,-1] - SimB$sat_def, MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+qlty = c(3,2,1,2,3)
+par(new=TRUE)
+plot(x = as.Date(SatDef_bm$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+dev.off()
+rm(quants, qlty)
+
+png(paste0('SatDef_MinusGI_2007_bm.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(SatDef_bm$Date[which((SatDef_bm$Date >= '2007-01-01') & (SatDef_bm$Date <= '2007-12-31'))]), y = SatDef_bm[which((SatDef_bm$Date >= '2007-01-01') & (SatDef_bm$Date <= '2007-12-31')),-1] - SimB$sat_def[which((SatDef_bm$Date >= '2007-01-01') & (SatDef_bm$Date <= '2007-12-31'))], col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'Sat. Deficit (mm)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(1,500,5), labels = TRUE, cex.axis = 1.5)
+#Add quantiles
+quants = apply(X = SatDef_bm[which((SatDef_bm$Date >= '2007-01-01') & (SatDef_bm$Date <= '2007-12-31')),-1] - SimB$sat_def[which((SatDef_bm$Date >= '2007-01-01') & (SatDef_bm$Date <= '2007-12-31'))], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+qlty = c(3,2,1,2,3)
+par(new=TRUE)
+plot(x = as.Date(SatDef_bm$Date[which((SatDef_bm$Date >= '2007-01-01') & (SatDef_bm$Date <= '2007-12-31'))]), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+dev.off()
+rm(quants, qlty)
+
+#Make a plot of the sd in streamflow for each day
+sdSatDef_MinGI_bm = apply(X = SatDef_bm[,-1] - SimB$sat_def, MARGIN = 1, FUN = sd)
+meanSatDef_MinGI_bm = apply(X = SatDef_bm[,-1] - SimB$sat_def, MARGIN = 1, FUN = mean)
+CVSatDef_MinGI_bm = sdSatDef_MinGI_bm/meanSatDef_MinGI_bm
+
+png(paste0('SatDef_MinusGI_CV_bm.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(SatDef_bm$Date), y = CVSatDef_MinGI_bm, xlab = 'Year', ylab = 'CV Sat. Def. (1)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(-1,1,0.01), labels = TRUE, cex.axis = 1.5)
+dev.off()
+
+png(paste0('SatDef_MinusGI_sd_bm.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(SatDef_bm$Date), y = sdSatDef_MinGI_bm, xlab = 'Year', ylab = 'Std. Dev. Sat. Deficit (mm)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,5,0.1), labels = TRUE, cex.axis = 1.5)
+dev.off()
+
+
+# Detention Storage - Same----
+sdDetStore_bm = apply(X = DetStore_bm[,-1], MARGIN = 1, FUN = sd)
+meanDetStore_bm = apply(X = DetStore_bm[,-1], MARGIN = 1, FUN = mean)
+CVDetStore_bm = sdDetStore_bm/meanDetStore_bm
+
+# ET----
+png(paste0('ET_MedGI_bm.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(ET_bm$Date), y = ET_bm[,-1], col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'ET (mm)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,50,2), labels = TRUE, cex.axis = 1.5)
+#Add quantiles
+quants = apply(X = ET_bm[,-1], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+qlty = c(3,2,1,2,3)
+par(new=TRUE)
+plot(x = as.Date(ET_bm$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+dev.off()
+rm(quants, qlty)
+
+png(paste0('ET_MedGI_2007_bm.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(ET_bm$Date[which((ET_bm$Date >= '2007-01-01') & (ET_bm$Date <= '2007-12-31'))]), y = ET_bm[which((ET_bm$Date >= '2007-01-01') & (ET_bm$Date <= '2007-12-31')),-1], col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'ET (mm)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,50,2), labels = TRUE, cex.axis = 1.5)
+#Add quantiles
+quants = apply(X = ET_bm[which((ET_bm$Date >= '2007-01-01') & (ET_bm$Date <= '2007-12-31')),-1], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+qlty = c(3,2,1,2,3)
+par(new=TRUE)
+plot(x = as.Date(ET_bm$Date[which((ET_bm$Date >= '2007-01-01') & (ET_bm$Date <= '2007-12-31'))]), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+dev.off()
+rm(quants, qlty)
+
+#Make a plot of the sd in streamflow for each day
+sdET_bm = apply(X = ET_bm[,-1], MARGIN = 1, FUN = sd)
+meanET_bm = apply(X = ET_bm[,-1], MARGIN = 1, FUN = mean)
+CVET_bm = sdET_bm/meanET_bm
+
+png(paste0('ET_CV_bm.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(ET_bm$Date), y = CVET_bm, xlab = 'Year', ylab = 'CV ET (1)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,.1,0.001), labels = TRUE, cex.axis = 1.5)
+dev.off()
+
+png(paste0('ET_sd_bm.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(ET_bm$Date), y = sdET_bm, xlab = 'Year', ylab = 'Std. Dev. ET (mm)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,.1,0.001), labels = TRUE, cex.axis = 1.5)
+dev.off()
+
+#Compare to without GI
+png(paste0('ET_GI+NoGI_bm.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(ET_bm$Date), y = ET_bm[,-1], col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'ET (mm)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,50,2), labels = TRUE, cex.axis = 1.5)
+par(new=TRUE)
+plot(x = as.Date(ET_bm$Date), y = SimB$ET, col = 'green', xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+dev.off()
+
+#Check that all GI streamflows are <= without GI
+for (i in 1:100){
+  if (!all(ET_bm[,1+i] > SimB$ET)){
+    print(paste('i = ', i, length(which(ET_bm[,1+i] <= SimB$ET))))
+  }
+}
+#Peak ET > with GI, but off peak can be less
+
+#Plots that compare reduction in streamflow
+png(paste0('ET_MinusGI_bm.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(ET_bm$Date), y = ET_bm[,-1] - SimB$ET, col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'ET (mm)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(1,-50,-0.1), labels = TRUE, cex.axis = 1.5)
+#Add quantiles
+quants = apply(X = ET_bm[,-1] - SimB$ET, MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+qlty = c(3,2,1,2,3)
+par(new=TRUE)
+plot(x = as.Date(ET_bm$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+dev.off()
+rm(quants, qlty)
+
+png(paste0('ET_MinusGI_2007_bm.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(ET_bm$Date[which((ET_bm$Date >= '2007-01-01') & (ET_bm$Date <= '2007-12-31'))]), y = ET_bm[which((ET_bm$Date >= '2007-01-01') & (ET_bm$Date <= '2007-12-31')),-1] - SimB$ET[which((ET_bm$Date >= '2007-01-01') & (ET_bm$Date <= '2007-12-31'))], col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'ET (mm)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(1,-50,-0.01), labels = TRUE, cex.axis = 1.5)
+#Add quantiles
+quants = apply(X = ET_bm[which((ET_bm$Date >= '2007-01-01') & (ET_bm$Date <= '2007-12-31')),-1] - SimB$ET[which((ET_bm$Date >= '2007-01-01') & (ET_bm$Date <= '2007-12-31'))], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+qlty = c(3,2,1,2,3)
+par(new=TRUE)
+plot(x = as.Date(ET_bm$Date[which((ET_bm$Date >= '2007-01-01') & (ET_bm$Date <= '2007-12-31'))]), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+dev.off()
+rm(quants, qlty)
+
+#Make a plot of the sd in streamflow for each day
+sdET_MinGI_bm = apply(X = ET_bm[,-1] - SimB$ET, MARGIN = 1, FUN = sd)
+meanET_MinGI_bm = apply(X = ET_bm[,-1] - SimB$ET, MARGIN = 1, FUN = mean)
+CVET_MinGI_bm = sdET_MinGI_bm/meanET_MinGI_bm
+
+png(paste0('ET_MinusGI_CV_bm.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(ET_bm$Date), y = CVET_MinGI_bm, xlab = 'Year', ylab = 'CV ET (1)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(-2000,2000,10), labels = TRUE, cex.axis = 1.5)
+dev.off()
+
+png(paste0('ET_MinusGI_sd_bm.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(ET_bm$Date), y = sdET_MinGI_bm, xlab = 'Year', ylab = 'Std. Dev. ET (mm)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,10,0.01), labels = TRUE, cex.axis = 1.5)
+dev.off()
+
+
+#Plots - Hillslope Midslope----
+# Streamflow----
+png(paste0('Q_MedGI_hm.png'), res = 300, height = 10, width=10, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  matplot(x = as.Date(Q_bm$Date), y = t(Q_hm[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]),
+          main = paste0('Hillslope ', uhills[h], ' Streamflow'), type = 'l', xlab = 'Year', ylab = 'Streamflow (cfs)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,50,.1), labels = TRUE, cex.axis = 1.5)
+  #Add quantiles
+  quants = apply(X = Q_hm[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)], MARGIN = 2, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+  qlty = c(3,2,1,2,3)
+  par(new=TRUE)
+  plot(x = as.Date(Q_bm$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, 
+       xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+}
+dev.off()
+rm(h, quants, qlty)
+
+png(paste0('Q_MedGI_2007_hm.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  matplot(x = as.Date(Q_bm$Date), y = t(Q_hm[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]),
+          main = paste0('Hillslope ', uhills[h], ' Streamflow'), type = 'l', xlab = 'Year', ylab = 'Streamflow (cfs)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5, xlim = c(as.Date('2007-01-01'), as.Date('2007-12-31')))
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,50,.1), labels = TRUE, cex.axis = 1.5)
+  #Add quantiles
+  quants = apply(X = Q_hm[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)], MARGIN = 2, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+  qlty = c(3,2,1,2,3)
+  par(new=TRUE)
+  plot(x = as.Date(Q_bm$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, 
+       xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+}
+dev.off()
+rm(h, quants, qlty)
+
+#Make a plot of the sd in streamflow for each day
+sdQ_hm = meanQ_hm = CVQ_hm = matrix(0, nrow = nrow(Area.Hills), ncol = length(Q_bm$Date))
+for (h in 1:nrow(sdQ_hm)){
+  sdQ_hm[h,] = apply(X = Q_hm[which(Q_hm$HillID == h),-c(1,2)], MARGIN = 2, FUN = sd)
+  meanQ_hm[h,] = apply(X = Q_hm[which(Q_hm$HillID == h),-c(1,2)], MARGIN = 2, FUN = mean)
+  CVQ_hm[h,] = sdQ_hm[h,]/meanQ_hm[h,]
+}
+rm(h)
+
+png(paste0('Q_CVQ_hm.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  plot(x = as.Date(Q_bm$Date), y = CVQ_hm[h,],
+       main = paste0('Hillslope ', uhills[h], ' CV Streamflow'), type = 'l', xlab = 'Year', ylab = 'CV Streamflow (1)',
+       col = 'black', axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,1,.01), labels = TRUE, cex.axis = 1.5)
+}
+dev.off()
+rm(h)
+
+png(paste0('Q_CVQ_hm_UnalteredSlopes.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6), c(7,8)))
+par(mar = c(3,3,3,0.5))
+for (h in 1:8){
+  plot(x = as.Date(Q_bm$Date), y = CVQ_hm[h,],
+       main = paste0('Hillslope ', uhills[h], ' CV Streamflow'), type = 'l', xlab = 'Year', ylab = 'CV Streamflow (1)',
+       col = 'black', axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,1,.01), labels = TRUE, cex.axis = 1.5)
+}
+dev.off()
+rm(h)
+
+png(paste0('Q_sdQ_hm.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  plot(x = as.Date(Q_bm$Date), y = sdQ_hm[h,],
+       main = paste0('Hillslope ', uhills[h], ' SD Streamflow'), type = 'l', xlab = 'Year', ylab = 'Std. Dev. Streamflow (cfs)',
+       col = 'black', axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,.1,0.001), labels = TRUE, cex.axis = 1.5)
+}
+dev.off()
+rm(h)
+
+png(paste0('Q_sdQ_hm_UnalteredSlopes.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6), c(7,8)))
+par(mar = c(3,3,3,0.5))
+for (h in 1:8){
+  plot(x = as.Date(Q_bm$Date), y = sdQ_hm[h,],
+       main = paste0('Hillslope ', uhills[h], ' SD Streamflow'), type = 'l', xlab = 'Year', ylab = 'Std. Dev. Streamflow (cfs)',
+       col = 'black', axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,.1,0.001), labels = TRUE, cex.axis = 1.5)
+}
+dev.off()
+rm(h)
+
+
+#Compare to without GI
+png(paste0('Q_GI+NoGI_hm.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  matplot(x = as.Date(Q_bm$Date), y = t(Q_hm[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]),
+          main = paste0('Hillslope ', uhills[h], ' Streamflow'), type = 'l', xlab = 'Year', ylab = 'Streamflow (cfs)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,50,.1), labels = TRUE, cex.axis = 1.5)
+  par(new=TRUE)
+  plot(x = as.Date(Q_bm$Date), y = SimH$streamflow[SimH$hillID == h], col = 'green', xlab = '', ylab = '', type = 'l', axes=FALSE, 
+       lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+}
+dev.off()
+
+#Compare to without GI
+png(paste0('Q_GI+NoGI_hm_UnalteredSlopes.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6), c(7,8)))
+par(mar = c(3,3,3,0.5))
+for (h in 1:8){
+  matplot(x = as.Date(Q_bm$Date), y = t(Q_hm[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]),
+          main = paste0('Hillslope ', uhills[h], ' Streamflow'), type = 'l', xlab = 'Year', ylab = 'Streamflow (cfs)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,50,.1), labels = TRUE, cex.axis = 1.5)
+  par(new=TRUE)
+  plot(x = as.Date(Q_bm$Date), y = SimH$streamflow[SimH$hillID == h], col = 'green', xlab = '', ylab = '', type = 'l', axes=FALSE, 
+       lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+}
+dev.off()
+
+#Plots that compare reduction in streamflow
+png(paste0('Q_MinusGI_hm.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  matplot(x = as.Date(Q_bm$Date), y = t(Q_hm[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$streamflow[SimH$hillID == h],
+          main = paste0('Hillslope ', uhills[h], ' GI - No GI Streamflow'), type = 'l', xlab = 'Year', ylab = 'Streamflow (cfs)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(1,-50,-.01), labels = TRUE, cex.axis = 1.5)
+  #Add quantiles
+  quants = apply(X = t(Q_hm[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$streamflow[SimH$hillID == h], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+  qlty = c(3,2,1,2,3)
+  par(new=TRUE)
+  plot(x = as.Date(Q_bm$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, 
+       xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+  lines(x = c(as.Date('2004-01-01'), as.Date('2014-01-01')), y = c(0,0), col = 'blue', type = 'l')
+}
+dev.off()
+rm(h, quants, qlty)
+
+png(paste0('Q_MinusGI_hm_UnalteredSlopes.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6), c(7,8)))
+par(mar = c(3,3,3,0.5))
+for (h in 1:8){
+  matplot(x = as.Date(Q_bm$Date), y = t(Q_hm[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$streamflow[SimH$hillID == h],
+          main = paste0('Hillslope ', uhills[h], ' GI - No GI Streamflow'), type = 'l', xlab = 'Year', ylab = 'Streamflow (cfs)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,-50,-.1), labels = TRUE, cex.axis = 1.5)
+  #Add quantiles
+  quants = apply(X = t(Q_hm[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$streamflow[SimH$hillID == h], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+  qlty = c(3,2,1,2,3)
+  par(new=TRUE)
+  plot(x = as.Date(Q_bm$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, 
+       xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+  lines(x = c(as.Date('2004-01-01'), as.Date('2014-01-01')), y = c(0,0), col = 'blue', type = 'l')
+}
+dev.off()
+rm(h, quants, qlty)
+
+png(paste0('Q_MinusGI_2007_hm.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  matplot(x = as.Date(Q_bm$Date), y = t(Q_hm[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$streamflow[SimH$hillID == h],
+          main = paste0('Hillslope ', uhills[h], ' GI - No GI Streamflow'), type = 'l', xlab = 'Year', ylab = 'Streamflow (cfs)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5, xlim = c(as.Date('2007-01-01'), as.Date('2007-12-31')))
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(1,-50,-.01), labels = TRUE, cex.axis = 1.5)
+  #Add quantiles
+  quants = apply(X = t(Q_hm[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$streamflow[SimH$hillID == h], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+  qlty = c(3,2,1,2,3)
+  par(new=TRUE)
+  plot(x = as.Date(Q_bm$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, 
+       xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+  lines(x = c(as.Date('2004-01-01'), as.Date('2014-01-01')), y = c(0,0), col = 'blue', type = 'l')
+}
+dev.off()
+rm(h, quants, qlty)
+
+png(paste0('Q_MinusGI_2007_hm_UnalteredSlopes.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6), c(7,8)))
+par(mar = c(3,3,3,0.5))
+for (h in 1:8){
+  matplot(x = as.Date(Q_bm$Date), y = t(Q_hm[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$streamflow[SimH$hillID == h],
+          main = paste0('Hillslope ', uhills[h], ' GI - No GI Streamflow'), type = 'l', xlab = 'Year', ylab = 'Streamflow (cfs)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5, xlim = c(as.Date('2007-01-01'), as.Date('2007-12-31')))
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(1,-50,-.01), labels = TRUE, cex.axis = 1.5)
+  #Add quantiles
+  quants = apply(X = t(Q_hm[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$streamflow[SimH$hillID == h], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+  qlty = c(3,2,1,2,3)
+  par(new=TRUE)
+  plot(x = as.Date(Q_bm$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, 
+       xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+  lines(x = c(as.Date('2004-01-01'), as.Date('2014-01-01')), y = c(0,0), col = 'blue', type = 'l')
+}
+dev.off()
+rm(h, quants, qlty)
+
+#Make a plot of the sd in streamflow for each day
+sdQ_MinGI_hm = meanQ_MinGI_hm = CVQ_MinGI_hm = matrix(0, nrow = nrow(Area.Hills), ncol = length(Q_bm$Date))
+for (h in 1:nrow(sdQ_MinGI_hm)){
+  sdQ_MinGI_hm[h,] = apply(X = t(Q_hm[which(Q_hm$HillID == h),-c(1,2)]) - SimH$streamflow[SimH$hillID == h], MARGIN = 1, FUN = sd)
+  meanQ_MinGI_hm[h,] = apply(X = t(Q_hm[which(Q_hm$HillID == h),-c(1,2)]) - SimH$streamflow[SimH$hillID == h], MARGIN = 1, FUN = mean)
+  CVQ_MinGI_hm[h,] = sdQ_MinGI_hm[h,]/meanQ_MinGI_hm[h,]
+}
+rm(h)
+
+png(paste0('Q_MinusGI_CVQ_hm.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  plot(x = as.Date(Q_bm$Date), y = CVQ_MinGI_hm[h,], xlab = 'Year', ylab = 'CV Streamflow (1)', type = 'l', axes=FALSE, cex.lab = 1.5,
+       main = paste0('Hillslope ', uhills[h], ' CV GI - No GI Streamflow'))
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(-1000,1000,1), labels = TRUE, cex.axis = 1.5)
+}
+dev.off()
+rm(h)
+
+png(paste0('Q_MinusGI_sdQ_hm.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  plot(x = as.Date(Q_bm$Date), y = sdQ_MinGI_hm[h,], xlab = 'Year', ylab = 'Std. Dev. Streamflow (1)', type = 'l', axes=FALSE, cex.lab = 1.5,
+       main = paste0('Hillslope ', uhills[h], ' SD GI - No GI Streamflow'))
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(-1000,1000,0.001), labels = TRUE, cex.axis = 1.5)
+}
+dev.off()
+rm(h)
+
+# Sat Def----
+png(paste0('SatDef_MedGI_hm.png'), res = 300, height = 10, width=10, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  matplot(x = as.Date(SatDef_bm$Date), y = t(SatDef_hm[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]),
+          main = paste0('Hillslope ', uhills[h], ' Sat. Def.'), type = 'l', xlab = 'Year', ylab = 'Sat. Def. (mm)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,5000,100), labels = TRUE, cex.axis = 1.5)
+  #Add quantiles
+  quants = apply(X = SatDef_hm[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)], MARGIN = 2, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+  qlty = c(3,2,1,2,3)
+  par(new=TRUE)
+  plot(x = as.Date(SatDef_bm$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, 
+       xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+}
+dev.off()
+rm(h, quants, qlty)
+
+png(paste0('SatDef_MedGI_2007_hm.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  matplot(x = as.Date(SatDef_bm$Date), y = t(SatDef_hm[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]),
+          main = paste0('Hillslope ', uhills[h], ' Sat. Def.'), type = 'l', xlab = 'Year', ylab = 'Sat. Def. (mm)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5, xlim = c(as.Date('2007-01-01'), as.Date('2007-12-31')))
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,5000,100), labels = TRUE, cex.axis = 1.5)
+  #Add quantiles
+  quants = apply(X = SatDef_hm[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)], MARGIN = 2, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+  qlty = c(3,2,1,2,3)
+  par(new=TRUE)
+  plot(x = as.Date(SatDef_bm$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, 
+       xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+}
+dev.off()
+rm(h, quants, qlty)
+
+#Make a plot of the sd in streamflow for each day
+sdSatDef_hm = meanSatDef_hm = CVSatDef_hm = matrix(0, nrow = nrow(Area.Hills), ncol = length(SatDef_bm$Date))
+for (h in 1:nrow(sdSatDef_hm)){
+  sdSatDef_hm[h,] = apply(X = SatDef_hm[which(SatDef_hm$HillID == h),-c(1,2)], MARGIN = 2, FUN = sd)
+  meanSatDef_hm[h,] = apply(X = SatDef_hm[which(SatDef_hm$HillID == h),-c(1,2)], MARGIN = 2, FUN = mean)
+  CVSatDef_hm[h,] = sdSatDef_hm[h,]/meanSatDef_hm[h,]
+}
+rm(h)
+
+png(paste0('SatDef_CV_hm.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  plot(x = as.Date(SatDef_bm$Date), y = CVSatDef_hm[h,],
+       main = paste0('Hillslope ', uhills[h], ' CV Sat. Def.'), type = 'l', xlab = 'Year', ylab = 'CV Sat. Def. (1)',
+       col = 'black', axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,10,.001), labels = TRUE, cex.axis = 1.5)
+}
+dev.off()
+rm(h)
+
+png(paste0('SatDef_CV_hm_UnalteredSlopes.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6), c(7,8)))
+par(mar = c(3,3,3,0.5))
+for (h in 1:8){
+  plot(x = as.Date(SatDef_bm$Date), y = CVSatDef_hm[h,],
+       main = paste0('Hillslope ', uhills[h], ' CV Sat. Def.'), type = 'l', xlab = 'Year', ylab = 'CV Sat. Def. (1)',
+       col = 'black', axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,1,.001), labels = TRUE, cex.axis = 1.5)
+}
+dev.off()
+rm(h)
+
+png(paste0('SatDef_sd_hm.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  plot(x = as.Date(SatDef_bm$Date), y = sdSatDef_hm[h,],
+       main = paste0('Hillslope ', uhills[h], ' SD Sat. Def.'), type = 'l', xlab = 'Year', ylab = 'Std. Dev. Sat. Def. (mm)',
+       col = 'black', axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,100,1), labels = TRUE, cex.axis = 1.5)
+}
+dev.off()
+rm(h)
+
+png(paste0('SatDef_sd_hm_UnalteredSlopes.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6), c(7,8)))
+par(mar = c(3,3,3,0.5))
+for (h in 1:8){
+  plot(x = as.Date(SatDef_bm$Date), y = sdSatDef_hm[h,],
+       main = paste0('Hillslope ', uhills[h], ' SD Sat. Def.'), type = 'l', xlab = 'Year', ylab = 'Std. Dev. Sat. Def. (mm)',
+       col = 'black', axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,1000,1), labels = TRUE, cex.axis = 1.5)
+}
+dev.off()
+rm(h)
+
+
+#Compare to without GI
+png(paste0('SatDef_GI+NoGI_hm.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  plot(x = as.Date(SatDef_bm$Date), y = c(max(t(SatDef_hm[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)])), min(t(SatDef_hm[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)])), max(SimH$sat_def[SimH$hillID == h]), min(SimH$sat_def[SimH$hillID == h]), rep(median(SimH$sat_def[SimH$hillID == h]), nrow(SatDef_bm)-4)), col = 'white', xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i")
+  par(new=TRUE)
+  matplot(x = as.Date(SatDef_bm$Date), y = t(SatDef_hm[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]),
+          main = paste0('Hillslope ', uhills[h], ' Sat. Def.'), type = 'l', xlab = 'Year', ylab = 'Sat. Def. (mm)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5, xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,5000,100), labels = TRUE, cex.axis = 1.5)
+  par(new=TRUE)
+  plot(x = as.Date(SatDef_bm$Date), y = SimH$sat_def[SimH$hillID == h], col = 'green', xlab = '', ylab = '', type = 'l', axes=FALSE, 
+       lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+}
+dev.off()
+
+#Compare to without GI
+png(paste0('SatDef_GI+NoGI_hm_UnalteredSlopes.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6), c(7,8)))
+par(mar = c(3,3,3,0.5))
+for (h in 1:8){
+  matplot(x = as.Date(SatDef_bm$Date), y = t(SatDef_hm[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]),
+          main = paste0('Hillslope ', uhills[h], ' Sat. Def.'), type = 'l', xlab = 'Year', ylab = 'Sat. Def. (mm)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,5000,100), labels = TRUE, cex.axis = 1.5)
+  par(new=TRUE)
+  plot(x = as.Date(SatDef_bm$Date), y = SimH$sat_def[SimH$hillID == h], col = 'green', xlab = '', ylab = '', type = 'l', axes=FALSE, 
+       lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+}
+dev.off()
+
+#Plots that compare reduction in streamflow
+png(paste0('SatDef_MinusGI_hm.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  matplot(x = as.Date(SatDef_bm$Date), y = t(SatDef_hm[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$sat_def[SimH$hillID == h],
+          main = paste0('Hillslope ', uhills[h], ' GI - No GI Sat. Def.'), type = 'l', xlab = 'Year', ylab = 'Sat. Def. (mm)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(-500,500,10), labels = TRUE, cex.axis = 1.5)
+  #Add quantiles
+  quants = apply(X = t(SatDef_hm[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$sat_def[SimH$hillID == h], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+  qlty = c(3,2,1,2,3)
+  par(new=TRUE)
+  plot(x = as.Date(SatDef_bm$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, 
+       xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+  lines(x = c(as.Date('2004-01-01'), as.Date('2014-01-01')), y = c(0,0), col = 'blue', type = 'l')
+}
+dev.off()
+rm(h, quants, qlty)
+
+png(paste0('SatDef_MinusGI_hm_UnalteredSlopes.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6), c(7,8)))
+par(mar = c(3,3,3,0.5))
+for (h in 1:8){
+  matplot(x = as.Date(SatDef_bm$Date), y = t(SatDef_hm[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$sat_def[SimH$hillID == h],
+          main = paste0('Hillslope ', uhills[h], ' GI - No GI Sat. Def.'), type = 'l', xlab = 'Year', ylab = 'Sat. Def. (mm)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(-500,500,0.001), labels = TRUE, cex.axis = 1.5)
+  #Add quantiles
+  quants = apply(X = t(SatDef_hm[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$sat_def[SimH$hillID == h], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+  qlty = c(3,2,1,2,3)
+  par(new=TRUE)
+  plot(x = as.Date(SatDef_bm$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, 
+       xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+  lines(x = c(as.Date('2004-01-01'), as.Date('2014-01-01')), y = c(0,0), col = 'blue', type = 'l')
+}
+dev.off()
+rm(h, quants, qlty)
+
+png(paste0('SatDef_MinusGI_2007_hm.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  matplot(x = as.Date(SatDef_bm$Date), y = t(SatDef_hm[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$sat_def[SimH$hillID == h],
+          main = paste0('Hillslope ', uhills[h], ' GI - No GI Sat. Def.'), type = 'l', xlab = 'Year', ylab = 'Sat. Def. (mm)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5, xlim = c(as.Date('2007-01-01'), as.Date('2007-12-31')))
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(-500,500,10), labels = TRUE, cex.axis = 1.5)
+  #Add quantiles
+  quants = apply(X = t(SatDef_hm[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$sat_def[SimH$hillID == h], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+  qlty = c(3,2,1,2,3)
+  par(new=TRUE)
+  plot(x = as.Date(SatDef_bm$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, 
+       xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+  lines(x = c(as.Date('2004-01-01'), as.Date('2014-01-01')), y = c(0,0), col = 'blue', type = 'l')
+}
+dev.off()
+rm(h, quants, qlty)
+
+png(paste0('SatDef_MinusGI_2007_hm_UnalteredSlopes.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6), c(7,8)))
+par(mar = c(3,3,3,0.5))
+for (h in 1:8){
+  matplot(x = as.Date(SatDef_bm$Date), y = t(SatDef_hm[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$sat_def[SimH$hillID == h],
+          main = paste0('Hillslope ', uhills[h], ' GI - No GI Sat. Def.'), type = 'l', xlab = 'Year', ylab = 'Sat. Def. (mm)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5, xlim = c(as.Date('2007-01-01'), as.Date('2007-12-31')))
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(-500,500,.001), labels = TRUE, cex.axis = 1.5)
+  #Add quantiles
+  quants = apply(X = t(SatDef_hm[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$sat_def[SimH$hillID == h], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+  qlty = c(3,2,1,2,3)
+  par(new=TRUE)
+  plot(x = as.Date(SatDef_bm$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, 
+       xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+  lines(x = c(as.Date('2004-01-01'), as.Date('2014-01-01')), y = c(0,0), col = 'blue', type = 'l')
+}
+dev.off()
+rm(h, quants, qlty)
+
+#Make a plot of the sd in streamflow for each day
+sdSatDef_MinGI_hm = meanSatDef_MinGI_hm = CVSatDef_MinGI_hm = matrix(0, nrow = nrow(Area.Hills), ncol = length(SatDef_bm$Date))
+for (h in 1:nrow(sdSatDef_MinGI_hm)){
+  sdSatDef_MinGI_hm[h,] = apply(X = t(SatDef_hm[which(SatDef_hm$HillID == h),-c(1,2)]) - SimH$sat_def[SimH$hillID == h], MARGIN = 1, FUN = sd)
+  meanSatDef_MinGI_hm[h,] = apply(X = t(SatDef_hm[which(SatDef_hm$HillID == h),-c(1,2)]) - SimH$sat_def[SimH$hillID == h], MARGIN = 1, FUN = mean)
+  CVSatDef_MinGI_hm[h,] = sdSatDef_MinGI_hm[h,]/meanSatDef_MinGI_hm[h,]
+}
+rm(h)
+
+png(paste0('SatDef_MinusGI_CV_hm.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  plot(x = as.Date(SatDef_bm$Date), y = CVSatDef_MinGI_hm[h,], xlab = 'Year', ylab = 'CV Sat. Def. (1)', type = 'l', axes=FALSE, cex.lab = 1.5,
+       main = paste0('Hillslope ', uhills[h], ' CV GI - No GI Sat. Def.'))
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(-1000,1000,0.01), labels = TRUE, cex.axis = 1.5)
+}
+dev.off()
+rm(h)
+
+png(paste0('SatDef_MinusGI_sd_hm.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  plot(x = as.Date(SatDef_bm$Date), y = sdSatDef_MinGI_hm[h,], xlab = 'Year', ylab = 'Std. Dev. Sat. Def. (1)', type = 'l', axes=FALSE, cex.lab = 1.5,
+       main = paste0('Hillslope ', uhills[h], ' SD GI - No GI Sat. Def.'))
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(-1000,1000,1), labels = TRUE, cex.axis = 1.5)
+}
+dev.off()
+rm(h)
+
+# ET----
+png(paste0('ET_MedGI_hm.png'), res = 300, height = 10, width=10, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  matplot(x = as.Date(ET_bm$Date), y = t(ET_hm[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]),
+          main = paste0('Hillslope ', uhills[h], ' ET'), type = 'l', xlab = 'Year', ylab = 'ET (mm)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,50,1), labels = TRUE, cex.axis = 1.5)
+  #Add quantiles
+  quants = apply(X = ET_hm[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)], MARGIN = 2, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+  qlty = c(3,2,1,2,3)
+  par(new=TRUE)
+  plot(x = as.Date(ET_bm$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, 
+       xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+}
+dev.off()
+rm(h, quants, qlty)
+
+png(paste0('ET_MedGI_2007_hm.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  matplot(x = as.Date(ET_bm$Date), y = t(ET_hm[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]),
+          main = paste0('Hillslope ', uhills[h], ' ET'), type = 'l', xlab = 'Year', ylab = 'ET (mm)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5, xlim = c(as.Date('2007-01-01'), as.Date('2007-12-31')))
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,50,1), labels = TRUE, cex.axis = 1.5)
+  #Add quantiles
+  quants = apply(X = ET_hm[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)], MARGIN = 2, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+  qlty = c(3,2,1,2,3)
+  par(new=TRUE)
+  plot(x = as.Date(ET_bm$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, 
+       xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+}
+dev.off()
+rm(h, quants, qlty)
+
+#Make a plot of the sd in streamflow for each day
+sdET_hm = meanET_hm = CVET_hm = matrix(0, nrow = nrow(Area.Hills), ncol = length(ET_bm$Date))
+for (h in 1:nrow(sdET_hm)){
+  sdET_hm[h,] = apply(X = ET_hm[which(ET_hm$HillID == h),-c(1,2)], MARGIN = 2, FUN = sd)
+  meanET_hm[h,] = apply(X = ET_hm[which(ET_hm$HillID == h),-c(1,2)], MARGIN = 2, FUN = mean)
+  CVET_hm[h,] = sdET_hm[h,]/meanET_hm[h,]
+}
+rm(h)
+
+png(paste0('ET_CV_hm.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  plot(x = as.Date(ET_bm$Date), y = CVET_hm[h,],
+       main = paste0('Hillslope ', uhills[h], ' CV ET'), type = 'l', xlab = 'Year', ylab = 'CV ET (1)',
+       col = 'black', axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,10,.01), labels = TRUE, cex.axis = 1.5)
+}
+dev.off()
+rm(h)
+
+png(paste0('ET_CV_hm_UnalteredSlopes.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6), c(7,8)))
+par(mar = c(3,3,3,0.5))
+for (h in 1:8){
+  plot(x = as.Date(ET_bm$Date), y = CVET_hm[h,],
+       main = paste0('Hillslope ', uhills[h], ' CV ET'), type = 'l', xlab = 'Year', ylab = 'CV ET (1)',
+       col = 'black', axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,1,.0001), labels = TRUE, cex.axis = 1.5)
+}
+dev.off()
+rm(h)
+
+png(paste0('ET_sd_hm.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  plot(x = as.Date(ET_bm$Date), y = sdET_hm[h,],
+       main = paste0('Hillslope ', uhills[h], ' SD ET'), type = 'l', xlab = 'Year', ylab = 'Std. Dev. ET (mm)',
+       col = 'black', axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,100,0.01), labels = TRUE, cex.axis = 1.5)
+}
+dev.off()
+rm(h)
+
+png(paste0('ET_sd_hm_UnalteredSlopes.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6), c(7,8)))
+par(mar = c(3,3,3,0.5))
+for (h in 1:8){
+  plot(x = as.Date(ET_bm$Date), y = sdET_hm[h,],
+       main = paste0('Hillslope ', uhills[h], ' SD ET'), type = 'l', xlab = 'Year', ylab = 'Std. Dev. ET (mm)',
+       col = 'black', axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,1,.0001), labels = TRUE, cex.axis = 1.5)
+}
+dev.off()
+rm(h)
+
+
+#Compare to without GI
+png(paste0('ET_GI+NoGI_hm.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  matplot(x = as.Date(ET_bm$Date), y = t(ET_hm[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]),
+          main = paste0('Hillslope ', uhills[h], ' ET'), type = 'l', xlab = 'Year', ylab = 'ET (mm)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,10,1), labels = TRUE, cex.axis = 1.5)
+  par(new=TRUE)
+  plot(x = as.Date(ET_bm$Date), y = SimH$ET[SimH$hillID == h], col = 'green', xlab = '', ylab = '', type = 'l', axes=FALSE, 
+       lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+}
+dev.off()
+
+#Compare to without GI
+png(paste0('ET_GI+NoGI_hm_UnalteredSlopes.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6), c(7,8)))
+par(mar = c(3,3,3,0.5))
+for (h in 1:8){
+  matplot(x = as.Date(ET_bm$Date), y = t(ET_hm[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]),
+          main = paste0('Hillslope ', uhills[h], ' ET'), type = 'l', xlab = 'Year', ylab = 'ET (mm)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,50,1), labels = TRUE, cex.axis = 1.5)
+  par(new=TRUE)
+  plot(x = as.Date(ET_bm$Date), y = SimH$ET[SimH$hillID == h], col = 'green', xlab = '', ylab = '', type = 'l', axes=FALSE, 
+       lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+}
+dev.off()
+
+#Plots that compare reduction in streamflow
+png(paste0('ET_MinusGI_hm.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  matplot(x = as.Date(ET_bm$Date), y = t(ET_hm[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$ET[SimH$hillID == h],
+          main = paste0('Hillslope ', uhills[h], ' GI - No GI ET'), type = 'l', xlab = 'Year', ylab = 'ET (mm)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(-50,50,0.2), labels = TRUE, cex.axis = 1.5)
+  #Add quantiles
+  quants = apply(X = t(ET_hm[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$ET[SimH$hillID == h], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+  qlty = c(3,2,1,2,3)
+  par(new=TRUE)
+  plot(x = as.Date(ET_bm$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, 
+       xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+  lines(x = c(as.Date('2004-01-01'), as.Date('2014-01-01')), y = c(0,0), col = 'blue', type = 'l')
+}
+dev.off()
+rm(h, quants, qlty)
+
+png(paste0('ET_MinusGI_hm_UnalteredSlopes.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6), c(7,8)))
+par(mar = c(3,3,3,0.5))
+for (h in 1:8){
+  matplot(x = as.Date(ET_bm$Date), y = t(ET_hm[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$ET[SimH$hillID == h],
+          main = paste0('Hillslope ', uhills[h], ' GI - No GI ET'), type = 'l', xlab = 'Year', ylab = 'ET (mm)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(-50,50,0.1), labels = TRUE, cex.axis = 1.5)
+  #Add quantiles
+  quants = apply(X = t(ET_hm[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$ET[SimH$hillID == h], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+  qlty = c(3,2,1,2,3)
+  par(new=TRUE)
+  plot(x = as.Date(ET_bm$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, 
+       xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+  lines(x = c(as.Date('2004-01-01'), as.Date('2014-01-01')), y = c(0,0), col = 'blue', type = 'l')
+}
+dev.off()
+rm(h, quants, qlty)
+
+png(paste0('ET_MinusGI_2007_hm.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  matplot(x = as.Date(ET_bm$Date), y = t(ET_hm[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$ET[SimH$hillID == h],
+          main = paste0('Hillslope ', uhills[h], ' GI - No GI ET'), type = 'l', xlab = 'Year', ylab = 'ET (mm)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5, xlim = c(as.Date('2007-01-01'), as.Date('2007-12-31')))
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(-50,50,1), labels = TRUE, cex.axis = 1.5)
+  #Add quantiles
+  quants = apply(X = t(ET_hm[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$ET[SimH$hillID == h], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+  qlty = c(3,2,1,2,3)
+  par(new=TRUE)
+  plot(x = as.Date(ET_bm$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, 
+       xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+  lines(x = c(as.Date('2004-01-01'), as.Date('2014-01-01')), y = c(0,0), col = 'blue', type = 'l')
+}
+dev.off()
+rm(h, quants, qlty)
+
+png(paste0('ET_MinusGI_2007_hm_UnalteredSlopes.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6), c(7,8)))
+par(mar = c(3,3,3,0.5))
+for (h in 1:8){
+  matplot(x = as.Date(ET_bm$Date), y = t(ET_hm[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$ET[SimH$hillID == h],
+          main = paste0('Hillslope ', uhills[h], ' GI - No GI ET'), type = 'l', xlab = 'Year', ylab = 'ET (mm)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5, xlim = c(as.Date('2007-01-01'), as.Date('2007-12-31')))
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(-50,50,.1), labels = TRUE, cex.axis = 1.5)
+  #Add quantiles
+  quants = apply(X = t(ET_hm[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$ET[SimH$hillID == h], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+  qlty = c(3,2,1,2,3)
+  par(new=TRUE)
+  plot(x = as.Date(ET_bm$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, 
+       xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+  lines(x = c(as.Date('2004-01-01'), as.Date('2014-01-01')), y = c(0,0), col = 'blue', type = 'l')
+}
+dev.off()
+rm(h, quants, qlty)
+
+#Make a plot of the sd in streamflow for each day
+sdET_MinGI_hm = meanET_MinGI_hm = CVET_MinGI_hm = matrix(0, nrow = nrow(Area.Hills), ncol = length(ET_bm$Date))
+for (h in 1:nrow(sdET_MinGI_hm)){
+  sdET_MinGI_hm[h,] = apply(X = t(ET_hm[which(ET_hm$HillID == h),-c(1,2)]) - SimH$ET[SimH$hillID == h], MARGIN = 1, FUN = sd)
+  meanET_MinGI_hm[h,] = apply(X = t(ET_hm[which(ET_hm$HillID == h),-c(1,2)]) - SimH$ET[SimH$hillID == h], MARGIN = 1, FUN = mean)
+  CVET_MinGI_hm[h,] = sdET_MinGI_hm[h,]/meanET_MinGI_hm[h,]
+}
+rm(h)
+
+png(paste0('ET_MinusGI_CV_hm.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  plot(x = as.Date(ET_bm$Date), y = CVET_MinGI_hm[h,], xlab = 'Year', ylab = 'CV ET (1)', type = 'l', axes=FALSE, cex.lab = 1.5,
+       main = paste0('Hillslope ', uhills[h], ' CV GI - No GI ET'))
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(-100,100,1), labels = TRUE, cex.axis = 1.5)
+}
+dev.off()
+rm(h)
+
+png(paste0('ET_MinusGI_sd_hm.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  plot(x = as.Date(ET_bm$Date), y = sdET_MinGI_hm[h,], xlab = 'Year', ylab = 'Std. Dev. ET (1)', type = 'l', axes=FALSE, cex.lab = 1.5,
+       main = paste0('Hillslope ', uhills[h], ' SD GI - No GI ET'))
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,100,.01), labels = TRUE, cex.axis = 1.5)
+}
+dev.off()
+rm(h)
+
+
+#Plots - Basin Downslope ----
+setwd("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\Optimization\\GIAllocation_Down")
+# Streamflow----
+png(paste0('Q_MedGI_bd.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(Q_bd$Date), y = Q_bd[,-1], col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'Streamflow (cfs)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,50,2), labels = TRUE, cex.axis = 1.5)
+#Add quantiles
+quants = apply(X = Q_bd[,-1], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+qlty = c(3,2,1,2,3)
+par(new=TRUE)
+plot(x = as.Date(Q_bd$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+dev.off()
+rm(quants, qlty)
+
+png(paste0('Q_MedGI_2007_bd.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(Q_bd$Date[which((Q_bd$Date >= '2007-01-01') & (Q_bd$Date <= '2007-12-31'))]), y = Q_bd[which((Q_bd$Date >= '2007-01-01') & (Q_bd$Date <= '2007-12-31')),-1], col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'Streamflow (cfs)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,50,2), labels = TRUE, cex.axis = 1.5)
+#Add quantiles
+quants = apply(X = Q_bd[which((Q_bd$Date >= '2007-01-01') & (Q_bd$Date <= '2007-12-31')),-1], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+qlty = c(3,2,1,2,3)
+par(new=TRUE)
+plot(x = as.Date(Q_bd$Date[which((Q_bd$Date >= '2007-01-01') & (Q_bd$Date <= '2007-12-31'))]), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+dev.off()
+rm(quants, qlty)
+
+#Make a plot of the sd in streamflow for each day
+sdQ_bd = apply(X = Q_bd[,-1], MARGIN = 1, FUN = sd)
+meanQ_bd = apply(X = Q_bd[,-1], MARGIN = 1, FUN = mean)
+CVQ_bd = sdQ_bd/meanQ_bd
+
+png(paste0('Q_CVQ_bd.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(Q_bd$Date), y = CVQ_bd, xlab = 'Year', ylab = 'CV Streamflow (1)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,.1,0.001), labels = TRUE, cex.axis = 1.5)
+dev.off()
+
+png(paste0('Q_sdQ_bd.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(Q_bd$Date), y = sdQ_bd, xlab = 'Year', ylab = 'Std. Dev. Streamflow (cfs)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,.1,0.001), labels = TRUE, cex.axis = 1.5)
+dev.off()
+
+#Compare to without GI
+png(paste0('Q_GI+NoGI_bd.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(Q_bd$Date), y = Q_bd[,-1], col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'Streamflow (cfs)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,50,2), labels = TRUE, cex.axis = 1.5)
+par(new=TRUE)
+plot(x = as.Date(Q_bd$Date), y = SimB$streamflow, col = 'green', xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+dev.off()
+
+#Check that all GI streamflows are <= without GI
+for (i in 1:100){
+  if (!all(Q_bd[,1+i] < SimB$streamflow)){
+    print(paste('i = ', i, length(which(Q_bd[,1+i] >= SimB$streamflow))))
+  }
+}
+
+#Plots that compare reduction in streamflow
+png(paste0('Q_MinusGI_bd.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(Q_bd$Date), y = Q_bd[,-1] - SimB$streamflow, col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'Streamflow (cfs)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(1,-50,-0.01), labels = TRUE, cex.axis = 1.5)
+#Add quantiles
+quants = apply(X = Q_bd[,-1] - SimB$streamflow, MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+qlty = c(3,2,1,2,3)
+par(new=TRUE)
+plot(x = as.Date(Q_bd$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+dev.off()
+rm(quants, qlty)
+
+png(paste0('Q_MinusGI_2007_bd.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(Q_bd$Date[which((Q_bd$Date >= '2007-01-01') & (Q_bd$Date <= '2007-12-31'))]), y = Q_bd[which((Q_bd$Date >= '2007-01-01') & (Q_bd$Date <= '2007-12-31')),-1] - SimB$streamflow[which((Q_bd$Date >= '2007-01-01') & (Q_bd$Date <= '2007-12-31'))], col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'Streamflow (cfs)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(1,-50,-0.01), labels = TRUE, cex.axis = 1.5)
+#Add quantiles
+quants = apply(X = Q_bd[which((Q_bd$Date >= '2007-01-01') & (Q_bd$Date <= '2007-12-31')),-1] - SimB$streamflow[which((Q_bd$Date >= '2007-01-01') & (Q_bd$Date <= '2007-12-31'))], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+qlty = c(3,2,1,2,3)
+par(new=TRUE)
+plot(x = as.Date(Q_bd$Date[which((Q_bd$Date >= '2007-01-01') & (Q_bd$Date <= '2007-12-31'))]), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+dev.off()
+rm(quants, qlty)
+
+#Make a plot of the sd in streamflow for each day
+sdQ_MinGI_bd = apply(X = Q_bd[,-1] - SimB$streamflow, MARGIN = 1, FUN = sd)
+meanQ_MinGI_bd = apply(X = Q_bd[,-1] - SimB$streamflow, MARGIN = 1, FUN = mean)
+CVQ_MinGI_bd = sdQ_MinGI_bd/meanQ_MinGI_bd
+
+png(paste0('Q_MinusGI_CVQ_bd.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(Q_bd$Date), y = CVQ_MinGI_bd, xlab = 'Year', ylab = 'CV Streamflow (1)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(-1,1,0.1), labels = TRUE, cex.axis = 1.5)
+dev.off()
+
+png(paste0('Q_MinusGI_sdQ_bd.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(Q_bd$Date), y = sdQ_MinGI_bd, xlab = 'Year', ylab = 'Std. Dev. Streamflow (cfs)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,.1,0.001), labels = TRUE, cex.axis = 1.5)
+dev.off()
+
+
+# Sat Def----
+png(paste0('SatDef_MedGI_bd.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(SatDef_bd$Date), y = SatDef_bd[,-1], col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'Sat. Deficit (mm)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,5000,20), labels = TRUE, cex.axis = 1.5)
+#Add quantiles
+quants = apply(X = SatDef_bd[,-1], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+qlty = c(3,2,1,2,3)
+par(new=TRUE)
+plot(x = as.Date(SatDef_bd$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+dev.off()
+rm(quants, qlty)
+
+png(paste0('SatDef_MedGI_2007_bd.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(SatDef_bd$Date[which((SatDef_bd$Date >= '2007-01-01') & (SatDef_bd$Date <= '2007-12-31'))]), y = SatDef_bd[which((SatDef_bd$Date >= '2007-01-01') & (SatDef_bd$Date <= '2007-12-31')),-1], col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'Sat. Deficit (mm)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,5000,20), labels = TRUE, cex.axis = 1.5)
+#Add quantiles
+quants = apply(X = SatDef_bd[which((SatDef_bd$Date >= '2007-01-01') & (SatDef_bd$Date <= '2007-12-31')),-1], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+qlty = c(3,2,1,2,3)
+par(new=TRUE)
+plot(x = as.Date(SatDef_bd$Date[which((SatDef_bd$Date >= '2007-01-01') & (SatDef_bd$Date <= '2007-12-31'))]), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+dev.off()
+rm(quants, qlty)
+
+#Make a plot of the sd in streamflow for each day
+sdSatDef_bd = apply(X = SatDef_bd[,-1], MARGIN = 1, FUN = sd)
+meanSatDef_bd = apply(X = SatDef_bd[,-1], MARGIN = 1, FUN = mean)
+CVSatDef_bd = sdSatDef_bd/meanSatDef_bd
+
+png(paste0('SatDef_CV_bd.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(SatDef_bd$Date), y = CVSatDef_bd, xlab = 'Year', ylab = 'CV Sat. Def. (1)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,.1,0.0001), labels = TRUE, cex.axis = 1.5)
+dev.off()
+
+png(paste0('SatDef_sd_bd.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(SatDef_bd$Date), y = sdSatDef_bd, xlab = 'Year', ylab = 'Std. Dev. Sat. Deficit (mm)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,10,0.1), labels = TRUE, cex.axis = 1.5)
+dev.off()
+
+#Compare to without GI
+png(paste0('SatDef_GI+NoGI_bd.png'), res = 300, height = 5, width=5, units = 'in')
+plot(x = as.Date(SatDef_bd$Date), y = c(max(SatDef_bd[,-1]), min(SatDef_bd[,-1]), max(SimB$sat_def), min(SimB$sat_def), rep(median(SimB$sat_def), nrow(SatDef_bd)-4)), col = 'white', xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i")
+par(new=TRUE)
+matplot(x = as.Date(SatDef_bd$Date), y = SatDef_bd[,-1], col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'Sat. Deficit (mm)', type = 'l', axes=FALSE, cex.lab = 1.5, xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,5000,20), labels = TRUE, cex.axis = 1.5)
+par(new=TRUE)
+plot(x = as.Date(SatDef_bd$Date), y = SimB$sat_def, col = 'green', xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+dev.off()
+
+#Check that all GI sat def are >= without GI
+for (i in 1:100){
+  if (!all(SatDef_bd[,1+i] > SimB$sat_def)){
+    print(paste('i = ', i, length(which(SatDef_bd[,1+i] <= SimB$sat_def))))
+  }
+}
+
+#Plots that compare reduction in streamflow
+png(paste0('SatDef_MinusGI_bd.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(SatDef_bd$Date), y = SatDef_bd[,-1] - SimB$sat_def, col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'Sat. Deficit: GI - No GI (mm)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(1,500,5), labels = TRUE, cex.axis = 1.5)
+#Add quantiles
+quants = apply(X = SatDef_bd[,-1] - SimB$sat_def, MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+qlty = c(3,2,1,2,3)
+par(new=TRUE)
+plot(x = as.Date(SatDef_bd$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+dev.off()
+rm(quants, qlty)
+
+png(paste0('SatDef_MinusGI_2007_bd.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(SatDef_bd$Date[which((SatDef_bd$Date >= '2007-01-01') & (SatDef_bd$Date <= '2007-12-31'))]), y = SatDef_bd[which((SatDef_bd$Date >= '2007-01-01') & (SatDef_bd$Date <= '2007-12-31')),-1] - SimB$sat_def[which((SatDef_bd$Date >= '2007-01-01') & (SatDef_bd$Date <= '2007-12-31'))], col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'Sat. Deficit (mm)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(1,500,5), labels = TRUE, cex.axis = 1.5)
+#Add quantiles
+quants = apply(X = SatDef_bd[which((SatDef_bd$Date >= '2007-01-01') & (SatDef_bd$Date <= '2007-12-31')),-1] - SimB$sat_def[which((SatDef_bd$Date >= '2007-01-01') & (SatDef_bd$Date <= '2007-12-31'))], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+qlty = c(3,2,1,2,3)
+par(new=TRUE)
+plot(x = as.Date(SatDef_bd$Date[which((SatDef_bd$Date >= '2007-01-01') & (SatDef_bd$Date <= '2007-12-31'))]), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+dev.off()
+rm(quants, qlty)
+
+#Make a plot of the sd in streamflow for each day
+sdSatDef_MinGI_bd = apply(X = SatDef_bd[,-1] - SimB$sat_def, MARGIN = 1, FUN = sd)
+meanSatDef_MinGI_bd = apply(X = SatDef_bd[,-1] - SimB$sat_def, MARGIN = 1, FUN = mean)
+CVSatDef_MinGI_bd = sdSatDef_MinGI_bd/meanSatDef_MinGI_bd
+
+png(paste0('SatDef_MinusGI_CV_bd.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(SatDef_bd$Date), y = CVSatDef_MinGI_bd, xlab = 'Year', ylab = 'CV Sat. Def. (1)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(-1,1,0.01), labels = TRUE, cex.axis = 1.5)
+dev.off()
+
+png(paste0('SatDef_MinusGI_sd_bd.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(SatDef_bd$Date), y = sdSatDef_MinGI_bd, xlab = 'Year', ylab = 'Std. Dev. Sat. Deficit (mm)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,5,0.1), labels = TRUE, cex.axis = 1.5)
+dev.off()
+
+
+# Detention Storage - Same----
+sdDetStore_bd = apply(X = DetStore_bd[,-1], MARGIN = 1, FUN = sd)
+meanDetStore_bd = apply(X = DetStore_bd[,-1], MARGIN = 1, FUN = mean)
+CVDetStore_bd = sdDetStore_bd/meanDetStore_bd
+
+# ET----
+png(paste0('ET_MedGI_bd.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(ET_bd$Date), y = ET_bd[,-1], col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'ET (mm)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,50,2), labels = TRUE, cex.axis = 1.5)
+#Add quantiles
+quants = apply(X = ET_bd[,-1], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+qlty = c(3,2,1,2,3)
+par(new=TRUE)
+plot(x = as.Date(ET_bd$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+dev.off()
+rm(quants, qlty)
+
+png(paste0('ET_MedGI_2007_bd.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(ET_bd$Date[which((ET_bd$Date >= '2007-01-01') & (ET_bd$Date <= '2007-12-31'))]), y = ET_bd[which((ET_bd$Date >= '2007-01-01') & (ET_bd$Date <= '2007-12-31')),-1], col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'ET (mm)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,50,2), labels = TRUE, cex.axis = 1.5)
+#Add quantiles
+quants = apply(X = ET_bd[which((ET_bd$Date >= '2007-01-01') & (ET_bd$Date <= '2007-12-31')),-1], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+qlty = c(3,2,1,2,3)
+par(new=TRUE)
+plot(x = as.Date(ET_bd$Date[which((ET_bd$Date >= '2007-01-01') & (ET_bd$Date <= '2007-12-31'))]), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+dev.off()
+rm(quants, qlty)
+
+#Make a plot of the sd in streamflow for each day
+sdET_bd = apply(X = ET_bd[,-1], MARGIN = 1, FUN = sd)
+meanET_bd = apply(X = ET_bd[,-1], MARGIN = 1, FUN = mean)
+CVET_bd = sdET_bd/meanET_bd
+
+png(paste0('ET_CV_bd.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(ET_bd$Date), y = CVET_bd, xlab = 'Year', ylab = 'CV ET (1)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,.1,0.001), labels = TRUE, cex.axis = 1.5)
+dev.off()
+
+png(paste0('ET_sd_bd.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(ET_bd$Date), y = sdET_bd, xlab = 'Year', ylab = 'Std. Dev. ET (mm)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,.1,0.001), labels = TRUE, cex.axis = 1.5)
+dev.off()
+
+#Compare to without GI
+png(paste0('ET_GI+NoGI_bd.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(ET_bd$Date), y = ET_bd[,-1], col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'ET (mm)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,50,2), labels = TRUE, cex.axis = 1.5)
+par(new=TRUE)
+plot(x = as.Date(ET_bd$Date), y = SimB$ET, col = 'green', xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+dev.off()
+
+#Check that all GI streamflows are <= without GI
+for (i in 1:100){
+  if (!all(ET_bd[,1+i] > SimB$ET)){
+    print(paste('i = ', i, length(which(ET_bd[,1+i] <= SimB$ET))))
+  }
+}
+#Peak ET > with GI, but off peak can be less
+
+#Plots that compare reduction in streamflow
+png(paste0('ET_MinusGI_bd.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(ET_bd$Date), y = ET_bd[,-1] - SimB$ET, col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'ET (mm)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(1,-50,-0.1), labels = TRUE, cex.axis = 1.5)
+#Add quantiles
+quants = apply(X = ET_bd[,-1] - SimB$ET, MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+qlty = c(3,2,1,2,3)
+par(new=TRUE)
+plot(x = as.Date(ET_bd$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+dev.off()
+rm(quants, qlty)
+
+png(paste0('ET_MinusGI_2007_bd.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(ET_bd$Date[which((ET_bd$Date >= '2007-01-01') & (ET_bd$Date <= '2007-12-31'))]), y = ET_bd[which((ET_bd$Date >= '2007-01-01') & (ET_bd$Date <= '2007-12-31')),-1] - SimB$ET[which((ET_bd$Date >= '2007-01-01') & (ET_bd$Date <= '2007-12-31'))], col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'ET (mm)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(1,-50,-0.01), labels = TRUE, cex.axis = 1.5)
+#Add quantiles
+quants = apply(X = ET_bd[which((ET_bd$Date >= '2007-01-01') & (ET_bd$Date <= '2007-12-31')),-1] - SimB$ET[which((ET_bd$Date >= '2007-01-01') & (ET_bd$Date <= '2007-12-31'))], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+qlty = c(3,2,1,2,3)
+par(new=TRUE)
+plot(x = as.Date(ET_bd$Date[which((ET_bd$Date >= '2007-01-01') & (ET_bd$Date <= '2007-12-31'))]), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+dev.off()
+rm(quants, qlty)
+
+#Make a plot of the sd in streamflow for each day
+sdET_MinGI_bd = apply(X = ET_bd[,-1] - SimB$ET, MARGIN = 1, FUN = sd)
+meanET_MinGI_bd = apply(X = ET_bd[,-1] - SimB$ET, MARGIN = 1, FUN = mean)
+CVET_MinGI_bd = sdET_MinGI_bd/meanET_MinGI_bd
+
+png(paste0('ET_MinusGI_CV_bd.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(ET_bd$Date), y = CVET_MinGI_bd, xlab = 'Year', ylab = 'CV ET (1)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(-2000,2000,10), labels = TRUE, cex.axis = 1.5)
+dev.off()
+
+png(paste0('ET_MinusGI_sd_bd.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(ET_bd$Date), y = sdET_MinGI_bd, xlab = 'Year', ylab = 'Std. Dev. ET (mm)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,10,0.01), labels = TRUE, cex.axis = 1.5)
+dev.off()
+
+
+#Plots - Hillslope Downslope----
+# Streamflow----
+png(paste0('Q_MedGI_hd.png'), res = 300, height = 10, width=10, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  matplot(x = as.Date(Q_bd$Date), y = t(Q_hd[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]),
+          main = paste0('Hillslope ', uhills[h], ' Streamflow'), type = 'l', xlab = 'Year', ylab = 'Streamflow (cfs)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,50,.1), labels = TRUE, cex.axis = 1.5)
+  #Add quantiles
+  quants = apply(X = Q_hd[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)], MARGIN = 2, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+  qlty = c(3,2,1,2,3)
+  par(new=TRUE)
+  plot(x = as.Date(Q_bd$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, 
+       xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+}
+dev.off()
+rm(h, quants, qlty)
+
+png(paste0('Q_MedGI_2007_hd.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  matplot(x = as.Date(Q_bd$Date), y = t(Q_hd[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]),
+          main = paste0('Hillslope ', uhills[h], ' Streamflow'), type = 'l', xlab = 'Year', ylab = 'Streamflow (cfs)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5, xlim = c(as.Date('2007-01-01'), as.Date('2007-12-31')))
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,50,.1), labels = TRUE, cex.axis = 1.5)
+  #Add quantiles
+  quants = apply(X = Q_hd[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)], MARGIN = 2, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+  qlty = c(3,2,1,2,3)
+  par(new=TRUE)
+  plot(x = as.Date(Q_bd$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, 
+       xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+}
+dev.off()
+rm(h, quants, qlty)
+
+#Make a plot of the sd in streamflow for each day
+sdQ_hd = meanQ_hd = CVQ_hd = matrix(0, nrow = nrow(Area.Hills), ncol = length(Q_bd$Date))
+for (h in 1:nrow(sdQ_hd)){
+  sdQ_hd[h,] = apply(X = Q_hd[which(Q_hd$HillID == h),-c(1,2)], MARGIN = 2, FUN = sd)
+  meanQ_hd[h,] = apply(X = Q_hd[which(Q_hd$HillID == h),-c(1,2)], MARGIN = 2, FUN = mean)
+  CVQ_hd[h,] = sdQ_hd[h,]/meanQ_hd[h,]
+}
+rm(h)
+
+png(paste0('Q_CVQ_hd.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  plot(x = as.Date(Q_bd$Date), y = CVQ_hd[h,],
+       main = paste0('Hillslope ', uhills[h], ' CV Streamflow'), type = 'l', xlab = 'Year', ylab = 'CV Streamflow (1)',
+       col = 'black', axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,1,.01), labels = TRUE, cex.axis = 1.5)
+}
+dev.off()
+rm(h)
+
+png(paste0('Q_CVQ_hd_UnalteredSlopes.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6), c(7,8)))
+par(mar = c(3,3,3,0.5))
+for (h in 1:8){
+  plot(x = as.Date(Q_bd$Date), y = CVQ_hd[h,],
+       main = paste0('Hillslope ', uhills[h], ' CV Streamflow'), type = 'l', xlab = 'Year', ylab = 'CV Streamflow (1)',
+       col = 'black', axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,1,.01), labels = TRUE, cex.axis = 1.5)
+}
+dev.off()
+rm(h)
+
+png(paste0('Q_sdQ_hd.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  plot(x = as.Date(Q_bd$Date), y = sdQ_hd[h,],
+       main = paste0('Hillslope ', uhills[h], ' SD Streamflow'), type = 'l', xlab = 'Year', ylab = 'Std. Dev. Streamflow (cfs)',
+       col = 'black', axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,.1,0.001), labels = TRUE, cex.axis = 1.5)
+}
+dev.off()
+rm(h)
+
+png(paste0('Q_sdQ_hd_UnalteredSlopes.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6), c(7,8)))
+par(mar = c(3,3,3,0.5))
+for (h in 1:8){
+  plot(x = as.Date(Q_bd$Date), y = sdQ_hd[h,],
+       main = paste0('Hillslope ', uhills[h], ' SD Streamflow'), type = 'l', xlab = 'Year', ylab = 'Std. Dev. Streamflow (cfs)',
+       col = 'black', axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,.1,0.001), labels = TRUE, cex.axis = 1.5)
+}
+dev.off()
+rm(h)
+
+
+#Compare to without GI
+png(paste0('Q_GI+NoGI_hd.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  matplot(x = as.Date(Q_bd$Date), y = t(Q_hd[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]),
+          main = paste0('Hillslope ', uhills[h], ' Streamflow'), type = 'l', xlab = 'Year', ylab = 'Streamflow (cfs)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,50,.1), labels = TRUE, cex.axis = 1.5)
+  par(new=TRUE)
+  plot(x = as.Date(Q_bd$Date), y = SimH$streamflow[SimH$hillID == h], col = 'green', xlab = '', ylab = '', type = 'l', axes=FALSE, 
+       lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+}
+dev.off()
+
+#Compare to without GI
+png(paste0('Q_GI+NoGI_hd_UnalteredSlopes.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6), c(7,8)))
+par(mar = c(3,3,3,0.5))
+for (h in 1:8){
+  matplot(x = as.Date(Q_bd$Date), y = t(Q_hd[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]),
+          main = paste0('Hillslope ', uhills[h], ' Streamflow'), type = 'l', xlab = 'Year', ylab = 'Streamflow (cfs)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,50,.1), labels = TRUE, cex.axis = 1.5)
+  par(new=TRUE)
+  plot(x = as.Date(Q_bd$Date), y = SimH$streamflow[SimH$hillID == h], col = 'green', xlab = '', ylab = '', type = 'l', axes=FALSE, 
+       lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+}
+dev.off()
+
+#Plots that compare reduction in streamflow
+png(paste0('Q_MinusGI_hd.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  matplot(x = as.Date(Q_bd$Date), y = t(Q_hd[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$streamflow[SimH$hillID == h],
+          main = paste0('Hillslope ', uhills[h], ' GI - No GI Streamflow'), type = 'l', xlab = 'Year', ylab = 'Streamflow (cfs)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(1,-50,-.01), labels = TRUE, cex.axis = 1.5)
+  #Add quantiles
+  quants = apply(X = t(Q_hd[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$streamflow[SimH$hillID == h], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+  qlty = c(3,2,1,2,3)
+  par(new=TRUE)
+  plot(x = as.Date(Q_bd$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, 
+       xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+  lines(x = c(as.Date('2004-01-01'), as.Date('2014-01-01')), y = c(0,0), col = 'blue', type = 'l')
+}
+dev.off()
+rm(h, quants, qlty)
+
+png(paste0('Q_MinusGI_hd_UnalteredSlopes.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6), c(7,8)))
+par(mar = c(3,3,3,0.5))
+for (h in 1:8){
+  matplot(x = as.Date(Q_bd$Date), y = t(Q_hd[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$streamflow[SimH$hillID == h],
+          main = paste0('Hillslope ', uhills[h], ' GI - No GI Streamflow'), type = 'l', xlab = 'Year', ylab = 'Streamflow (cfs)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,-50,-.1), labels = TRUE, cex.axis = 1.5)
+  #Add quantiles
+  quants = apply(X = t(Q_hd[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$streamflow[SimH$hillID == h], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+  qlty = c(3,2,1,2,3)
+  par(new=TRUE)
+  plot(x = as.Date(Q_bd$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, 
+       xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+  lines(x = c(as.Date('2004-01-01'), as.Date('2014-01-01')), y = c(0,0), col = 'blue', type = 'l')
+}
+dev.off()
+rm(h, quants, qlty)
+
+png(paste0('Q_MinusGI_2007_hd.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  matplot(x = as.Date(Q_bd$Date), y = t(Q_hd[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$streamflow[SimH$hillID == h],
+          main = paste0('Hillslope ', uhills[h], ' GI - No GI Streamflow'), type = 'l', xlab = 'Year', ylab = 'Streamflow (cfs)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5, xlim = c(as.Date('2007-01-01'), as.Date('2007-12-31')))
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(1,-50,-.01), labels = TRUE, cex.axis = 1.5)
+  #Add quantiles
+  quants = apply(X = t(Q_hd[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$streamflow[SimH$hillID == h], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+  qlty = c(3,2,1,2,3)
+  par(new=TRUE)
+  plot(x = as.Date(Q_bd$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, 
+       xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+  lines(x = c(as.Date('2004-01-01'), as.Date('2014-01-01')), y = c(0,0), col = 'blue', type = 'l')
+}
+dev.off()
+rm(h, quants, qlty)
+
+png(paste0('Q_MinusGI_2007_hd_UnalteredSlopes.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6), c(7,8)))
+par(mar = c(3,3,3,0.5))
+for (h in 1:8){
+  matplot(x = as.Date(Q_bd$Date), y = t(Q_hd[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$streamflow[SimH$hillID == h],
+          main = paste0('Hillslope ', uhills[h], ' GI - No GI Streamflow'), type = 'l', xlab = 'Year', ylab = 'Streamflow (cfs)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5, xlim = c(as.Date('2007-01-01'), as.Date('2007-12-31')))
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(1,-50,-.01), labels = TRUE, cex.axis = 1.5)
+  #Add quantiles
+  quants = apply(X = t(Q_hd[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$streamflow[SimH$hillID == h], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+  qlty = c(3,2,1,2,3)
+  par(new=TRUE)
+  plot(x = as.Date(Q_bd$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, 
+       xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+  lines(x = c(as.Date('2004-01-01'), as.Date('2014-01-01')), y = c(0,0), col = 'blue', type = 'l')
+}
+dev.off()
+rm(h, quants, qlty)
+
+#Make a plot of the sd in streamflow for each day
+sdQ_MinGI_hd = meanQ_MinGI_hd = CVQ_MinGI_hd = matrix(0, nrow = nrow(Area.Hills), ncol = length(Q_bd$Date))
+for (h in 1:nrow(sdQ_MinGI_hd)){
+  sdQ_MinGI_hd[h,] = apply(X = t(Q_hd[which(Q_hd$HillID == h),-c(1,2)]) - SimH$streamflow[SimH$hillID == h], MARGIN = 1, FUN = sd)
+  meanQ_MinGI_hd[h,] = apply(X = t(Q_hd[which(Q_hd$HillID == h),-c(1,2)]) - SimH$streamflow[SimH$hillID == h], MARGIN = 1, FUN = mean)
+  CVQ_MinGI_hd[h,] = sdQ_MinGI_hd[h,]/meanQ_MinGI_hd[h,]
+}
+rm(h)
+
+png(paste0('Q_MinusGI_CVQ_hd.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  plot(x = as.Date(Q_bd$Date), y = CVQ_MinGI_hd[h,], xlab = 'Year', ylab = 'CV Streamflow (1)', type = 'l', axes=FALSE, cex.lab = 1.5,
+       main = paste0('Hillslope ', uhills[h], ' CV GI - No GI Streamflow'))
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(-1000,1000,1), labels = TRUE, cex.axis = 1.5)
+}
+dev.off()
+rm(h)
+
+png(paste0('Q_MinusGI_sdQ_hd.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  plot(x = as.Date(Q_bd$Date), y = sdQ_MinGI_hd[h,], xlab = 'Year', ylab = 'Std. Dev. Streamflow (1)', type = 'l', axes=FALSE, cex.lab = 1.5,
+       main = paste0('Hillslope ', uhills[h], ' SD GI - No GI Streamflow'))
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(-1000,1000,0.001), labels = TRUE, cex.axis = 1.5)
+}
+dev.off()
+rm(h)
+
+# Sat Def----
+png(paste0('SatDef_MedGI_hd.png'), res = 300, height = 10, width=10, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  matplot(x = as.Date(SatDef_bd$Date), y = t(SatDef_hd[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]),
+          main = paste0('Hillslope ', uhills[h], ' Sat. Def.'), type = 'l', xlab = 'Year', ylab = 'Sat. Def. (mm)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,5000,100), labels = TRUE, cex.axis = 1.5)
+  #Add quantiles
+  quants = apply(X = SatDef_hd[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)], MARGIN = 2, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+  qlty = c(3,2,1,2,3)
+  par(new=TRUE)
+  plot(x = as.Date(SatDef_bd$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, 
+       xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+}
+dev.off()
+rm(h, quants, qlty)
+
+png(paste0('SatDef_MedGI_2007_hd.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  matplot(x = as.Date(SatDef_bd$Date), y = t(SatDef_hd[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]),
+          main = paste0('Hillslope ', uhills[h], ' Sat. Def.'), type = 'l', xlab = 'Year', ylab = 'Sat. Def. (mm)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5, xlim = c(as.Date('2007-01-01'), as.Date('2007-12-31')))
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,5000,100), labels = TRUE, cex.axis = 1.5)
+  #Add quantiles
+  quants = apply(X = SatDef_hd[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)], MARGIN = 2, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+  qlty = c(3,2,1,2,3)
+  par(new=TRUE)
+  plot(x = as.Date(SatDef_bd$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, 
+       xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+}
+dev.off()
+rm(h, quants, qlty)
+
+#Make a plot of the sd in streamflow for each day
+sdSatDef_hd = meanSatDef_hd = CVSatDef_hd = matrix(0, nrow = nrow(Area.Hills), ncol = length(SatDef_bd$Date))
+for (h in 1:nrow(sdSatDef_hd)){
+  sdSatDef_hd[h,] = apply(X = SatDef_hd[which(SatDef_hd$HillID == h),-c(1,2)], MARGIN = 2, FUN = sd)
+  meanSatDef_hd[h,] = apply(X = SatDef_hd[which(SatDef_hd$HillID == h),-c(1,2)], MARGIN = 2, FUN = mean)
+  CVSatDef_hd[h,] = sdSatDef_hd[h,]/meanSatDef_hd[h,]
+}
+rm(h)
+
+png(paste0('SatDef_CV_hd.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  plot(x = as.Date(SatDef_bd$Date), y = CVSatDef_hd[h,],
+       main = paste0('Hillslope ', uhills[h], ' CV Sat. Def.'), type = 'l', xlab = 'Year', ylab = 'CV Sat. Def. (1)',
+       col = 'black', axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,10,.001), labels = TRUE, cex.axis = 1.5)
+}
+dev.off()
+rm(h)
+
+png(paste0('SatDef_CV_hd_UnalteredSlopes.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6), c(7,8)))
+par(mar = c(3,3,3,0.5))
+for (h in 1:8){
+  plot(x = as.Date(SatDef_bd$Date), y = CVSatDef_hd[h,],
+       main = paste0('Hillslope ', uhills[h], ' CV Sat. Def.'), type = 'l', xlab = 'Year', ylab = 'CV Sat. Def. (1)',
+       col = 'black', axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,1,.001), labels = TRUE, cex.axis = 1.5)
+}
+dev.off()
+rm(h)
+
+png(paste0('SatDef_sd_hd.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  plot(x = as.Date(SatDef_bd$Date), y = sdSatDef_hd[h,],
+       main = paste0('Hillslope ', uhills[h], ' SD Sat. Def.'), type = 'l', xlab = 'Year', ylab = 'Std. Dev. Sat. Def. (mm)',
+       col = 'black', axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,100,1), labels = TRUE, cex.axis = 1.5)
+}
+dev.off()
+rm(h)
+
+png(paste0('SatDef_sd_hd_UnalteredSlopes.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6), c(7,8)))
+par(mar = c(3,3,3,0.5))
+for (h in 1:8){
+  plot(x = as.Date(SatDef_bd$Date), y = sdSatDef_hd[h,],
+       main = paste0('Hillslope ', uhills[h], ' SD Sat. Def.'), type = 'l', xlab = 'Year', ylab = 'Std. Dev. Sat. Def. (mm)',
+       col = 'black', axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,1000,1), labels = TRUE, cex.axis = 1.5)
+}
+dev.off()
+rm(h)
+
+
+#Compare to without GI
+png(paste0('SatDef_GI+NoGI_hd.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  plot(x = as.Date(SatDef_bd$Date), y = c(max(t(SatDef_hd[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)])), min(t(SatDef_hd[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)])), max(SimH$sat_def[SimH$hillID == h]), min(SimH$sat_def[SimH$hillID == h]), rep(median(SimH$sat_def[SimH$hillID == h]), nrow(SatDef_bd)-4)), col = 'white', xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i")
+  par(new=TRUE)
+  matplot(x = as.Date(SatDef_bd$Date), y = t(SatDef_hd[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]),
+          main = paste0('Hillslope ', uhills[h], ' Sat. Def.'), type = 'l', xlab = 'Year', ylab = 'Sat. Def. (mm)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5, xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,5000,100), labels = TRUE, cex.axis = 1.5)
+  par(new=TRUE)
+  plot(x = as.Date(SatDef_bd$Date), y = SimH$sat_def[SimH$hillID == h], col = 'green', xlab = '', ylab = '', type = 'l', axes=FALSE, 
+       lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+}
+dev.off()
+
+#Compare to without GI
+png(paste0('SatDef_GI+NoGI_hd_UnalteredSlopes.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6), c(7,8)))
+par(mar = c(3,3,3,0.5))
+for (h in 1:8){
+  matplot(x = as.Date(SatDef_bd$Date), y = t(SatDef_hd[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]),
+          main = paste0('Hillslope ', uhills[h], ' Sat. Def.'), type = 'l', xlab = 'Year', ylab = 'Sat. Def. (mm)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,5000,100), labels = TRUE, cex.axis = 1.5)
+  par(new=TRUE)
+  plot(x = as.Date(SatDef_bd$Date), y = SimH$sat_def[SimH$hillID == h], col = 'green', xlab = '', ylab = '', type = 'l', axes=FALSE, 
+       lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+}
+dev.off()
+
+#Plots that compare reduction in streamflow
+png(paste0('SatDef_MinusGI_hd.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  matplot(x = as.Date(SatDef_bd$Date), y = t(SatDef_hd[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$sat_def[SimH$hillID == h],
+          main = paste0('Hillslope ', uhills[h], ' GI - No GI Sat. Def.'), type = 'l', xlab = 'Year', ylab = 'Sat. Def. (mm)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(-500,500,10), labels = TRUE, cex.axis = 1.5)
+  #Add quantiles
+  quants = apply(X = t(SatDef_hd[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$sat_def[SimH$hillID == h], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+  qlty = c(3,2,1,2,3)
+  par(new=TRUE)
+  plot(x = as.Date(SatDef_bd$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, 
+       xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+  lines(x = c(as.Date('2004-01-01'), as.Date('2014-01-01')), y = c(0,0), col = 'blue', type = 'l')
+}
+dev.off()
+rm(h, quants, qlty)
+
+png(paste0('SatDef_MinusGI_hd_UnalteredSlopes.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6), c(7,8)))
+par(mar = c(3,3,3,0.5))
+for (h in 1:8){
+  matplot(x = as.Date(SatDef_bd$Date), y = t(SatDef_hd[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$sat_def[SimH$hillID == h],
+          main = paste0('Hillslope ', uhills[h], ' GI - No GI Sat. Def.'), type = 'l', xlab = 'Year', ylab = 'Sat. Def. (mm)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(-500,500,0.001), labels = TRUE, cex.axis = 1.5)
+  #Add quantiles
+  quants = apply(X = t(SatDef_hd[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$sat_def[SimH$hillID == h], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+  qlty = c(3,2,1,2,3)
+  par(new=TRUE)
+  plot(x = as.Date(SatDef_bd$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, 
+       xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+  lines(x = c(as.Date('2004-01-01'), as.Date('2014-01-01')), y = c(0,0), col = 'blue', type = 'l')
+}
+dev.off()
+rm(h, quants, qlty)
+
+png(paste0('SatDef_MinusGI_2007_hd.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  matplot(x = as.Date(SatDef_bd$Date), y = t(SatDef_hd[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$sat_def[SimH$hillID == h],
+          main = paste0('Hillslope ', uhills[h], ' GI - No GI Sat. Def.'), type = 'l', xlab = 'Year', ylab = 'Sat. Def. (mm)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5, xlim = c(as.Date('2007-01-01'), as.Date('2007-12-31')))
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(-500,500,10), labels = TRUE, cex.axis = 1.5)
+  #Add quantiles
+  quants = apply(X = t(SatDef_hd[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$sat_def[SimH$hillID == h], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+  qlty = c(3,2,1,2,3)
+  par(new=TRUE)
+  plot(x = as.Date(SatDef_bd$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, 
+       xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+  lines(x = c(as.Date('2004-01-01'), as.Date('2014-01-01')), y = c(0,0), col = 'blue', type = 'l')
+}
+dev.off()
+rm(h, quants, qlty)
+
+png(paste0('SatDef_MinusGI_2007_hd_UnalteredSlopes.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6), c(7,8)))
+par(mar = c(3,3,3,0.5))
+for (h in 1:8){
+  matplot(x = as.Date(SatDef_bd$Date), y = t(SatDef_hd[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$sat_def[SimH$hillID == h],
+          main = paste0('Hillslope ', uhills[h], ' GI - No GI Sat. Def.'), type = 'l', xlab = 'Year', ylab = 'Sat. Def. (mm)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5, xlim = c(as.Date('2007-01-01'), as.Date('2007-12-31')))
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(-500,500,.001), labels = TRUE, cex.axis = 1.5)
+  #Add quantiles
+  quants = apply(X = t(SatDef_hd[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$sat_def[SimH$hillID == h], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+  qlty = c(3,2,1,2,3)
+  par(new=TRUE)
+  plot(x = as.Date(SatDef_bd$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, 
+       xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+  lines(x = c(as.Date('2004-01-01'), as.Date('2014-01-01')), y = c(0,0), col = 'blue', type = 'l')
+}
+dev.off()
+rm(h, quants, qlty)
+
+#Make a plot of the sd in streamflow for each day
+sdSatDef_MinGI_hd = meanSatDef_MinGI_hd = CVSatDef_MinGI_hd = matrix(0, nrow = nrow(Area.Hills), ncol = length(SatDef_bd$Date))
+for (h in 1:nrow(sdSatDef_MinGI_hd)){
+  sdSatDef_MinGI_hd[h,] = apply(X = t(SatDef_hd[which(SatDef_hd$HillID == h),-c(1,2)]) - SimH$sat_def[SimH$hillID == h], MARGIN = 1, FUN = sd)
+  meanSatDef_MinGI_hd[h,] = apply(X = t(SatDef_hd[which(SatDef_hd$HillID == h),-c(1,2)]) - SimH$sat_def[SimH$hillID == h], MARGIN = 1, FUN = mean)
+  CVSatDef_MinGI_hd[h,] = sdSatDef_MinGI_hd[h,]/meanSatDef_MinGI_hd[h,]
+}
+rm(h)
+
+png(paste0('SatDef_MinusGI_CV_hd.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  plot(x = as.Date(SatDef_bd$Date), y = CVSatDef_MinGI_hd[h,], xlab = 'Year', ylab = 'CV Sat. Def. (1)', type = 'l', axes=FALSE, cex.lab = 1.5,
+       main = paste0('Hillslope ', uhills[h], ' CV GI - No GI Sat. Def.'))
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(-1000,1000,0.01), labels = TRUE, cex.axis = 1.5)
+}
+dev.off()
+rm(h)
+
+png(paste0('SatDef_MinusGI_sd_hd.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  plot(x = as.Date(SatDef_bd$Date), y = sdSatDef_MinGI_hd[h,], xlab = 'Year', ylab = 'Std. Dev. Sat. Def. (1)', type = 'l', axes=FALSE, cex.lab = 1.5,
+       main = paste0('Hillslope ', uhills[h], ' SD GI - No GI Sat. Def.'))
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(-1000,1000,1), labels = TRUE, cex.axis = 1.5)
+}
+dev.off()
+rm(h)
+
+# ET----
+png(paste0('ET_MedGI_hd.png'), res = 300, height = 10, width=10, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  matplot(x = as.Date(ET_bd$Date), y = t(ET_hd[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]),
+          main = paste0('Hillslope ', uhills[h], ' ET'), type = 'l', xlab = 'Year', ylab = 'ET (mm)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,50,1), labels = TRUE, cex.axis = 1.5)
+  #Add quantiles
+  quants = apply(X = ET_hd[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)], MARGIN = 2, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+  qlty = c(3,2,1,2,3)
+  par(new=TRUE)
+  plot(x = as.Date(ET_bd$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, 
+       xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+}
+dev.off()
+rm(h, quants, qlty)
+
+png(paste0('ET_MedGI_2007_hd.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  matplot(x = as.Date(ET_bd$Date), y = t(ET_hd[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]),
+          main = paste0('Hillslope ', uhills[h], ' ET'), type = 'l', xlab = 'Year', ylab = 'ET (mm)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5, xlim = c(as.Date('2007-01-01'), as.Date('2007-12-31')))
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,50,1), labels = TRUE, cex.axis = 1.5)
+  #Add quantiles
+  quants = apply(X = ET_hd[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)], MARGIN = 2, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+  qlty = c(3,2,1,2,3)
+  par(new=TRUE)
+  plot(x = as.Date(ET_bd$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, 
+       xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+}
+dev.off()
+rm(h, quants, qlty)
+
+#Make a plot of the sd in streamflow for each day
+sdET_hd = meanET_hd = CVET_hd = matrix(0, nrow = nrow(Area.Hills), ncol = length(ET_bd$Date))
+for (h in 1:nrow(sdET_hd)){
+  sdET_hd[h,] = apply(X = ET_hd[which(ET_hd$HillID == h),-c(1,2)], MARGIN = 2, FUN = sd)
+  meanET_hd[h,] = apply(X = ET_hd[which(ET_hd$HillID == h),-c(1,2)], MARGIN = 2, FUN = mean)
+  CVET_hd[h,] = sdET_hd[h,]/meanET_hd[h,]
+}
+rm(h)
+
+png(paste0('ET_CV_hd.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  plot(x = as.Date(ET_bd$Date), y = CVET_hd[h,],
+       main = paste0('Hillslope ', uhills[h], ' CV ET'), type = 'l', xlab = 'Year', ylab = 'CV ET (1)',
+       col = 'black', axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,10,.01), labels = TRUE, cex.axis = 1.5)
+}
+dev.off()
+rm(h)
+
+png(paste0('ET_CV_hd_UnalteredSlopes.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6), c(7,8)))
+par(mar = c(3,3,3,0.5))
+for (h in 1:8){
+  plot(x = as.Date(ET_bd$Date), y = CVET_hd[h,],
+       main = paste0('Hillslope ', uhills[h], ' CV ET'), type = 'l', xlab = 'Year', ylab = 'CV ET (1)',
+       col = 'black', axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,1,.0001), labels = TRUE, cex.axis = 1.5)
+}
+dev.off()
+rm(h)
+
+png(paste0('ET_sd_hd.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  plot(x = as.Date(ET_bd$Date), y = sdET_hd[h,],
+       main = paste0('Hillslope ', uhills[h], ' SD ET'), type = 'l', xlab = 'Year', ylab = 'Std. Dev. ET (mm)',
+       col = 'black', axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,100,0.01), labels = TRUE, cex.axis = 1.5)
+}
+dev.off()
+rm(h)
+
+png(paste0('ET_sd_hd_UnalteredSlopes.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6), c(7,8)))
+par(mar = c(3,3,3,0.5))
+for (h in 1:8){
+  plot(x = as.Date(ET_bd$Date), y = sdET_hd[h,],
+       main = paste0('Hillslope ', uhills[h], ' SD ET'), type = 'l', xlab = 'Year', ylab = 'Std. Dev. ET (mm)',
+       col = 'black', axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,1,.0001), labels = TRUE, cex.axis = 1.5)
+}
+dev.off()
+rm(h)
+
+
+#Compare to without GI
+png(paste0('ET_GI+NoGI_hd.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  matplot(x = as.Date(ET_bd$Date), y = t(ET_hd[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]),
+          main = paste0('Hillslope ', uhills[h], ' ET'), type = 'l', xlab = 'Year', ylab = 'ET (mm)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,10,1), labels = TRUE, cex.axis = 1.5)
+  par(new=TRUE)
+  plot(x = as.Date(ET_bd$Date), y = SimH$ET[SimH$hillID == h], col = 'green', xlab = '', ylab = '', type = 'l', axes=FALSE, 
+       lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+}
+dev.off()
+
+#Compare to without GI
+png(paste0('ET_GI+NoGI_hd_UnalteredSlopes.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6), c(7,8)))
+par(mar = c(3,3,3,0.5))
+for (h in 1:8){
+  matplot(x = as.Date(ET_bd$Date), y = t(ET_hd[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]),
+          main = paste0('Hillslope ', uhills[h], ' ET'), type = 'l', xlab = 'Year', ylab = 'ET (mm)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,50,1), labels = TRUE, cex.axis = 1.5)
+  par(new=TRUE)
+  plot(x = as.Date(ET_bd$Date), y = SimH$ET[SimH$hillID == h], col = 'green', xlab = '', ylab = '', type = 'l', axes=FALSE, 
+       lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+}
+dev.off()
+
+#Plots that compare reduction in streamflow
+png(paste0('ET_MinusGI_hd.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  matplot(x = as.Date(ET_bd$Date), y = t(ET_hd[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$ET[SimH$hillID == h],
+          main = paste0('Hillslope ', uhills[h], ' GI - No GI ET'), type = 'l', xlab = 'Year', ylab = 'ET (mm)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(-50,50,0.2), labels = TRUE, cex.axis = 1.5)
+  #Add quantiles
+  quants = apply(X = t(ET_hd[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$ET[SimH$hillID == h], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+  qlty = c(3,2,1,2,3)
+  par(new=TRUE)
+  plot(x = as.Date(ET_bd$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, 
+       xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+  lines(x = c(as.Date('2004-01-01'), as.Date('2014-01-01')), y = c(0,0), col = 'blue', type = 'l')
+}
+dev.off()
+rm(h, quants, qlty)
+
+png(paste0('ET_MinusGI_hd_UnalteredSlopes.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6), c(7,8)))
+par(mar = c(3,3,3,0.5))
+for (h in 1:8){
+  matplot(x = as.Date(ET_bd$Date), y = t(ET_hd[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$ET[SimH$hillID == h],
+          main = paste0('Hillslope ', uhills[h], ' GI - No GI ET'), type = 'l', xlab = 'Year', ylab = 'ET (mm)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5)
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(-50,50,0.1), labels = TRUE, cex.axis = 1.5)
+  #Add quantiles
+  quants = apply(X = t(ET_hd[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$ET[SimH$hillID == h], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+  qlty = c(3,2,1,2,3)
+  par(new=TRUE)
+  plot(x = as.Date(ET_bd$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, 
+       xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+  lines(x = c(as.Date('2004-01-01'), as.Date('2014-01-01')), y = c(0,0), col = 'blue', type = 'l')
+}
+dev.off()
+rm(h, quants, qlty)
+
+png(paste0('ET_MinusGI_2007_hd.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  matplot(x = as.Date(ET_bd$Date), y = t(ET_hd[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$ET[SimH$hillID == h],
+          main = paste0('Hillslope ', uhills[h], ' GI - No GI ET'), type = 'l', xlab = 'Year', ylab = 'ET (mm)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5, xlim = c(as.Date('2007-01-01'), as.Date('2007-12-31')))
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(-50,50,1), labels = TRUE, cex.axis = 1.5)
+  #Add quantiles
+  quants = apply(X = t(ET_hd[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$ET[SimH$hillID == h], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+  qlty = c(3,2,1,2,3)
+  par(new=TRUE)
+  plot(x = as.Date(ET_bd$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, 
+       xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+  lines(x = c(as.Date('2004-01-01'), as.Date('2014-01-01')), y = c(0,0), col = 'blue', type = 'l')
+}
+dev.off()
+rm(h, quants, qlty)
+
+png(paste0('ET_MinusGI_2007_hd_UnalteredSlopes.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6), c(7,8)))
+par(mar = c(3,3,3,0.5))
+for (h in 1:8){
+  matplot(x = as.Date(ET_bd$Date), y = t(ET_hd[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$ET[SimH$hillID == h],
+          main = paste0('Hillslope ', uhills[h], ' GI - No GI ET'), type = 'l', xlab = 'Year', ylab = 'ET (mm)',
+          col = grey(level = 0.1, alpha = 0.01), axes=FALSE, cex.lab = 1.5, xlim = c(as.Date('2007-01-01'), as.Date('2007-12-31')))
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(-50,50,.1), labels = TRUE, cex.axis = 1.5)
+  #Add quantiles
+  quants = apply(X = t(ET_hd[seq(1+(uhills[h]-1)*numReps, numReps+(uhills[h]-1)*numReps, 1), -c(1,2)]) - SimH$ET[SimH$hillID == h], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+  qlty = c(3,2,1,2,3)
+  par(new=TRUE)
+  plot(x = as.Date(ET_bd$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, 
+       xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+  lines(x = c(as.Date('2004-01-01'), as.Date('2014-01-01')), y = c(0,0), col = 'blue', type = 'l')
+}
+dev.off()
+rm(h, quants, qlty)
+
+#Make a plot of the sd in streamflow for each day
+sdET_MinGI_hd = meanET_MinGI_hd = CVET_MinGI_hd = matrix(0, nrow = nrow(Area.Hills), ncol = length(ET_bd$Date))
+for (h in 1:nrow(sdET_MinGI_hd)){
+  sdET_MinGI_hd[h,] = apply(X = t(ET_hd[which(ET_hd$HillID == h),-c(1,2)]) - SimH$ET[SimH$hillID == h], MARGIN = 1, FUN = sd)
+  meanET_MinGI_hd[h,] = apply(X = t(ET_hd[which(ET_hd$HillID == h),-c(1,2)]) - SimH$ET[SimH$hillID == h], MARGIN = 1, FUN = mean)
+  CVET_MinGI_hd[h,] = sdET_MinGI_hd[h,]/meanET_MinGI_hd[h,]
+}
+rm(h)
+
+png(paste0('ET_MinusGI_CV_hd.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  plot(x = as.Date(ET_bd$Date), y = CVET_MinGI_hd[h,], xlab = 'Year', ylab = 'CV ET (1)', type = 'l', axes=FALSE, cex.lab = 1.5,
+       main = paste0('Hillslope ', uhills[h], ' CV GI - No GI ET'))
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(-100,100,1), labels = TRUE, cex.axis = 1.5)
+}
+dev.off()
+rm(h)
+
+png(paste0('ET_MinusGI_sd_hd.png'), res = 300, height = 5, width=5, units = 'in')
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+par(mar = c(3,3,3,0.5))
+for (h in 9:length(uhills)){
+  plot(x = as.Date(ET_bd$Date), y = sdET_MinGI_hd[h,], xlab = 'Year', ylab = 'Std. Dev. ET (1)', type = 'l', axes=FALSE, cex.lab = 1.5,
+       main = paste0('Hillslope ', uhills[h], ' SD GI - No GI ET'))
+  box()
+  axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+  axis(2, at = seq(0,100,.01), labels = TRUE, cex.axis = 1.5)
+}
+dev.off()
+rm(h)
+
+
+#Compare streamflow reduction for up, mid, downslope, and sum vs. using all at once----
+setwd("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\Optimization\\GIAllocation")
+
+Area_d = read.csv("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\Optimization\\GIAllocation_Down\\lulcFrac30m_GI.csv", stringsAsFactors = FALSE)
+Area_m = read.csv("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\Optimization\\GIAllocation_Mid\\lulcFrac30m_GI.csv", stringsAsFactors = FALSE)
+Area_u = read.csv("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\Optimization\\GIAllocation_Up\\lulcFrac30m_GI.csv", stringsAsFactors = FALSE)
+
+Area_bd = sum(Area_d$lulc13)/1000000
+Area_bm = sum(Area_m$lulc13)/1000000
+Area_bu = sum(Area_u$lulc13)/1000000
+
+#Plots that compare reduction in streamflow, normalized by area converted to GI
+png(paste0('Q_MinusGI_all_area.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(Q_bd$Date), y = (Q_bd[,-1] - SimB$streamflow)/Area_bd, col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'Streamflow (cfs)/GI Area (km2)', type = 'l', axes=FALSE, cex.lab = 1.5, xlim = c(as.Date("2004-01-01"), as.Date("2014-06-30")), ylim = c(-5, 1), xaxs = 'i', yaxs = 'i')
+par(new = TRUE)
+matplot(x = as.Date(Q_bm$Date), y = (Q_bm[,-1] - SimB$streamflow)/Area_bm, col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = '', type = 'l', axes=FALSE, cex.lab = 1.5, xlim=as.Date(par('usr')[c(1,2)], origin = as.Date('1970-01-01')), ylim=par('usr')[c(3,4)], xaxs = 'i', yaxs = 'i')
+par(new = TRUE)
+matplot(x = as.Date(Q_bu$Date), y = (Q_bu[,-1] - SimB$streamflow)/Area_bu, col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = '', type = 'l', axes=FALSE, cex.lab = 1.5, xlim=as.Date(par('usr')[c(1,2)], origin = as.Date('1970-01-01')), ylim=par('usr')[c(3,4)], xaxs = 'i', yaxs = 'i')
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(1,-50,-0.01), labels = TRUE, cex.axis = 1.5)
+#Add quantiles
+quants_d = apply(X = (Q_bd[,-1] - SimB$streamflow)/Area_bd, MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+quants_m = apply(X = (Q_bm[,-1] - SimB$streamflow)/Area_bm, MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+quants_u = apply(X = (Q_bu[,-1] - SimB$streamflow)/Area_bu, MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+qlty = c(3,2,1,2,3)
+par(new=TRUE)
+plot(x = as.Date(Q_bd$Date), y = quants_d[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=as.Date(par('usr')[c(1,2)], origin = as.Date('1970-01-01')), ylim=par('usr')[c(3,4)], xaxs = 'i', yaxs = 'i')
+par(new=TRUE)
+plot(x = as.Date(Q_bm$Date), y = quants_m[3,], col = 'green', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=as.Date(par('usr')[c(1,2)], origin = as.Date('1970-01-01')), ylim=par('usr')[c(3,4)], xaxs = 'i', yaxs = 'i')
+par(new=TRUE)
+plot(x = as.Date(Q_bu$Date), y = quants_u[3,], col = 'blue', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=as.Date(par('usr')[c(1,2)], origin = as.Date('1970-01-01')), ylim=par('usr')[c(3,4)], xaxs = 'i', yaxs = 'i')
+dev.off()
+rm(quants_d, quants_m, quants_u, qlty)
+
+png(paste0('Q_MinusGI_all_sum.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(Q_bd$Date), y = (Q_bd[,-1] - SimB$streamflow) + (Q_bm[,-1] - SimB$streamflow) + (Q_bu[,-1] - SimB$streamflow), col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'Streamflow (cfs)', type = 'l', axes=FALSE, cex.lab = 1.5, xlim = c(as.Date("2004-01-01"), as.Date("2014-06-30")), ylim = c(-0.3, 0.1), xaxs = 'i', yaxs = 'i')
+par(new = TRUE)
+matplot(x = as.Date(Q_b$Date), y = (Q_b[,-1] - SimB$streamflow), col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = '', type = 'l', axes=FALSE, cex.lab = 1.5, xlim=as.Date(par('usr')[c(1,2)], origin = as.Date('1970-01-01')), ylim=par('usr')[c(3,4)], xaxs = 'i', yaxs = 'i')
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(1,-50,-0.01), labels = TRUE, cex.axis = 1.5)
+#Add quantiles
+quants_d = apply(X = (Q_bd[,-1] - SimB$streamflow) + (Q_bm[,-1] - SimB$streamflow) + (Q_bu[,-1] - SimB$streamflow), MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+quants = apply(X = (Q_b[,-1] - SimB$streamflow), MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+qlty = c(3,2,1,2,3)
+par(new=TRUE)
+plot(x = as.Date(Q_bd$Date), y = quants_d[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=as.Date(par('usr')[c(1,2)], origin = as.Date('1970-01-01')), ylim=par('usr')[c(3,4)], xaxs = 'i', yaxs = 'i')
+par(new=TRUE)
+plot(x = as.Date(Q_b$Date), y = quants[3,], col = 'green', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=as.Date(par('usr')[c(1,2)], origin = as.Date('1970-01-01')), ylim=par('usr')[c(3,4)], xaxs = 'i', yaxs = 'i')
+dev.off()
+rm(quants_d, quants, qlty)
 
 ##Maps----
 ##  Make the worldfile a spatial dataframe to get a map. Plot information in the worldfile on the maps----
