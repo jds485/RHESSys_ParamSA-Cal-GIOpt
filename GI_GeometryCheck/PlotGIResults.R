@@ -36,9 +36,26 @@ proj4string(world) = CRS('+init=epsg:26918')
 #Change to degrees
 world=spTransform(world, CRSobj = CRS('+init=epsg:4326'))
 
-#Load the observed streamflow to compare the parameter set to it
+#Load the observed streamflow to compare the parameter set to it----
 ObsQ = read.table("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\RHESSysFilePreparation\\obs\\BaismanStreamflow_Feb2020Revised_Cal_p.txt", header = TRUE, sep = '\t', stringsAsFactors = FALSE)
-#Load streamflow likelihood parameters to plot error bars
+#Compute the 5th and 95th %-iles for use later - using the calibration timeperiod
+obsQuants = read.table("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\RHESSysFilePreparation\\obs\\BaismanStreamflow_Feb2020Revised_Cal.txt", header = TRUE, check.names = FALSE, stringsAsFactors = FALSE, sep = '\t')
+#Remove observations later than 9/30/2013 (calibration timeperiod end)
+obsQuants = obsQuants[as.Date(obsQuants$Date) <= as.Date('2013-09-30'),]
+
+q05_cal = quantile(x = obsQuants$Flow, probs = 0.05)
+q95_cal = quantile(x = obsQuants$Flow, probs = 0.95)
+
+Year = unique(format(as.Date(obsQuants$Date), '%Y'))
+for (i in 1:14){
+  plot(x = as.Date(paste0(Year[i+1], '-01-01')), y = quantile(x = obsQuants$Flow[as.Date(obsQuants$Date) <= as.Date(paste0(Year[i+1], '-09-30'))], probs = 0.05), xlim = c(as.Date('1999-01-01'), as.Date('2014-01-01')), ylim = c(0,5), xlab = 'Year', ylab = 'Streamflow (cfs)')
+  par(new = TRUE)
+  plot(x = as.Date(paste0(Year[i+1], '-01-01')), y = quantile(x = obsQuants$Flow[as.Date(obsQuants$Date) <= as.Date(paste0(Year[i+1], '-09-30'))], probs = 0.95), xlim = c(as.Date('1999-01-01'), as.Date('2014-01-01')), ylim = c(0,5), col = 'red', axes = FALSE, xlab = '', ylab = '')
+  par(new=T)
+}
+rm(i)
+
+#Load streamflow likelihood parameters to plot error bars----
 ErrParams = read.csv('Params_logLQ_Run192_Ch9.csv')
 
 #Load the original data and trim to only the variables being compared----
@@ -263,6 +280,13 @@ axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Dat
 axis(2, at = seq(0,.1,0.001), labels = TRUE, cex.axis = 1.5)
 dev.off()
 
+
+#  Sum flow greater than 95th%-ile historical flows----
+Sum95_b = apply(X = Q_b[,-1][which(Q_b[,-1] >= q95_cal),], MARGIN = 2, FUN = sum, na.rm=TRUE)
+#  Sum flow less than 5th%-ile historical flows----
+Sum05_b = apply(X = Q_b[,-1][which(Q_b[,-1] <= q05_cal),], MARGIN = 2, FUN = sum, na.rm=TRUE)
+#  Sum reduction in flow for all historical flows----
+SumAll_b = apply(X = Q_b[,-1] - SimB$streamflow, MARGIN = 2, FUN = sum)
 
 # Sat Def----
 png(paste0('SatDef_MedGI_b.png'), res = 300, height = 5, width=5, units = 'in')
@@ -1425,6 +1449,12 @@ axis(2, at = seq(0,.1,0.001), labels = TRUE, cex.axis = 1.5)
 dev.off()
 
 
+#  Sum flow greater than 95th%-ile historical flows----
+Sum95_bu = apply(X = Q_bu[,-1][which(Q_bu[,-1] >= q95_cal),], MARGIN = 2, FUN = sum, na.rm=TRUE)
+#  Sum flow less than 5th%-ile historical flows----
+Sum05_bu = apply(X = Q_bu[,-1][which(Q_bu[,-1] <= q05_cal),], MARGIN = 2, FUN = sum, na.rm=TRUE)
+#  Sum reduction in flow for all historical flows----
+SumAll_bu = apply(X = Q_bu[,-1] - SimB$streamflow, MARGIN = 2, FUN = sum)
 # Sat Def----
 png(paste0('SatDef_MedGI_bu.png'), res = 300, height = 5, width=5, units = 'in')
 matplot(x = as.Date(SatDef_bu$Date), y = SatDef_bu[,-1], col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'Sat. Deficit (mm)', type = 'l', axes=FALSE, cex.lab = 1.5)
@@ -2552,6 +2582,12 @@ axis(2, at = seq(0,.1,0.001), labels = TRUE, cex.axis = 1.5)
 dev.off()
 
 
+#  Sum flow greater than 95th%-ile historical flows----
+Sum95_bm = apply(X = Q_bm[,-1][which(Q_bm[,-1] >= q95_cal),], MARGIN = 2, FUN = sum, na.rm=TRUE)
+#  Sum flow less than 5th%-ile historical flows----
+Sum05_bm = apply(X = Q_bm[,-1][which(Q_bm[,-1] <= q05_cal),], MARGIN = 2, FUN = sum, na.rm=TRUE)
+#  Sum reduction in flow for all historical flows----
+SumAll_bm = apply(X = Q_bm[,-1] - SimB$streamflow, MARGIN = 2, FUN = sum)
 # Sat Def----
 png(paste0('SatDef_MedGI_bm.png'), res = 300, height = 5, width=5, units = 'in')
 matplot(x = as.Date(SatDef_bm$Date), y = SatDef_bm[,-1], col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'Sat. Deficit (mm)', type = 'l', axes=FALSE, cex.lab = 1.5)
@@ -3679,6 +3715,12 @@ axis(2, at = seq(0,.1,0.001), labels = TRUE, cex.axis = 1.5)
 dev.off()
 
 
+#  Sum flow greater than 95th%-ile historical flows----
+Sum95_bd = apply(X = Q_bd[,-1][which(Q_bd[,-1] >= q95_cal),], MARGIN = 2, FUN = sum, na.rm=TRUE)
+#  Sum flow less than 5th%-ile historical flows----
+Sum05_bd = apply(X = Q_bd[,-1][which(Q_bd[,-1] <= q05_cal),], MARGIN = 2, FUN = sum, na.rm=TRUE)
+#  Sum reduction in flow for all historical flows----
+SumAll_bd = apply(X = Q_bd[,-1] - SimB$streamflow, MARGIN = 2, FUN = sum)
 # Sat Def----
 png(paste0('SatDef_MedGI_bd.png'), res = 300, height = 5, width=5, units = 'in')
 matplot(x = as.Date(SatDef_bd$Date), y = SatDef_bd[,-1], col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'Sat. Deficit (mm)', type = 'l', axes=FALSE, cex.lab = 1.5)
@@ -4748,12 +4790,6 @@ dev.off()
 rm(quants_d, quants, qlty)
 
 ##Maps----
-##  Make the worldfile a spatial dataframe to get a map. Plot information in the worldfile on the maps----
-#coordinates(world) = c('patchX', 'patchY')
-#proj4string(world) = CRS('+init=epsg:26918')
-##Change to degrees
-#world=spTransform(world, CRSobj = CRS('+init=epsg:4326'))
-#
 #cols = rainbow(n = length(uhills))
 #
 ##Fixme: add stream to this map (white?)
