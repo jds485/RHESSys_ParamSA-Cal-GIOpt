@@ -12,6 +12,7 @@ library(foreach)
 library(parallel)
 library(iterators)
 library(doParallel)
+library(GISTools)
 
 #Load color functions - from JDS github repo: Geothermal_ESDA
 source('C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\Hydrology\\USGSGauges\\ColorFunctions.R')
@@ -466,6 +467,40 @@ for (h in 9:14){
 }
 rm(h)
 legend('bottomright', title = expression(bold('Hillslope Specific Cutoffs')), legend = c("Upslope", 'Midslope', 'Downslope', 'No GI Possible'), col = c('red', 'green', 'purple', 'black'), pch = 15)
+dev.off()
+
+#Load streams
+Streams = readOGR(dsn = "C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\Hydrology\\NHD_H_Maryland_State_Shape\\Shape", layer = 'MDstreams', stringsAsFactors = FALSE)
+Streams = spTransform(Streams, CRSobj = CRS('+init=epsg:26918'))
+
+#Change all data to degrees
+CellsWGS = spTransform(Cells, CRSobj = CRS('+init=epsg:4326'))
+StreamsWGS = spTransform(Streams, CRSobj = CRS('+init=epsg:4326'))
+
+png('UpMidDownSlope_hill_proposal.png', res = 300, units = 'in', width = 6, height = 6)
+par(mar= c(2.5,2.5,1,1))
+plot(CellsWGS, col = 'black', pch = 15, lwd = 0)
+#plot(CellGrid[CellGrid$MaxGI > 0,], add = TRUE, col = 'black')
+for (h in 9:14){
+  plot(CellsWGS[CellsWGS$hillID == h,], col = 'gray', add = TRUE, lwd=7, pch = 22)
+  plot(CellsWGS[CellsWGS$hillID == h,], col = 'black', add = TRUE, pch = 15, cex = 0.7)
+  plot(CellsWGS[which((CellsWGS$hillID == h) & (CellsWGS$MaxGI > 0) & (CellsWGS$patchZ <= Downslope_h[h,2])),], col = 'purple', add = TRUE, pch = 15, cex = 0.7)
+  plot(CellsWGS[which((CellsWGS$hillID == h) & (CellsWGS$MaxGI > 0) & (CellsWGS$patchZ > Downslope_h[h,2]) & (CellsWGS$patchZ <= Midslope_h[h,2])),], col = 'green', add = TRUE, pch = 15, cex = 0.7)
+  plot(CellsWGS[which((CellsWGS$hillID == h) & (CellsWGS$MaxGI > 0) & (CellsWGS$patchZ > Midslope_h[h,2]) & (CellsWGS$patchZ <= Upslope_h[h,2])),], col = 'darkorange', add = TRUE, pch = 15, cex = 0.7)
+}
+rm(h)
+#Add stream flowlines
+plot(StreamsWGS, col = 'blue', add = TRUE, lwd = 2)
+legend('bottomright', title = expression(bold('Possible GI Patches')), legend = c("Upslope", 'Midslope', 'Downslope', 'No GI Possible'), col = c('darkorange', 'green', 'purple', 'black'), pch = 15)
+legend('topright', legend = c('Suburban Hillslope Outline', 'Approximate Stream Location'), col = c('gray', 'blue'), pch = c(22,NA), lty = c(NA, 1), lwd = 2, pt.cex = 2, pt.lwd = 5)
+degAxis(side = 1, at = seq(-77,-76,.01), labels = FALSE)
+degAxis(side = 1, at = seq(-76.7,-76,.02))
+degAxis(side = 3, at = seq(-77,-76,.01), labels = FALSE)
+degAxis(side = 2, at = seq(39.45, 40,.01))
+degAxis(side = 4, at = seq(39.45, 40,.01), labels = FALSE)
+north.arrow(xb = -76.712, yb = 39.469, len = .0005, lab = 'N', tcol = 'black', col='black')
+text(x = -76.712, y = 39.467, 'WGS84')
+box(which = 'figure', lwd = 2)
 dev.off()
 
 #Check that number of patches is within 1 for each hillslope
