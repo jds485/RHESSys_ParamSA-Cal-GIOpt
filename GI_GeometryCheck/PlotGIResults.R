@@ -4811,3 +4811,36 @@ rm(quants_d, quants, qlty)
 #box(which = 'figure', lwd = 2)
 #dev.off()
 #rm(h)
+#Land Cover in Suburban Hillslopes----
+# length(unique(world$patchID[which((world$hillID %in% c(11,12)) & (world$patchLandID == 1))]))/length(unique(world$patchID[which(world$hillID %in% c(11,12))]))
+# [1] 0.1432665
+# > length(unique(world$patchID[which((world$hillID %in% c(10,9)) & (world$patchLandID == 1))]))/length(unique(world$patchID[which(world$hillID %in% c(10,9))]))
+# [1] 0.1317114
+# > length(unique(world$patchID[which((world$hillID %in% c(13,14)) & (world$patchLandID == 1))]))/length(unique(world$patchID[which(world$hillID %in% c(13,14))]))
+# [1] 0.1424936
+# > length(unique(world$patchID[which(world$patchLandID == 1)]))/length(unique(world$patchID))
+# [1] 0.08989547
+# > length(unique(world$patchID[which(world$patchLandID == 2)]))/length(unique(world$patchID))
+# [1] 0.7437863
+# > length(unique(world$patchID[which((world$hillID %in% c(13,14)) & (world$patchLandID == 2))]))/length(unique(world$patchID[which(world$hillID %in% c(13,14))]))
+# [1] 0.5839695
+# > length(unique(world$patchID[which((world$hillID %in% c(10,9)) & (world$patchLandID == 2))]))/length(unique(world$patchID[which(world$hillID %in% c(10,9))]))
+# [1] 0.6627517
+# > length(unique(world$patchID[which((world$hillID %in% c(11,12)) & (world$patchLandID == 2))]))/length(unique(world$patchID[which(world$hillID %in% c(11,12))]))
+# [1] 0.5315186
+# > length(unique(world$patchID[which(world$patchLandID == 3)]))/length(unique(world$patchID))
+# [1] 0.01718931
+# > length(unique(world$patchID[which((world$hillID %in% c(11,12)) & (world$patchLandID == 3))]))/length(unique(world$patchID[which(world$hillID %in% c(11,12))]))
+# [1] 0.0243553
+# > length(unique(world$patchID[which((world$hillID %in% c(10,9)) & (world$patchLandID == 3))]))/length(unique(world$patchID[which(world$hillID %in% c(10,9))]))
+# [1] 0.02432886
+# > length(unique(world$patchID[which((world$hillID %in% c(13,14)) & (world$patchLandID == 3))]))/length(unique(world$patchID[which(world$hillID %in% c(13,14))]))
+# [1] 0.03180662
+# > length(unique(world$patchID[which(world$patchLandID == 4)]))/length(unique(world$patchID))
+# [1] 0.1491289
+# > length(unique(world$patchID[which((world$hillID %in% c(11,12)) & (world$patchLandID == 4))]))/length(unique(world$patchID[which(world$hillID %in% c(11,12))]))
+# [1] 0.3008596
+# > length(unique(world$patchID[which((world$hillID %in% c(10,9)) & (world$patchLandID == 4))]))/length(unique(world$patchID[which(world$hillID %in% c(10,9))]))
+# [1] 0.1812081
+# > length(unique(world$patchID[which((world$hillID %in% c(13,14)) & (world$patchLandID == 4))]))/length(unique(world$patchID[which(world$hillID %in% c(13,14))]))
+# [1] 0.2417303
