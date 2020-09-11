@@ -184,8 +184,8 @@ GI_p = unique(CenterOptions$patchID)
 cl = makeCluster(detectCores() - 1)
 registerDoParallel(cl)
 MaxGI = foreach(p = 1:length(GI_p), .packages = c('sp', 'raster'), .combine = c, .inorder = TRUE, 
-               .noexport = c("BufferOptions_grass", "CellGrid", "Cells", "Cells_buff30m", "ImpBuff", "Impervious1", "lc1", "lc1_rast", "lc30", 
-                             "PL1", "PL1_Bound", "PL1_Boundgr", "PL1_Center", "PL2", "PL2_Bound", "PL2_Boundgr", "PL2_Center", "Rte25", "Rte25_Cells")) %dopar% {
+                .noexport = c("BufferOptions_grass", "CellGrid", "Cells", "Cells_buff30m", "ImpBuff", "Impervious1", "lc1", "lc1_rast", "lc30", 
+                              "PL1", "PL1_Bound", "PL1_Boundgr", "PL1_Center", "PL2", "PL2_Bound", "PL2_Boundgr", "PL2_Center", "Rte25", "Rte25_Cells")) %dopar% {
   #Get the center and buffer cell options for this patch. 
   co = CenterOptions[CenterOptions$patchID == GI_p[p],]
   bo = BufferOptions[BufferOptions$patchID == GI_p[p],]
@@ -266,8 +266,8 @@ GI_p = unique(CenterOptions$patchID)
 cl = makeCluster(detectCores() - 1)
 registerDoParallel(cl)
 MaxGI_gr = foreach(p = 1:length(GI_p), .packages = c('sp', 'raster'), .combine = c, .inorder = TRUE, 
-                .noexport = c("BufferOptions", "CellGrid", "Cells", "Cells_buff30m", "ImpBuff", "Impervious1", "lc1", "lc1_rast", "lc30", "lcMax",
-                              "PL1", "PL1_Bound", "PL1_Boundgr", "PL1_Center", "PL2", "PL2_Bound", "PL2_Boundgr", "PL2_Center", "Rte25", "Rte25_Cells")) %dopar% {
+                   .noexport = c("BufferOptions", "CellGrid", "Cells", "Cells_buff30m", "ImpBuff", "Impervious1", "lc1", "lc1_rast", "lc30", "lcMax",
+                                 "PL1", "PL1_Bound", "PL1_Boundgr", "PL1_Center", "PL2", "PL2_Bound", "PL2_Boundgr", "PL2_Center", "Rte25", "Rte25_Cells")) %dopar% {
   #Get the center and buffer cell options for this patch. 
   co = CenterOptions[CenterOptions$patchID == GI_p[p],]
   bo = BufferOptions_grass[BufferOptions_grass$patchID == GI_p[p],]
@@ -537,3 +537,93 @@ writeOGR(CellGrid, dsn = 'PatchGrid', layer = 'patch_p', driver = 'ESRI Shapefil
 
 #Save data----
 save.image("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\Optimization\\GIAllocation\\CalcMaxGI_Aug17.RData")
+
+#Proposal Land Use----
+png('LandUseCoarse_proposal.png', res = 300, units = 'in', width = 6, height = 6)
+par(mar= c(2.5,2.5,1,1))
+plot(CellsWGS, col = 'black', pch = 15, lwd = 0, cex = 0.7)
+plot(CellsWGS[CellsWGS$patchLandID == 1,], col = 'green', pch = 15, add = TRUE, cex = 0.7)
+plot(CellsWGS[CellsWGS$patchLandID == 2,], col = 'darkgreen', pch = 15, add = TRUE, cex = 0.7)
+plot(CellsWGS[CellsWGS$patchLandID == 3,], col = 'red', pch = 15, add = TRUE, cex = 0.7)
+plot(CellsWGS[CellsWGS$patchLandID == 4,], col = 'red', pch = 15, add = TRUE, cex = 0.7)
+degAxis(side = 1, at = seq(-77,-76,.01), labels = FALSE)
+degAxis(side = 1, at = seq(-76.7,-76,.02))
+degAxis(side = 3, at = seq(-77,-76,.01), labels = FALSE)
+degAxis(side = 2, at = seq(39.45, 40,.01))
+degAxis(side = 4, at = seq(39.45, 40,.01), labels = FALSE)
+north.arrow(xb = -76.712, yb = 39.469, len = .0005, lab = 'N', tcol = 'black', col='black')
+text(x = -76.712, y = 39.467, 'WGS84')
+box(which = 'figure', lwd = 2)
+dev.off()
+
+png('LandUseCoarse_hill_proposal.png', res = 300, units = 'in', width = 6, height = 6)
+par(mar= c(2.5,2.5,1,1))
+plot(CellsWGS, col = 'black', pch = 15, lwd = 0, cex = 0.7)
+plot(CellsWGS[CellsWGS$patchLandID == 1,], col = 'green', pch = 15, add = TRUE, cex = 0.7)
+plot(CellsWGS[CellsWGS$patchLandID == 2,], col = 'darkgreen', pch = 15, add = TRUE, cex = 0.7)
+plot(CellsWGS[CellsWGS$patchLandID == 3,], col = 'orange', pch = 15, add = TRUE, cex = 0.7)
+plot(CellsWGS[CellsWGS$patchLandID == 4,], col = 'orange', pch = 15, add = TRUE, cex = 0.7)
+for (h in 9:14){
+  plot(CellsWGS[CellsWGS$hillID == h,], col = 'gray', add = TRUE, lwd=7, pch = 22)
+  plot(CellsWGS[which((CellsWGS$hillID == h) & (CellsWGS$patchLandID == 1)),], col = 'green', pch = 15, add = TRUE, cex = 0.7)
+  plot(CellsWGS[which((CellsWGS$hillID == h) & (CellsWGS$patchLandID == 2)),], col = 'darkgreen', pch = 15, add = TRUE, cex = 0.7)
+  plot(CellsWGS[which((CellsWGS$hillID == h) & (CellsWGS$patchLandID == 3)),], col = 'orange', pch = 15, add = TRUE, cex = 0.7)
+  plot(CellsWGS[which((CellsWGS$hillID == h) & (CellsWGS$patchLandID == 4)),], col = 'orange', pch = 15, add = TRUE, cex = 0.7)
+}
+rm(h)
+degAxis(side = 1, at = seq(-77,-76,.01), labels = FALSE)
+degAxis(side = 1, at = seq(-76.7,-76,.02))
+degAxis(side = 3, at = seq(-77,-76,.01), labels = FALSE)
+degAxis(side = 2, at = seq(39.45, 40,.01))
+degAxis(side = 4, at = seq(39.45, 40,.01), labels = FALSE)
+north.arrow(xb = -76.712, yb = 39.469, len = .0005, lab = 'N', tcol = 'black', col='black')
+text(x = -76.712, y = 39.467, 'WGS84')
+box(which = 'figure', lwd = 2)
+#Add stream flowlines
+plot(StreamsWGS, col = 'blue', add = TRUE, lwd = 2)
+legend('bottomright', title = expression(bold('Land Cover')), legend = c("Developed", 'Undeveloped', 'Forest'), col = c('orange', 'green', 'darkgreen'), pch = 15)
+legend('topright', legend = c('Suburban Hillslope Outline', 'Approximate Stream Location'), col = c('gray', 'blue'), pch = c(22,NA), lty = c(NA, 1), lwd = 2, pt.cex = 2, pt.lwd = 5)
+dev.off()
+
+png('LandUseCoarse_stream_proposal.png', res = 300, units = 'in', width = 6, height = 6)
+par(mar= c(2.5,2.5,1,1))
+plot(CellsWGS, col = 'black', pch = 15, lwd = 0, cex = 0.7)
+plot(CellsWGS[CellsWGS$patchLandID == 1,], col = 'green', pch = 15, add = TRUE, cex = 0.7)
+plot(CellsWGS[CellsWGS$patchLandID == 2,], col = 'darkgreen', pch = 15, add = TRUE, cex = 0.7)
+plot(CellsWGS[CellsWGS$patchLandID == 3,], col = 'orange', pch = 15, add = TRUE, cex = 0.7)
+plot(CellsWGS[CellsWGS$patchLandID == 4,], col = 'orange', pch = 15, add = TRUE, cex = 0.7)
+degAxis(side = 1, at = seq(-77,-76,.01), labels = FALSE)
+degAxis(side = 1, at = seq(-76.7,-76,.02))
+degAxis(side = 3, at = seq(-77,-76,.01), labels = FALSE)
+degAxis(side = 2, at = seq(39.45, 40,.01))
+degAxis(side = 4, at = seq(39.45, 40,.01), labels = FALSE)
+north.arrow(xb = -76.712, yb = 39.469, len = .0005, lab = 'N', tcol = 'black', col='black')
+text(x = -76.712, y = 39.467, 'WGS84')
+box(which = 'figure', lwd = 2)
+#Add stream flowlines
+plot(StreamsWGS, col = 'blue', add = TRUE, lwd = 2)
+legend('bottomright', title = expression(bold('Land Cover')), legend = c("Developed", 'Undeveloped', 'Forest'), col = c('orange', 'green', 'darkgreen'), pch = 15)
+legend('topright', legend = c('Approximate Stream Location'), col = c('blue'), pch = c(NA), lty = c(1), lwd = 2, pt.cex = 2, pt.lwd = 5)
+dev.off()
+
+BufferOptionsWGS = spTransform(BufferOptions_grass, CRSobj = CRS('+init=epsg:4326'))
+CenterOptionsWGS = spTransform(CenterOptions, CRSobj = CRS('+init=epsg:4326'))
+lc1WGS = spTransform(lc1, CRSobj = CRS('+init=epsg:4326'))
+
+png('LandUseFine_proposal.png', res = 300, units = 'in', width = 6, height = 6)
+par(mar= c(2.5,2.5,1,1))
+plot(CellsWGS, col = 'black', pch = 15, lwd = 0, cex = 0.7)
+plot(lc1WGS[lc1WGS$BARN_1mLC_UTM == 1,], col = 'blue', cex = 0.05, add = T)
+plot(lc1WGS[lc1WGS$BARN_1mLC_UTM == 3,], col = 'darkgreen', cex = 0.05, add = T)
+plot(lc1WGS[lc1WGS$BARN_1mLC_UTM == 5,], col = 'green', cex = 0.05, add = T)
+plot(lc1WGS[lc1WGS$BARN_1mLC_UTM == 6,], col = 'green', cex = 0.05, add = T)
+plot(lc1WGS[lc1WGS$BARN_1mLC_UTM %in% c(7,8,9,10,11,12),], col = 'red', cex = 0.05, add = T)
+degAxis(side = 1, at = seq(-77,-76,.01), labels = FALSE)
+degAxis(side = 1, at = seq(-76.7,-76,.02))
+degAxis(side = 3, at = seq(-77,-76,.01), labels = FALSE)
+degAxis(side = 2, at = seq(39.45, 40,.01))
+degAxis(side = 4, at = seq(39.45, 40,.01), labels = FALSE)
+north.arrow(xb = -76.712, yb = 39.469, len = .0005, lab = 'N', tcol = 'black', col='black')
+text(x = -76.712, y = 39.467, 'WGS84')
+box(which = 'figure', lwd = 2)
+dev.off()
