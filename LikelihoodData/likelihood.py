@@ -108,6 +108,7 @@ def generalizedLikelihoodFunction(data, comparedata, tIndex, params, month=None)
         omegaBeta = np.sqrt(math.gamma(3 * (1 + beta) / 2)) / ((1 + beta) * np.sqrt(math.gamma((1 + beta) / 2) ** 3))
         M_1 = math.gamma(1 + beta) / (np.sqrt(math.gamma(3 * (1 + beta) / 2)) * np.sqrt(math.gamma((1 + beta) / 2)))
         M_2 = 1
+		#Note - absolute value is not part of the paper equation A6.
         sigma_xi = np.sqrt(np.abs(float((M_2 - M_1 ** 2) * (xi ** 2 + xi ** (-2)) + 2 * M_1 ** 2 - M_2)))
         cBeta = (math.gamma(3 * (1 + beta) / 2) / math.gamma((1 + beta) / 2)) ** (1 / (1 + beta))
     except ValueError:
@@ -126,9 +127,9 @@ def generalizedLikelihoodFunction(data, comparedata, tIndex, params, month=None)
     # So, mu_h is "a bias parameter to be inferred from the data." (cite, page 3, formula (3))
 
     #mu_t = np.mean(muh * comparedata) # this was the formula in the function, I changed it to:
-    mu_t = np.exp(mu_h * abs(comparedata))
+    mu_t = np.exp(mu_h * np.abs(comparedata))
 
-    E_t = abs(comparedata) * mu_t
+    E_t = np.abs(comparedata) * mu_t
 
     sigma_t = sigma_0 + sigma_1 * E_t
     
