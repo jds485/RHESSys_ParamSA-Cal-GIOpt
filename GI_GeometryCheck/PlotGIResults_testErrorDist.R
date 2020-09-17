@@ -47,6 +47,7 @@ for (i in 1:reps){
   TNresid[,i] = t[[1]]
   TNflow[,i] = t[[2]]
 }
+rm(i, q, t)
 
 #Diagnostics on Residuals----
 #empirical
@@ -56,10 +57,9 @@ at_resid<-a_t(e_t = raw_resid, phi_i = LQ$phi_1, sigma_t = sigma_t(sigma_0 = LQ$
                                                                              mu_t = mu_t(sim_inflow = SimQ$streamflow_BC, mu_h = LQ$mu_h))))
 
 #synthetic
-syn_resid<-a_t(Qresid,LQ$phi_1,sigma_t(LQ$sigma_0,LQ$sigma_1,SimQ$streamflow_BC))
-#Trim to -50,50 for the function
-syn_resid[syn_resid < -50] = -50
-syn_resid[syn_resid > 50] = 50
+syn_resid<-a_t(e_t = Qresid, phi_i = LQ$phi_1, sigma_t = sigma_t(sigma_0 = LQ$sigma_0,sigma_1 = LQ$sigma_1,
+                                                                 E_t = E_t(sim_inflow = SimQ$streamflow_BC, 
+                                                                           mu_t = mu_t(sim_inflow = SimQ$streamflow_BC, mu_h = LQ$mu_h))))
 
 #plot empirical vs synthetic
 par(mfrow=c(1,2))
@@ -85,6 +85,34 @@ nep_at<-psged(at_resid,mean=0,sd=1,nu = (2/(1+LQ$beta)), xi = LQ$xi)
 plot(sort(nep_at),y,main='Q-Q Plot',
      col='red',xlab='SGED Quantile',ylab='Empirical Quantile',xlim=c(0,1),ylim=c(0,1), cex=0.75)
 abline(0,1,lwd=2)
+
+#Check that synthetic generation is perfectly straight line
+nep_syn<-psged(syn_resid[,1],mean=0,sd=1,nu = (2/(1+LQ$beta)), xi = LQ$xi)
+
+plot(sort(nep_syn),y,main='Q-Q Plot', 
+     col='red',xlab='SGED Quantile',ylab='Empirical Quantile',xlim=c(0,1),ylim=c(0,1), cex=0.75)
+abline(0,1,lwd=2)
+
+#Reproduce the original timeseries through transformation function----
+raw_resid<-obsQ$Flow_BC - E_t_noAbs(SimQ$streamflow_BC,mu_t(SimQ$streamflow_BC,LQ$mu_h))
+at_resid<-a_t(e_t = raw_resid, phi_i = LQ$phi_1, sigma_t = sigma_t(sigma_0 = LQ$sigma_0, sigma_1 = LQ$sigma_1, 
+                                                                   E_t = E_t(sim_inflow = SimQ$streamflow_BC, 
+                                                                             mu_t = mu_t(sim_inflow = SimQ$streamflow_BC, mu_h = LQ$mu_h))))
+e_t<-vector('numeric', length = length(obsQ$Flow_BC))
+E_t1<-E_t(SimQ$streamflow_BC[1],mu_t(SimQ$streamflow_BC[1],LQ$mu_h))
+sigma_t1<-sigma_t(LQ$sigma_0,LQ$sigma_1,E_t1)
+e_t[1]<-sigma_t1*at_resid[1] #assume initial error of zero
+
+#recorrelate and re-heteroscedasticize residuals
+for(i in 2:length(obsQ$Flow_BC)){
+  Et<-E_t(SimQ$streamflow_BC[i],mu_t(SimQ$streamflow_BC[i],LQ$mu_h))
+  e_t[i]<-e_t[i-1]*LQ$phi_1 + sigma_t(LQ$sigma_0,LQ$sigma_1,Et)*at_resid[i]
+}
+rm(i, Et)
+Y_t<-E_t_noAbs(SimQ$streamflow_BC,mu_t(SimQ$streamflow_BC,LQ$mu_h)) + e_t
+
+length(which(abs(Y_t - obsQ$Flow_BC) > 0.0001)) 
+#0
 
 #Inverse Box-Cox transform flow----
 Qflow = (Qflow*Qlambda + 1)^(1/Qlambda) - 0.001
