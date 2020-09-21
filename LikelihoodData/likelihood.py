@@ -13,11 +13,15 @@ class LikelihoodError(Exception):
 #    return np.array(data) * 0.1
 
 
-def __calcSimpleDeviation(data, comparedata):
+def __calcSimpleDeviation(data, comparedata, mu_h):
     __standartChecksBeforeStart(data, comparedata)
     d = np.array(data)
     c = np.array(comparedata)
-    return d - c
+	#Must adjust c for multiplicative bias parameter:
+    mu_t = np.exp(mu_h * np.abs(c))
+    #Note: No absolute value for this Et because it is the real predicted value, not the adjustment to sigma1 heteroskedasticity.
+    Et = c * mu_t
+    return d - Et
 
 
 def __standartChecksBeforeStart(data, comparedata):
@@ -41,7 +45,7 @@ def __standartChecksBeforeStart(data, comparedata):
 def generalizedLikelihoodFunction(data, comparedata, tIndex, params, month=None):
     #measerror=None: excluded; assuming no measurement error for now; added tIndex in case time step inconsistent
     """
-    Under the assumption of having correlated, heteroscedastic, and non‐Gaussian errors and assuming that the data are
+    Under the assumption of having correlated, heteroscedastic, and non-Gaussian errors and assuming that the data are
     coming from a time series modeled as
     .. math::
             \\Phi_p(B)e_t = \\sigma_t a_t
@@ -75,12 +79,21 @@ def generalizedLikelihoodFunction(data, comparedata, tIndex, params, month=None)
     :return: the p value as a likelihood
     :rtype: float
     """
+    
+    beta = params[0]
+    xi = params[1]
+    sigma_0 = params[2]
+    sigma_1 =params[3]
+    phi_1 = params[4]
+    mu_h = params[5]
 
     __standartChecksBeforeStart(data, comparedata)
-    errorArr = __calcSimpleDeviation(data, comparedata)
+    errorArr = __calcSimpleDeviation(data, comparedata, mu_h)
     
     comparedata = np.array(comparedata)
     
+    '''
+	Fixme: this may be incorrect now that errorArr is adjusted by mu_h bias.
     if month is not None:
         # remove seasonality in residuals
         for m in range(12):
@@ -91,19 +104,13 @@ def generalizedLikelihoodFunction(data, comparedata, tIndex, params, month=None)
             errorArr[inds] = (errorArr[inds] - Mu) / Sigma
             #Also adjust the comparedata
             comparedata[inds] = (comparedata[inds] - Mu) / Sigma
-    
+    '''
+	
     #if measerror is None:
     #    measerror = __generateMeaserror(data)
     #measerror = np.array(measerror)
     #measerror = __jitter_measerror_if_needed("generalizedLikelihoodFunction", measerror)
-
-    beta = params[0]
-    xi = params[1]
-    sigma_0 = params[2]
-    sigma_1 =params[3]
-    phi_1 = params[4]
-    mu_h = params[5]
-
+	
     try:
         omegaBeta = np.sqrt(math.gamma(3 * (1 + beta) / 2)) / ((1 + beta) * np.sqrt(math.gamma((1 + beta) / 2) ** 3))
         M_1 = math.gamma(1 + beta) / (np.sqrt(math.gamma(3 * (1 + beta) / 2)) * np.sqrt(math.gamma((1 + beta) / 2)))
@@ -129,9 +136,10 @@ def generalizedLikelihoodFunction(data, comparedata, tIndex, params, month=None)
     #mu_t = np.mean(muh * comparedata) # this was the formula in the function, I changed it to:
     mu_t = np.exp(mu_h * np.abs(comparedata))
 
-    E_t = np.abs(comparedata) * mu_t
+    E_t = comparedata * mu_t
 
     sigma_t = sigma_0 + sigma_1 * E_t
+    sigma_t[np.where(sigma_t < sigma_0)] = sigma_0
     
     # formula for a_xi_t is from page 3, (6)
     sum_a_xi_t = 0
