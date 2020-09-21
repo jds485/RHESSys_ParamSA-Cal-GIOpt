@@ -6,6 +6,7 @@ library(rgdal)
 
 setwd("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\Optimization\\GIAllocation")
 
+#Number of random seeds run with each GI allocation
 numReps = 100
 
 #Compute streamflow conversion factor----
@@ -58,7 +59,7 @@ rm(i)
 #Load streamflow likelihood parameters to plot error bars----
 ErrParams = read.csv('Params_logLQ_Run192_Ch9.csv')
 
-#Load the original data and trim to only the variables being compared----
+#Load the simulated data and trim to only the variables being compared----
 #Read in simulated basin streamflow
 SimB = vroom('Run192_Ch9_basin.daily', delim = ' ', col_names = TRUE, col_types = cols(.default=col_double()), progress = FALSE)
 
@@ -168,7 +169,9 @@ Qlambda = 0.03891046118748475
 #Inverse Box Cox Transform the simulated error
 (SimQ['streamflow']*Qlambda + 1)^(1/Qlambda) - 0.001
 
-#Get the mean and 5th and 95th quantile estimates
+#Get the mean and 5th and 95th quantile estimates for the timeseries
+
+#Plot as a gray box for 5th - 95th, observations in black line, simulation in red line
 
 
 # Streamflow----
