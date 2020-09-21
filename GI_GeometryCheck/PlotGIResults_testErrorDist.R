@@ -5,7 +5,7 @@ library(fGarch)
 
 #Set random seed and sample size info----
 set.seed(487)
-reps = 1000
+reps = 10000
 
 #Load SEP code----
 setwd("C:\\Users\\js4yd\\OneDrive - University of Virginia\\Code\\GenLikelihood_Zach")
@@ -31,6 +31,22 @@ obsQ$Flow_BC = ((obsQ$Flow+0.001)**Qlambda-1)/Qlambda
 #Load likelihood function parameter values----
 LQ = read.csv('C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\Optimization\\GIAllocation\\Params_logLQ_Run192_Ch9.csv', stringsAsFactors = FALSE)
 LTN = read.csv('C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\Optimization\\GIAllocation\\Params_logLTN_Run192_Ch9.csv', stringsAsFactors = FALSE)
+
+#BC transform with corrected bias in likelihood
+#LQ$beta = 2.922088
+#LQ$xi = 1.028359
+#LQ$phi_1 = 0.993485
+#LQ$sigma_0 = 0.111253
+#LQ$sigma_1 = 0.285754
+#LQ$mu_h = 0
+
+#No BC transform with corrected bias in likelihood
+#LQ$beta = 4.447389014760954
+#LQ$xi = 0.9983325601584668
+#LQ$phi_1 = 0.9714746732012267
+#LQ$sigma_0 = 1.0003614566639278e-09
+#LQ$sigma_1 = 0.29064531446053377
+#LQ$mu_h = 0.02240242623251768
 
 #Compute residuals----
 Qresid = TNresid = Qflow = TNflow = matrix(0, nrow = nrow(obsQ), ncol = reps)
@@ -141,13 +157,13 @@ par(new = T)
 plot(x = as.Date(SimQ$Date), Q95, col = 'red', type = 'l', lty = 2, ylim = c(0.001,1E30), log='y')
 
 #Not log scale
-plot(x = as.Date(obsQ$Date), y = obsQ$Flow, col = 'black', type = 'l', lty = 1, ylim = c(0.001,100))
+plot(x = as.Date(obsQ$Date), y = obsQ$Flow, col = 'black', type = 'l', lty = 1, ylim = c(0.001,300))
 par(new = T)
-plot(x = as.Date(obsQ$Date), y = SimQ$streamflow, col = 'blue', type = 'l', lty = 1, ylim = c(0.001,100))
+plot(x = as.Date(obsQ$Date), y = SimQ$streamflow, col = 'blue', type = 'l', lty = 1, ylim = c(0.001,300))
 par(new = T)
-plot(x = as.Date(SimQ$Date), Q05, col = 'green', type = 'l', lty = 2, ylim = c(0.001,100))
+plot(x = as.Date(SimQ$Date), Q05, col = 'green', type = 'l', lty = 2, ylim = c(0.001,300))
 par(new = T)
-plot(x = as.Date(SimQ$Date), Q95, col = 'red', type = 'l', lty = 2, ylim = c(0.001,100))
+plot(x = as.Date(SimQ$Date), Q95, col = 'red', type = 'l', lty = 2, ylim = c(0.001,300))
 
 #2007 Not log scale
 plot(x = as.Date(obsQ$Date)[which((as.Date(obsQ$Date) >= as.Date('2007-01-01')) & (as.Date(obsQ$Date) < as.Date('2008-01-01')))], y = obsQ$Flow[which((as.Date(obsQ$Date) >= as.Date('2007-01-01')) & (as.Date(obsQ$Date) < as.Date('2008-01-01')))], col = 'black', type = 'l', lty = 1, ylim = c(0.001,50))
@@ -161,14 +177,21 @@ par(new = T)
 plot(x = as.Date(SimQ$Date)[which((as.Date(obsQ$Date) >= as.Date('2007-01-01')) & (as.Date(obsQ$Date) < as.Date('2008-01-01')))], Q95[which((as.Date(obsQ$Date) >= as.Date('2007-01-01')) & (as.Date(obsQ$Date) < as.Date('2008-01-01')))], col = 'red', type = 'l', lty = 2, ylim = c(0.001,50))
 
 #Compare number of observations within %-level prediction intervals
-
-
+length(which(obsQ$Flow < Q95))/length(obsQ$Flow)
+length(which(obsQ$Flow < Q75))/length(obsQ$Flow)
+length(which(obsQ$Flow < Q50))/length(obsQ$Flow)
+length(which(obsQ$Flow < Q25))/length(obsQ$Flow)
+length(which(obsQ$Flow < Q05))/length(obsQ$Flow)
 
 #Test R Optimization----
-lb<-c(0.000001,0,0,-0.99,0.1,0) #lower bounds for sig0, sig1, phi1, beta, xi, muh; -1 for beta gives an error
-ub<-c(1,1,1,7,5,30) #upper bounds for sig0, sig1, phi1, beta, xi, muh
-st<-c(.5,.5,.5,0,1,1) #starting parameters for sig0, sig1, phi1, beta, xi, muh
+lb<-c(0.0000000001,0,0,-0.99,0,0) #lower bounds for sig0, sig1, phi1, beta, xi, muh; -1 for beta gives an error
+ub<-c(1,1,1,7,5,1) #upper bounds for sig0, sig1, phi1, beta, xi, muh
+st<-c(.5,.5,.5,0,1,0) #starting parameters for sig0, sig1, phi1, beta, xi, muh
 
-gl_mle<-optim(par=st,fn=GL_fun,inflow=obsQ$Flow_BC,sim_inflow=SimQ$streamflow_BC,
+gl_mle_BC<-optim(par=st,fn=GL_fun,inflow=obsQ$Flow_BC,sim_inflow=SimQ$streamflow_BC,
+              method = 'L-BFGS-B',lower = lb, upper = ub,
+              control = list(fnscale=-1,maxit=10000))
+
+gl_mle<-optim(par=st,fn=GL_fun,inflow=obsQ$Flow,sim_inflow=SimQ$streamflow,
               method = 'L-BFGS-B',lower = lb, upper = ub,
               control = list(fnscale=-1,maxit=10000))
