@@ -19,15 +19,16 @@ import os
 #6: directory of the likelihood function
 
 #Change to function directory and load function
-owd = os.getcwd()
+#owd = os.getcwd()
 #os.chdir(sys.argv[6])
-os.chdir('C:\\Users\\js4yd\\OneDrive - University of Virginia\\RHESSys_ParameterSA\\LikelihoodData')
+#os.chdir('C:\\Users\\js4yd\\OneDrive - University of Virginia\\RHESSys_ParameterSA\\LikelihoodData')
 from likelihood import generalizedLikelihoodFunction
-os.chdir(owd)
+#os.chdir(owd)
 
 # load flow observations
 #TrueQ = pd.read_csv('C:\\Users\\js4yd\\Dropbox\\Jared-Julie-Share\\Data\\BaismanStreamflow_Cal.txt',delimiter='\t') #11-15-99 through 9-30-13
-TrueQ = pd.read_csv('C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\RHESSysFilePreparation\\obs\\BaismanStreamflow_Feb2020Revised_Cal_p.txt',delimiter='\t') #11-15-99 through 9-30-13
+#TrueQ = pd.read_csv('C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\RHESSysFilePreparation\\obs\\BaismanStreamflow_Feb2020Revised_Cal_p.txt',delimiter='\t') #11-15-99 through 9-30-13
+TrueQ = pd.read_csv('BaismanStreamflow_Feb2020Revised_Cal_p.txt',delimiter='\t') #11-15-99 through 9-30-13
 #TrueQ = pd.read_csv(sys.argv[2],delimiter='\t') #11-15-99 through 9-30-13
 TrueQ = TrueQ.iloc[0:2191]
 TrueQ['Date'] = pd.to_datetime(TrueQ['Date'],format="%Y-%m-%d")
@@ -35,7 +36,8 @@ TrueQ['Date'] = pd.to_datetime(TrueQ['Date'],format="%Y-%m-%d")
 # load flow simulations
 #Dec. 2019
 #SimQ = pd.read_csv('SAResults_BasinStreamflow_p4.txt',delimiter='\t') #(11-15-99 through 9-30-10)
-SimQ = pd.read_csv('C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\SAResults_BasinStreamflow_p4_Reordered_Add5_Likes.txt',delimiter='\t')
+#SimQ = pd.read_csv('C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\SAResults_BasinStreamflow_p4_Reordered_Add5_Likes.txt',delimiter='\t')
+SimQ = pd.read_csv('SAResults_BasinStreamflow_p4_Reordered_Add5_Likes.txt',delimiter='\t')
 SimQ = SimQ.iloc[1782:]
 #SimQ = pd.read_csv('SAResults_BasinStreamflow_p4_Reordered_Add5_Likes.txt',delimiter='\t')
 #SimQ = pd.read_csv(sys.argv[3],delimiter='\t')
@@ -96,7 +98,7 @@ else:
 numsamps = 20
 #numsamps = int(sys.argv[4])
 #Create dataframe to store successful parameter sets
-Qdf_success = pd.DataFrame(columns=['beta','xi','sigma_0','sigma_1','phi_1','mu_h','logL'])
+#Qdf_success = pd.DataFrame(columns=['beta','xi','sigma_0','sigma_1','phi_1','mu_h','logL'])
 
 for i in range(start,stop):
     comparedata = np.array(SimQ['Replicate' + str(i+1)])
@@ -111,11 +113,11 @@ for i in range(start,stop):
     wTrueQ = np.zeros(len(aTrueQ)*52 + 1)
     wSimQ = np.zeros(len(aSimQ)*52 + 1)
     w = 0
-    for i in range(len(cTrueQ['Flow'])):
-        if np.mod(i+1, 7) == 0:
+    for k in range(len(cTrueQ['Flow'])):
+        if np.mod(k+1, 7) == 0:
             #Sum the last 6 days + this day
-            wTrueQ[w] = cTrueQ['Flow'].iloc[(i-6):i+1].sum()
-            wSimQ[w] = cSimQ['Replicate' + str(i+1)].iloc[(i-6):i+1].sum()
+            wTrueQ[w] = cTrueQ['Flow'].iloc[(k-6):k+1].sum()
+            wSimQ[w] = cSimQ['Replicate' + str(i+1)].iloc[(k-6):k+1].sum()
             w = w + 1
     
     #Compute metrics to append to dataframe:
@@ -177,11 +179,11 @@ for i in range(start,stop):
             OptFailed = optParams
 
         #Used to see the distribution of parameter values with different starting locations
-        if (optParams.success == True):
-            #Save parameter vector
-            Qdf_success = Qdf_success.append({'beta': optParams.x[0], 'xi': optParams.x[1], 'sigma_0': optParams.x[2],
-                        'sigma_1': optParams.x[3], 'phi_1': optParams.x[4], 'mu_h': optParams.x[5],
-                        'logL': -optParams.fun}, ignore_index=True)
+        #if (optParams.success == True):
+        #    #Save parameter vector
+        #    Qdf_success = Qdf_success.append({'beta': optParams.x[0], 'xi': optParams.x[1], 'sigma_0': optParams.x[2],
+        #                'sigma_1': optParams.x[3], 'phi_1': optParams.x[4], 'mu_h': optParams.x[5],
+        #                'logL': -optParams.fun}, ignore_index=True)
     
     #Check if there are any successes
     if OptChoice.success == True:
