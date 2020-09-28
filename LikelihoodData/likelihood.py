@@ -86,6 +86,13 @@ def generalizedLikelihoodFunction(data, comparedata, tIndex, params, month=None)
     sigma_1 =params[3]
     phi_1 = params[4]
     mu_h = params[5]
+    
+    if xi <= 0.:
+        warnings.warn("xi must be > 0")
+        return np.inf
+    if beta <= -1.:
+        warnings.warn("beta must be > -1 as programmed.")
+        return np.inf
 
     __standartChecksBeforeStart(data, comparedata)
     errorArr = __calcSimpleDeviation(data, comparedata, mu_h)
@@ -141,32 +148,29 @@ def generalizedLikelihoodFunction(data, comparedata, tIndex, params, month=None)
     sigma_t = sigma_0 + sigma_1 * E_t
     sigma_t[np.where(sigma_t < sigma_0)] = sigma_0
     
-    # formula for a_xi_t is from page 3, (6)
-    sum_a_xi_t = 0
-    n = data.__len__()
-    
-    for j in range(n - 1):
-        t = j + 1
-        if t > 0 and t < n and type(t) == type(1):
-            #a_t = (errorArr[t] - phi_1 * errorArr[t - 1]) / (measerror[t]) # this was the formula in the function, I changed it to:
-            a_t = (errorArr[t] - (phi_1**(tIndex[t]-tIndex[t-1])) * errorArr[t - 1]) / sigma_t[t]
-            # modification accounts for inconsistent time steps and uses sigma_t instead of measerror[t] in the denominator
-        else:
-            warnings.warn("Your parameter 't' does not suit the given data list")
-            return np.inf
-
-        a_xi_t = xi ** (-1 * np.sign(mu_xi + sigma_xi * a_t)) * (mu_xi + sigma_xi * a_t)
-
-        sum_a_xi_t += np.abs(a_xi_t) ** (2 / (1 + beta))
-        
     if sigma_t[sigma_t <= 0.0].size > 0:
         warnings.warn("Sorry, your comparedata have negative values. Maybe your model has some inaccurate"
                       " assumptions or there is another error."
                       " We cannot calculate this likelihood")
         return np.inf
-
+        
+    # formula for a_xi_t is from page 3, (6)    
+    #a_t = (errorArr[t] - phi_1 * errorArr[t - 1]) / (measerror[t]) # this was the formula in the function, I changed it to:
+    #a_t = (errorArr[t] - (phi_1**(tIndex[t]-tIndex[t-1])) * errorArr[t - 1]) / sigma_t[t]
+    a_t = (np.delete(errorArr,0) - (phi_1**(np.diff(tIndex)) * np.delete(errorArr,len(errorArr)-1))) / np.delete(sigma_t,0)
+    # modification accounts for inconsistent time steps and uses sigma_t instead of measerror[t] in the denominator.
+    # also vectorizes to make the calculation much faster and nearly independent of n
+    
+    a_xi_t = xi ** (-1 * np.sign(mu_xi + sigma_xi * a_t)) * (mu_xi + sigma_xi * a_t)
+    sum_a_xi_t = np.sum(np.abs(a_xi_t) ** (2 / (1 + beta)))
+    
+    #Sample size - 1 because first data point is only used for its residual in lag1 model.
+    n = data.__len__() - 1
+    
     # I negated this for minimization
+    # Also dropped first term in sigma_t because it's not used to estimate anything with lag1 process.
     # Without normalization by number of observations
-    return -(n * np.log(omegaBeta * (2 * sigma_xi) / np.abs(xi + (1 / xi))) - np.sum(np.log(sigma_t)) - cBeta * sum_a_xi_t)
+    # Removed np.abs for xi+1/xi. Negative xi is not allowed, so I added a check for that above.
+    return -(n * np.log(omegaBeta * (2 * sigma_xi) / (xi + (1 / xi))) - np.sum(np.log(np.delete(sigma_t,0))) - cBeta * sum_a_xi_t)
     # to normalize by # of observations:
-    # return -(np.log(omegaBeta * (2 * sigma_xi) / np.abs(xi + (1 / xi))) - np.sum(np.log(sigma_t))/n - cBeta * sum_a_xi_t/n)
+    # return -(np.log(omegaBeta * (2 * sigma_xi) / (xi + (1 / xi))) - np.sum(np.log(np.delete(sigma_t,0)))/n - cBeta * sum_a_xi_t/n)
