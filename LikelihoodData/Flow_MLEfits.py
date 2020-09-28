@@ -95,10 +95,10 @@ else:
 	stop = start + count
 
 #Number of samples to take for the multi-start gradient descent algorithm
-numsamps = 20
+numsamps = 1000
 #numsamps = int(sys.argv[4])
 #Create dataframe to store successful parameter sets
-#Qdf_success = pd.DataFrame(columns=['beta','xi','sigma_0','sigma_1','phi_1','mu_h','logL'])
+Qdf_success = pd.DataFrame(columns=['beta','xi','sigma_0','sigma_1','phi_1','mu_h','logL'])
 
 for i in range(start,stop):
     comparedata = np.array(SimQ['Replicate' + str(i+1)])
@@ -151,13 +151,14 @@ for i in range(start,stop):
     #Make an LHS sample of the initial parameters to try for each replicate. Random seed is the index
     np.random.seed(seed=i+518)
 	#np.random.seed(seed=i+int(sys.argv[1]))
-    paramsInit = pyDOE.lhs(n=6, criterion='m', iterations=1000, samples=numsamps)
+    #paramsInit = pyDOE.lhs(n=6, criterion='m', iterations=1000, samples=numsamps)
+    paramsInit = pyDOE.lhs(n=6, samples=numsamps)
     
     #Get all of the parameters into their expected ranges
     #Initial bounds were [-1,10], [0,10], same, same, same, [0,100]
-    paramsInit[:,0] = paramsInit[:,0]*8. - 1.
-    paramsInit[:,1] = paramsInit[:,1]*5.
-    paramsInit[:,2] = paramsInit[:,2]*(1.-.000000001)+.000000001
+    paramsInit[:,0] = paramsInit[:,0]*(7. + 0.99) - 0.99
+    paramsInit[:,1] = paramsInit[:,1]*(5. - 0.01) + 0.01
+    paramsInit[:,2] = paramsInit[:,2]*(1.-.000001)+.000001
     #3 is on [0,1]
     #4 is on [0,1]
     #5 is on [0,1]
@@ -167,7 +168,7 @@ for i in range(start,stop):
         optParams = sciOpt.minimize(ObjFunc, 
                                     paramsInit[j,:], 
                                     method='SLSQP', 
-                                    bounds=[[-1,7],[0,5],[0.000000001,1],[0,1],[0,1],[0,1]],
+                                    bounds=[[-0.99,7],[0.01,5],[0.000001,1],[0,1],[0,1],[0,1]],
                                     options={'maxiter': 1000, 'disp': False})
         if j == 0:
             #Save the optimal successful convergence and unsuccessful convergence
@@ -179,11 +180,11 @@ for i in range(start,stop):
             OptFailed = optParams
 
         #Used to see the distribution of parameter values with different starting locations
-        #if (optParams.success == True):
-        #    #Save parameter vector
-        #    Qdf_success = Qdf_success.append({'beta': optParams.x[0], 'xi': optParams.x[1], 'sigma_0': optParams.x[2],
-        #                'sigma_1': optParams.x[3], 'phi_1': optParams.x[4], 'mu_h': optParams.x[5],
-        #                'logL': -optParams.fun}, ignore_index=True)
+        if (optParams.success == True):
+            #Save parameter vector
+            Qdf_success = Qdf_success.append({'beta': optParams.x[0], 'xi': optParams.x[1], 'sigma_0': optParams.x[2],
+                        'sigma_1': optParams.x[3], 'phi_1': optParams.x[4], 'mu_h': optParams.x[5],
+                        'logL': -optParams.fun}, ignore_index=True)
     
     #Check if there are any successes
     if OptChoice.success == True:
