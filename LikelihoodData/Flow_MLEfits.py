@@ -168,7 +168,7 @@ for i in range(start,stop):
         optParams = sciOpt.minimize(ObjFunc, 
                                     paramsInit[j,:], 
                                     method='SLSQP', 
-                                    bounds=[[-0.99,7],[0.01,5],[0.000001,1],[0,1],[0,1],[0,1]],
+                                    bounds=[[-0.99,7.],[0.01,5.],[0.000001,1.],[0.,1.],[0.,1.],[0.,1.]],
                                     options={'maxiter': 1000, 'disp': False})
         if j == 0:
             #Save the optimal successful convergence and unsuccessful convergence
