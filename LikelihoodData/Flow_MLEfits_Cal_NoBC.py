@@ -102,13 +102,14 @@ ObjFunc = lambda params: generalizedLikelihoodFunction(data,comparedata,tIndex,p
 # sigma_0 (err), sigma_1 (err trend with flow), phi_1 (auto-correlation), mu_h (bias)
 #Make an LHS sample of the initial parameters to try for each replicate. Random seed is the index
 np.random.seed(seed=int(sys.argv[3]))
-paramsInit = pyDOE.lhs(n=6, criterion='m', iterations=1000, samples=numsamps)
+#paramsInit = pyDOE.lhs(n=6, criterion='m', iterations=1000, samples=numsamps)
+paramsInit = pyDOE.lhs(n=6, samples=numsamps)
 
 #Get all of the parameters into their expected ranges
 #Initial bounds were [-1,10], [0,10], same, same, same, [0,100]
-paramsInit[:,0] = paramsInit[:,0]*8. - 1.
-paramsInit[:,1] = paramsInit[:,1]*5.
-paramsInit[:,2] = paramsInit[:,2]*(1.-.000000001)+.000000001
+paramsInit[:,0] = paramsInit[:,0]*(7. + 0.99) - 0.99
+paramsInit[:,1] = paramsInit[:,1]*(5. - 0.01) + 0.01
+paramsInit[:,2] = paramsInit[:,2]*(1.-.000001)+.000001
 #3 is on [0,1]
 #4 is on [0,1]
 #5 is on [0,1]
@@ -118,7 +119,7 @@ for j in range(numsamps):
     optParams = sciOpt.minimize(ObjFunc, 
                                 paramsInit[j,:], 
                                 method='SLSQP', 
-                                bounds=[[-1,7],[0,5],[0.000000001,1],[0,1],[0,1],[0,1]],
+                                bounds=[[-0.99,7.],[0.01,5.],[0.000001,1.],[0.,1.],[0.,1.],[0.,1.]],
                                 options={'maxiter': 1000, 'disp': False})
     if j == 0:
         #Save the optimal successful convergence and unsuccessful convergence
