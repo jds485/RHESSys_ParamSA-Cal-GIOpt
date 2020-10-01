@@ -135,8 +135,8 @@ if OptChoice.success == True:
     #Assign the best parameter values to this ith replicate
     Qdf = Qdf.append({'Replicate': int(sys.argv[1]), 'Chain': int(sys.argv[2]), 'beta': OptChoice.x[0], 'xi': OptChoice.x[1], 'sigma_0': OptChoice.x[2],
 					  'sigma_1': OptChoice.x[3], 'phi_1': OptChoice.x[4], 'mu_h': OptChoice.x[5],
-					  'logL': -OptChoice.fun, 'SSEdBC': SSEdBC, 'SSEd': SSEd, 'SSEw': SSEw, 'SSEm': SSEm, 'SSEa': SSEa, 
-					  'NSEdBC': NSEdBC, 'NSEd': NSEd, 'NSEw': NSEw, 'NSEm': NSEm, 'NSEa': NSEa, 
+					  'logL': -OptChoice.fun, 'SSEd': SSEd, 'SSEw': SSEw, 'SSEm': SSEm, 'SSEa': SSEa, 
+					  'NSEd': NSEd, 'NSEw': NSEw, 'NSEm': NSEm, 'NSEa': NSEa, 
 					  'LNSEd': LNSEd, 'LNSEw': LNSEw, 'LNSEm': LNSEm, 'LNSEa': LNSEa, 
 					  'pBias': pBias,
 					  'success': OptChoice.success, 'mess': OptChoice.message}, ignore_index=True)
@@ -144,8 +144,8 @@ else:
     #No successful convergence. Use the OptFailed
     Qdf = Qdf.append({'Replicate': int(sys.argv[1]), 'Chain': int(sys.argv[2]), 'beta': OptFailed.x[0], 'xi': OptFailed.x[1], 'sigma_0': OptFailed.x[2],
 					  'sigma_1': OptFailed.x[3], 'phi_1': OptFailed.x[4], 'mu_h': OptFailed.x[5],
-					  'logL': -OptFailed.fun, 'SSEdBC': SSEdBC, 'SSEd': SSEd, 'SSEw': SSEw, 'SSEm': SSEm, 'SSEa': SSEa, 
-					  'NSEdBC': NSEdBC, 'NSEd': NSEd, 'NSEw': NSEw, 'NSEm': NSEm, 'NSEa': NSEa, 
+					  'logL': -OptFailed.fun, 'SSEd': SSEd, 'SSEw': SSEw, 'SSEm': SSEm, 'SSEa': SSEa, 
+					  'NSEd': NSEd, 'NSEw': NSEw, 'NSEm': NSEm, 'NSEa': NSEa, 
 					  'LNSEd': LNSEd, 'LNSEw': LNSEw, 'LNSEm': LNSEm, 'LNSEa': LNSEa, 
 					  'pBias': pBias,
 					  'success': OptFailed.success, 'mess': OptFailed.message}, ignore_index=True)
