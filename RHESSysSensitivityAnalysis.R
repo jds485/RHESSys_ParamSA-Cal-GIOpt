@@ -200,9 +200,14 @@ rm(h)
 colnames(MedHills) = colnames(BasinSF)
 
 #Get the MedHills as 05, 95, and ot days
+#These are not calculated correctly. All shifted off by 1 day. But maybe it doesn't matter because the baseline is constant and it's absolute error.
 MedHills05 = MedHills[,c(1, which(as.Date(colnames(MedHills)[-1]) %in% as.Date(days05)))]
 MedHills95 = MedHills[,c(1, which(as.Date(colnames(MedHills)[-1]) %in% as.Date(days95)))]
 MedHillsot = MedHills[,c(1, which(as.Date(colnames(MedHills)[-1]) %in% as.Date(daysot)))]
+#This is the fixed method
+#MedHills05 = MedHills[,c(1, 1+which(as.Date(colnames(MedHills)[-1]) %in% as.Date(days05)))]
+#MedHills95 = MedHills[,c(1, 1+which(as.Date(colnames(MedHills)[-1]) %in% as.Date(days95)))]
+#MedHillsot = MedHills[,c(1, 1+which(as.Date(colnames(MedHills)[-1]) %in% as.Date(daysot)))]
 rm(MedHills)
 
 #Load the observed TN record----
@@ -1748,6 +1753,15 @@ for (h in 1:length(uhills)){
   RanksMuaTN_h_Agg = unique(c(RanksMuaTN_h_Agg, RanksMuaTN05_h_Agg[[h]]$Param[1:Top10hTN05_Agg],RanksMuaTNMed_h_Agg[[h]]$Param[1:Top10hTNMed_Agg],RanksMuaTN95_h_Agg[[h]]$Param[1:Top10hTN95_Agg]))
 }
 
+RanksMua_h_Agg910 = NULL
+for (h in 9:10){
+  Top10h05_Agg = ceiling((length(EEs05_h_mua_m[h,-c(1,which(colnames(EEs05_h_mua_m) %in% ColsAggregated))]) - length(which(EEs05_h_mua_m[h,-c(1,which(colnames(EEs05_h_mua_m) %in% ColsAggregated))] == 0)))*0.1)
+  Top10hot_Agg = ceiling((length(EEsot_h_mua_m[h,-c(1,which(colnames(EEs05_h_mua_m) %in% ColsAggregated))]) - length(which(EEsot_h_mua_m[h,-c(1,which(colnames(EEs05_h_mua_m) %in% ColsAggregated))] == 0)))*0.1)
+  Top10h95_Agg = ceiling((length(EEs95_h_mua_m[h,-c(1,which(colnames(EEs05_h_mua_m) %in% ColsAggregated))]) - length(which(EEs95_h_mua_m[h,-c(1,which(colnames(EEs05_h_mua_m) %in% ColsAggregated))] == 0)))*0.1)
+
+  RanksMua_h_Agg910 = unique(c(RanksMua_h_Agg910, RanksMua05_h_Agg[[h]]$Param[1:Top10h05_Agg],RanksMuaot_h_Agg[[h]]$Param[1:Top10hot_Agg],RanksMua95_h_Agg[[h]]$Param[1:Top10h95_Agg]))
+}
+
 # Select all parameters whose 95th quantile estimate of EE is greater than the selected threshold point
 ParamSelect_h_Agg = ParamSelectTN_h_Agg = NULL
 for (h in 1:length(uhills)){
@@ -1757,6 +1771,13 @@ for (h in 1:length(uhills)){
   ParamSelectTN_h_Agg = unique(c(ParamSelectTN_h_Agg, colnames(EEsTN05_h_mua_95)[-c(1,which(colnames(EEsTN05_h_mua_m) %in% ColsAggregated))][EEsTN05_h_mua_95[h,-c(1,which(colnames(EEsTN05_h_mua_m) %in% ColsAggregated))] >= RanksMuaTN05_h_Agg[[h]][Top10hTN05_Agg,2]],
                                                       colnames(EEsTNMed_h_mua_95)[-c(1,which(colnames(EEsTNMed_h_mua_m) %in% ColsAggregated))][EEsTNMed_h_mua_95[h,-c(1,which(colnames(EEsTNMed_h_mua_m) %in% ColsAggregated))] >= RanksMuaTNMed_h_Agg[[h]][Top10hTNMed_Agg,2]],
                                                       colnames(EEsTN95_h_mua_95)[-c(1,which(colnames(EEsTN95_h_mua_m) %in% ColsAggregated))][EEsTN95_h_mua_95[h,-c(1,which(colnames(EEsTN95_h_mua_m) %in% ColsAggregated))] >= RanksMuaTN95_h_Agg[[h]][Top10hTN95_Agg,2]]))
+}
+
+ParamSelect_h_Agg910 = NULL
+for (h in 9:10){
+  ParamSelect_h_Agg910 = unique(c(ParamSelect_h_Agg910, colnames(EEs05_h_mua_95)[-c(1,which(colnames(EEs05_h_mua_m) %in% ColsAggregated))][EEs05_h_mua_95[h,-c(1,which(colnames(EEs05_h_mua_m) %in% ColsAggregated))] >= RanksMua05_h_Agg[[h]][Top10h05_Agg,2]],
+                               colnames(EEsot_h_mua_95)[-c(1,which(colnames(EEsot_h_mua_m) %in% ColsAggregated))][EEsot_h_mua_95[h,-c(1,which(colnames(EEsot_h_mua_m) %in% ColsAggregated))] >= RanksMuaot_h_Agg[[h]][Top10hot_Agg,2]],
+                               colnames(EEs95_h_mua_95)[-c(1,which(colnames(EEs95_h_mua_m) %in% ColsAggregated))][EEs95_h_mua_95[h,-c(1,which(colnames(EEs95_h_mua_m) %in% ColsAggregated))] >= RanksMua95_h_Agg[[h]][Top10h95_Agg,2]]))
 }
 
 #Make a plot of the number of parameters selected versus the threshold percentage----
@@ -2649,6 +2670,7 @@ dev.off()
 #Evaluate correlations for the selected parameters----
 RankSelParams_Agg = sort(unique(c(ParamSelect_b_Agg, ParamSelectTN_b_Agg)))
 RankSelParams_h_Agg = sort(unique(c(ParamSelect_b_Agg, ParamSelectTN_b_Agg, ParamSelect_h_Agg, ParamSelectTN_h_Agg)))
+RankSelParams_h_Agg910 = sort(ParamSelect_h_Agg910)
 
 # Loop over the variables and get the parameters correlated by a certain amount
 CorParams = CorParams_h = NULL
@@ -2946,15 +2968,30 @@ for (k in seq(15,35,5)){
 #Select top 35 ParamRanges[ParamRanges$NumberedParams %in% RankSelParams_h_Agg,1:4]
 #And also disaggregate variables to add to that list.
 RankSelParams_h_Disagg = c(RankSelParams_h_Agg[-which(RankSelParams_h_Agg %in% ColsAggregated_key)], ColsAggregated[which(ColsAggregated_key %in% RankSelParams_h_Agg[which(RankSelParams_h_Agg %in% colnames(EEs05_b_mua[,272:291]))])])
+RankSelParams_h_Disagg910 = c(RankSelParams_h_Agg910[-which(RankSelParams_h_Agg910 %in% ColsAggregated_key)], ColsAggregated[which(ColsAggregated_key %in% RankSelParams_h_Agg910[which(RankSelParams_h_Agg910 %in% colnames(EEs05_b_mua[,272:291]))])])
 #Also remove the landuse % impervious. That will not be considered uncertain because it will be assigned from land use maps
 RankSelParams_h_Disagg = RankSelParams_h_Disagg[-grep(RankSelParams_h_Disagg, pattern = '.percent_impervious', fixed = TRUE)]
+RankSelParams_h_Disagg910 = RankSelParams_h_Disagg910[-grep(RankSelParams_h_Disagg910, pattern = '.percent_impervious', fixed = TRUE)]
+
 ParamRanges_Cal = ParamRanges[ParamRanges$NumberedParams %in% RankSelParams_h_Disagg,1:4]
+ParamRanges_Cal910 = ParamRanges[ParamRanges$NumberedParams %in% RankSelParams_h_Disagg910,1:4]
 #Edit several lower bounds that changed since SA run
 ParamRanges_Cal$Lower[ParamRanges_Cal$NumberedParams == 's9_Ksat_0_v'] = 0.2
 ParamRanges_Cal$Lower[ParamRanges_Cal$NumberedParams == 's109_Ksat_0_v'] = 0.05
 ParamRanges_Cal$Lower[ParamRanges_Cal$NumberedParams == 's8_Ksat_0_v'] = 0.2
 ParamRanges_Cal$Lower[ParamRanges_Cal$NumberedParams == 's108_Ksat_0_v'] = 0.05
 ParamRanges_Cal$Lower[ParamRanges_Cal$NumberedParams == 'l4_septic_water_load'] = 0
+
+ParamRanges_Cal910$Lower[ParamRanges_Cal910$NumberedParams == 's9_Ksat_0_v'] = 0.2
+ParamRanges_Cal910$Lower[ParamRanges_Cal910$NumberedParams == 's109_Ksat_0_v'] = 0.05
+ParamRanges_Cal910$Lower[ParamRanges_Cal910$NumberedParams == 's8_Ksat_0_v'] = 0.2
+ParamRanges_Cal910$Lower[ParamRanges_Cal910$NumberedParams == 's108_Ksat_0_v'] = 0.05
+ParamRanges_Cal910$Lower[ParamRanges_Cal910$NumberedParams == 'l4_septic_water_load'] = 0
+#And edit the GW parameter bounds as well based on discussion with Laurence
+ParamRanges_Cal910$Upper[ParamRanges_Cal910$NumberedParams == 'h_gw_loss_coeff'] = 0.3
+ParamRanges_Cal910$Upper[ParamRanges_Cal910$NumberedParams == 's9_sat_to_gw_coeff'] = 0.3
+ParamRanges_Cal910$Upper[ParamRanges_Cal910$NumberedParams == 's109_sat_to_gw_coeff'] = 0.3
+
 
 #Add all of the parameters of the likelihood function as well
 # (kurotsis) beta=-1: uniform, beta=0: Gaussian, beta=1: double exponential
@@ -2973,6 +3010,8 @@ ParamRanges_Cal_Likes = rbind(ParamRanges_Cal, LikelihoodParams)
 options(scipen = 999)
 write.csv(ParamRanges_Cal, file = "C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\RHESSysFilePreparation\\defs_Calibration\\BaismanCalibrationParameterProblemFile.csv", row.names = FALSE)
 write.csv(ParamRanges_Cal_Likes, file = "C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\RHESSysFilePreparation\\defs_Calibration\\BaismanCalibrationParameterProblemFile_LikelihoodParams.csv", row.names = FALSE)
+
+write.csv(ParamRanges_Cal910, file = "C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\RHESSysFilePreparation\\defs_Calibration/BaismanCalibrationParameterProblemFile_NewGWBounds.csv", row.names = FALSE)
 options(scipen = 0)
 
 #Pre-2020 Diagnosis of problems with EEs----
@@ -3016,3 +3055,93 @@ options(scipen = 0)
 # runif(n = 1, min = 0.1, max = .909091)
 # #5837
 # #set manually to 0.4 because both Ksat0 and Ksat0v needed adjustment from lower bound
+
+#Determine the practical significance of the largest EEs----
+#Get all of the indices for which a particular parameter changed.
+which((OrigParams[2:nrow(OrigParams),"h_gw_loss_coeff"] - OrigParams[1:(nrow(OrigParams)-1),"h_gw_loss_coeff"]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),"h_gw_loss_coeff"] - OrigParams[1:(nrow(OrigParams)-1),"h_gw_loss_coeff"]) != 0) %in% seq(272,10880,272))]
+
+
+#Check that EEs match (they do)
+#Basin
+max(abs((apply(X = abs(apply(X = BasinSF05[which((OrigParams[2:nrow(OrigParams),"h_gw_loss_coeff"] - OrigParams[1:(nrow(OrigParams)-1),"h_gw_loss_coeff"]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),"h_gw_loss_coeff"] - OrigParams[1:(nrow(OrigParams)-1),"h_gw_loss_coeff"]) != 0) %in% seq(272,10880,272))]+1,], MARGIN = 1, FUN = "-", obs05$Flow)), MARGIN = 2, FUN = sum) - apply(X = abs(apply(X = BasinSF05[which((OrigParams[2:nrow(OrigParams),"h_gw_loss_coeff"] - OrigParams[1:(nrow(OrigParams)-1),"h_gw_loss_coeff"]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),"h_gw_loss_coeff"] - OrigParams[1:(nrow(OrigParams)-1),"h_gw_loss_coeff"]) != 0) %in% seq(272,10880,272))],], MARGIN = 1, FUN = "-", obs05$Flow)), MARGIN = 2, FUN = sum))/Deltas[,"h_gw_loss_coeff"] - EEs05_b$h_gw_loss_coeff))
+#Hillslope
+max(abs((apply(X = abs(apply(X = HillSF05[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams),"h_gw_loss_coeff"] - OrigParams[1:(nrow(OrigParams)-1),"h_gw_loss_coeff"]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),"h_gw_loss_coeff"] - OrigParams[1:(nrow(OrigParams)-1),"h_gw_loss_coeff"]) != 0) %in% seq(272,10880,272))]+1,], MARGIN = 1, FUN = "-", as.numeric(MedHills05[which(MedHills05[,1] == 9),-1]))), MARGIN = 2, FUN = sum) - apply(X = abs(apply(X = HillSF05[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams),"h_gw_loss_coeff"] - OrigParams[1:(nrow(OrigParams)-1),"h_gw_loss_coeff"]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),"h_gw_loss_coeff"] - OrigParams[1:(nrow(OrigParams)-1),"h_gw_loss_coeff"]) != 0) %in% seq(272,10880,272))],], MARGIN = 1, FUN = "-", as.numeric(MedHills05[which(MedHills05[,1] == 9),-1]))), MARGIN = 2, FUN = sum))/Deltas[,"h_gw_loss_coeff"] - EEs05_h[EEs05_h$HillID == 9, "h_gw_loss_coeff"]))
+max(abs((apply(X = abs(apply(X = HillSF95[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams),"h_gw_loss_coeff"] - OrigParams[1:(nrow(OrigParams)-1),"h_gw_loss_coeff"]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),"h_gw_loss_coeff"] - OrigParams[1:(nrow(OrigParams)-1),"h_gw_loss_coeff"]) != 0) %in% seq(272,10880,272))]+1,], MARGIN = 1, FUN = "-", as.numeric(MedHills95[which(MedHills95[,1] == 9),-1]))), MARGIN = 2, FUN = sum) - apply(X = abs(apply(X = HillSF95[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams),"h_gw_loss_coeff"] - OrigParams[1:(nrow(OrigParams)-1),"h_gw_loss_coeff"]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),"h_gw_loss_coeff"] - OrigParams[1:(nrow(OrigParams)-1),"h_gw_loss_coeff"]) != 0) %in% seq(272,10880,272))],], MARGIN = 1, FUN = "-", as.numeric(MedHills95[which(MedHills95[,1] == 9),-1]))), MARGIN = 2, FUN = sum))/Deltas[,"h_gw_loss_coeff"] - EEs95_h[EEs95_h$HillID == 9, "h_gw_loss_coeff"]))
+max(abs((apply(X = abs(apply(X = HillSFot[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams),"h_gw_loss_coeff"] - OrigParams[1:(nrow(OrigParams)-1),"h_gw_loss_coeff"]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),"h_gw_loss_coeff"] - OrigParams[1:(nrow(OrigParams)-1),"h_gw_loss_coeff"]) != 0) %in% seq(272,10880,272))]+1,], MARGIN = 1, FUN = "-", as.numeric(MedHillsot[which(MedHillsot[,1] == 9),-1]))), MARGIN = 2, FUN = sum) - apply(X = abs(apply(X = HillSFot[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams),"h_gw_loss_coeff"] - OrigParams[1:(nrow(OrigParams)-1),"h_gw_loss_coeff"]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),"h_gw_loss_coeff"] - OrigParams[1:(nrow(OrigParams)-1),"h_gw_loss_coeff"]) != 0) %in% seq(272,10880,272))],], MARGIN = 1, FUN = "-", as.numeric(MedHillsot[which(MedHillsot[,1] == 9),-1]))), MARGIN = 2, FUN = sum))/Deltas[,"h_gw_loss_coeff"] - EEsot_h[EEsot_h$HillID == 9, "h_gw_loss_coeff"]))
+
+# Try metrics to plot practical significance - none seem useful and not using any----
+#abs(SAE2 - SAE1)/n(timeseries length)/(max-min flow in timeseries) = average daily difference/(max - min)
+#hist(abs((apply(X = abs(apply(X = HillSF05[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams),"h_gw_loss_coeff"] - OrigParams[1:(nrow(OrigParams)-1),"h_gw_loss_coeff"]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),"h_gw_loss_coeff"] - OrigParams[1:(nrow(OrigParams)-1),"h_gw_loss_coeff"]) != 0) %in% seq(272,10880,272))]+1,], MARGIN = 1, FUN = "-", as.numeric(MedHills05[which(MedHills05[,1] == 9),-1]))), MARGIN = 2, FUN = sum) - apply(X = abs(apply(X = HillSF05[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams),"h_gw_loss_coeff"] - OrigParams[1:(nrow(OrigParams)-1),"h_gw_loss_coeff"]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),"h_gw_loss_coeff"] - OrigParams[1:(nrow(OrigParams)-1),"h_gw_loss_coeff"]) != 0) %in% seq(272,10880,272))],], MARGIN = 1, FUN = "-", as.numeric(MedHills05[which(MedHills05[,1] == 9),-1]))), MARGIN = 2, FUN = sum)))/length(obs05$Date)/(max(obs05$Flow) - min(obs05$Flow)), breaks = 10)
+for (i in 1:length(ParamSelect_h_Agg910)){
+  if (!(i %in% c(10,11))){
+    #abs(SAE2 - SAE1)/n(timeseries length) = average daily difference
+    #hist(abs((apply(X = abs(apply(X = HillSF05[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))]+1,], MARGIN = 1, FUN = "-", as.numeric(MedHills05[which(MedHills05[,1] == 9),-1]))), MARGIN = 2, FUN = sum) - apply(X = abs(apply(X = HillSF05[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))],], MARGIN = 1, FUN = "-", as.numeric(MedHills05[which(MedHills05[,1] == 9),-1]))), MARGIN = 2, FUN = sum)))/length(obs05$Date), breaks = 10, xlab = 'average daily difference', main = ParamSelect_h_Agg910[i])
+    #hist(abs((apply(X = abs(apply(X = HillSFot[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))]+1,], MARGIN = 1, FUN = "-", as.numeric(MedHillsot[which(MedHillsot[,1] == 9),-1]))), MARGIN = 2, FUN = sum) - apply(X = abs(apply(X = HillSFot[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))],], MARGIN = 1, FUN = "-", as.numeric(MedHillsot[which(MedHillsot[,1] == 9),-1]))), MARGIN = 2, FUN = sum)))/length(obsot$Date), breaks = 10, xlab = 'average daily difference', main = ParamSelect_h_Agg910[i])
+    #hist(abs((apply(X = abs(apply(X = HillSF95[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))]+1,], MARGIN = 1, FUN = "-", as.numeric(MedHills95[which(MedHills95[,1] == 9),-1]))), MARGIN = 2, FUN = sum) - apply(X = abs(apply(X = HillSF95[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))],], MARGIN = 1, FUN = "-", as.numeric(MedHills95[which(MedHills95[,1] == 9),-1]))), MARGIN = 2, FUN = sum)))/length(obs95$Date), breaks = 10, xlab = 'average daily difference', main = ParamSelect_h_Agg910[i])
+    #abs(SAE2 - SAE1)/n(timeseries length)/(max-min flow in timeseries) = average daily difference/(max - min)
+    #hist(abs((apply(X = abs(apply(X = HillSF05[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))]+1,], MARGIN = 1, FUN = "-", as.numeric(MedHills05[which(MedHills05[,1] == 9),-1]))), MARGIN = 2, FUN = sum) - apply(X = abs(apply(X = HillSF05[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))],], MARGIN = 1, FUN = "-", as.numeric(MedHills05[which(MedHills05[,1] == 9),-1]))), MARGIN = 2, FUN = sum)))/length(obs05$Date)/(max(as.numeric(MedHills05[which(MedHills05[,1] == 9),-1])) - min(as.numeric(MedHills05[which(MedHills05[,1] == 9),-1]))), breaks = 10, xlab = 'average daily difference/(max - min flow)', main = ParamSelect_h_Agg910[i])
+    #hist(abs((apply(X = abs(apply(X = HillSFot[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))]+1,], MARGIN = 1, FUN = "-", as.numeric(MedHillsot[which(MedHillsot[,1] == 9),-1]))), MARGIN = 2, FUN = sum) - apply(X = abs(apply(X = HillSFot[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))],], MARGIN = 1, FUN = "-", as.numeric(MedHillsot[which(MedHillsot[,1] == 9),-1]))), MARGIN = 2, FUN = sum)))/length(obsot$Date)/(max(as.numeric(MedHillsot[which(MedHillsot[,1] == 9),-1])) - min(as.numeric(MedHillsot[which(MedHillsot[,1] == 9),-1]))), breaks = 10, xlab = 'average daily difference/(max - min flow)', main = ParamSelect_h_Agg910[i])
+    #hist(abs((apply(X = abs(apply(X = HillSF95[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))]+1,], MARGIN = 1, FUN = "-", as.numeric(MedHills95[which(MedHills95[,1] == 9),-1]))), MARGIN = 2, FUN = sum) - apply(X = abs(apply(X = HillSF95[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))],], MARGIN = 1, FUN = "-", as.numeric(MedHills95[which(MedHills95[,1] == 9),-1]))), MARGIN = 2, FUN = sum)))/length(obs95$Date)/(max(as.numeric(MedHills95[which(MedHills95[,1] == 9),-1])) - min(as.numeric(MedHills95[which(MedHills95[,1] == 9),-1]))), breaks = 10, xlab = 'average daily difference/(max - min flow)', main = ParamSelect_h_Agg910[i])
+    #abs(SAE2 - SAE1)/(median(SAE2, SAE1)) = 
+    hist(abs((apply(X = abs(apply(X = HillSF05[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
+                                                                          - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
+                                                                                                                                                                                            - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))]+1,], 
+                                  MARGIN = 1, FUN = "-", as.numeric(MedHills05[which(MedHills05[,1] == 9),-1]))), 
+                    MARGIN = 2, FUN = sum) 
+              - apply(X = abs(apply(X = HillSF05[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
+                                                                            - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
+                                                                                                                                                                                             - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))],], 
+                                    MARGIN = 1, FUN = "-", as.numeric(MedHills05[which(MedHills05[,1] == 9),-1]))), 
+                      MARGIN = 2, FUN = sum)))/
+           apply(X = rbind(apply(X = abs(apply(X = HillSF05[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
+                                                                              - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
+                                                                                                                                                                                                - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))]+1,], 
+                                      MARGIN = 1, FUN = "-", as.numeric(MedHills05[which(MedHills05[,1] == 9),-1]))), 
+                        MARGIN = 2, FUN = sum), apply(X = abs(apply(X = HillSF05[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
+                                                                                                            - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
+                                                                                                                                                                                                                             - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))],], 
+                                                                    MARGIN = 1, FUN = "-", as.numeric(MedHills05[which(MedHills05[,1] == 9),-1]))), 
+                                                      MARGIN = 2, FUN = sum)), MARGIN = 2, FUN = mean), 
+         breaks = 10, xlab = 'average daily difference', main = ParamSelect_h_Agg910[i])
+    hist(abs((apply(X = abs(apply(X = HillSF95[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
+                                                                          - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
+                                                                                                                                                                                            - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))]+1,], 
+                                  MARGIN = 1, FUN = "-", as.numeric(MedHills95[which(MedHills95[,1] == 9),-1]))), 
+                    MARGIN = 2, FUN = sum) 
+              - apply(X = abs(apply(X = HillSF95[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
+                                                                            - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
+                                                                                                                                                                                             - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))],], 
+                                    MARGIN = 1, FUN = "-", as.numeric(MedHills95[which(MedHills95[,1] == 9),-1]))), 
+                      MARGIN = 2, FUN = sum)))/
+           apply(X = rbind(apply(X = abs(apply(X = HillSF95[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
+                                                                                       - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
+                                                                                                                                                                                                         - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))]+1,], 
+                                               MARGIN = 1, FUN = "-", as.numeric(MedHills95[which(MedHills95[,1] == 9),-1]))), 
+                                 MARGIN = 2, FUN = sum), apply(X = abs(apply(X = HillSF95[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
+                                                                                                                     - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
+                                                                                                                                                                                                                                      - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))],], 
+                                                                             MARGIN = 1, FUN = "-", as.numeric(MedHills95[which(MedHills95[,1] == 9),-1]))), 
+                                                               MARGIN = 2, FUN = sum)), MARGIN = 2, FUN = mean), 
+         breaks = 10, xlab = 'average daily difference', main = ParamSelect_h_Agg910[i])
+    hist(abs((apply(X = abs(apply(X = HillSFot[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
+                                                                          - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
+                                                                                                                                                                                            - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))]+1,], 
+                                  MARGIN = 1, FUN = "-", as.numeric(MedHillsot[which(MedHillsot[,1] == 9),-1]))), 
+                    MARGIN = 2, FUN = sum) 
+              - apply(X = abs(apply(X = HillSFot[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
+                                                                            - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
+                                                                                                                                                                                             - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))],], 
+                                    MARGIN = 1, FUN = "-", as.numeric(MedHillsot[which(MedHillsot[,1] == 9),-1]))), 
+                      MARGIN = 2, FUN = sum)))/
+           apply(X = rbind(apply(X = abs(apply(X = HillSFot[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
+                                                                                       - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
+                                                                                                                                                                                                         - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))]+1,], 
+                                               MARGIN = 1, FUN = "-", as.numeric(MedHillsot[which(MedHillsot[,1] == 9),-1]))), 
+                                 MARGIN = 2, FUN = sum), apply(X = abs(apply(X = HillSFot[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
+                                                                                                                     - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
+                                                                                                                                                                                                                                      - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))],], 
+                                                                             MARGIN = 1, FUN = "-", as.numeric(MedHillsot[which(MedHillsot[,1] == 9),-1]))), 
+                                                               MARGIN = 2, FUN = sum)), MARGIN = 2, FUN = mean), 
+         breaks = 10, xlab = 'average daily difference', main = ParamSelect_h_Agg910[i])
+  }
+}
