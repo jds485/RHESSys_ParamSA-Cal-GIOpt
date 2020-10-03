@@ -555,6 +555,7 @@ cols = ncol(InputParams)
 
 #Load in file containing the parameters that will be calibrated----
 ParamsCal = read.csv(file = "C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\RHESSysFilePreparation\\defs_Calibration\\BaismanCalibrationParameterProblemFile.csv", header = TRUE, stringsAsFactors = FALSE)
+ParamsCal910 = read.csv(file = "C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\RHESSysFilePreparation\\defs_Calibration\\BaismanCalibrationParameterProblemFile_NewGWBounds.csv", header = TRUE, stringsAsFactors = FALSE)
 #Export csv of parameters and likelihood for parallel axis plot----
 LikesParams = cbind(SelLikes$logLAll, InputParams[SelLikes$Replicate, which(colnames(InputParams) %in% ParamsCal$NumberedParams)])
 write.csv(LikesParams, 'LikelihoodParamsParAxis.csv', row.names = FALSE)
@@ -715,3 +716,79 @@ for (i in 1:nrow(ParamsCal)){
   dev.off()
 }
 rm(i)
+
+# Random sample for hillslope 910 calibration----
+set.seed(5269)
+#LHS with 10 chains
+LHS910_10 = improvedLHS(n = 10, k = nrow(ParamsCal910))
+#Name the columns
+colnames(LHS910_10) = ParamsCal910$NumberedParams
+
+#Get all parameters into their specified ranges
+for (i in 1:nrow(ParamsCal910)){
+  LHS910_10[,i] = LHS910_10[,i]*(ParamsCal910$Upper[i] - ParamsCal910$Lower[i]) + ParamsCal910$Lower[i]
+}
+rm(i)
+#Round to the same number of decimal places as replicate chains
+LHS910_10 = round(LHS910_10, 9)
+
+#LHS with 10 chains
+LHS910_10_1 = improvedLHS(n = 10, k = nrow(ParamsCal910))
+#Name the columns
+colnames(LHS910_10_1) = ParamsCal910$NumberedParams
+
+#Get all parameters into their specified ranges
+for (i in 1:nrow(ParamsCal910)){
+  LHS910_10_1[,i] = LHS910_10_1[,i]*(ParamsCal910$Upper[i] - ParamsCal910$Lower[i]) + ParamsCal910$Lower[i]
+}
+rm(i)
+#Round to the same number of decimal places as replicate chains
+LHS910_10_1 = round(LHS910_10_1, 9)
+
+#LHS with 10 chains
+LHS910_10_2 = improvedLHS(n = 10, k = nrow(ParamsCal910))
+#Name the columns
+colnames(LHS910_10_2) = ParamsCal910$NumberedParams
+
+#Get all parameters into their specified ranges
+for (i in 1:nrow(ParamsCal910)){
+  LHS910_10_2[,i] = LHS910_10_2[,i]*(ParamsCal910$Upper[i] - ParamsCal910$Lower[i]) + ParamsCal910$Lower[i]
+}
+rm(i)
+#Round to the same number of decimal places as replicate chains
+LHS910_10_2 = round(LHS910_10_2, 9)
+
+#LHS with 10 chains
+LHS910_10_3 = improvedLHS(n = 10, k = nrow(ParamsCal910))
+#Name the columns
+colnames(LHS910_10_3) = ParamsCal910$NumberedParams
+
+#Get all parameters into their specified ranges
+for (i in 1:nrow(ParamsCal910)){
+  LHS910_10_3[,i] = LHS910_10_3[,i]*(ParamsCal910$Upper[i] - ParamsCal910$Lower[i]) + ParamsCal910$Lower[i]
+}
+rm(i)
+#Round to the same number of decimal places as replicate chains
+LHS910_10_3 = round(LHS910_10_3, 9)
+
+write.table(LHS910_10, file = 'Bais910ChainStarts_LHS10.txt', sep = '\t', row.names = FALSE, col.names = TRUE)
+write.table(LHS910_10_1, file = 'Bais910ChainStarts_LHS10_1.txt', sep = '\t', row.names = FALSE, col.names = TRUE)
+write.table(LHS910_10_2, file = 'Bais910ChainStarts_LHS10_2.txt', sep = '\t', row.names = FALSE, col.names = TRUE)
+write.table(LHS910_10_3, file = 'Bais910ChainStarts_LHS10_3.txt', sep = '\t', row.names = FALSE, col.names = TRUE)
+
+#Make the obs synthetic timeseries parameters----
+set.seed(3948)
+ObsParams = vector('numeric', nrow(ParamsCal910))
+#Get all parameters into their specified ranges
+for (i in 1:nrow(ParamsCal910)){
+  ObsParams[i] = runif(n = 1, min = ParamsCal910$Lower[i], max = ParamsCal910$Upper[i])
+}
+rm(i)
+#Round to the same number of decimal places as replicate chains
+ObsParams = round(ObsParams, 9)
+
+#Add column names and make a dataframe
+ObsParams = as.data.frame(t(ObsParams))
+colnames(ObsParams) = ParamsCal910$NumberedParams
+
+write.table(ObsParams, file = 'Bais910_Syn_BeforeProcessing.txt', sep = '\t', row.names = FALSE, col.names = TRUE)
