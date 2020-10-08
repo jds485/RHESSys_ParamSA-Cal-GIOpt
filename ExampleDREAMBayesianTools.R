@@ -4,6 +4,7 @@ library(parallel)
 library(foreach)
 library(doParallel)
 library(rlist)
+library(bayesplot)
 
 #Example from: https://cran.r-project.org/web/packages/BayesianTools/vignettes/BayesianTools.html#example
 set.seed(2759)
@@ -24,14 +25,17 @@ setUp1 <- createBayesianSetup(likelihood1, lower = c(-5,-5,-5,0.01), upper = c(5
 setUp1_par <- createBayesianSetup(likelihood1, lower = c(-5,-5,-5,0.01), upper = c(5,5,5,30), parallel = 7, parallelOptions = list(packages=list('BayesianTools'), variables=list('x','y'), dlls=NULL))
 
 #MCMC setup
-settings = list(iterations = 100000, gamma= NULL, eps = 0, e = 0.05, parallel = NULL, Z = NULL, ZupdateFrequency = 10, pSnooker = 0.1, DEpairs = 3,
-                nCR = 1, pCRupdate = TRUE, updateInterval = 100,
+settings = list(iterations = 10000, gamma= NULL, eps = 0, e = 0.05, parallel = NULL, 
+                Z = NULL, ZupdateFrequency = 10, pSnooker = 0.1, DEpairs = 3,
+                nCR = 3, pCRupdate = TRUE, updateInterval = 10,
                 #burnin must be greater than adaptation.
-                burnin = 20000, adaptation = 20000, thin = 5, message = FALSE, startValue = 7)
+                burnin = 3000, adaptation = 2000, thin = 1, message = FALSE, startValue = 5)
 
 out1 <- runMCMC(bayesianSetup = setUp1, sampler = "DREAMzs", settings = settings)
 tracePlot(out1)
 summary(out1)
+correlationPlot(out1)
+gelmanDiagnostics(out1, plot=T)
 
 #parallel
 #Note: setting the seed equal to the seed for serial does not result in identical runs. There must be a parallel random seed option that's different than serial.
