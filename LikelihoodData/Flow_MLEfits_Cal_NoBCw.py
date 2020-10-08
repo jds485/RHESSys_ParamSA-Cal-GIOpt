@@ -43,8 +43,6 @@ Qdf = pd.DataFrame(columns=['Replicate', 'Chain', 'beta','xi','sigma_0','sigma_1
 #Number of samples to take for the multi-start gradient descent algorithm
 numsamps = int(sys.argv[6])
 
-comparedata = np.array(SimQ['streamflow'])
-
 #Compute the weekly, monthly, and annual timeseries from the daily timeseries
 #Make a deep copy of this to compute weekly, monthly, and annual info later
 cTrueQ = TrueQ.copy(deep=True)
@@ -74,6 +72,7 @@ for i in range(len(cTrueQ['Flow'])):
         w = w + 1
 
 data = np.array(wTrueQ)
+comparedata = np.array(wSimQ)
 tIndex = range(len(wTrueQ))
 
 #Compute metrics to append to dataframe:
