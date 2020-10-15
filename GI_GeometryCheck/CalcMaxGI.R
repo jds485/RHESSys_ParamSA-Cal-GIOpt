@@ -627,3 +627,21 @@ north.arrow(xb = -76.712, yb = 39.469, len = .0005, lab = 'N', tcol = 'black', c
 text(x = -76.712, y = 39.467, 'WGS84')
 box(which = 'figure', lwd = 2)
 dev.off()
+
+#Get the Max GI for only hillslopes 9 and 10----
+setwd("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\SyntheticHill11+12")
+lcMax_gr910 = lcMax_gr[lcMax_gr$patchID %in% Cells$patchID[Cells$hillID %in% c(9,10)],]
+
+#Reassign the patchID number to match the RHESSys setup for only those hillslopes
+Cells910 = read.csv("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\SyntheticHill11+12\\worldfile.csv", stringsAsFactors = FALSE)
+coordinates(Cells910) = c('patchX', 'patchY')
+proj4string(Cells910) = CRS('+init=epsg:26918')
+
+lcMax_gr910$patchID2 = 0
+for (i in 1:nrow(lcMax_gr910)){
+  lcMax_gr910$patchID2[i] = Cells910$patchID[which((Cells910$patchX == Cells$patchX[Cells$patchID == lcMax_gr910$patchID[i]][1]) & (Cells910$patchY == Cells$patchY[Cells$patchID == lcMax_gr910$patchID[i]][1]))][1]
+}
+#These are the same! Drop the patchID2 column and save
+lcMax_gr910 = lcMax_gr910[,-which(colnames(lcMax_gr910) == 'patchID2')]
+
+write.csv(lcMax_gr910, 'MaxGI30m910.csv', row.names = FALSE)
