@@ -15,18 +15,20 @@ od = getwd()
 #7: Output filename ('lulcFrac30m_GI.csv')
 #8: GI resolution (side of a square), in meters ('9')
 #9: Total patch area, m2 ('900')
+#10: Decision Variable file name
 arg = commandArgs(T)
 
 setwd(arg[4])
 
-#Fixme: read in an externally generated file?
-# It would be nice if this file in the name or in the contents contained an identifier 
-# for the parameter set and the optimization replicate so that they can be used for the
-# random seed selection and (possibly) the file names.
-#Input from Borg is what fraction of each hillslope+location(up, mid, downslope) to change to GI
-# One row per hillslope, 9-14
-# columns: Downslope, Midslope, Upslope to match MaxGI column order
-HillPct = matrix(rep(0.2,as.numeric(arg[5])*as.numeric(arg[6])), nrow = as.numeric(arg[5]), ncol = as.numeric(arg[6]))
+#Read in the file generated from the c++ function
+#Entries are what fraction of each hillslope section to change to GI
+# columns: 9 Downslope, 9 Midslope, 9 Upslope, 10 Downslope, 10 Midslope, 10 Upslope
+fd = as.numeric(read.table(arg[10], header = FALSE, sep = '\t', stringsAsFactors = FALSE))
+
+#reformat data into a matrix for calculation in the function below
+HillPct = matrix(rep(0,as.numeric(arg[5])*as.numeric(arg[6])), nrow = as.numeric(arg[5]), ncol = as.numeric(arg[6]))
+HillPct[1,] = fd[1:3]
+HillPct[2,] = fd[4:6]
 
 #Read in the maximum possible GI allocation amount for each patch.
 MaxGI = read.csv(arg[2], stringsAsFactors = FALSE)
@@ -39,12 +41,11 @@ if (!('lulc13' %in% colnames(lc30))){
 }
 
 #Allocate GI randomly within each hillslopes----
-#Random seed based on Borg replicate
 set.seed(as.numeric(arg[1]))
 
 #Fixme: this loop is not generalized.
 #Loop over hillslopes
-for (h in 9:14){
+for (h in 9:10){
   #Loop over locations
   for (l in 1:as.numeric(arg[6])){
     #Only add GI if the proportion is larger than 0
