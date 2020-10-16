@@ -2,6 +2,9 @@
 
 print('Start GI Allocation')
 
+#Get original working directory
+od = getwd()
+
 #Arguments:
 #1: random seed
 #2: csv file describing the maximum GI allocation for each patch ('MaxGI30m.csv')
@@ -119,4 +122,6 @@ if (any(rowSums(lc30[,-c(1,2)]) != as.numeric(arg[9]))){
 #Output the lulcFrac30m.csv file with the updated GI changes
 write.csv(lc30, file = arg[7], row.names = FALSE)
 
+#Set original working directory
+setwd(od)
 print('End GI Allocation')

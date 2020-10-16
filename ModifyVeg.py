@@ -23,6 +23,8 @@ import string
 veg = pd.read_csv(sys.argv[1]+'/'+sys.argv[4], header=None)
 
 #Modify each column using the def files
+#Get original directory
+od = os.getcwd()
 #Go to the def file directory
 os.chdir(sys.argv[3])
 
@@ -49,4 +51,7 @@ for h in range(len(IndH)):
 
 #Write a new vegetation csv file in the output location
 veg.to_csv(sys.argv[2]+'/'+sys.argv[4], index=False, header=False)
+
+#Go back to original directory
+os.chdir(od)
 print('End ModifyVeg.py')
