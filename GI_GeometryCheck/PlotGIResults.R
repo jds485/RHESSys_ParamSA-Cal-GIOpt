@@ -4,6 +4,553 @@ library(vroom)
 library(sp)
 library(rgdal)
 
+#Hillslopes 9+10----
+setwd("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\Optimization\\GIAllocation910")
+
+#Number of random seeds run with each GI allocation
+numReps = 100
+
+#Compute streamflow conversion factor----
+world = read.csv('worldfile.csv', stringsAsFactors = FALSE)
+res = 30
+#Taking the unique patch IDs because strata can exist in more than one patch.
+Area.basin = length(unique(world$patchID))*res^2
+#Multiplier conversion for basin streamflow (mm/d)*conversion_b -> cfs
+conversion_b = Area.basin/1000/(.3048^3)/24/3600
+
+#Get hillslope areas and conversion factor for streamflow in hillslopes
+uhills = unique(world$hillID)
+Area.Hills = matrix(NA, nrow = length(uhills), ncol = 2)
+#Multiplier conversion for streamflow (mm/d)*conversion_b -> cfs
+conversion_h = matrix(NA, nrow = length(uhills), ncol = 2)
+for (h in 9:10){
+  Area.Hills[h-8,1] = h
+  conversion_h[h-8,1] = h
+  #some patches have multiple strata, so their area cannot be counted from the count of cells.
+  Area.Hills[h-8,2] = length(which(world[which(duplicated(world$patchID) == FALSE),]$hillID == h))*res^2
+  conversion_h[h-8,2] = Area.Hills[h-8,2]/1000/(.3048^3)/24/3600
+}
+rm(h)
+
+#Make spatial dataframe from worldfile----
+coordinates(world) = c('patchX', 'patchY')
+proj4string(world) = CRS('+init=epsg:26918')
+#Change to degrees
+world=spTransform(world, CRSobj = CRS('+init=epsg:4326'))
+
+#Load the observed streamflow to compare the parameter set to it----
+ObsQNoError = read.table("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\SyntheticHill11+12\\SyntheticDataCreation\\Q0NoError.txt", header = TRUE, sep = '\t', stringsAsFactors = FALSE)
+ObsQ = read.table("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\SyntheticHill11+12\\SyntheticDataCreation\\Q0.txt", header = TRUE, sep = '\t', stringsAsFactors = FALSE)
+Resid = ObsQ$Flow - ObsQNoError$streamflow
+
+#Compute the 5th and 95th %-iles for use later - using the calibration timeperiod
+q05_cal = quantile(x = ObsQ$Flow, probs = 0.05)
+q95_cal = quantile(x = ObsQ$Flow, probs = 0.95)
+
+Year = unique(format(as.Date(ObsQ$Date), '%Y'))
+for (i in 1:(length(Year)-1)){
+  plot(x = as.Date(paste0(Year[i+1], '-01-01')), y = quantile(x = ObsQ$Flow[as.Date(ObsQ$Date) <= as.Date(paste0(Year[i+1], '-09-30'))], probs = 0.05), xlim = c(as.Date('1999-01-01'), as.Date('2014-01-01')), ylim = c(0,5), xlab = 'Year', ylab = 'Streamflow (cfs)')
+  par(new = TRUE)
+  plot(x = as.Date(paste0(Year[i+1], '-01-01')), y = quantile(x = ObsQ$Flow[as.Date(ObsQ$Date) <= as.Date(paste0(Year[i+1], '-09-30'))], probs = 0.95), xlim = c(as.Date('1999-01-01'), as.Date('2014-01-01')), ylim = c(0,5), col = 'red', axes = FALSE, xlab = '', ylab = '')
+  par(new=T)
+}
+rm(i)
+
+#Load the GI data----
+Q_b20 = read.table('FlowGI20_c.txt', header = TRUE, sep = '\t', stringsAsFactors = FALSE)
+Q_b40 = read.table('FlowGI40_c.txt', header = TRUE, sep = '\t', stringsAsFactors = FALSE)
+Q_b60 = read.table('FlowGI60_c.txt', header = TRUE, sep = '\t', stringsAsFactors = FALSE)
+Q_b80 = read.table('FlowGI80_c.txt', header = TRUE, sep = '\t', stringsAsFactors = FALSE)
+Q_b100 = vroom('Run401_basin.daily', delim = ' ', col_names = TRUE, col_types = cols(.default=col_double()), progress = FALSE)
+#Make a new Date column
+Q_b100$Date = as.Date(paste0(Q_b100$year, '-', Q_b100$month, '-', Q_b100$day))
+#Trim off spin-up years
+Q_b100 = Q_b100[which(as.Date(Q_b100$Date) >= as.Date('2004-10-01')),]
+#Convert simulated streamflow to cfs units
+Q_b100$streamflow = round(Q_b100$streamflow*conversion_b, 6)
+#Make an evaporation + transpiration column
+Q_b100$ET = Q_b100$evap + Q_b100$trans
+#Retain only streamflow, sat def, detention storage, ET, and Date columns for space
+Q_b100 = as.data.frame(Q_b100[,c('Date', 'streamflow', 'sat_def', 'detention_store', 'ET')])
+
+#Add residuals to each of the timeseries----
+Q_b20[,-1] = Q_b20[,-1] + Resid
+Q_b40[,-1] = Q_b40[,-1] + Resid
+Q_b60[,-1] = Q_b60[,-1] + Resid
+Q_b80[,-1] = Q_b80[,-1] + Resid
+Q_b100$streamflow = Q_b100$streamflow + Resid
+
+#Set negative flows to 0----
+Q_b20[,-1][Q_b20[,-1] < 0] = 0
+Q_b40[,-1][Q_b40[,-1] < 0] = 0
+Q_b60[,-1][Q_b60[,-1] < 0] = 0
+Q_b80[,-1][Q_b80[,-1] < 0] = 0
+Q_b100$streamflow[Q_b100$streamflow < 0] = 0
+
+#Plots - Basin ----
+setwd("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\Optimization\\GIAllocation910")
+# Compare observed and simulated streamflow----
+png(paste0('Q_ObsVsSim_b100.png'), res = 300, height = 5, width=5, units = 'in')
+plot(x = as.Date(ObsQ$Date), y = ObsQ$Flow, col = 'black', xlab = 'Year', ylab = 'Streamflow (cfs)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,50,2), labels = TRUE, cex.axis = 1.5)
+par(new=TRUE)
+plot(x = as.Date(Q_b20$Date), y = Q_b100$streamflow, col = 'red', xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+dev.off()
+
+# Streamflow----
+#  20% GI----
+png(paste0('Q_MedGI_b20.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(Q_b20$Date), y = Q_b20[,-1], col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'Streamflow (cfs)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,50,2), labels = TRUE, cex.axis = 1.5)
+#Add quantiles
+quants = apply(X = Q_b20[,-1], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+qlty = c(3,2,1,2,3)
+par(new=TRUE)
+plot(x = as.Date(Q_b20$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+dev.off()
+rm(quants, qlty)
+
+png(paste0('Q_MedGI_2007_b20.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(Q_b20$Date[which((Q_b20$Date >= '2007-01-01') & (Q_b20$Date <= '2007-12-31'))]), y = Q_b20[which((Q_b20$Date >= '2007-01-01') & (Q_b20$Date <= '2007-12-31')),-1], col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'Streamflow (cfs)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,50,2), labels = TRUE, cex.axis = 1.5)
+#Add quantiles
+quants = apply(X = Q_b20[which((Q_b20$Date >= '2007-01-01') & (Q_b20$Date <= '2007-12-31')),-1], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+qlty = c(3,2,1,2,3)
+par(new=TRUE)
+plot(x = as.Date(Q_b20$Date[which((Q_b20$Date >= '2007-01-01') & (Q_b20$Date <= '2007-12-31'))]), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+dev.off()
+rm(quants, qlty)
+
+#Make a plot of the sd in streamflow for each day
+sdQ20 = apply(X = Q_b20[,-1], MARGIN = 1, FUN = sd)
+meanQ20 = apply(X = Q_b20[,-1], MARGIN = 1, FUN = mean)
+CVQ20 = sdQ20/meanQ20
+
+png(paste0('Q_CVQ_b20.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(Q_b20$Date), y = CVQ20, xlab = 'Year', ylab = 'CV Streamflow (1)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,.1,0.001), labels = TRUE, cex.axis = 1.5)
+dev.off()
+
+png(paste0('Q_sdQ_b20.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(Q_b20$Date), y = sdQ20, xlab = 'Year', ylab = 'Std. Dev. Streamflow (cfs)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,.1,0.001), labels = TRUE, cex.axis = 1.5)
+dev.off()
+
+#Compare to without GI
+png(paste0('Q_GI+NoGI_b20.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(Q_b20$Date), y = Q_b20[,-1], col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'Streamflow (cfs)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,50,2), labels = TRUE, cex.axis = 1.5)
+par(new=TRUE)
+plot(x = as.Date(Q_b20$Date), y = ObsQ$Flow, col = 'green', xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+dev.off()
+
+#Check that all GI streamflows are <= without GI
+for (i in 1:100){
+  if (!all(Q_b20[,1+i] < ObsQ$Flow)){
+    print(paste('i = ', i, length(which(Q_b20[,1+i] >= ObsQ$Flow))))
+  }
+}
+
+#Plots that compare reduction in streamflow
+png(paste0('Q_MinusGI_b20.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(Q_b20$Date), y = Q_b20[,-1] - ObsQ$Flow, col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'Streamflow (cfs)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(1,-50,-0.01), labels = TRUE, cex.axis = 1.5)
+#Add quantiles
+quants = apply(X = Q_b20[,-1] - ObsQ$Flow, MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+qlty = c(3,2,1,2,3)
+par(new=TRUE)
+plot(x = as.Date(Q_b20$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+dev.off()
+rm(quants, qlty)
+
+png(paste0('Q_MinusGI_2007_b20.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(Q_b20$Date[which((Q_b20$Date >= '2007-01-01') & (Q_b20$Date <= '2007-12-31'))]), y = Q_b20[which((Q_b20$Date >= '2007-01-01') & (Q_b20$Date <= '2007-12-31')),-1] - ObsQ$Flow[which((Q_b20$Date >= '2007-01-01') & (Q_b20$Date <= '2007-12-31'))], col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'Streamflow (cfs)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(1,-50,-0.01), labels = TRUE, cex.axis = 1.5)
+#Add quantiles
+quants = apply(X = Q_b20[which((Q_b20$Date >= '2007-01-01') & (Q_b20$Date <= '2007-12-31')),-1] - ObsQ$Flow[which((Q_b20$Date >= '2007-01-01') & (Q_b20$Date <= '2007-12-31'))], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+qlty = c(3,2,1,2,3)
+par(new=TRUE)
+plot(x = as.Date(Q_b20$Date[which((Q_b20$Date >= '2007-01-01') & (Q_b20$Date <= '2007-12-31'))]), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+dev.off()
+rm(quants, qlty)
+
+#  40% GI----
+png(paste0('Q_MedGI_b40.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(Q_b40$Date), y = Q_b40[,-1], col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'Streamflow (cfs)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,50,2), labels = TRUE, cex.axis = 1.5)
+#Add quantiles
+quants = apply(X = Q_b40[,-1], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+qlty = c(3,2,1,2,3)
+par(new=TRUE)
+plot(x = as.Date(Q_b40$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+dev.off()
+rm(quants, qlty)
+
+png(paste0('Q_MedGI_2007_b40.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(Q_b40$Date[which((Q_b40$Date >= '2007-01-01') & (Q_b40$Date <= '2007-12-31'))]), y = Q_b40[which((Q_b40$Date >= '2007-01-01') & (Q_b40$Date <= '2007-12-31')),-1], col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'Streamflow (cfs)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,50,2), labels = TRUE, cex.axis = 1.5)
+#Add quantiles
+quants = apply(X = Q_b40[which((Q_b40$Date >= '2007-01-01') & (Q_b40$Date <= '2007-12-31')),-1], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+qlty = c(3,2,1,2,3)
+par(new=TRUE)
+plot(x = as.Date(Q_b40$Date[which((Q_b40$Date >= '2007-01-01') & (Q_b40$Date <= '2007-12-31'))]), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+dev.off()
+rm(quants, qlty)
+
+#Make a plot of the sd in streamflow for each day
+sdQ20 = apply(X = Q_b40[,-1], MARGIN = 1, FUN = sd)
+meanQ20 = apply(X = Q_b40[,-1], MARGIN = 1, FUN = mean)
+CVQ20 = sdQ20/meanQ20
+
+png(paste0('Q_CVQ_b40.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(Q_b40$Date), y = CVQ20, xlab = 'Year', ylab = 'CV Streamflow (1)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,.1,0.001), labels = TRUE, cex.axis = 1.5)
+dev.off()
+
+png(paste0('Q_sdQ_b40.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(Q_b40$Date), y = sdQ20, xlab = 'Year', ylab = 'Std. Dev. Streamflow (cfs)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,.1,0.001), labels = TRUE, cex.axis = 1.5)
+dev.off()
+
+#Compare to without GI
+png(paste0('Q_GI+NoGI_b40.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(Q_b40$Date), y = Q_b40[,-1], col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'Streamflow (cfs)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,50,2), labels = TRUE, cex.axis = 1.5)
+par(new=TRUE)
+plot(x = as.Date(Q_b40$Date), y = ObsQ$Flow, col = 'green', xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+dev.off()
+
+#Check that all GI streamflows are <= without GI
+for (i in 1:100){
+  if (!all(Q_b40[,1+i] < ObsQ$Flow)){
+    print(paste('i = ', i, length(which(Q_b40[,1+i] >= ObsQ$Flow))))
+  }
+}
+
+#Plots that compare reduction in streamflow
+png(paste0('Q_MinusGI_b40.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(Q_b40$Date), y = Q_b40[,-1] - ObsQ$Flow, col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'Streamflow (cfs)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(1,-50,-0.01), labels = TRUE, cex.axis = 1.5)
+#Add quantiles
+quants = apply(X = Q_b40[,-1] - ObsQ$Flow, MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+qlty = c(3,2,1,2,3)
+par(new=TRUE)
+plot(x = as.Date(Q_b40$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+dev.off()
+rm(quants, qlty)
+
+png(paste0('Q_MinusGI_2007_b40.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(Q_b40$Date[which((Q_b40$Date >= '2007-01-01') & (Q_b40$Date <= '2007-12-31'))]), y = Q_b40[which((Q_b40$Date >= '2007-01-01') & (Q_b40$Date <= '2007-12-31')),-1] - ObsQ$Flow[which((Q_b40$Date >= '2007-01-01') & (Q_b40$Date <= '2007-12-31'))], col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'Streamflow (cfs)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(1,-50,-0.01), labels = TRUE, cex.axis = 1.5)
+#Add quantiles
+quants = apply(X = Q_b40[which((Q_b40$Date >= '2007-01-01') & (Q_b40$Date <= '2007-12-31')),-1] - ObsQ$Flow[which((Q_b40$Date >= '2007-01-01') & (Q_b40$Date <= '2007-12-31'))], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+qlty = c(3,2,1,2,3)
+par(new=TRUE)
+plot(x = as.Date(Q_b40$Date[which((Q_b40$Date >= '2007-01-01') & (Q_b40$Date <= '2007-12-31'))]), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+dev.off()
+rm(quants, qlty)
+
+#  60% GI----
+png(paste0('Q_MedGI_b60.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(Q_b60$Date), y = Q_b60[,-1], col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'Streamflow (cfs)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,50,2), labels = TRUE, cex.axis = 1.5)
+#Add quantiles
+quants = apply(X = Q_b60[,-1], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+qlty = c(3,2,1,2,3)
+par(new=TRUE)
+plot(x = as.Date(Q_b60$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+dev.off()
+rm(quants, qlty)
+
+png(paste0('Q_MedGI_2007_b60.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(Q_b60$Date[which((Q_b60$Date >= '2007-01-01') & (Q_b60$Date <= '2007-12-31'))]), y = Q_b60[which((Q_b60$Date >= '2007-01-01') & (Q_b60$Date <= '2007-12-31')),-1], col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'Streamflow (cfs)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,50,2), labels = TRUE, cex.axis = 1.5)
+#Add quantiles
+quants = apply(X = Q_b60[which((Q_b60$Date >= '2007-01-01') & (Q_b60$Date <= '2007-12-31')),-1], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+qlty = c(3,2,1,2,3)
+par(new=TRUE)
+plot(x = as.Date(Q_b60$Date[which((Q_b60$Date >= '2007-01-01') & (Q_b60$Date <= '2007-12-31'))]), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+dev.off()
+rm(quants, qlty)
+
+#Make a plot of the sd in streamflow for each day
+sdQ20 = apply(X = Q_b60[,-1], MARGIN = 1, FUN = sd)
+meanQ20 = apply(X = Q_b60[,-1], MARGIN = 1, FUN = mean)
+CVQ20 = sdQ20/meanQ20
+
+png(paste0('Q_CVQ_b60.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(Q_b60$Date), y = CVQ20, xlab = 'Year', ylab = 'CV Streamflow (1)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,.1,0.001), labels = TRUE, cex.axis = 1.5)
+dev.off()
+
+png(paste0('Q_sdQ_b60.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(Q_b60$Date), y = sdQ20, xlab = 'Year', ylab = 'Std. Dev. Streamflow (cfs)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,.1,0.001), labels = TRUE, cex.axis = 1.5)
+dev.off()
+
+#Compare to without GI
+png(paste0('Q_GI+NoGI_b60.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(Q_b60$Date), y = Q_b60[,-1], col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'Streamflow (cfs)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,50,2), labels = TRUE, cex.axis = 1.5)
+par(new=TRUE)
+plot(x = as.Date(Q_b60$Date), y = ObsQ$Flow, col = 'green', xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+dev.off()
+
+#Check that all GI streamflows are <= without GI
+for (i in 1:100){
+  if (!all(Q_b60[,1+i] < ObsQ$Flow)){
+    print(paste('i = ', i, length(which(Q_b60[,1+i] >= ObsQ$Flow))))
+  }
+}
+
+#Plots that compare reduction in streamflow
+png(paste0('Q_MinusGI_b60.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(Q_b60$Date), y = Q_b60[,-1] - ObsQ$Flow, col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'Streamflow (cfs)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(1,-50,-0.01), labels = TRUE, cex.axis = 1.5)
+#Add quantiles
+quants = apply(X = Q_b60[,-1] - ObsQ$Flow, MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+qlty = c(3,2,1,2,3)
+par(new=TRUE)
+plot(x = as.Date(Q_b60$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+dev.off()
+rm(quants, qlty)
+
+png(paste0('Q_MinusGI_2007_b60.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(Q_b60$Date[which((Q_b60$Date >= '2007-01-01') & (Q_b60$Date <= '2007-12-31'))]), y = Q_b60[which((Q_b60$Date >= '2007-01-01') & (Q_b60$Date <= '2007-12-31')),-1] - ObsQ$Flow[which((Q_b60$Date >= '2007-01-01') & (Q_b60$Date <= '2007-12-31'))], col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'Streamflow (cfs)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(1,-50,-0.01), labels = TRUE, cex.axis = 1.5)
+#Add quantiles
+quants = apply(X = Q_b60[which((Q_b60$Date >= '2007-01-01') & (Q_b60$Date <= '2007-12-31')),-1] - ObsQ$Flow[which((Q_b60$Date >= '2007-01-01') & (Q_b60$Date <= '2007-12-31'))], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+qlty = c(3,2,1,2,3)
+par(new=TRUE)
+plot(x = as.Date(Q_b60$Date[which((Q_b60$Date >= '2007-01-01') & (Q_b60$Date <= '2007-12-31'))]), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+dev.off()
+rm(quants, qlty)
+
+#  80% GI----
+png(paste0('Q_MedGI_b80.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(Q_b80$Date), y = Q_b80[,-1], col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'Streamflow (cfs)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,50,2), labels = TRUE, cex.axis = 1.5)
+#Add quantiles
+quants = apply(X = Q_b80[,-1], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+qlty = c(3,2,1,2,3)
+par(new=TRUE)
+plot(x = as.Date(Q_b80$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+dev.off()
+rm(quants, qlty)
+
+png(paste0('Q_MedGI_2007_b80.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(Q_b80$Date[which((Q_b80$Date >= '2007-01-01') & (Q_b80$Date <= '2007-12-31'))]), y = Q_b80[which((Q_b80$Date >= '2007-01-01') & (Q_b80$Date <= '2007-12-31')),-1], col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'Streamflow (cfs)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,50,2), labels = TRUE, cex.axis = 1.5)
+#Add quantiles
+quants = apply(X = Q_b80[which((Q_b80$Date >= '2007-01-01') & (Q_b80$Date <= '2007-12-31')),-1], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+qlty = c(3,2,1,2,3)
+par(new=TRUE)
+plot(x = as.Date(Q_b80$Date[which((Q_b80$Date >= '2007-01-01') & (Q_b80$Date <= '2007-12-31'))]), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+dev.off()
+rm(quants, qlty)
+
+#Make a plot of the sd in streamflow for each day
+sdQ20 = apply(X = Q_b80[,-1], MARGIN = 1, FUN = sd)
+meanQ20 = apply(X = Q_b80[,-1], MARGIN = 1, FUN = mean)
+CVQ20 = sdQ20/meanQ20
+
+png(paste0('Q_CVQ_b80.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(Q_b80$Date), y = CVQ20, xlab = 'Year', ylab = 'CV Streamflow (1)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,.1,0.001), labels = TRUE, cex.axis = 1.5)
+dev.off()
+
+png(paste0('Q_sdQ_b80.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(Q_b80$Date), y = sdQ20, xlab = 'Year', ylab = 'Std. Dev. Streamflow (cfs)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,.1,0.001), labels = TRUE, cex.axis = 1.5)
+dev.off()
+
+#Compare to without GI
+png(paste0('Q_GI+NoGI_b80.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(Q_b80$Date), y = Q_b80[,-1], col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'Streamflow (cfs)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(0,50,2), labels = TRUE, cex.axis = 1.5)
+par(new=TRUE)
+plot(x = as.Date(Q_b80$Date), y = ObsQ$Flow, col = 'green', xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+dev.off()
+
+#Check that all GI streamflows are <= without GI
+for (i in 1:100){
+  if (!all(Q_b80[,1+i] < ObsQ$Flow)){
+    print(paste('i = ', i, length(which(Q_b80[,1+i] >= ObsQ$Flow))))
+  }
+}
+
+#Plots that compare reduction in streamflow
+png(paste0('Q_MinusGI_b80.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(Q_b80$Date), y = Q_b80[,-1] - ObsQ$Flow, col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'Streamflow (cfs)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(1,-50,-0.01), labels = TRUE, cex.axis = 1.5)
+#Add quantiles
+quants = apply(X = Q_b80[,-1] - ObsQ$Flow, MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+qlty = c(3,2,1,2,3)
+par(new=TRUE)
+plot(x = as.Date(Q_b80$Date), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+dev.off()
+rm(quants, qlty)
+
+png(paste0('Q_MinusGI_2007_b80.png'), res = 300, height = 5, width=5, units = 'in')
+matplot(x = as.Date(Q_b80$Date[which((Q_b80$Date >= '2007-01-01') & (Q_b80$Date <= '2007-12-31'))]), y = Q_b80[which((Q_b80$Date >= '2007-01-01') & (Q_b80$Date <= '2007-12-31')),-1] - ObsQ$Flow[which((Q_b80$Date >= '2007-01-01') & (Q_b80$Date <= '2007-12-31'))], col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'Streamflow (cfs)', type = 'l', axes=FALSE, cex.lab = 1.5)
+box()
+axis(1, at = as.Date(paste0(seq(1999,2020,1), '-01-01')), labels = format(as.Date(paste0(seq(1999,2020,1), '-01-01')), "%Y"), cex.axis = 1.5)
+axis(2, at = seq(1,-50,-0.01), labels = TRUE, cex.axis = 1.5)
+#Add quantiles
+quants = apply(X = Q_b80[which((Q_b80$Date >= '2007-01-01') & (Q_b80$Date <= '2007-12-31')),-1] - ObsQ$Flow[which((Q_b80$Date >= '2007-01-01') & (Q_b80$Date <= '2007-12-31'))], MARGIN = 1, FUN = quantile, seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7)
+qlty = c(3,2,1,2,3)
+par(new=TRUE)
+plot(x = as.Date(Q_b80$Date[which((Q_b80$Date >= '2007-01-01') & (Q_b80$Date <= '2007-12-31'))]), y = quants[3,], col = 'red', lty = qlty[3], xlab = '', ylab = '', type = 'l', axes=FALSE, lwd = 0.1, xaxs="i", yaxs="i", xlim=par('usr')[c(1,2)], ylim=par('usr')[c(3,4)])
+dev.off()
+rm(quants, qlty)
+
+#  Flood Objective----
+Sum95_b0 = sum(ObsQ$Flow[ObsQ$Flow >= q95_cal])
+Sum95_b20 = apply(X = Q_b20[,-1][which(Q_b20[,-1] >= q95_cal),], MARGIN = 2, FUN = sum, na.rm=TRUE)
+Sum95_b40 = apply(X = Q_b40[,-1][which(Q_b40[,-1] >= q95_cal),], MARGIN = 2, FUN = sum, na.rm=TRUE)
+Sum95_b60 = apply(X = Q_b60[,-1][which(Q_b60[,-1] >= q95_cal),], MARGIN = 2, FUN = sum, na.rm=TRUE)
+Sum95_b80 = apply(X = Q_b80[,-1][which(Q_b80[,-1] >= q95_cal),], MARGIN = 2, FUN = sum, na.rm=TRUE)
+Sum95_b100 = sum(Q_b100$streamflow[which(Q_b100$streamflow >= q95_cal)])
+
+O1_b20 = (Sum95_b0 - Sum95_b20)/Sum95_b0
+O1_b40 = (Sum95_b0 - Sum95_b40)/Sum95_b0
+O1_b60 = (Sum95_b0 - Sum95_b60)/Sum95_b0
+O1_b80 = (Sum95_b0 - Sum95_b80)/Sum95_b0
+O1_b100 = (Sum95_b0 - Sum95_b100)/Sum95_b0
+
+#   Histogram----
+png('NormalizedFloodingHist.png', res=200, units='in', width = 5, height = 5)
+hist(O1_b20, breaks = 10, freq = TRUE, xlim = c(0,0.5), ylim = c(0,20), xlab = 'Normalized Flooding Objective', main ='')
+par(new=TRUE)
+hist(O1_b40, breaks = 10, freq = TRUE, xlim = c(0,0.5), ylim = c(0,20), axes=FALSE, xlab='',ylab='', main ='')
+par(new=TRUE)
+hist(O1_b60, breaks = 10, freq = TRUE, xlim = c(0,0.5), ylim = c(0,20), axes=FALSE, xlab='',ylab='', main ='')
+par(new=TRUE)
+hist(O1_b80, breaks = 10, freq = TRUE, xlim = c(0,0.5), ylim = c(0,20), axes=FALSE, xlab='',ylab='', main ='')
+lines(x = c(O1_b100,O1_b100), y = c(0,20), col='red')
+dev.off()
+
+    #Quantile----
+Qo1_b20 = quantile(O1_b20, probs = c(0.05,0.25,0.5,0.75,0.95))
+Qo1_b40 = quantile(O1_b40, probs = c(0.05,0.25,0.5,0.75,0.95))
+Qo1_b60 = quantile(O1_b60, probs = c(0.05,0.25,0.5,0.75,0.95))
+Qo1_b80 = quantile(O1_b80, probs = c(0.05,0.25,0.5,0.75,0.95))
+
+png('QuantileRangeFlooding.png', res=200, units='in', width = 5, height = 5)
+plot(y = Qo1_b20[5]-Qo1_b20[1], x = 1, ylim = c(0,0.03), xlim = c(0,5), axes=FALSE, xlab = 'GI Arrangement', ylab = 'Quantile Range (95th - 5th)', pch=16, main='Normalized Flooding Objective')
+axis(side = 1, at = c(1,2,3,4), labels = c(20,40,60,80))
+axis(side = 2, at = seq(0,0.03,0.005))
+box()
+par(new=TRUE)
+plot(y = Qo1_b40[5]-Qo1_b40[1], x = 2, ylim = c(0,0.03), xlim = c(0,5), axes=FALSE, pch=16, xlab='', ylab='')
+par(new=TRUE)
+plot(y = Qo1_b60[5]-Qo1_b60[1], x = 3, ylim = c(0,0.03), xlim = c(0,5), axes=FALSE, pch=16, xlab='', ylab='')
+par(new=TRUE)
+plot(y = Qo1_b80[5]-Qo1_b80[1], x = 4, ylim = c(0,0.03), xlim = c(0,5), axes=FALSE, pch=16, xlab='', ylab='')
+dev.off()
+
+#  Low Flow Objective----
+Sum05_b0 = sum(ObsQ$Flow[ObsQ$Flow <= q05_cal])
+Sum05_b20 = apply(X = Q_b20[,-1][which(Q_b20[,-1] <= q05_cal),], MARGIN = 2, FUN = sum, na.rm=TRUE)
+Sum05_b40 = apply(X = Q_b40[,-1][which(Q_b40[,-1] <= q05_cal),], MARGIN = 2, FUN = sum, na.rm=TRUE)
+Sum05_b60 = apply(X = Q_b60[,-1][which(Q_b60[,-1] <= q05_cal),], MARGIN = 2, FUN = sum, na.rm=TRUE)
+Sum05_b80 = apply(X = Q_b80[,-1][which(Q_b80[,-1] <= q05_cal),], MARGIN = 2, FUN = sum, na.rm=TRUE)
+Sum05_b100 = sum(Q_b100$streamflow[which(Q_b100$streamflow <= q05_cal)])
+
+O2_b20 = (Sum05_b0 - Sum05_b20)/Sum05_b0
+O2_b40 = (Sum05_b0 - Sum05_b40)/Sum05_b0
+O2_b60 = (Sum05_b0 - Sum05_b60)/Sum05_b0
+O2_b80 = (Sum05_b0 - Sum05_b80)/Sum05_b0
+O2_b100 = (Sum05_b0 - Sum05_b100)/Sum05_b0
+
+#   Histogram----
+png('NormalizedLowFlowHist.png', res=200, units='in', width = 5, height = 5)
+hist(O2_b20, breaks = 10, freq = TRUE, xlim = c(-1,0), ylim = c(0,20), xlab = 'Normalized Flooding Objective', main ='')
+par(new=TRUE)
+hist(O2_b40, breaks = 10, freq = TRUE, xlim = c(-1,0), ylim = c(0,20), axes=FALSE, xlab='',ylab='', main ='')
+par(new=TRUE)
+hist(O2_b60, breaks = 10, freq = TRUE, xlim = c(-1,0), ylim = c(0,20), axes=FALSE, xlab='',ylab='', main ='')
+par(new=TRUE)
+hist(O2_b80, breaks = 10, freq = TRUE, xlim = c(-1,0), ylim = c(0,20), axes=FALSE, xlab='',ylab='', main ='')
+lines(x = c(O2_b100,O2_b100), y = c(0,20), col='red')
+dev.off()
+
+#   Quantiles----
+Qo2_b20 = quantile(O2_b20, probs = c(0.05,0.25,0.5,0.75,0.95))
+Qo2_b40 = quantile(O2_b40, probs = c(0.05,0.25,0.5,0.75,0.95))
+Qo2_b60 = quantile(O2_b60, probs = c(0.05,0.25,0.5,0.75,0.95))
+Qo2_b80 = quantile(O2_b80, probs = c(0.05,0.25,0.5,0.75,0.95))
+
+png('QuantileRangeLowFlow.png', res=200, units='in', width = 5, height = 5)
+plot(y = Qo2_b20[5]-Qo2_b20[1], x = 1, ylim = c(0,0.03), xlim = c(0,5), axes=FALSE, xlab = 'GI Arrangement', ylab = 'Quantile Range (95th - 5th)', pch=16, main='Normalized Low Flow Objective')
+axis(side = 1, at = c(1,2,3,4), labels = c(20,40,60,80))
+axis(side = 2, at = seq(0,0.03,0.005))
+box()
+par(new=TRUE)
+plot(y = Qo2_b40[5]-Qo2_b40[1], x = 2, ylim = c(0,0.03), xlim = c(0,5), axes=FALSE, pch=16, xlab='', ylab='')
+par(new=TRUE)
+plot(y = Qo2_b60[5]-Qo2_b60[1], x = 3, ylim = c(0,0.03), xlim = c(0,5), axes=FALSE, pch=16, xlab='', ylab='')
+par(new=TRUE)
+plot(y = Qo2_b80[5]-Qo2_b80[1], x = 4, ylim = c(0,0.03), xlim = c(0,5), axes=FALSE, pch=16, xlab='', ylab='')
+dev.off()
+
+########Full Basin################----
 setwd("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\Optimization\\GIAllocation")
 
 #Number of random seeds run with each GI allocation
