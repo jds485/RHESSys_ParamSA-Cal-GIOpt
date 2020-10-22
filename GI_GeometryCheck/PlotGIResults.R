@@ -78,6 +78,10 @@ SimB$ET = SimB$evap + SimB$trans
 #Retain only streamflow, sat def, detention storage, ET, and Date columns for space
 SimB = as.data.frame(SimB[,c('Date', 'streamflow', 'sat_def', 'detention_store', 'ET')])
 
+#Compute quantiles----
+q05_sim = quantile(x = SimB$streamflow, probs = 0.05)
+q95_sim = quantile(x = SimB$streamflow, probs = 0.95)
+
 # Hillslope----
 SimH = vroom('Run192_Ch9_hillslope.daily', delim = ' ', col_names = TRUE, col_types = cols(.default=col_double()), progress = FALSE)
 
@@ -291,6 +295,10 @@ Sum05_b = apply(X = Q_b[,-1][which(Q_b[,-1] <= q05_cal),], MARGIN = 2, FUN = sum
 #  Sum reduction in flow for all historical flows----
 SumAll_b = apply(X = Q_b[,-1] - SimB$streamflow, MARGIN = 2, FUN = sum)
 
+#  Sum flow greater than 95th%-ile flows for this parameter without GI----
+Sum95_b_sim = apply(X = Q_b[,-1][which(Q_b[,-1] >= q95_sim),], MARGIN = 2, FUN = sum, na.rm=TRUE)
+#  Sum flow less than 5th%-ile flowsfor this parameter without GI----
+Sum05_b_sim = apply(X = Q_b[,-1][which(Q_b[,-1] <= q05_sim),], MARGIN = 2, FUN = sum, na.rm=TRUE)
 # Sat Def----
 png(paste0('SatDef_MedGI_b.png'), res = 300, height = 5, width=5, units = 'in')
 matplot(x = as.Date(SatDef_b$Date), y = SatDef_b[,-1], col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'Sat. Deficit (mm)', type = 'l', axes=FALSE, cex.lab = 1.5)
@@ -1458,6 +1466,10 @@ Sum95_bu = apply(X = Q_bu[,-1][which(Q_bu[,-1] >= q95_cal),], MARGIN = 2, FUN = 
 Sum05_bu = apply(X = Q_bu[,-1][which(Q_bu[,-1] <= q05_cal),], MARGIN = 2, FUN = sum, na.rm=TRUE)
 #  Sum reduction in flow for all historical flows----
 SumAll_bu = apply(X = Q_bu[,-1] - SimB$streamflow, MARGIN = 2, FUN = sum)
+#  Sum flow greater than 95th%-ile flows for this parameter without GI----
+Sum95_bu_sim = apply(X = Q_bu[,-1][which(Q_bu[,-1] >= q95_sim),], MARGIN = 2, FUN = sum, na.rm=TRUE)
+#  Sum flow less than 5th%-ile flowsfor this parameter without GI----
+Sum05_bu_sim = apply(X = Q_bu[,-1][which(Q_bu[,-1] <= q05_sim),], MARGIN = 2, FUN = sum, na.rm=TRUE)
 # Sat Def----
 png(paste0('SatDef_MedGI_bu.png'), res = 300, height = 5, width=5, units = 'in')
 matplot(x = as.Date(SatDef_bu$Date), y = SatDef_bu[,-1], col = grey(level = 0.1, alpha = 0.01), xlab = 'Year', ylab = 'Sat. Deficit (mm)', type = 'l', axes=FALSE, cex.lab = 1.5)
