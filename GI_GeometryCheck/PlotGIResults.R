@@ -521,7 +521,7 @@ O2_b100 = (Sum05_b0 - Sum05_b100)/Sum05_b0
 
 #   Histogram----
 png('NormalizedLowFlowHist.png', res=200, units='in', width = 5, height = 5)
-hist(O2_b20, breaks = 10, freq = TRUE, xlim = c(-1,0), ylim = c(0,20), xlab = 'Normalized Flooding Objective', main ='')
+hist(O2_b20, breaks = 10, freq = TRUE, xlim = c(-1,0), ylim = c(0,20), xlab = 'Normalized Low Flow Objective', main ='')
 par(new=TRUE)
 hist(O2_b40, breaks = 10, freq = TRUE, xlim = c(-1,0), ylim = c(0,20), axes=FALSE, xlab='',ylab='', main ='')
 par(new=TRUE)
