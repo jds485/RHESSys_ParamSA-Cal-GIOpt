@@ -1,6 +1,6 @@
 #!/bin/bash
-#SBATCH -D /scratch/js4yd/GI_RandomSeedEval_Mid/
-#SBATCH -o /scratch/js4yd/GI_RandomSeedEval_Mid/Compareb_Mid.out
+#SBATCH -D /scratch/js4yd/GI_RandomSeedEval910/
+#SBATCH -o /scratch/js4yd/GI_RandomSeedEval910/Compareb60.out
 #SBATCH --ntasks=1                              # Number of tasks per serial job (must be 1)
 #SBATCH -p standard           									# Queue partition name "standard"
 #SBATCH -A quinnlab       											# allocation name
@@ -19,4 +19,4 @@ module load gcc/7.1.0 openmpi/3.1.4 R/3.5.3
 #5: Starting date
 #6: Replicate starting number
 #7: File end name
-Rscript /sfs/lustre/bahamut/scratch/js4yd/GI_RandomSeedEval_Mid/CompareGIStreamflows.R '30' '/scratch/js4yd/GI_RandomSeedEval_Mid/' 'RHESSys_Baisman30m_g74' '100' '2004-10-01' '1' ''
+Rscript /sfs/lustre/bahamut/scratch/js4yd/GI_RandomSeedEval910/CompareGIStreamflows.R '30' '/scratch/js4yd/GI_RandomSeedEval910/' 'RHESSys_Baisman30m_g74' '100' '2004-10-01' '201' '60'
