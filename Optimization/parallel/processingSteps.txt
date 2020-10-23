@@ -1,0 +1,36 @@
+1) get_objs.sh
+- assumes your runtime files are in a subdirectory "runtime" and have the file ending ".runtime"
+- assumes you will write files to a subdirectory "objs/runtime"
+- change lines 2-4 for your problem (seeds are 1-indexed, islands/masters are 0-indexed)
+- on line 12, change $135, $136, $137 to the numbers of the columns with your objective values (1-indexing; first nvars are decision variables)
+
+2) separateRuntimeObjs.py
+- no changes needed
+
+3) separateRuntimeSets.py
+- no changes needed
+
+4) find_runtime_refSet.sh (uses pareto.py)
+- assumes you will write files to a subdirectory "objs/runtime/reference"
+- change lines 2-4 for your problem (steps are 0-indexed)
+- on line 12, change numbers after -o to columns of .obj files with objectives (0 indexing), and numbers after -e to epsilons for each objective
+- on line 14, change numbers after -o to columns of .set files (first nvars are decision variables) with objectives (0 indexing), and numbers after -e to epsilons for each objective
+
+5) concatenate_runref.sh
+- change lines 2-4 for your problem
+
+6) find_refSet.sh (uses pareto.py)
+- assumes your set files are in a subdirectory "set" and have the file ending ".set"
+- change line 2 for your problem
+- on line 4, change numbers after -o to columns of .set files (first nvars are decision variables) with objectives (0 indexing), and numbers after -e to epsilons for each objective
+- running this will create a file called "${MODEL}.reference"; add a new line to ${MODEL}.reference with just "#" (needed for next 2 scripts)
+
+7) find_metrics.sh (uses MOEAFramework)
+- assumes you will write files to a directory "metrics"
+- change lines 2-3 for your problem
+- on line 10, change number after -d to the number of decision variables
+
+8) find_runtime_metrics.sh (uses MOEAFramework)
+- assumes you will write files to a directory "metrics/runtime"
+- change lines 2-3 for your problem
+- on line 10, change number after -d to the number of decision variables
