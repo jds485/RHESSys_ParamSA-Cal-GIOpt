@@ -11,6 +11,19 @@ library(pracma)
 library(coda)
 library(bayesplot)
 library(gridExtra)
+library(fGarch)
+library(factoextra)
+library(NbClust)
+library(MASS)
+
+#Load SEP code----
+setwd("C:\\Users\\js4yd\\OneDrive - University of Virginia\\Code\\GenLikelihood_Zach")
+source('GL_maineqs.R')
+#Load matplot with dates on x-axis allowed
+source('C:\\Users\\js4yd\\OneDrive - University of Virginia\\EnGauge\\EnGauge\\matplotDates.R')
+
+#Load synthetic parameter set----
+SynParams = read.csv("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\SyntheticHill11+12\\Bais910_Syn_AfterProcessing.csv")
 
 #Set directories----
 #dir_Ch39 = "C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\Calibration\\Ch39"
@@ -20,9 +33,13 @@ dir_Ch10_2 = "C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES
 dir_Ch10_3 = "C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\Calibration\\Ch10-3"
 
 dir_sCh10 = "C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\Calibration\\SynCh10"
+dir_sCh10n = "C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\Calibration\\SynCh10\\NewCR"
 dir_sCh10_1 = "C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\Calibration\\SynCh10-1"
+dir_sCh10_1n = "C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\Calibration\\SynCh10-1\\NewCR"
 dir_sCh10_2 = "C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\Calibration\\SynCh10-2"
+dir_sCh10_2n = "C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\Calibration\\SynCh10-2\\NewCR"
 dir_sCh10_3 = "C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\Calibration\\SynCh10-3"
+dir_sCh10_3n = "C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\Calibration\\SynCh10-3\\NewCR"
 
 #39 Chains----
 #setwd(dir_Ch39)
@@ -2643,6 +2660,1424 @@ png('AcceptRejectHist.png', res = 200, height=5, width=5, units='in')
 hist(ARrates_Ch10, xlim=c(0,1))
 dev.off()
 
+#10 Chains, New CR Probabilities----
+# Random seed----
+set.seed(7256)
+# Load Files----
+setwd(dir_sCh10n)
+load(file = paste0(dir_sCh10n, '/OutputWorkspace-10Ch_s400.RData'), verbose = FALSE)
+rm(cl, Info, i, arg, startValues, tic_Script)
+out_sCh10_s400n = out_Parext
+rm(out_Parext)
+load(file = paste0(dir_sCh10n, '/OutputWorkspace-10Ch_s1200.RData'), verbose = FALSE)
+rm(cl, Info, i, arg, startValues, tic_Script)
+out_sCh10_s1200n = out_Parext_Restart
+rm(out_Parext_Restart, temp)
+
+#  Remove the burnin----
+#out_Ch10_s500$burnrm = out_Ch10_s500$chain[201:500,]
+#class(out_Ch10_s500$burnrm) = 'mcmc.list'
+
+# Plot and summarize output----
+#Fixme: this requires cores to be setup to run in parallel, with all of the exported variables.
+#summary(out_Parext)
+
+#  Marginals - Useful to see the prior and posterior on same plot.----
+PriorSample = prior$sampler(n = 50000)
+png('marginalplot_10_atm_s400.png', res = 300, units = 'in', width = 7, height = 7)
+marginalPlot(x = out_sCh10_s400n$chain[,c(12,2)], prior = PriorSample[,c(12,2)], singlePanel = FALSE)
+dev.off()
+png('marginalplot_10_s9_s400.png', res = 300, units = 'in', width = 7, height = 7)
+marginalPlot(x = out_sCh10_s400n$chain[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], prior = PriorSample[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], singlePanel = FALSE)
+dev.off()
+png('marginalplot_10_veg_s400.png', res = 300, units = 'in', width = 7, height = 7)
+marginalPlot(x = out_sCh10_s400n$chain[,c(1, 16:19)], prior = PriorSample[,c(1, 16:19)], singlePanel = FALSE)
+dev.off()
+
+png('marginalplot_10_atm_s1200.png', res = 300, units = 'in', width = 7, height = 7)
+marginalPlot(x = out_sCh10_s1200n$chain[,c(12,2)], prior = PriorSample[,c(12,2)], singlePanel = FALSE)
+dev.off()
+png('marginalplot_10_s9_s1200.png', res = 300, units = 'in', width = 7, height = 7)
+marginalPlot(x = out_sCh10_s1200n$chain[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], prior = PriorSample[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], singlePanel = FALSE)
+dev.off()
+png('marginalplot_10_veg_s1200.png', res = 300, units = 'in', width = 7, height = 7)
+marginalPlot(x = out_sCh10_s1200n$chain[,c(1, 16:19)], prior = PriorSample[,c(1, 16:19)], singlePanel = FALSE)
+dev.off()
+
+#Only for last 50 chain steps
+
+#Removing the first 200 (burnin)
+png('marginalplot_10_atm_s1200_burnrm.png', res = 300, units = 'in', width = 7, height = 7)
+marginalPlot(x = out_sCh10_s1200n$chain[-seq(1,200,1),c(12,2)], prior = PriorSample[,c(12,2)], singlePanel = FALSE)
+dev.off()
+png('marginalplot_10_s9_s1200_burnrm.png', res = 300, units = 'in', width = 7, height = 7)
+marginalPlot(x = out_sCh10_s1200n$chain[-seq(1,200,1),c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], prior = PriorSample[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], singlePanel = FALSE)
+dev.off()
+png('marginalplot_10_veg_s1200_burnrm.png', res = 300, units = 'in', width = 7, height = 7)
+marginalPlot(x = out_sCh10_s1200n$chain[-seq(1,200,1),c(1, 16:19)], prior = PriorSample[,c(1, 16:19)], singlePanel = FALSE)
+dev.off()
+
+#  scatterplot matrix----
+#Not sure how is best to view this scatterplot matrix because there are too many parameters to view in one grid.
+png('corplot_10_atm_s1200.png', res = 300, units = 'in', width = 14, height = 14)
+correlationPlot(mat = out_sCh10_s1200n$chain, scaleCorText = TRUE, whichParameters = c(12,2))
+dev.off()
+png('corplot_10_29_s1200.png', res = 300, units = 'in', width = 14, height = 14)
+correlationPlot(mat = out_sCh10_s1200n$chain, scaleCorText = TRUE, whichParameters = c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14))
+dev.off()
+png('corplot_10_veg_s1200.png', res = 300, units = 'in', width = 14, height = 14)
+correlationPlot(mat = out_sCh10_s1200n$chain, scaleCorText = TRUE, whichParameters = c(1, 16:19))
+dev.off()
+#Most sensitive parameters
+#png('corplot_10_sens_s1200.png', res = 300, units = 'in', width = 14, height = 14)
+#correlationPlot(mat = out_sCh10_s1200n$chain, scaleCorText = TRUE, whichParameters = c(34:42, 1,33))
+#dev.off()
+
+#mcmc_pairs in bayesplot is alternative method
+#png('pairs_10.png', res = 300, units = 'in', width = 10, height = 10)
+#mcmc_pairs(out_sCh10_s400n$chain[,1:10])
+#dev.off()
+
+#  Trace plots with posterior density for all parameter values----
+# chains should look similar, not get stuck
+png('traceplot_10_1-4.png', res = 300, units = 'in', width = 7, height = 7)
+plot(out_sCh10_s400n$chain[,1:4], smooth = FALSE)
+dev.off()
+png('traceplot_10_5-8.png', res = 300, units = 'in', width = 7, height = 7)
+plot(out_sCh10_s400n$chain[,5:8], smooth = FALSE)
+dev.off()
+png('traceplot_10_9-12.png', res = 300, units = 'in', width = 7, height = 7)
+plot(out_sCh10_s400n$chain[,9:12], smooth = FALSE)
+dev.off()
+png('traceplot_10_13-16.png', res = 300, units = 'in', width = 7, height = 7)
+plot(out_sCh10_s400n$chain[,13:16], smooth = FALSE)
+dev.off()
+png('traceplot_10_17-19.png', res = 300, units = 'in', width = 7, height = 7)
+plot(out_sCh10_s400n$chain[,17:19], smooth = FALSE)
+dev.off()
+
+png('traceplot_10_1-4_s1200.png', res = 300, units = 'in', width = 7, height = 7)
+plot(out_sCh10_s1200n$chain[,1:4], smooth = FALSE)
+dev.off()
+png('traceplot_10_5-8_s1200.png', res = 300, units = 'in', width = 7, height = 7)
+plot(out_sCh10_s1200n$chain[,5:8], smooth = FALSE)
+dev.off()
+png('traceplot_10_9-12_s1200.png', res = 300, units = 'in', width = 7, height = 7)
+plot(out_sCh10_s1200n$chain[,9:12], smooth = FALSE)
+dev.off()
+png('traceplot_10_13-16_s1200.png', res = 300, units = 'in', width = 7, height = 7)
+plot(out_sCh10_s1200n$chain[,13:16], smooth = FALSE)
+dev.off()
+png('traceplot_10_17-19_s1200.png', res = 300, units = 'in', width = 7, height = 7)
+plot(out_sCh10_s1200n$chain[,17:19], smooth = FALSE)
+dev.off()
+
+#mcmc_trace in bayesplot as alternative traceplots
+# png('traceplot_10_1-9_b.png', res = 300, units = 'in', width = 7, height = 7)
+# mcmc_trace(out_sCh10_s400n$chain[,1:9])
+# dev.off()
+
+#  Gelman Diagnostics----
+#Fixme: This requires cores to be setup to run in parallel
+#png('gelmanplot_10.png', res = 300, units = 'in', width = 7, height = 7)
+#gelmanDiagnostics(sampler = out_sCh10_s400n, plot = TRUE)
+#dev.off()
+#png('diagnosticplot_10.png', res = 300, units = 'in', width = 7, height = 7)
+#plotDiagnostic(out = out_sCh10_s400n)
+#dev.off()
+
+#stopCluster(cl)
+
+# Run convergence diagnostics----
+#R-hat - Gelman-Rubin within and between chain variance for all variables - target less than 1.05 for all
+#gelman.diag(out_sCh10_s400n$chain[,1:42])
+#Autocorrelation of chain for each parameter should drop quickly. This informs the amount of values to skip in MCMC
+#Fixme: this function plots individual chains. Would be good to average the autocorrelation for each chain and plot with error bars.
+png('AutocorrPlot_10_1-9.png', res = 300, units = 'in', width = 7, height = 7)
+coda::autocorr.plot(out_sCh10_s400n$chain[,1:9], lag.max = 100, ask = FALSE)
+dev.off()
+png('AutocorrPlot_10_10-18.png', res = 300, units = 'in', width = 7, height = 7)
+coda::autocorr.plot(out_sCh10_s400n$chain[,10:18], lag.max = 100, ask = FALSE)
+dev.off()
+png('AutocorrPlot_10_19.png', res = 300, units = 'in', width = 7, height = 7)
+coda::autocorr.plot(out_sCh10_s400n$chain[,19], lag.max = 100, ask = FALSE)
+dev.off()
+
+png('AutocorrPlot_10_1-9_s1200.png', res = 300, units = 'in', width = 7, height = 7)
+coda::autocorr.plot(out_sCh10_s1200n$chain[,1:9], lag.max = 100, ask = FALSE)
+dev.off()
+png('AutocorrPlot_10_10-18_s1200.png', res = 300, units = 'in', width = 7, height = 7)
+coda::autocorr.plot(out_sCh10_s1200n$chain[,10:18], lag.max = 100, ask = FALSE)
+dev.off()
+png('AutocorrPlot_10_19_s1200.png', res = 300, units = 'in', width = 7, height = 7)
+coda::autocorr.plot(out_sCh10_s1200n$chain[,19], lag.max = 100, ask = FALSE)
+dev.off()
+
+#Burnin removed
+
+#Stationarity of chain - Geweke
+#Fixme: This is computed for individual chains. code to loop in first figure
+# png('GewekePlot_10_1-9.png', res = 300, units = 'in', width = 7, height = 7)
+# coda::geweke.plot(out_sCh10_s400n$chain[,1:9])
+# coda::geweke.plot(as.mcmc(out_Ch10_s300$chain[[1]][150:300,1:9]))
+# dev.off()
+# png('GewekePlot_10_10-18.png', res = 300, units = 'in', width = 7, height = 7)
+# coda::geweke.plot(out_sCh10_s400n$chain[,10:18])
+# dev.off()
+# png('GewekePlot_10_19-27.png', res = 300, units = 'in', width = 7, height = 7)
+# coda::geweke.plot(out_sCh10_s400n$chain[,19:27])
+# dev.off()
+# png('GewekePlot_10_28-36.png', res = 300, units = 'in', width = 7, height = 7)
+# coda::geweke.plot(out_sCh10_s400n$chain[,28:36])
+# dev.off()
+# png('GewekePlot_10_veg.png', res = 300, units = 'in', width = 7, height = 7)
+# coda::geweke.plot(out_sCh10_s400n$chain[,34:42])
+# dev.off()
+
+#need at least 50 chain steps for this
+gelman.plot(x = out_sCh10_s400n$chain[,-c(20,21,22)], autoburnin = TRUE, ylim = c(0,10))
+
+gelman.plot(x = out_sCh10_s1200n$chain[,-c(20,21,22)], autoburnin = TRUE, ylim = c(0,10))
+
+#Burning removed
+
+#Parallel coordinate plot - including all parameters is a bit much.
+#png('parcoord_10.png', res = 300, units = 'in', width = 10, height = 5)
+#mcmc_parcoord(outParext$chain, transform = function(x) {(x - min(x)) / (max(x)-min(x))})
+#dev.off()
+
+#Density overlay (mcmc_dens_overlay) - all chains should have similar densities for each variable
+png('densOverlay_10_s400.png', res = 300, units = 'in', width = 10, height = 10)
+mcmc_dens_overlay(out_sCh10_s400n$chain)
+dev.off()
+
+png('densOverlay_10_s1200.png', res = 300, units = 'in', width = 10, height = 10)
+mcmc_dens_overlay(out_sCh10_s1200n$chain)
+dev.off()
+
+#Burnin Removed
+
+#Rejection Rate
+Reject_sCh10_s400 = coda::rejectionRate(out_sCh10_s400n$chain)
+Reject_sCh10_s1200 = coda::rejectionRate(out_sCh10_s1200n$chain)
+#Burnin Removed
+
+#Highest Posterior Density Interval
+HPDs_Ch10 = coda::HPDinterval(out_sCh10_s1200n$chain)
+HPDs_Ch10_bt = BayesianTools::getCredibleIntervals(out_sCh10_s1200n$chain[[1]])
+
+#Effective sample size for each parameter should be similar
+EffSize_sCh10 = coda::effectiveSize(out_sCh10_s400n$chain)
+EffSize_sCh10_s1200 = coda::effectiveSize(out_sCh10_s1200n$chain)
+
+# Accept/Reject rates for each chain----
+#AR_Ch10_s400 = read.table('AcceptReject_c_s400.txt', header=TRUE)
+
+#Join into one
+#AR_Ch10 = rbind(AR_Ch10_s400, AR_Ch10_s200, AR_Ch10_s300, AR_Ch10_s400, AR_Ch10_s500, AR_Ch10_s600)
+#rm(AR_Ch10_s400, AR_Ch10_s200, AR_Ch10_s300, AR_Ch10_s400, AR_Ch10_s500, AR_Ch10_s600)
+
+#ARrates_Ch10 = vector('numeric', length = ncol(AR_Ch10))
+#for (i in 1:ncol(AR_Ch10)){
+#  ARrates_Ch10[i] = sum(AR_Ch10[,i])/nrow(AR_Ch10)
+#}
+
+#png('AcceptRejectHist.png', res = 200, height=5, width=5, units='in')
+#hist(ARrates_Ch10, xlim=c(0,1))
+#dev.off()
+
+#10 Chains - 1, New CR Probabilities----
+# Random seed----
+set.seed(7257)
+# Load Files----
+setwd(dir_sCh10_1n)
+load(file = paste0(dir_sCh10_1n, '/OutputWorkspace-10Ch-1_s1200.RData'), verbose = FALSE)
+rm(cl, Info, i, arg, startValues, tic_Script)
+out_sCh10_1_s1200n = out_Parext_Restart
+rm(out_Parext_Restart, temp)
+
+#  Remove the burnin----
+#out_Ch10_s500$burnrm = out_Ch10_s500$chain[201:500,]
+#class(out_Ch10_s500$burnrm) = 'mcmc.list'
+
+# Plot and summarize output----
+#Fixme: this requires cores to be setup to run in parallel, with all of the exported variables.
+#summary(out_Parext)
+
+#  Marginals - Useful to see the prior and posterior on same plot.----
+PriorSample = prior$sampler(n = 50000)
+png('marginalplot_10_atm_s1200.png', res = 300, units = 'in', width = 7, height = 7)
+marginalPlot(x = out_sCh10_1_s1200n$chain[,c(12,2)], prior = PriorSample[,c(12,2)], singlePanel = FALSE)
+dev.off()
+png('marginalplot_10_s9_s1200.png', res = 300, units = 'in', width = 7, height = 7)
+marginalPlot(x = out_sCh10_1_s1200n$chain[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], prior = PriorSample[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], singlePanel = FALSE)
+dev.off()
+png('marginalplot_10_veg_s1200.png', res = 300, units = 'in', width = 7, height = 7)
+marginalPlot(x = out_sCh10_1_s1200n$chain[,c(1, 16:19)], prior = PriorSample[,c(1, 16:19)], singlePanel = FALSE)
+dev.off()
+
+#Only for last 50 chain steps
+
+#Removing the first 200 (burnin)
+
+#  scatterplot matrix----
+#Not sure how is best to view this scatterplot matrix because there are too many parameters to view in one grid.
+png('corplot_10_atm_s1200.png', res = 300, units = 'in', width = 14, height = 14)
+correlationPlot(mat = out_sCh10_1_s1200n$chain, scaleCorText = TRUE, whichParameters = c(12,2))
+dev.off()
+png('corplot_10_29_s1200.png', res = 300, units = 'in', width = 14, height = 14)
+correlationPlot(mat = out_sCh10_1_s1200n$chain, scaleCorText = TRUE, whichParameters = c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14))
+dev.off()
+png('corplot_10_veg_s1200.png', res = 300, units = 'in', width = 14, height = 14)
+correlationPlot(mat = out_sCh10_1_s1200n$chain, scaleCorText = TRUE, whichParameters = c(1, 16:19))
+dev.off()
+#Most sensitive parameters
+#png('corplot_10_sens_s1200.png', res = 300, units = 'in', width = 14, height = 14)
+#correlationPlot(mat = out_sCh10_1_s1200n$chain, scaleCorText = TRUE, whichParameters = c(34:42, 1,33))
+#dev.off()
+
+#mcmc_pairs in bayesplot is alternative method
+
+#  Trace plots with posterior density for all parameter values----
+# chains should look similar, not get stuck
+png('traceplot_10_1-4_s1200.png', res = 300, units = 'in', width = 7, height = 7)
+plot(out_sCh10_1_s1200n$chain[,1:4], smooth = FALSE)
+dev.off()
+png('traceplot_10_5-8_s1200.png', res = 300, units = 'in', width = 7, height = 7)
+plot(out_sCh10_1_s1200n$chain[,5:8], smooth = FALSE)
+dev.off()
+png('traceplot_10_9-12_s1200.png', res = 300, units = 'in', width = 7, height = 7)
+plot(out_sCh10_1_s1200n$chain[,9:12], smooth = FALSE)
+dev.off()
+png('traceplot_10_13-16_s1200.png', res = 300, units = 'in', width = 7, height = 7)
+plot(out_sCh10_1_s1200n$chain[,13:16], smooth = FALSE)
+dev.off()
+png('traceplot_10_17-19_s1200.png', res = 300, units = 'in', width = 7, height = 7)
+plot(out_sCh10_1_s1200n$chain[,17:19], smooth = FALSE)
+dev.off()
+
+#mcmc_trace in bayesplot as alternative traceplots
+
+#  Gelman Diagnostics----
+
+# Run convergence diagnostics----
+#R-hat - Gelman-Rubin within and between chain variance for all variables - target less than 1.05 for all
+#gelman.diag(out_sCh10_1_s400n$chain[,1:42])
+#Autocorrelation of chain for each parameter should drop quickly. This informs the amount of values to skip in MCMC
+#Fixme: this function plots individual chains. Would be good to average the autocorrelation for each chain and plot with error bars.
+png('AutocorrPlot_10_1-9_s1200.png', res = 300, units = 'in', width = 7, height = 7)
+coda::autocorr.plot(out_sCh10_1_s1200n$chain[,1:9], lag.max = 100, ask = FALSE)
+dev.off()
+png('AutocorrPlot_10_10-18_s1200.png', res = 300, units = 'in', width = 7, height = 7)
+coda::autocorr.plot(out_sCh10_1_s1200n$chain[,10:18], lag.max = 100, ask = FALSE)
+dev.off()
+png('AutocorrPlot_10_19_s1200.png', res = 300, units = 'in', width = 7, height = 7)
+coda::autocorr.plot(out_sCh10_1_s1200n$chain[,19], lag.max = 100, ask = FALSE)
+dev.off()
+
+#Burnin removed
+
+#Stationarity of chain - Geweke
+
+#need at least 50 chain steps for this
+gelman.plot(x = out_sCh10_1_s1200n$chain[,-c(20,21,22)], autoburnin = TRUE, ylim = c(0,10))
+
+#Burning removed
+
+#Parallel coordinate plot - including all parameters is a bit much.
+#png('parcoord_10.png', res = 300, units = 'in', width = 10, height = 5)
+#mcmc_parcoord(outParext$chain, transform = function(x) {(x - min(x)) / (max(x)-min(x))})
+#dev.off()
+
+#Density overlay (mcmc_dens_overlay) - all chains should have similar densities for each variable
+png('densOverlay_10_s1200.png', res = 300, units = 'in', width = 10, height = 10)
+mcmc_dens_overlay(out_sCh10_1_s1200n$chain)
+dev.off()
+
+#Burnin Removed
+
+#Rejection Rate
+Reject_sCh10_1_s1200 = coda::rejectionRate(out_sCh10_1_s1200n$chain)
+#Burnin Removed
+
+#Highest Posterior Density Interval
+HPDs_Ch10_1 = coda::HPDinterval(out_sCh10_1_s1200n$chain)
+HPDs_Ch10_1_bt = BayesianTools::getCredibleIntervals(out_sCh10_1_s1200n$chain[[1]])
+
+#Effective sample size for each parameter should be similar
+EffSize_sCh10_1_s1200 = coda::effectiveSize(out_sCh10_1_s1200n$chain)
+
+# Accept/Reject rates for each chain----
+
+#10 Chains - 2, New CR Probabilities----
+# Random seed----
+set.seed(7258)
+# Load Files----
+setwd(dir_sCh10_2n)
+load(file = paste0(dir_sCh10_2n, '/OutputWorkspace-10Ch-2_s1200.RData'), verbose = FALSE)
+rm(cl, Info, i, arg, startValues, tic_Script)
+out_sCh10_2_s1200n = out_Parext_Restart
+rm(out_Parext_Restart, temp)
+
+#  Remove the burnin----
+
+# Plot and summarize output----
+#Fixme: this requires cores to be setup to run in parallel, with all of the exported variables.
+#summary(out_Parext)
+
+#  Marginals - Useful to see the prior and posterior on same plot.----
+PriorSample = prior$sampler(n = 50000)
+png('marginalplot_10_atm_s1200.png', res = 300, units = 'in', width = 7, height = 7)
+marginalPlot(x = out_sCh10_2_s1200n$chain[,c(12,2)], prior = PriorSample[,c(12,2)], singlePanel = FALSE)
+dev.off()
+png('marginalplot_10_s9_s1200.png', res = 300, units = 'in', width = 7, height = 7)
+marginalPlot(x = out_sCh10_2_s1200n$chain[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], prior = PriorSample[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], singlePanel = FALSE)
+dev.off()
+png('marginalplot_10_veg_s1200.png', res = 300, units = 'in', width = 7, height = 7)
+marginalPlot(x = out_sCh10_2_s1200n$chain[,c(1, 16:19)], prior = PriorSample[,c(1, 16:19)], singlePanel = FALSE)
+dev.off()
+
+#Only for last 50 chain steps
+
+#Removing the first 200 (burnin)
+
+#  scatterplot matrix----
+#Not sure how is best to view this scatterplot matrix because there are too many parameters to view in one grid.
+png('corplot_10_atm_s1200.png', res = 300, units = 'in', width = 14, height = 14)
+correlationPlot(mat = out_sCh10_2_s1200n$chain, scaleCorText = TRUE, whichParameters = c(12,2))
+dev.off()
+png('corplot_10_29_s1200.png', res = 300, units = 'in', width = 14, height = 14)
+correlationPlot(mat = out_sCh10_2_s1200n$chain, scaleCorText = TRUE, whichParameters = c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14))
+dev.off()
+png('corplot_10_veg_s1200.png', res = 300, units = 'in', width = 14, height = 14)
+correlationPlot(mat = out_sCh10_2_s1200n$chain, scaleCorText = TRUE, whichParameters = c(1, 16:19))
+dev.off()
+#Most sensitive parameters
+#png('corplot_10_sens_s1200.png', res = 300, units = 'in', width = 14, height = 14)
+#correlationPlot(mat = out_sCh10_2_s1200n$chain, scaleCorText = TRUE, whichParameters = c(34:42, 1,33))
+#dev.off()
+
+#mcmc_pairs in bayesplot is alternative method
+
+#  Trace plots with posterior density for all parameter values----
+# chains should look similar, not get stuck
+png('traceplot_10_1-4_s1200.png', res = 300, units = 'in', width = 7, height = 7)
+plot(out_sCh10_2_s1200n$chain[,1:4], smooth = FALSE)
+dev.off()
+png('traceplot_10_5-8_s1200.png', res = 300, units = 'in', width = 7, height = 7)
+plot(out_sCh10_2_s1200n$chain[,5:8], smooth = FALSE)
+dev.off()
+png('traceplot_10_9-12_s1200.png', res = 300, units = 'in', width = 7, height = 7)
+plot(out_sCh10_2_s1200n$chain[,9:12], smooth = FALSE)
+dev.off()
+png('traceplot_10_13-16_s1200.png', res = 300, units = 'in', width = 7, height = 7)
+plot(out_sCh10_2_s1200n$chain[,13:16], smooth = FALSE)
+dev.off()
+png('traceplot_10_17-19_s1200.png', res = 300, units = 'in', width = 7, height = 7)
+plot(out_sCh10_2_s1200n$chain[,17:19], smooth = FALSE)
+dev.off()
+
+#mcmc_trace in bayesplot as alternative traceplots
+
+#  Gelman Diagnostics----
+
+# Run convergence diagnostics----
+#R-hat - Gelman-Rubin within and between chain variance for all variables - target less than 1.05 for all
+#gelman.diag(out_sCh10_2_s400n$chain[,1:42])
+#Autocorrelation of chain for each parameter should drop quickly. This informs the amount of values to skip in MCMC
+#Fixme: this function plots individual chains. Would be good to average the autocorrelation for each chain and plot with error bars.
+png('AutocorrPlot_10_1-9_s1200.png', res = 300, units = 'in', width = 7, height = 7)
+coda::autocorr.plot(out_sCh10_2_s1200n$chain[,1:9], lag.max = 100, ask = FALSE)
+dev.off()
+png('AutocorrPlot_10_10-18_s1200.png', res = 300, units = 'in', width = 7, height = 7)
+coda::autocorr.plot(out_sCh10_2_s1200n$chain[,10:18], lag.max = 100, ask = FALSE)
+dev.off()
+png('AutocorrPlot_10_19_s1200.png', res = 300, units = 'in', width = 7, height = 7)
+coda::autocorr.plot(out_sCh10_2_s1200n$chain[,19], lag.max = 100, ask = FALSE)
+dev.off()
+
+#Burnin removed
+
+#Stationarity of chain - Geweke
+
+#need at least 50 chain steps for this
+gelman.plot(x = out_sCh10_2_s1200n$chain[,-c(20,21,22)], autoburnin = TRUE, ylim = c(0,10))
+
+#Burning removed
+
+#Parallel coordinate plot - including all parameters is a bit much.
+#png('parcoord_10.png', res = 300, units = 'in', width = 10, height = 5)
+#mcmc_parcoord(outParext$chain, transform = function(x) {(x - min(x)) / (max(x)-min(x))})
+#dev.off()
+
+#Density overlay (mcmc_dens_overlay) - all chains should have similar densities for each variable
+png('densOverlay_10_s1200.png', res = 300, units = 'in', width = 10, height = 10)
+mcmc_dens_overlay(out_sCh10_2_s1200n$chain)
+dev.off()
+
+#Burnin Removed
+
+#Rejection Rate
+Reject_sCh10_2_s1200 = coda::rejectionRate(out_sCh10_2_s1200n$chain)
+#Burnin Removed
+
+#Highest Posterior Density Interval
+HPDs_Ch10_2 = coda::HPDinterval(out_sCh10_2_s1200n$chain)
+HPDs_Ch10_2_bt = BayesianTools::getCredibleIntervals(out_sCh10_2_s1200n$chain[[1]])
+
+#Effective sample size for each parameter should be similar
+EffSize_sCh10_2_s1200 = coda::effectiveSize(out_sCh10_2_s1200n$chain)
+
+# Accept/Reject rates for each chain----
+
+#10 Chains - 3 New CR Probabilities----
+# Random seed----
+set.seed(7259)
+# Load Files----
+setwd(dir_sCh10_3n)
+load(file = paste0(dir_sCh10_3n, '/OutputWorkspace-10Ch-3_s1200.RData'), verbose = FALSE)
+rm(cl, Info, i, arg, startValues, tic_Script)
+out_sCh10_3_s1200n = out_Parext_Restart
+rm(out_Parext_Restart, temp)
+
+#  Remove the burnin----
+
+# Plot and summarize output----
+#Fixme: this requires cores to be setup to run in parallel, with all of the exported variables.
+#summary(out_Parext)
+
+#  Marginals - Useful to see the prior and posterior on same plot.----
+PriorSample = prior$sampler(n = 50000)
+png('marginalplot_10_atm_s1200.png', res = 300, units = 'in', width = 7, height = 7)
+marginalPlot(x = out_sCh10_3_s1200n$chain[,c(12,2)], prior = PriorSample[,c(12,2)], singlePanel = FALSE)
+dev.off()
+png('marginalplot_10_s9_s1200.png', res = 300, units = 'in', width = 7, height = 7)
+marginalPlot(x = out_sCh10_3_s1200n$chain[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], prior = PriorSample[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], singlePanel = FALSE)
+dev.off()
+png('marginalplot_10_veg_s1200.png', res = 300, units = 'in', width = 7, height = 7)
+marginalPlot(x = out_sCh10_3_s1200n$chain[,c(1, 16:19)], prior = PriorSample[,c(1, 16:19)], singlePanel = FALSE)
+dev.off()
+
+#Only for last 50 chain steps
+
+#Removing the first 200 (burnin)
+
+#  scatterplot matrix----
+#Not sure how is best to view this scatterplot matrix because there are too many parameters to view in one grid.
+png('corplot_10_atm_s1200.png', res = 300, units = 'in', width = 14, height = 14)
+correlationPlot(mat = out_sCh10_3_s1200n$chain, scaleCorText = TRUE, whichParameters = c(12,2))
+dev.off()
+png('corplot_10_29_s1200.png', res = 300, units = 'in', width = 14, height = 14)
+correlationPlot(mat = out_sCh10_3_s1200n$chain, scaleCorText = TRUE, whichParameters = c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14))
+dev.off()
+png('corplot_10_veg_s1200.png', res = 300, units = 'in', width = 14, height = 14)
+correlationPlot(mat = out_sCh10_3_s1200n$chain, scaleCorText = TRUE, whichParameters = c(1, 16:19))
+dev.off()
+#Most sensitive parameters
+#png('corplot_10_sens_s1200.png', res = 300, units = 'in', width = 14, height = 14)
+#correlationPlot(mat = out_sCh10_3_s1200n$chain, scaleCorText = TRUE, whichParameters = c(34:42, 1,33))
+#dev.off()
+
+#mcmc_pairs in bayesplot is alternative method
+
+#  Trace plots with posterior density for all parameter values----
+# chains should look similar, not get stuck
+png('traceplot_10_1-4_s1200.png', res = 300, units = 'in', width = 7, height = 7)
+plot(out_sCh10_3_s1200n$chain[,1:4], smooth = FALSE)
+dev.off()
+png('traceplot_10_5-8_s1200.png', res = 300, units = 'in', width = 7, height = 7)
+plot(out_sCh10_3_s1200n$chain[,5:8], smooth = FALSE)
+dev.off()
+png('traceplot_10_9-12_s1200.png', res = 300, units = 'in', width = 7, height = 7)
+plot(out_sCh10_3_s1200n$chain[,9:12], smooth = FALSE)
+dev.off()
+png('traceplot_10_13-16_s1200.png', res = 300, units = 'in', width = 7, height = 7)
+plot(out_sCh10_3_s1200n$chain[,13:16], smooth = FALSE)
+dev.off()
+png('traceplot_10_17-19_s1200.png', res = 300, units = 'in', width = 7, height = 7)
+plot(out_sCh10_3_s1200n$chain[,17:19], smooth = FALSE)
+dev.off()
+
+#mcmc_trace in bayesplot as alternative traceplots
+
+#  Gelman Diagnostics----
+
+# Run convergence diagnostics----
+#R-hat - Gelman-Rubin within and between chain variance for all variables - target less than 1.05 for all
+#gelman.diag(out_sCh10_3_s400n$chain[,1:42])
+#Autocorrelation of chain for each parameter should drop quickly. This informs the amount of values to skip in MCMC
+#Fixme: this function plots individual chains. Would be good to average the autocorrelation for each chain and plot with error bars.
+png('AutocorrPlot_10_1-9_s1200.png', res = 300, units = 'in', width = 7, height = 7)
+coda::autocorr.plot(out_sCh10_3_s1200n$chain[,1:9], lag.max = 100, ask = FALSE)
+dev.off()
+png('AutocorrPlot_10_10-18_s1200.png', res = 300, units = 'in', width = 7, height = 7)
+coda::autocorr.plot(out_sCh10_3_s1200n$chain[,10:18], lag.max = 100, ask = FALSE)
+dev.off()
+png('AutocorrPlot_10_19_s1200.png', res = 300, units = 'in', width = 7, height = 7)
+coda::autocorr.plot(out_sCh10_3_s1200n$chain[,19], lag.max = 100, ask = FALSE)
+dev.off()
+
+#Burnin removed
+
+#Stationarity of chain - Geweke
+
+#need at least 50 chain steps for this
+gelman.plot(x = out_sCh10_3_s1200n$chain[,-c(20,21,22)], autoburnin = TRUE, ylim = c(0,10))
+
+#Burning removed
+
+#Parallel coordinate plot - including all parameters is a bit much.
+#png('parcoord_10.png', res = 300, units = 'in', width = 10, height = 5)
+#mcmc_parcoord(outParext$chain, transform = function(x) {(x - min(x)) / (max(x)-min(x))})
+#dev.off()
+
+#Density overlay (mcmc_dens_overlay) - all chains should have similar densities for each variable
+png('densOverlay_10_s1200.png', res = 300, units = 'in', width = 10, height = 10)
+mcmc_dens_overlay(out_sCh10_3_s1200n$chain)
+dev.off()
+
+#Burnin Removed
+
+#Rejection Rate
+Reject_sCh10_3_s1200 = coda::rejectionRate(out_sCh10_3_s1200n$chain)
+#Burnin Removed
+
+#Highest Posterior Density Interval
+HPDs_Ch10_3 = coda::HPDinterval(out_sCh10_3_s1200n$chain)
+HPDs_Ch10_3_bt = BayesianTools::getCredibleIntervals(out_sCh10_3_s1200n$chain[[1]])
+
+#Effective sample size for each parameter should be similar
+EffSize_sCh10_3_s1200 = coda::effectiveSize(out_sCh10_3_s1200n$chain)
+
+# Accept/Reject rates for each chain----
+
+#Combined chain marginals----
+setwd("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\Calibration")
+png('marginalplot_10_atm_s1200_c.png', res = 300, units = 'in', width = 7, height = 7)
+marginalPlot(x = c(out_sCh10_3_s1200n$chain[,c(12,2)], out_sCh10_2_s1200n$chain[,c(12,2)], out_sCh10_1_s1200n$chain[,c(12,2)], out_sCh10_s1200n$chain[,c(12,2)]), prior = PriorSample[,c(12,2)], singlePanel = FALSE, trueVals = SynParams[c(12,2)])
+dev.off()
+png('marginalplot_10_s9_s1200_c.png', res = 300, units = 'in', width = 7, height = 7)
+marginalPlot(x = c(out_sCh10_3_s1200n$chain[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], out_sCh10_2_s1200n$chain[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], out_sCh10_1_s1200n$chain[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], out_sCh10_s1200n$chain[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)]), prior = PriorSample[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], singlePanel = FALSE, trueVals = SynParams[c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)])
+dev.off()
+png('marginalplot_10_veg_s1200_c.png', res = 300, units = 'in', width = 7, height = 7)
+marginalPlot(x = c(out_sCh10_3_s1200n$chain[,c(1, 16:19)], out_sCh10_2_s1200n$chain[,c(1, 16:19)], out_sCh10_1_s1200n$chain[,c(1, 16:19)], out_sCh10_s1200n$chain[,c(1, 16:19)]), prior = PriorSample[,c(1, 16:19)], singlePanel = FALSE, trueVals = SynParams[c(1, 16:19)])
+dev.off()
+
+#Compute MAP----
+out_sCh10_s1200nc = as.data.frame(mergeChains(out_sCh10_s1200n$chain))
+out_sCh10_1_s1200nc = as.data.frame(mergeChains(out_sCh10_1_s1200n$chain))
+out_sCh10_2_s1200nc = as.data.frame(mergeChains(out_sCh10_2_s1200n$chain))
+out_sCh10_3_s1200nc = as.data.frame(mergeChains(out_sCh10_3_s1200n$chain))
+
+max(out_sCh10_s1200nc$LP)
+max(out_sCh10_1_s1200nc$LP)
+max(out_sCh10_2_s1200nc$LP)
+max(out_sCh10_3_s1200nc$LP)
+
+#10Ch-3, Chain2, replicate 997
+which(out_sCh10_3_s1200nc$LP == max(out_sCh10_3_s1200nc$LP))[1]-1200
+
+#Extract the maximum likelihood value----
+#Returns same value as above approach for MAP.
+#Loop over datasets and chains
+MaxLikes = matrix(NA, nrow = 40, ncol = ncol(out_sCh10_1_s1200n$chain[[1]])+3)
+for (ch in 1:10){
+  MaxLikes[ch,1] = 0
+  MaxLikes[ch,2] = ch
+  MaxLikes[ch,3] = which(out_sCh10_s1200n$chain[[ch]][,20] == max(out_sCh10_s1200n$chain[[ch]][,20]))[1]
+  MaxLikes[ch,-c(1,2,3)] = out_sCh10_s1200n$chain[[ch]][which(out_sCh10_s1200n$chain[[ch]][,20] == max(out_sCh10_s1200n$chain[[ch]][,20]))[1],]
+}
+for (ch in 11:20){
+  MaxLikes[ch,1] = 1
+  MaxLikes[ch,2] = ch-10
+  MaxLikes[ch,3] = which(out_sCh10_1_s1200n$chain[[ch-10]][,20] == max(out_sCh10_1_s1200n$chain[[ch-10]][,20]))[1]
+  MaxLikes[ch,-c(1,2,3)] = out_sCh10_1_s1200n$chain[[ch-10]][which(out_sCh10_1_s1200n$chain[[ch-10]][,20] == max(out_sCh10_1_s1200n$chain[[ch-10]][,20]))[1],]
+}
+for (ch in 21:30){
+  MaxLikes[ch,1] = 2
+  MaxLikes[ch,2] = ch-20
+  MaxLikes[ch,3] = which(out_sCh10_2_s1200n$chain[[ch-20]][,20] == max(out_sCh10_2_s1200n$chain[[ch-20]][,20]))[1]
+  MaxLikes[ch,-c(1,2,3)] = out_sCh10_2_s1200n$chain[[ch-20]][which(out_sCh10_2_s1200n$chain[[ch-20]][,20] == max(out_sCh10_2_s1200n$chain[[ch-20]][,20]))[1],]
+}
+for (ch in 31:40){
+  MaxLikes[ch,1] = 3
+  MaxLikes[ch,2] = ch-30
+  MaxLikes[ch,3] = which(out_sCh10_3_s1200n$chain[[ch-30]][,20] == max(out_sCh10_3_s1200n$chain[[ch-30]][,20]))[1]
+  MaxLikes[ch,-c(1,2,3)] = out_sCh10_3_s1200n$chain[[ch-30]][which(out_sCh10_3_s1200n$chain[[ch-30]][,20] == max(out_sCh10_3_s1200n$chain[[ch-30]][,20]))[1],]
+}
+
+#10Ch-3, Chain2, replicate 997
+MaxLikes[which(MaxLikes[,23] == max(MaxLikes[,23])),]
+
+#Select the 19 parameter sets to use for MORO optimization----
+#Load the files with LNSE and other efficiency metrics - THESE ARE NOT MCMC CHAINS!----
+Eff_Ch10 = read.csv("C:/Users/js4yd/OneDrive - University of Virginia/BES_Data/BES_Data/RHESSysFiles/BR&POBR/Calibration/SynCh10/NewCR/ParamsLikes_c_s400.csv", stringsAsFactors = FALSE)
+Eff_Ch10 = rbind(Eff_Ch10, read.csv("C:/Users/js4yd/OneDrive - University of Virginia/BES_Data/BES_Data/RHESSysFiles/BR&POBR/Calibration/SynCh10/NewCR/ParamsLikes_c_s800.csv", stringsAsFactors = FALSE))
+Eff_Ch10 = rbind(Eff_Ch10, read.csv("C:/Users/js4yd/OneDrive - University of Virginia/BES_Data/BES_Data/RHESSysFiles/BR&POBR/Calibration/SynCh10/NewCR/ParamsLikes_c_s1200.csv", stringsAsFactors = FALSE))
+Eff_Ch10_1 = read.csv("C:/Users/js4yd/OneDrive - University of Virginia/BES_Data/BES_Data/RHESSysFiles/BR&POBR/Calibration/SynCh10-1/NewCR/ParamsLikes_c_s400.csv", stringsAsFactors = FALSE)
+Eff_Ch10_1 = rbind(Eff_Ch10_1, read.csv("C:/Users/js4yd/OneDrive - University of Virginia/BES_Data/BES_Data/RHESSysFiles/BR&POBR/Calibration/SynCh10-1/NewCR/ParamsLikes_c_s800.csv", stringsAsFactors = FALSE))
+Eff_Ch10_1 = rbind(Eff_Ch10_1, read.csv("C:/Users/js4yd/OneDrive - University of Virginia/BES_Data/BES_Data/RHESSysFiles/BR&POBR/Calibration/SynCh10-1/NewCR/ParamsLikes_c_s1200.csv", stringsAsFactors = FALSE))
+Eff_Ch10_2 = read.csv("C:/Users/js4yd/OneDrive - University of Virginia/BES_Data/BES_Data/RHESSysFiles/BR&POBR/Calibration/SynCh10-2/NewCR/ParamsLikes_c_s400.csv", stringsAsFactors = FALSE)
+Eff_Ch10_2 = rbind(Eff_Ch10_2, read.csv("C:/Users/js4yd/OneDrive - University of Virginia/BES_Data/BES_Data/RHESSysFiles/BR&POBR/Calibration/SynCh10-2/NewCR/ParamsLikes_c_s800.csv", stringsAsFactors = FALSE))
+Eff_Ch10_2 = rbind(Eff_Ch10_2, read.csv("C:/Users/js4yd/OneDrive - University of Virginia/BES_Data/BES_Data/RHESSysFiles/BR&POBR/Calibration/SynCh10-2/NewCR/ParamsLikes_c_s1200.csv", stringsAsFactors = FALSE))
+Eff_Ch10_3 = read.csv("C:/Users/js4yd/OneDrive - University of Virginia/BES_Data/BES_Data/RHESSysFiles/BR&POBR/Calibration/SynCh10-3/NewCR/ParamsLikes_c_s400.csv", stringsAsFactors = FALSE)
+Eff_Ch10_3 = rbind(Eff_Ch10_3, read.csv("C:/Users/js4yd/OneDrive - University of Virginia/BES_Data/BES_Data/RHESSysFiles/BR&POBR/Calibration/SynCh10-3/NewCR/ParamsLikes_c_s800.csv", stringsAsFactors = FALSE))
+Eff_Ch10_3 = rbind(Eff_Ch10_3, read.csv("C:/Users/js4yd/OneDrive - University of Virginia/BES_Data/BES_Data/RHESSysFiles/BR&POBR/Calibration/SynCh10-3/NewCR/ParamsLikes_c_s1200.csv", stringsAsFactors = FALSE))
+
+#Join the metrics to the MCMC chains----
+#Add columns to chain datasets
+out_sCh10_s1200nc$ID = out_sCh10_s1200nc$Dataset = out_sCh10_s1200nc$Replicate = out_sCh10_s1200nc$Chain = NA
+out_sCh10_s1200nc$beta = out_sCh10_s1200nc$xi = out_sCh10_s1200nc$sigma_0 = out_sCh10_s1200nc$sigma_1 = out_sCh10_s1200nc$phi_1 = out_sCh10_s1200nc$mu_h = NA
+out_sCh10_s1200nc$SSEd = out_sCh10_s1200nc$SSEw = out_sCh10_s1200nc$SSEm = out_sCh10_s1200nc$SSEa = NA
+out_sCh10_s1200nc$NSEd = out_sCh10_s1200nc$NSEw = out_sCh10_s1200nc$NSEm = out_sCh10_s1200nc$NSEa = NA
+out_sCh10_s1200nc$LNSEd = out_sCh10_s1200nc$LNSEw = out_sCh10_s1200nc$LNSEm = out_sCh10_s1200nc$LNSEa = out_sCh10_s1200nc$pBias = NA
+out_sCh10_s1200nc$success = NA
+colnames(out_sCh10_s1200nc)[23:46] = c('ID','Dataset','Replicate','Chain','beta','xi','sigma_0','sigma_1','phi_1','mu_h','SSEd','SSEw','SSEm','SSEa','NSEd','NSEw','NSEm','NSEa','LNSEd','LNSEw','LNSEm','LNSEa','pBias','success')
+
+out_sCh10_1_s1200nc$ID = out_sCh10_1_s1200nc$Dataset = out_sCh10_1_s1200nc$Replicate = out_sCh10_1_s1200nc$Chain = NA
+out_sCh10_1_s1200nc$beta = out_sCh10_1_s1200nc$xi = out_sCh10_1_s1200nc$sigma_0 = out_sCh10_1_s1200nc$sigma_1 = out_sCh10_1_s1200nc$phi_1 = out_sCh10_1_s1200nc$mu_h = NA
+out_sCh10_1_s1200nc$SSEd = out_sCh10_1_s1200nc$SSEw = out_sCh10_1_s1200nc$SSEm = out_sCh10_1_s1200nc$SSEa = NA
+out_sCh10_1_s1200nc$NSEd = out_sCh10_1_s1200nc$NSEw = out_sCh10_1_s1200nc$NSEm = out_sCh10_1_s1200nc$NSEa = NA
+out_sCh10_1_s1200nc$LNSEd = out_sCh10_1_s1200nc$LNSEw = out_sCh10_1_s1200nc$LNSEm = out_sCh10_1_s1200nc$LNSEa = out_sCh10_1_s1200nc$pBias = NA
+out_sCh10_1_s1200nc$success = NA
+colnames(out_sCh10_1_s1200nc)[23:46] = c('ID','Dataset','Replicate','Chain','beta','xi','sigma_0','sigma_1','phi_1','mu_h','SSEd','SSEw','SSEm','SSEa','NSEd','NSEw','NSEm','NSEa','LNSEd','LNSEw','LNSEm','LNSEa','pBias','success')
+
+out_sCh10_2_s1200nc$ID = out_sCh10_2_s1200nc$Dataset = out_sCh10_2_s1200nc$Replicate = out_sCh10_2_s1200nc$Chain = NA
+out_sCh10_2_s1200nc$beta = out_sCh10_2_s1200nc$xi = out_sCh10_2_s1200nc$sigma_0 = out_sCh10_2_s1200nc$sigma_1 = out_sCh10_2_s1200nc$phi_1 = out_sCh10_2_s1200nc$mu_h = NA
+out_sCh10_2_s1200nc$SSEd = out_sCh10_2_s1200nc$SSEw = out_sCh10_2_s1200nc$SSEm = out_sCh10_2_s1200nc$SSEa = NA
+out_sCh10_2_s1200nc$NSEd = out_sCh10_2_s1200nc$NSEw = out_sCh10_2_s1200nc$NSEm = out_sCh10_2_s1200nc$NSEa = NA
+out_sCh10_2_s1200nc$LNSEd = out_sCh10_2_s1200nc$LNSEw = out_sCh10_2_s1200nc$LNSEm = out_sCh10_2_s1200nc$LNSEa = out_sCh10_2_s1200nc$pBias = NA
+out_sCh10_2_s1200nc$success = NA
+colnames(out_sCh10_2_s1200nc)[23:46] = c('ID','Dataset','Replicate','Chain','beta','xi','sigma_0','sigma_1','phi_1','mu_h','SSEd','SSEw','SSEm','SSEa','NSEd','NSEw','NSEm','NSEa','LNSEd','LNSEw','LNSEm','LNSEa','pBias','success')
+
+out_sCh10_3_s1200nc$ID = out_sCh10_3_s1200nc$Dataset = out_sCh10_3_s1200nc$Replicate = out_sCh10_3_s1200nc$Chain = NA
+out_sCh10_3_s1200nc$beta = out_sCh10_3_s1200nc$xi = out_sCh10_3_s1200nc$sigma_0 = out_sCh10_3_s1200nc$sigma_1 = out_sCh10_3_s1200nc$phi_1 = out_sCh10_3_s1200nc$mu_h = NA
+out_sCh10_3_s1200nc$SSEd = out_sCh10_3_s1200nc$SSEw = out_sCh10_3_s1200nc$SSEm = out_sCh10_3_s1200nc$SSEa = NA
+out_sCh10_3_s1200nc$NSEd = out_sCh10_3_s1200nc$NSEw = out_sCh10_3_s1200nc$NSEm = out_sCh10_3_s1200nc$NSEa = NA
+out_sCh10_3_s1200nc$LNSEd = out_sCh10_3_s1200nc$LNSEw = out_sCh10_3_s1200nc$LNSEm = out_sCh10_3_s1200nc$LNSEa = out_sCh10_3_s1200nc$pBias = NA
+out_sCh10_3_s1200nc$success = NA
+colnames(out_sCh10_3_s1200nc)[23:46] = c('ID','Dataset','Replicate','Chain','beta','xi','sigma_0','sigma_1','phi_1','mu_h','SSEd','SSEw','SSEm','SSEa','NSEd','NSEw','NSEm','NSEa','LNSEd','LNSEw','LNSEm','LNSEa','pBias','success')
+
+#Loop over replicates
+lchain = nrow(out_sCh10_s1200n$chain[[1]])
+nchains = length(out_sCh10_s1200n$chain)
+for (i in 1:lchain){
+  #Order of out_sCh10 files is Chain 1 replicate 1-1200, Chains 2 replicate 1-1200, etc.
+  #Order of metrics file is Replicate 1 Chain 1-10, Replicate 2 Chain 1-10, etc.
+  if (i == 1){
+    #This will always be accepted. Add metrics info to out files
+    for (j in 1:nchains){
+      out_sCh10_s1200nc[i+lchain*(j-1),23:46] = Eff_Ch10[j,c(1,2,3,4,26:31,33:46)]
+      out_sCh10_1_s1200nc[i+lchain*(j-1),23:46] = Eff_Ch10_1[j,c(1,2,3,4,26:31,33:46)]
+      out_sCh10_2_s1200nc[i+lchain*(j-1),23:46] = Eff_Ch10_2[j,c(1,2,3,4,26:31,33:46)]
+      out_sCh10_3_s1200nc[i+lchain*(j-1),23:46] = Eff_Ch10_3[j,c(1,2,3,4,26:31,33:46)]
+    }
+  }else{
+    #Loop over chains, and check if the value changed.
+    for (j in 1:nchains){
+      #10Ch
+      if (any(out_sCh10_s1200n$chain[[j]][i,1:20] != out_sCh10_s1200n$chain[[j]][i-1,1:20])){
+        #If it did, get the corresponding value in the metrics file
+        out_sCh10_s1200nc[i+lchain*(j-1),23:46] = Eff_Ch10[j+nchains*(i-1),c(1,2,3,4,26:31,33:46)]
+      }else{
+        #If it didn't, copy the current metric info
+        out_sCh10_s1200nc[i+lchain*(j-1),23:46] = out_sCh10_s1200nc[i+lchain*(j-1)-1,23:46]
+      }
+      #10Ch-1
+      if (any(out_sCh10_1_s1200n$chain[[j]][i,1:20] != out_sCh10_1_s1200n$chain[[j]][i-1,1:20])){
+        #If it did, get the corresponding value in the metrics file
+        out_sCh10_1_s1200nc[i+lchain*(j-1),23:46] = Eff_Ch10_1[j+nchains*(i-1),c(1,2,3,4,26:31,33:46)]
+      }else{
+        #If it didn't, copy the current metric info
+        out_sCh10_1_s1200nc[i+lchain*(j-1),23:46] = out_sCh10_1_s1200nc[i+lchain*(j-1)-1,23:46]
+      }
+      #10Ch-2
+      if (any(out_sCh10_2_s1200n$chain[[j]][i,1:20] != out_sCh10_2_s1200n$chain[[j]][i-1,1:20])){
+        #If it did, get the corresponding value in the metrics file
+        out_sCh10_2_s1200nc[i+lchain*(j-1),23:46] = Eff_Ch10_2[j+nchains*(i-1),c(1,2,3,4,26:31,33:46)]
+      }else{
+        #If it didn't, copy the current metric info
+        out_sCh10_2_s1200nc[i+lchain*(j-1),23:46] = out_sCh10_2_s1200nc[i+lchain*(j-1)-1,23:46]
+      }
+      #10Ch-3
+      if (any(out_sCh10_3_s1200n$chain[[j]][i,1:20] != out_sCh10_3_s1200n$chain[[j]][i-1,1:20])){
+        #If it did, get the corresponding value in the metrics file
+        out_sCh10_3_s1200nc[i+lchain*(j-1),23:46] = Eff_Ch10_3[j+nchains*(i-1),c(1,2,3,4,26:31,33:46)]
+      }else{
+        #If it didn't, copy the current metric info
+        out_sCh10_3_s1200nc[i+lchain*(j-1),23:46] = out_sCh10_3_s1200nc[i+lchain*(j-1)-1,23:46]
+      }
+    }
+  }
+}
+
+#Normalize the parameters to 0-1----
+for (i in 1:nrow(ParamRanges)){
+  out_sCh10_s1200nc[,i] = (out_sCh10_s1200nc[,i] - ParamRanges$Lower[ParamRanges$NumberedParams == colnames(out_sCh10_s1200nc)[i]])/(ParamRanges$Upper[ParamRanges$NumberedParams == colnames(out_sCh10_s1200nc)[i]] - ParamRanges$Lower[ParamRanges$NumberedParams == colnames(out_sCh10_s1200nc)[i]])
+  out_sCh10_1_s1200nc[,i] = (out_sCh10_1_s1200nc[,i] - ParamRanges$Lower[ParamRanges$NumberedParams == colnames(out_sCh10_1_s1200nc)[i]])/(ParamRanges$Upper[ParamRanges$NumberedParams == colnames(out_sCh10_1_s1200nc)[i]] - ParamRanges$Lower[ParamRanges$NumberedParams == colnames(out_sCh10_1_s1200nc)[i]])
+  out_sCh10_2_s1200nc[,i] = (out_sCh10_2_s1200nc[,i] - ParamRanges$Lower[ParamRanges$NumberedParams == colnames(out_sCh10_2_s1200nc)[i]])/(ParamRanges$Upper[ParamRanges$NumberedParams == colnames(out_sCh10_2_s1200nc)[i]] - ParamRanges$Lower[ParamRanges$NumberedParams == colnames(out_sCh10_2_s1200nc)[i]])
+  out_sCh10_3_s1200nc[,i] = (out_sCh10_3_s1200nc[,i] - ParamRanges$Lower[ParamRanges$NumberedParams == colnames(out_sCh10_3_s1200nc)[i]])/(ParamRanges$Upper[ParamRanges$NumberedParams == colnames(out_sCh10_3_s1200nc)[i]] - ParamRanges$Lower[ParamRanges$NumberedParams == colnames(out_sCh10_3_s1200nc)[i]])
+  #Eff_Ch10[,4+i] = (Eff_Ch10[,4+i] - ParamRanges$Lower[ParamRanges$NumberedParams == colnames(Eff_Ch10)[4+i]])/(ParamRanges$Upper[ParamRanges$NumberedParams == colnames(Eff_Ch10)[4+i]] - ParamRanges$Lower[ParamRanges$NumberedParams == colnames(Eff_Ch10)[4+i]])
+  #Eff_Ch10_1[,4+i] = (Eff_Ch10_1[,4+i] - ParamRanges$Lower[ParamRanges$NumberedParams == colnames(Eff_Ch10_1)[4+i]])/(ParamRanges$Upper[ParamRanges$NumberedParams == colnames(Eff_Ch10_1)[4+i]] - ParamRanges$Lower[ParamRanges$NumberedParams == colnames(Eff_Ch10_1)[4+i]])
+  #Eff_Ch10_2[,4+i] = (Eff_Ch10_2[,4+i] - ParamRanges$Lower[ParamRanges$NumberedParams == colnames(Eff_Ch10_2)[4+i]])/(ParamRanges$Upper[ParamRanges$NumberedParams == colnames(Eff_Ch10_2)[4+i]] - ParamRanges$Lower[ParamRanges$NumberedParams == colnames(Eff_Ch10_2)[4+i]])
+  #Eff_Ch10_3[,4+i] = (Eff_Ch10_3[,4+i] - ParamRanges$Lower[ParamRanges$NumberedParams == colnames(Eff_Ch10_3)[4+i]])/(ParamRanges$Upper[ParamRanges$NumberedParams == colnames(Eff_Ch10_3)[4+i]] - ParamRanges$Lower[ParamRanges$NumberedParams == colnames(Eff_Ch10_3)[4+i]])
+}
+
+#Remove burnin of 200----
+out_sCh10_s1200ncb = out_sCh10_s1200nc[c(1:1000,1201:2200,2401:3400,3601:4600,4801:5800,6001:7000,7201:8200,8401:9400,9601:10600,10801:11800),]
+out_sCh10_1_s1200ncb = out_sCh10_1_s1200nc[c(1:1000,1201:2200,2401:3400,3601:4600,4801:5800,6001:7000,7201:8200,8401:9400,9601:10600,10801:11800),]
+out_sCh10_2_s1200ncb = out_sCh10_2_s1200nc[c(1:1000,1201:2200,2401:3400,3601:4600,4801:5800,6001:7000,7201:8200,8401:9400,9601:10600,10801:11800),]
+out_sCh10_3_s1200ncb = out_sCh10_3_s1200nc[c(1:1000,1201:2200,2401:3400,3601:4600,4801:5800,6001:7000,7201:8200,8401:9400,9601:10600,10801:11800),]
+
+#Select only the unique points----
+out_sCh10_s1200ncu = unique(out_sCh10_s1200nc)
+out_sCh10_1_s1200ncu = unique(out_sCh10_1_s1200nc)
+out_sCh10_2_s1200ncu = unique(out_sCh10_2_s1200nc)
+out_sCh10_3_s1200ncu = unique(out_sCh10_3_s1200nc)
+#burnin
+out_sCh10_s1200ncbu = unique(out_sCh10_s1200ncb)
+out_sCh10_1_s1200ncbu = unique(out_sCh10_1_s1200ncb)
+out_sCh10_2_s1200ncbu = unique(out_sCh10_2_s1200ncb)
+out_sCh10_3_s1200ncbu = unique(out_sCh10_3_s1200ncb)
+
+#Just 4.7% were accepted
+out_sCh10u = rbind(out_sCh10_s1200ncu, out_sCh10_1_s1200ncu, out_sCh10_2_s1200ncu, out_sCh10_3_s1200ncu)
+out_sCh10bu = rbind(out_sCh10_s1200ncbu, out_sCh10_1_s1200ncbu, out_sCh10_2_s1200ncbu, out_sCh10_3_s1200ncbu)
+
+#Make a dataset of only the points with LNSE > 0.7
+#Just 14.4% are less than 0.7, so we're not cutting much of the tails off, and 0.7 is very acceptable performance.
+out_sCh10uL = out_sCh10u[out_sCh10u$LNSEd > 0.7,]
+out_sCh10buL = out_sCh10bu[out_sCh10bu$LNSEd > 0.7,]
+
+#Burnin of 200 steps would remove some higher LNSEd points as well as all of the LNSEd < 0.7
+#Using non-burned in portion of chains
+
+#Create a scale normalized dataset for clustering (compare with 0-1 nromalized)----
+out_sCh10suL = out_sCh10uL
+out_sCh10suL[,1:19] = t(apply(X = t(apply(X = out_sCh10uL[,1:19], MARGIN = 1, FUN = "-", colMeans(out_sCh10uL[,1:19]))), MARGIN = 1, FUN = "/", colSds(out_sCh10uL[,1:19])))
+
+#Test clustering into 1 - 40 clusters----
+# Elbow method
+#0-1 normalization
+fviz_nbclust(x = out_sCh10uL[,1:19], FUNcluster = kmeans, method = "wss", nstart = 100, k.max = 40) +
+  geom_vline(xintercept = 9, linetype = 2, colour='red') +
+  geom_vline(xintercept = 19, linetype = 2, colour='red') +
+  labs(subtitle = "Elbow method") + coord_cartesian(xlim = c(1, 40), ylim = c(0,2000))
+#Scale normalization
+fviz_nbclust(x = out_sCh10suL[,1:19], FUNcluster = kmeans, method = "wss", nstart = 100, k.max = 40) +
+  geom_vline(xintercept = 9, linetype = 2, colour='red') +
+  geom_vline(xintercept = 19, linetype = 2, colour='red') +
+  labs(subtitle = "Elbow method") + coord_cartesian(xlim = c(1, 40))
+
+# Silhouette method - optimal of 39
+#0-1 normalization
+fviz_nbclust(x = out_sCh10uL[,1:19], FUNcluster = kmeans, method = "silhouette", nstart = 100, k.max = 40) +
+  geom_vline(xintercept = 9, linetype = 2, colour='red') +
+  geom_vline(xintercept = 19, linetype = 2, colour='red') +
+  labs(subtitle = "Silhouette method") + coord_cartesian(xlim = c(1, 40))
+#Scale normalization
+fviz_nbclust(x = out_sCh10suL[,1:19], FUNcluster = kmeans, method = "silhouette", nstart = 100, k.max = 40) +
+  geom_vline(xintercept = 9, linetype = 2, colour='red') +
+  geom_vline(xintercept = 19, linetype = 2, colour='red') +
+  labs(subtitle = "Silhouette method") + coord_cartesian(xlim = c(1, 40))
+
+# Gap statistic - optimal of 14
+#0-1 normalization
+fviz_nbclust(x = out_sCh10uL[,1:19], FUNcluster = kmeans, method = "gap_stat", iter.max = 100, nstart = 100, k.max = 40, nboot = 100) + 
+  geom_vline(xintercept = 9, linetype = 2, colour='red') +
+  geom_vline(xintercept = 19, linetype = 2, colour='red') +
+  labs(subtitle = "Gap statistic method") + coord_cartesian(xlim = c(1, 40))
+#Scale normalization
+fviz_nbclust(x = out_sCh10suL[,1:19], FUNcluster = kmeans, method = "gap_stat", iter.max = 100, nstart = 100, k.max = 40, nboot = 5) + 
+  geom_vline(xintercept = 9, linetype = 2, colour='red') +
+  geom_vline(xintercept = 19, linetype = 2, colour='red') +
+  labs(subtitle = "Gap statistic method") + coord_cartesian(xlim = c(1, 40))
+
+#Cluster Metrics - Optimal of 4? That doesn't make sense to me.
+nbclust_out <- NbClust(data = out_sCh10uL[,1:19], distance = "euclidean", min.nc = 2, max.nc = 40, method = "kmeans")
+# create a dataframe of the optimal number of clusters
+nbclust_plot <- data.frame(clusters = nbclust_out$Best.nc[1, ])
+# select only indices which select between 2 and 40 clusters
+nbclust_plot <- subset(nbclust_plot, clusters >= 2 & clusters <= 40)
+# create plot
+ggplot(nbclust_plot) + aes(x = clusters) +
+  geom_histogram(bins = 40L, fill = "#0c4c8a") +
+  labs(x = "Number of clusters", y = "Frequency among all indices", title = "Optimal number of clusters") +
+  theme_minimal()
+
+#Evaluate 9 vs. 19 clusters. 19 seems more reasonable from above plots----
+#Also doing 8 and 18 + MAP
+Clust9 = kmeans(x = out_sCh10uL[,1:19], centers = 9, iter.max = 1000, nstart = 100, trace = FALSE)
+Clust19 = kmeans(x = out_sCh10uL[,1:19], centers = 19, iter.max = 1000, nstart = 100, trace = FALSE)
+Clust8 = kmeans(x = out_sCh10uL[,1:19], centers = 8, iter.max = 1000, nstart = 100, trace = FALSE)
+Clust18 = kmeans(x = out_sCh10uL[,1:19], centers = 18, iter.max = 1000, nstart = 100, trace = FALSE)
+#Scale normalization
+Clust9s = kmeans(x = out_sCh10suL[,1:19], centers = 9, iter.max = 1000, nstart = 100, trace = FALSE)
+Clust19s = kmeans(x = out_sCh10suL[,1:19], centers = 19, iter.max = 1000, nstart = 100, trace = FALSE)
+Clust8s = kmeans(x = out_sCh10suL[,1:19], centers = 8, iter.max = 1000, nstart = 100, trace = FALSE)
+Clust18s = kmeans(x = out_sCh10suL[,1:19], centers = 18, iter.max = 1000, nstart = 100, trace = FALSE)
+
+# Gather the most likely point from each cluster----
+MaxClust8 = as.data.frame(matrix(NA, nrow = 8, ncol = ncol(out_sCh10uL)))
+MaxClust8s = as.data.frame(matrix(NA, nrow = 8, ncol = ncol(out_sCh10suL)))
+for (i in 1:8){
+  MaxClust8[i,] = out_sCh10uL[Clust8$cluster == i,][which(out_sCh10uL$LP[Clust8$cluster == i] == max(out_sCh10uL$LP[Clust8$cluster == i])),]
+  MaxClust8s[i,] = out_sCh10suL[Clust8s$cluster == i,][which(out_sCh10suL$LP[Clust8s$cluster == i] == max(out_sCh10suL$LP[Clust8s$cluster == i])),]
+}
+colnames(MaxClust8) = colnames(out_sCh10uL)
+colnames(MaxClust8s) = colnames(out_sCh10suL)
+
+#Points in clusters do not all come from the same chain, which is good.
+hist(out_sCh10uL$Chain[Clust8$cluster == 1])
+hist(out_sCh10uL$Chain[Clust8$cluster == 2])
+hist(out_sCh10uL$Chain[Clust8$cluster == 3])
+hist(out_sCh10uL$Chain[Clust8$cluster == 4])
+hist(out_sCh10uL$Chain[Clust8$cluster == 5])
+hist(out_sCh10uL$Chain[Clust8$cluster == 6])
+hist(out_sCh10uL$Chain[Clust8$cluster == 7])
+hist(out_sCh10uL$Chain[Clust8$cluster == 8])
+
+hist(out_sCh10suL$Chain[Clust8s$cluster == 1])
+hist(out_sCh10suL$Chain[Clust8s$cluster == 2])
+hist(out_sCh10suL$Chain[Clust8s$cluster == 3])
+hist(out_sCh10suL$Chain[Clust8s$cluster == 4])
+hist(out_sCh10suL$Chain[Clust8s$cluster == 5])
+hist(out_sCh10suL$Chain[Clust8s$cluster == 6])
+hist(out_sCh10suL$Chain[Clust8s$cluster == 7])
+hist(out_sCh10suL$Chain[Clust8s$cluster == 8])
+
+MaxClust9 = as.data.frame(matrix(NA, nrow = 9, ncol = ncol(out_sCh10uL)))
+MaxClust9s = as.data.frame(matrix(NA, nrow = 9, ncol = ncol(out_sCh10suL)))
+for (i in 1:9){
+  MaxClust9[i,] = out_sCh10uL[Clust9$cluster == i,][which(out_sCh10uL$LP[Clust9$cluster == i] == max(out_sCh10uL$LP[Clust9$cluster == i])),]
+  MaxClust9s[i,] = out_sCh10suL[Clust9s$cluster == i,][which(out_sCh10suL$LP[Clust9s$cluster == i] == max(out_sCh10suL$LP[Clust9s$cluster == i])),]
+}
+colnames(MaxClust9) = colnames(out_sCh10uL)
+colnames(MaxClust9s) = colnames(out_sCh10suL)
+
+#Points in clusters do not all come from the same chain, which is good.
+hist(out_sCh10uL$Chain[Clust9$cluster == 1])
+hist(out_sCh10uL$Chain[Clust9$cluster == 2])
+hist(out_sCh10uL$Chain[Clust9$cluster == 3])
+hist(out_sCh10uL$Chain[Clust9$cluster == 4])
+hist(out_sCh10uL$Chain[Clust9$cluster == 5])
+hist(out_sCh10uL$Chain[Clust9$cluster == 6])
+hist(out_sCh10uL$Chain[Clust9$cluster == 7])
+hist(out_sCh10uL$Chain[Clust9$cluster == 8])
+hist(out_sCh10uL$Chain[Clust9$cluster == 9])
+
+hist(out_sCh10suL$Chain[Clust9s$cluster == 1])
+hist(out_sCh10suL$Chain[Clust9s$cluster == 2])
+hist(out_sCh10suL$Chain[Clust9s$cluster == 3])
+hist(out_sCh10suL$Chain[Clust9s$cluster == 4])
+hist(out_sCh10suL$Chain[Clust9s$cluster == 5])
+hist(out_sCh10suL$Chain[Clust9s$cluster == 6])
+hist(out_sCh10suL$Chain[Clust9s$cluster == 7])
+hist(out_sCh10suL$Chain[Clust9s$cluster == 8])
+hist(out_sCh10suL$Chain[Clust9s$cluster == 9])
+
+MaxClust18 = as.data.frame(matrix(NA, nrow = 18, ncol = ncol(out_sCh10uL)))
+MaxClust18s = as.data.frame(matrix(NA, nrow = 18, ncol = ncol(out_sCh10suL)))
+for (i in 1:18){
+  MaxClust18[i,] = out_sCh10uL[Clust18$cluster == i,][which(out_sCh10uL$LP[Clust18$cluster == i] == max(out_sCh10uL$LP[Clust18$cluster == i])),]
+  MaxClust18s[i,] = out_sCh10suL[Clust18s$cluster == i,][which(out_sCh10suL$LP[Clust18s$cluster == i] == max(out_sCh10suL$LP[Clust18s$cluster == i])),]
+}
+colnames(MaxClust18) = colnames(out_sCh10uL)
+colnames(MaxClust18s) = colnames(out_sCh10suL)
+
+#Points in clusters do not all come from the same chain, which is good.
+hist(out_sCh10uL$Chain[Clust18$cluster == 1])
+hist(out_sCh10uL$Chain[Clust18$cluster == 2])
+hist(out_sCh10uL$Chain[Clust18$cluster == 3])
+hist(out_sCh10uL$Chain[Clust18$cluster == 4])
+hist(out_sCh10uL$Chain[Clust18$cluster == 5])
+hist(out_sCh10uL$Chain[Clust18$cluster == 6])
+hist(out_sCh10uL$Chain[Clust18$cluster == 7])
+hist(out_sCh10uL$Chain[Clust18$cluster == 8])
+hist(out_sCh10uL$Chain[Clust18$cluster == 9])
+hist(out_sCh10uL$Chain[Clust18$cluster == 10])
+hist(out_sCh10uL$Chain[Clust18$cluster == 11])
+hist(out_sCh10uL$Chain[Clust18$cluster == 12])
+hist(out_sCh10uL$Chain[Clust18$cluster == 13])
+hist(out_sCh10uL$Chain[Clust18$cluster == 14])
+hist(out_sCh10uL$Chain[Clust18$cluster == 15])
+hist(out_sCh10uL$Chain[Clust18$cluster == 16])
+hist(out_sCh10uL$Chain[Clust18$cluster == 17])
+hist(out_sCh10uL$Chain[Clust18$cluster == 18])
+
+hist(out_sCh10suL$Chain[Clust18s$cluster == 1])
+hist(out_sCh10suL$Chain[Clust18s$cluster == 2])
+hist(out_sCh10suL$Chain[Clust18s$cluster == 3])
+hist(out_sCh10suL$Chain[Clust18s$cluster == 4])
+hist(out_sCh10suL$Chain[Clust18s$cluster == 5])
+hist(out_sCh10suL$Chain[Clust18s$cluster == 6])
+hist(out_sCh10suL$Chain[Clust18s$cluster == 7])
+hist(out_sCh10suL$Chain[Clust18s$cluster == 8])
+hist(out_sCh10suL$Chain[Clust18s$cluster == 9])
+hist(out_sCh10suL$Chain[Clust18s$cluster == 10])
+hist(out_sCh10suL$Chain[Clust18s$cluster == 11])
+hist(out_sCh10suL$Chain[Clust18s$cluster == 12])
+hist(out_sCh10suL$Chain[Clust18s$cluster == 13])
+hist(out_sCh10suL$Chain[Clust18s$cluster == 14])
+hist(out_sCh10suL$Chain[Clust18s$cluster == 15])
+hist(out_sCh10suL$Chain[Clust18s$cluster == 16])
+hist(out_sCh10suL$Chain[Clust18s$cluster == 17])
+hist(out_sCh10suL$Chain[Clust18s$cluster == 18])
+
+MaxClust19 = as.data.frame(matrix(NA, nrow = 19, ncol = ncol(out_sCh10uL)))
+MaxClust19s = as.data.frame(matrix(NA, nrow = 19, ncol = ncol(out_sCh10suL)))
+for (i in 1:19){
+  MaxClust19[i,] = out_sCh10uL[Clust19$cluster == i,][which(out_sCh10uL$LP[Clust19$cluster == i] == max(out_sCh10uL$LP[Clust19$cluster == i])),]
+  MaxClust19s[i,] = out_sCh10suL[Clust19s$cluster == i,][which(out_sCh10suL$LP[Clust19s$cluster == i] == max(out_sCh10suL$LP[Clust19s$cluster == i])),]
+}
+colnames(MaxClust19) = colnames(out_sCh10uL)
+colnames(MaxClust19s) = colnames(out_sCh10suL)
+
+hist(out_sCh10uL$Chain[Clust19$cluster == 1])
+hist(out_sCh10uL$Chain[Clust19$cluster == 2])
+hist(out_sCh10uL$Chain[Clust19$cluster == 3])
+hist(out_sCh10uL$Chain[Clust19$cluster == 4])
+hist(out_sCh10uL$Chain[Clust19$cluster == 5])
+hist(out_sCh10uL$Chain[Clust19$cluster == 6])
+hist(out_sCh10uL$Chain[Clust19$cluster == 7])
+hist(out_sCh10uL$Chain[Clust19$cluster == 8])
+hist(out_sCh10uL$Chain[Clust19$cluster == 9])
+hist(out_sCh10uL$Chain[Clust19$cluster == 10])
+hist(out_sCh10uL$Chain[Clust19$cluster == 11])
+hist(out_sCh10uL$Chain[Clust19$cluster == 12])
+hist(out_sCh10uL$Chain[Clust19$cluster == 13])
+hist(out_sCh10uL$Chain[Clust19$cluster == 14])
+hist(out_sCh10uL$Chain[Clust19$cluster == 15])
+hist(out_sCh10uL$Chain[Clust19$cluster == 16])
+hist(out_sCh10uL$Chain[Clust19$cluster == 17])
+hist(out_sCh10uL$Chain[Clust19$cluster == 18])
+hist(out_sCh10uL$Chain[Clust19$cluster == 19])
+
+hist(out_sCh10suL$Chain[Clust19s$cluster == 1])
+hist(out_sCh10suL$Chain[Clust19s$cluster == 2])
+hist(out_sCh10suL$Chain[Clust19s$cluster == 3])
+hist(out_sCh10suL$Chain[Clust19s$cluster == 4])
+hist(out_sCh10suL$Chain[Clust19s$cluster == 5])
+hist(out_sCh10suL$Chain[Clust19s$cluster == 6])
+hist(out_sCh10suL$Chain[Clust19s$cluster == 7])
+hist(out_sCh10suL$Chain[Clust19s$cluster == 8])
+hist(out_sCh10suL$Chain[Clust19s$cluster == 9])
+hist(out_sCh10suL$Chain[Clust19s$cluster == 10])
+hist(out_sCh10suL$Chain[Clust19s$cluster == 11])
+hist(out_sCh10suL$Chain[Clust19s$cluster == 12])
+hist(out_sCh10suL$Chain[Clust19s$cluster == 13])
+hist(out_sCh10suL$Chain[Clust19s$cluster == 14])
+hist(out_sCh10suL$Chain[Clust19s$cluster == 15])
+hist(out_sCh10suL$Chain[Clust19s$cluster == 16])
+hist(out_sCh10suL$Chain[Clust19s$cluster == 17])
+hist(out_sCh10suL$Chain[Clust19s$cluster == 18])
+hist(out_sCh10suL$Chain[Clust19s$cluster == 19])
+
+# Gather the point closest to the center of each cluster (that's how they're clustered, so probably better)----
+#  0-1 normalization----
+CenPtClust8 = as.data.frame(matrix(NA, nrow = 8, ncol = ncol(out_sCh10uL)))
+for (i in 1:8){
+  #Calculate Euclidean distance to the center vector
+  dists = t(apply(X = out_sCh10uL[Clust8$cluster == i,1:19], MARGIN = 1, FUN = '-', Clust8$centers[i,]))
+  #nth root of sum of squared differences
+  dists = dists^2
+  dists = apply(X = dists, MARGIN = 1, FUN = sum)
+  dists = dists^(1/8)
+  #Take the point with the smallest distance to the center
+  CenPtClust8[i,] = out_sCh10uL[Clust8$cluster == i,][which(dists == min(dists)),]
+  
+  #If this cluster has the MAP, compute the distance rank of the MAP
+  if (i == which(MaxClust8$LP == max(MaxClust8$LP))){
+    distMAP = dists[which(out_sCh10uL$LP[Clust8$cluster == i] == max(out_sCh10uL$LP[Clust8$cluster == i]))]
+    DistRankMAP8 = which(sort(dists) == distMAP)
+  }
+}
+colnames(CenPtClust8) = colnames(out_sCh10uL)
+
+CenPtClust9 = as.data.frame(matrix(NA, nrow = 9, ncol = ncol(out_sCh10uL)))
+for (i in 1:9){
+  #Calculate Euclidean distance to the center vector
+  dists = t(apply(X = out_sCh10uL[Clust9$cluster == i,1:19], MARGIN = 1, FUN = '-', Clust9$centers[i,]))
+  #nth root of sum of squared differences
+  dists = dists^2
+  dists = apply(X = dists, MARGIN = 1, FUN = sum)
+  dists = dists^(1/9)
+  #Take the point with the smallest distance to the center
+  CenPtClust9[i,] = out_sCh10uL[Clust9$cluster == i,][which(dists == min(dists)),]
+  
+  #If this cluster has the MAP, compute the distance rank of the MAP
+  if (i == which(MaxClust9$LP == max(MaxClust9$LP))){
+    distMAP = dists[which(out_sCh10uL$LP[Clust9$cluster == i] == max(out_sCh10uL$LP[Clust9$cluster == i]))]
+    DistRankMAP9 = which(sort(dists) == distMAP)
+  }
+}
+colnames(CenPtClust9) = colnames(out_sCh10uL)
+
+CenPtClust18 = as.data.frame(matrix(NA, nrow = 18, ncol = ncol(out_sCh10uL)))
+for (i in 1:18){
+  #Calculate Euclidean distance to the center vector
+  dists = t(apply(X = out_sCh10uL[Clust18$cluster == i,1:19], MARGIN = 1, FUN = '-', Clust18$centers[i,]))
+  #nth root of sum of squared differences
+  dists = dists^2
+  dists = apply(X = dists, MARGIN = 1, FUN = sum)
+  dists = dists^(1/18)
+  #Take the point with the smallest distance to the center
+  CenPtClust18[i,] = out_sCh10uL[Clust18$cluster == i,][which(dists == min(dists)),]
+  
+  #If this cluster has the MAP, compute the distance rank of the MAP
+  if (i == which(MaxClust18$LP == max(MaxClust18$LP))){
+    distMAP = dists[which(out_sCh10uL$LP[Clust18$cluster == i] == max(out_sCh10uL$LP[Clust18$cluster == i]))]
+    DistRankMAP18 = which(sort(dists) == distMAP)
+  }
+}
+colnames(CenPtClust18) = colnames(out_sCh10uL)
+
+CenPtClust19 = as.data.frame(matrix(NA, nrow = 19, ncol = ncol(out_sCh10uL)))
+for (i in 1:19){
+  #Calculate Euclidean distance to the center vector
+  dists = t(apply(X = out_sCh10uL[Clust19$cluster == i,1:19], MARGIN = 1, FUN = '-', Clust19$centers[i,]))
+  #nth root of sum of squared differences
+  dists = dists^2
+  dists = apply(X = dists, MARGIN = 1, FUN = sum)
+  dists = dists^(1/19)
+  #Take the point with the smallest distance to the center
+  CenPtClust19[i,] = out_sCh10uL[Clust19$cluster == i,][which(dists == min(dists)),]
+  
+  #If this cluster has the MAP, compute the distance rank of the MAP
+  if (i == which(MaxClust19$LP == max(MaxClust19$LP))){
+    distMAP = dists[which(out_sCh10uL$LP[Clust19$cluster == i] == max(out_sCh10uL$LP[Clust19$cluster == i]))]
+    DistRankMAP19 = which(sort(dists) == distMAP)
+  }
+}
+colnames(CenPtClust19) = colnames(out_sCh10uL)
+
+#  Scale normalization----
+CenPtClust8s = as.data.frame(matrix(NA, nrow = 8, ncol = ncol(out_sCh10suL)))
+for (i in 1:8){
+  #Calculate Euclidean distance to the center vector
+  dists = t(apply(X = out_sCh10suL[Clust8s$cluster == i,1:19], MARGIN = 1, FUN = '-', Clust8s$centers[i,]))
+  #nth root of sum of squared differences
+  dists = dists^2
+  dists = apply(X = dists, MARGIN = 1, FUN = sum)
+  dists = dists^(1/8)
+  #Take the point with the smallest distance to the center
+  CenPtClust8s[i,] = out_sCh10suL[Clust8s$cluster == i,][which(dists == min(dists)),]
+  
+  #If this cluster has the MAP, compute the distance rank of the MAP
+  if (i == which(MaxClust8s$LP == max(MaxClust8s$LP))){
+    distMAP = dists[which(out_sCh10suL$LP[Clust8s$cluster == i] == max(out_sCh10suL$LP[Clust8s$cluster == i]))]
+    DistRankMAP8s = which(sort(dists) == distMAP)
+  }
+}
+colnames(CenPtClust8s) = colnames(out_sCh10suL)
+
+CenPtClust9s = as.data.frame(matrix(NA, nrow = 9, ncol = ncol(out_sCh10suL)))
+for (i in 1:9){
+  #Calculate Euclidean distance to the center vector
+  dists = t(apply(X = out_sCh10suL[Clust9s$cluster == i,1:19], MARGIN = 1, FUN = '-', Clust9s$centers[i,]))
+  #nth root of sum of squared differences
+  dists = dists^2
+  dists = apply(X = dists, MARGIN = 1, FUN = sum)
+  dists = dists^(1/9)
+  #Take the point with the smallest distance to the center
+  CenPtClust9s[i,] = out_sCh10suL[Clust9s$cluster == i,][which(dists == min(dists)),]
+  
+  #If this cluster has the MAP, compute the distance rank of the MAP
+  if (i == which(MaxClust9s$LP == max(MaxClust9s$LP))){
+    distMAP = dists[which(out_sCh10suL$LP[Clust9s$cluster == i] == max(out_sCh10suL$LP[Clust9s$cluster == i]))]
+    DistRankMAP9s = which(sort(dists) == distMAP)
+  }
+}
+colnames(CenPtClust9s) = colnames(out_sCh10suL)
+
+CenPtClust18s = as.data.frame(matrix(NA, nrow = 18, ncol = ncol(out_sCh10suL)))
+for (i in 1:18){
+  #Calculate Euclidean distance to the center vector
+  dists = t(apply(X = out_sCh10suL[Clust18s$cluster == i,1:19], MARGIN = 1, FUN = '-', Clust18s$centers[i,]))
+  #nth root of sum of squared differences
+  dists = dists^2
+  dists = apply(X = dists, MARGIN = 1, FUN = sum)
+  dists = dists^(1/18)
+  #Take the point with the smallest distance to the center
+  CenPtClust18s[i,] = out_sCh10suL[Clust18s$cluster == i,][which(dists == min(dists)),]
+  
+  #If this cluster has the MAP, compute the distance rank of the MAP
+  if (i == which(MaxClust18s$LP == max(MaxClust18s$LP))){
+    distMAP = dists[which(out_sCh10suL$LP[Clust18s$cluster == i] == max(out_sCh10suL$LP[Clust18s$cluster == i]))]
+    DistRankMAP18s = which(sort(dists) == distMAP)
+  }
+}
+colnames(CenPtClust18s) = colnames(out_sCh10suL)
+
+CenPtClust19s = as.data.frame(matrix(NA, nrow = 19, ncol = ncol(out_sCh10suL)))
+for (i in 1:19){
+  #Calculate Euclidean distance to the center vector
+  dists = t(apply(X = out_sCh10suL[Clust19s$cluster == i,1:19], MARGIN = 1, FUN = '-', Clust19s$centers[i,]))
+  #nth root of sum of squared differences
+  dists = dists^2
+  dists = apply(X = dists, MARGIN = 1, FUN = sum)
+  dists = dists^(1/19)
+  #Take the point with the smallest distance to the center
+  CenPtClust19s[i,] = out_sCh10suL[Clust19s$cluster == i,][which(dists == min(dists)),]
+  
+  #If this cluster has the MAP, compute the distance rank of the MAP
+  if (i == which(MaxClust19s$LP == max(MaxClust19s$LP))){
+    distMAP = dists[which(out_sCh10suL$LP[Clust19s$cluster == i] == max(out_sCh10suL$LP[Clust19s$cluster == i]))]
+    DistRankMAP19s = which(sort(dists) == distMAP)
+  }
+}
+colnames(CenPtClust19s) = colnames(out_sCh10suL)
+
+# Parallel axis plot of points----
+#Rescale values to 0-1 range for plotting
+Clust8sp = t(apply(X = t(apply(X = Clust8s$centers[,1:19], MARGIN = 1, FUN = "*", colSds(out_sCh10uL[,1:19]))), MARGIN = 1, FUN = "+", colMeans(out_sCh10uL[,1:19])))
+Clust9sp = t(apply(X = t(apply(X = Clust9s$centers[,1:19], MARGIN = 1, FUN = "*", colSds(out_sCh10uL[,1:19]))), MARGIN = 1, FUN = "+", colMeans(out_sCh10uL[,1:19])))
+Clust18sp = t(apply(X = t(apply(X = Clust18s$centers[,1:19], MARGIN = 1, FUN = "*", colSds(out_sCh10uL[,1:19]))), MARGIN = 1, FUN = "+", colMeans(out_sCh10uL[,1:19])))
+Clust19sp = t(apply(X = t(apply(X = Clust19s$centers[,1:19], MARGIN = 1, FUN = "*", colSds(out_sCh10uL[,1:19]))), MARGIN = 1, FUN = "+", colMeans(out_sCh10uL[,1:19])))
+
+CenPtClust8sp = t(apply(X = t(apply(X = CenPtClust8s[,1:19], MARGIN = 1, FUN = "*", colSds(out_sCh10uL[,1:19]))), MARGIN = 1, FUN = "+", colMeans(out_sCh10uL[,1:19])))
+CenPtClust9sp = t(apply(X = t(apply(X = CenPtClust9s[,1:19], MARGIN = 1, FUN = "*", colSds(out_sCh10uL[,1:19]))), MARGIN = 1, FUN = "+", colMeans(out_sCh10uL[,1:19])))
+CenPtClust18sp = t(apply(X = t(apply(X = CenPtClust18s[,1:19], MARGIN = 1, FUN = "*", colSds(out_sCh10uL[,1:19]))), MARGIN = 1, FUN = "+", colMeans(out_sCh10uL[,1:19])))
+CenPtClust19sp = t(apply(X = t(apply(X = CenPtClust19s[,1:19], MARGIN = 1, FUN = "*", colSds(out_sCh10uL[,1:19]))), MARGIN = 1, FUN = "+", colMeans(out_sCh10uL[,1:19])))
+
+MaxClust8sp = t(apply(X = t(apply(X = MaxClust8s[,1:19], MARGIN = 1, FUN = "*", colSds(out_sCh10uL[,1:19]))), MARGIN = 1, FUN = "+", colMeans(out_sCh10uL[,1:19])))
+MaxClust9sp = t(apply(X = t(apply(X = MaxClust9s[,1:19], MARGIN = 1, FUN = "*", colSds(out_sCh10uL[,1:19]))), MARGIN = 1, FUN = "+", colMeans(out_sCh10uL[,1:19])))
+MaxClust18sp = t(apply(X = t(apply(X = MaxClust18s[,1:19], MARGIN = 1, FUN = "*", colSds(out_sCh10uL[,1:19]))), MARGIN = 1, FUN = "+", colMeans(out_sCh10uL[,1:19])))
+MaxClust19sp = t(apply(X = t(apply(X = MaxClust19s[,1:19], MARGIN = 1, FUN = "*", colSds(out_sCh10uL[,1:19]))), MARGIN = 1, FUN = "+", colMeans(out_sCh10uL[,1:19])))
+
+#  All cluster centers----
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust8$centers[,1:19]), col = c('black', 'black', rainbow(8)))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust9$centers[,1:19]), col = c('black', 'black', rainbow(9)))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust18$centers[,1:19]), col = c('black', 'black', rainbow(18)))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust19$centers[,1:19]), col = c('black', 'black', rainbow(19)))
+
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust8sp[,1:19]), col = c('black', 'black', rainbow(8)))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust9sp[,1:19]), col = c('black', 'black', rainbow(9)))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust18sp[,1:19]), col = c('black', 'black', rainbow(18)))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust19sp[,1:19]), col = c('black', 'black', rainbow(19)))
+
+#  All points closest to center----
+parcoord(x = rbind(rep(0,19), rep(1,19), CenPtClust8[,1:19]), col = c('black', 'black', rainbow(8)))
+parcoord(x = rbind(rep(0,19), rep(1,19), CenPtClust9[,1:19]), col = c('black', 'black', rainbow(9)))
+parcoord(x = rbind(rep(0,19), rep(1,19), CenPtClust18[,1:19]), col = c('black', 'black', rainbow(18)))
+parcoord(x = rbind(rep(0,19), rep(1,19), CenPtClust19[,1:19]), col = c('black', 'black', rainbow(19)))
+
+parcoord(x = rbind(rep(0,19), rep(1,19), CenPtClust8sp[,1:19]), col = c('black', 'black', rainbow(8)))
+parcoord(x = rbind(rep(0,19), rep(1,19), CenPtClust9sp[,1:19]), col = c('black', 'black', rainbow(9)))
+parcoord(x = rbind(rep(0,19), rep(1,19), CenPtClust18sp[,1:19]), col = c('black', 'black', rainbow(18)))
+parcoord(x = rbind(rep(0,19), rep(1,19), CenPtClust19sp[,1:19]), col = c('black', 'black', rainbow(19)))
+
+#  All most likely points in clusters----
+parcoord(x = rbind(rep(0,19), rep(1,19), MaxClust8[,1:19]), col = c('black', 'black', rainbow(8)))
+parcoord(x = rbind(rep(0,19), rep(1,19), MaxClust9[,1:19]), col = c('black', 'black', rainbow(9)))
+parcoord(x = rbind(rep(0,19), rep(1,19), MaxClust18[,1:19]), col = c('black', 'black', rainbow(18)))
+parcoord(x = rbind(rep(0,19), rep(1,19), MaxClust19[,1:19]), col = c('black', 'black', rainbow(19)))
+
+parcoord(x = rbind(rep(0,19), rep(1,19), MaxClust8sp[,1:19]), col = c('black', 'black', rainbow(8)))
+parcoord(x = rbind(rep(0,19), rep(1,19), MaxClust9sp[,1:19]), col = c('black', 'black', rainbow(9)))
+parcoord(x = rbind(rep(0,19), rep(1,19), MaxClust18sp[,1:19]), col = c('black', 'black', rainbow(18)))
+parcoord(x = rbind(rep(0,19), rep(1,19), MaxClust19sp[,1:19]), col = c('black', 'black', rainbow(19)))
+
+# Plot the center point, max point, and cluster centers on parallel axis plot----
+#  8 clusters----
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust8$centers[1,1:19], CenPtClust8[1,1:19], MaxClust8[1,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust8$centers[2,1:19], CenPtClust8[2,1:19], MaxClust8[2,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust8$centers[3,1:19], CenPtClust8[3,1:19], MaxClust8[3,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust8$centers[4,1:19], CenPtClust8[4,1:19], MaxClust8[4,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust8$centers[5,1:19], CenPtClust8[5,1:19], MaxClust8[5,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust8$centers[6,1:19], CenPtClust8[6,1:19], MaxClust8[6,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust8$centers[7,1:19], CenPtClust8[7,1:19], MaxClust8[7,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust8$centers[8,1:19], CenPtClust8[8,1:19], MaxClust8[8,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust8sp[1,1:19], CenPtClust8sp[1,1:19], MaxClust8sp[1,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust8sp[2,1:19], CenPtClust8sp[2,1:19], MaxClust8sp[2,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust8sp[3,1:19], CenPtClust8sp[3,1:19], MaxClust8sp[3,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust8sp[4,1:19], CenPtClust8sp[4,1:19], MaxClust8sp[4,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust8sp[5,1:19], CenPtClust8sp[5,1:19], MaxClust8sp[5,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust8sp[6,1:19], CenPtClust8sp[6,1:19], MaxClust8sp[6,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust8sp[7,1:19], CenPtClust8sp[7,1:19], MaxClust8sp[7,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust8sp[8,1:19], CenPtClust8sp[8,1:19], MaxClust8sp[8,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+
+#  9 clusters----
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust9$centers[1,1:19], CenPtClust9[1,1:19], MaxClust9[1,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust9$centers[2,1:19], CenPtClust9[2,1:19], MaxClust9[2,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust9$centers[3,1:19], CenPtClust9[3,1:19], MaxClust9[3,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust9$centers[4,1:19], CenPtClust9[4,1:19], MaxClust9[4,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust9$centers[5,1:19], CenPtClust9[5,1:19], MaxClust9[5,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust9$centers[6,1:19], CenPtClust9[6,1:19], MaxClust9[6,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust9$centers[7,1:19], CenPtClust9[7,1:19], MaxClust9[7,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust9$centers[8,1:19], CenPtClust9[8,1:19], MaxClust9[8,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust9$centers[9,1:19], CenPtClust9[9,1:19], MaxClust9[9,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust9sp[1,1:19], CenPtClust9sp[1,1:19], MaxClust9sp[1,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust9sp[2,1:19], CenPtClust9sp[2,1:19], MaxClust9sp[2,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust9sp[3,1:19], CenPtClust9sp[3,1:19], MaxClust9sp[3,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust9sp[4,1:19], CenPtClust9sp[4,1:19], MaxClust9sp[4,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust9sp[5,1:19], CenPtClust9sp[5,1:19], MaxClust9sp[5,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust9sp[6,1:19], CenPtClust9sp[6,1:19], MaxClust9sp[6,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust9sp[7,1:19], CenPtClust9sp[7,1:19], MaxClust9sp[7,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust9sp[8,1:19], CenPtClust9sp[8,1:19], MaxClust9sp[8,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust9sp[9,1:19], CenPtClust9sp[9,1:19], MaxClust9sp[9,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+
+#18 clusters
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust18$centers[1,1:19], CenPtClust18[1,1:19], MaxClust18[1,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust18$centers[2,1:19], CenPtClust18[2,1:19], MaxClust18[2,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust18$centers[3,1:19], CenPtClust18[3,1:19], MaxClust18[3,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust18$centers[4,1:19], CenPtClust18[4,1:19], MaxClust18[4,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust18$centers[5,1:19], CenPtClust18[5,1:19], MaxClust18[5,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust18$centers[6,1:19], CenPtClust18[6,1:19], MaxClust18[6,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust18$centers[7,1:19], CenPtClust18[7,1:19], MaxClust18[7,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust18$centers[8,1:19], CenPtClust18[8,1:19], MaxClust18[8,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust18$centers[9,1:19], CenPtClust18[9,1:19], MaxClust18[9,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust18$centers[10,1:19], CenPtClust18[10,1:19], MaxClust18[10,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust18$centers[11,1:19], CenPtClust18[11,1:19], MaxClust18[11,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust18$centers[12,1:19], CenPtClust18[12,1:19], MaxClust18[12,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust18$centers[13,1:19], CenPtClust18[13,1:19], MaxClust18[13,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust18$centers[14,1:19], CenPtClust18[14,1:19], MaxClust18[14,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust18$centers[15,1:19], CenPtClust18[15,1:19], MaxClust18[15,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust18$centers[16,1:19], CenPtClust18[16,1:19], MaxClust18[16,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust18$centers[17,1:19], CenPtClust18[17,1:19], MaxClust18[17,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust18$centers[18,1:19], CenPtClust18[18,1:19], MaxClust18[18,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust18sp[1,1:19], CenPtClust18sp[1,1:19], MaxClust18sp[1,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust18sp[2,1:19], CenPtClust18sp[2,1:19], MaxClust18sp[2,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust18sp[3,1:19], CenPtClust18sp[3,1:19], MaxClust18sp[3,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust18sp[4,1:19], CenPtClust18sp[4,1:19], MaxClust18sp[4,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust18sp[5,1:19], CenPtClust18sp[5,1:19], MaxClust18sp[5,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust18sp[6,1:19], CenPtClust18sp[6,1:19], MaxClust18sp[6,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust18sp[7,1:19], CenPtClust18sp[7,1:19], MaxClust18sp[7,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust18sp[8,1:19], CenPtClust18sp[8,1:19], MaxClust18sp[8,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust18sp[9,1:19], CenPtClust18sp[9,1:19], MaxClust18sp[9,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust18sp[10,1:19], CenPtClust18sp[10,1:19], MaxClust18sp[10,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust18sp[11,1:19], CenPtClust18sp[11,1:19], MaxClust18sp[11,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust18sp[12,1:19], CenPtClust18sp[12,1:19], MaxClust18sp[12,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust18sp[13,1:19], CenPtClust18sp[13,1:19], MaxClust18sp[13,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust18sp[14,1:19], CenPtClust18sp[14,1:19], MaxClust18sp[14,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust18sp[15,1:19], CenPtClust18sp[15,1:19], MaxClust18sp[15,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust18sp[16,1:19], CenPtClust18sp[16,1:19], MaxClust18sp[16,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust18sp[17,1:19], CenPtClust18sp[17,1:19], MaxClust18sp[17,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust18sp[18,1:19], CenPtClust18sp[18,1:19], MaxClust18sp[18,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+
+#19 clusters
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust19$centers[1,1:19], CenPtClust19[1,1:19], MaxClust19[1,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust19$centers[2,1:19], CenPtClust19[2,1:19], MaxClust19[2,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust19$centers[3,1:19], CenPtClust19[3,1:19], MaxClust19[3,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust19$centers[4,1:19], CenPtClust19[4,1:19], MaxClust19[4,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust19$centers[5,1:19], CenPtClust19[5,1:19], MaxClust19[5,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust19$centers[6,1:19], CenPtClust19[6,1:19], MaxClust19[6,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust19$centers[7,1:19], CenPtClust19[7,1:19], MaxClust19[7,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust19$centers[8,1:19], CenPtClust19[8,1:19], MaxClust19[8,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust19$centers[9,1:19], CenPtClust19[9,1:19], MaxClust19[9,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust19$centers[10,1:19], CenPtClust19[10,1:19], MaxClust19[10,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust19$centers[11,1:19], CenPtClust19[11,1:19], MaxClust19[11,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust19$centers[12,1:19], CenPtClust19[12,1:19], MaxClust19[12,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust19$centers[13,1:19], CenPtClust19[13,1:19], MaxClust19[13,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust19$centers[14,1:19], CenPtClust19[14,1:19], MaxClust19[14,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust19$centers[15,1:19], CenPtClust19[15,1:19], MaxClust19[15,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust19$centers[16,1:19], CenPtClust19[16,1:19], MaxClust19[16,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust19$centers[17,1:19], CenPtClust19[17,1:19], MaxClust19[17,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust19$centers[18,1:19], CenPtClust19[18,1:19], MaxClust19[18,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust19$centers[19,1:19], CenPtClust19[19,1:19], MaxClust19[19,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust19sp[1,1:19], CenPtClust19sp[1,1:19], MaxClust19sp[1,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust19sp[2,1:19], CenPtClust19sp[2,1:19], MaxClust19sp[2,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust19sp[3,1:19], CenPtClust19sp[3,1:19], MaxClust19sp[3,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust19sp[4,1:19], CenPtClust19sp[4,1:19], MaxClust19sp[4,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust19sp[5,1:19], CenPtClust19sp[5,1:19], MaxClust19sp[5,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust19sp[6,1:19], CenPtClust19sp[6,1:19], MaxClust19sp[6,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust19sp[7,1:19], CenPtClust19sp[7,1:19], MaxClust19sp[7,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust19sp[8,1:19], CenPtClust19sp[8,1:19], MaxClust19sp[8,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust19sp[9,1:19], CenPtClust19sp[9,1:19], MaxClust19sp[9,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust19sp[10,1:19], CenPtClust19sp[10,1:19], MaxClust19sp[10,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust19sp[11,1:19], CenPtClust19sp[11,1:19], MaxClust19sp[11,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust19sp[12,1:19], CenPtClust19sp[12,1:19], MaxClust19sp[12,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust19sp[13,1:19], CenPtClust19sp[13,1:19], MaxClust19sp[13,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust19sp[14,1:19], CenPtClust19sp[14,1:19], MaxClust19sp[14,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust19sp[15,1:19], CenPtClust19sp[15,1:19], MaxClust19sp[15,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust19sp[16,1:19], CenPtClust19sp[16,1:19], MaxClust19sp[16,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust19sp[17,1:19], CenPtClust19sp[17,1:19], MaxClust19sp[17,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust19sp[18,1:19], CenPtClust19sp[18,1:19], MaxClust19sp[18,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+parcoord(x = rbind(rep(0,19), rep(1,19), Clust19sp[19,1:19], CenPtClust19sp[19,1:19], MaxClust19sp[19,1:19]), col = c('black', 'black','red', 'green', 'blue'))
+
+#Plot the center points and the MAP on the marginal distributions----
+setwd("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\Calibration")
+# Atm Params----
+#Synthetic
+marginalPlot(x = c(out_sCh10_3_s1200n$chain[,c(12,2)], out_sCh10_2_s1200n$chain[,c(12,2)], out_sCh10_1_s1200n$chain[,c(12,2)], out_sCh10_s1200n$chain[,c(12,2)]), prior = PriorSample[,c(12,2)], singlePanel = FALSE, trueVals = SynParams[c(12,2)])
+#MAP
+marginalPlot(x = c(out_sCh10_3_s1200n$chain[,c(12,2)], out_sCh10_2_s1200n$chain[,c(12,2)], out_sCh10_1_s1200n$chain[,c(12,2)], out_sCh10_s1200n$chain[,c(12,2)]), prior = PriorSample[,c(12,2)], singlePanel = FALSE, trueVals = matrix(MaxLikes[32,c(15,5)], ncol = 2))
+#All Centers
+marginalPlot(x = c(out_sCh10_3_s1200n$chain[,c(12,2)], out_sCh10_2_s1200n$chain[,c(12,2)], out_sCh10_1_s1200n$chain[,c(12,2)], out_sCh10_s1200n$chain[,c(12,2)]), prior = PriorSample[,c(12,2)], singlePanel = FALSE, trueVals = t(apply(X = t(apply(X = CenPtClust8[,c(12,2)], MARGIN = 1, FUN = "*", (ParamRanges$Upper[c(12,2)] - ParamRanges$Lower[c(12,2)]))), MARGIN = 1, FUN = "+", ParamRanges$Lower[c(12,2)])))
+marginalPlot(x = c(out_sCh10_3_s1200n$chain[,c(12,2)], out_sCh10_2_s1200n$chain[,c(12,2)], out_sCh10_1_s1200n$chain[,c(12,2)], out_sCh10_s1200n$chain[,c(12,2)]), prior = PriorSample[,c(12,2)], singlePanel = FALSE, trueVals = t(apply(X = t(apply(X = CenPtClust9[,c(12,2)], MARGIN = 1, FUN = "*", (ParamRanges$Upper[c(12,2)] - ParamRanges$Lower[c(12,2)]))), MARGIN = 1, FUN = "+", ParamRanges$Lower[c(12,2)])))
+marginalPlot(x = c(out_sCh10_3_s1200n$chain[,c(12,2)], out_sCh10_2_s1200n$chain[,c(12,2)], out_sCh10_1_s1200n$chain[,c(12,2)], out_sCh10_s1200n$chain[,c(12,2)]), prior = PriorSample[,c(12,2)], singlePanel = FALSE, trueVals = t(apply(X = t(apply(X = CenPtClust18[,c(12,2)], MARGIN = 1, FUN = "*", (ParamRanges$Upper[c(12,2)] - ParamRanges$Lower[c(12,2)]))), MARGIN = 1, FUN = "+", ParamRanges$Lower[c(12,2)])))
+marginalPlot(x = c(out_sCh10_3_s1200n$chain[,c(12,2)], out_sCh10_2_s1200n$chain[,c(12,2)], out_sCh10_1_s1200n$chain[,c(12,2)], out_sCh10_s1200n$chain[,c(12,2)]), prior = PriorSample[,c(12,2)], singlePanel = FALSE, trueVals = t(apply(X = t(apply(X = CenPtClust19[,c(12,2)], MARGIN = 1, FUN = "*", (ParamRanges$Upper[c(12,2)] - ParamRanges$Lower[c(12,2)]))), MARGIN = 1, FUN = "+", ParamRanges$Lower[c(12,2)])))
+#Scale normalization
+marginalPlot(x = c(out_sCh10_3_s1200n$chain[,c(12,2)], out_sCh10_2_s1200n$chain[,c(12,2)], out_sCh10_1_s1200n$chain[,c(12,2)], out_sCh10_s1200n$chain[,c(12,2)]), prior = PriorSample[,c(12,2)], singlePanel = FALSE, trueVals = t(apply(X = t(apply(X = CenPtClust8sp[,c(12,2)], MARGIN = 1, FUN = "*", (ParamRanges$Upper[c(12,2)] - ParamRanges$Lower[c(12,2)]))), MARGIN = 1, FUN = "+", ParamRanges$Lower[c(12,2)])))
+marginalPlot(x = c(out_sCh10_3_s1200n$chain[,c(12,2)], out_sCh10_2_s1200n$chain[,c(12,2)], out_sCh10_1_s1200n$chain[,c(12,2)], out_sCh10_s1200n$chain[,c(12,2)]), prior = PriorSample[,c(12,2)], singlePanel = FALSE, trueVals = t(apply(X = t(apply(X = CenPtClust9sp[,c(12,2)], MARGIN = 1, FUN = "*", (ParamRanges$Upper[c(12,2)] - ParamRanges$Lower[c(12,2)]))), MARGIN = 1, FUN = "+", ParamRanges$Lower[c(12,2)])))
+marginalPlot(x = c(out_sCh10_3_s1200n$chain[,c(12,2)], out_sCh10_2_s1200n$chain[,c(12,2)], out_sCh10_1_s1200n$chain[,c(12,2)], out_sCh10_s1200n$chain[,c(12,2)]), prior = PriorSample[,c(12,2)], singlePanel = FALSE, trueVals = t(apply(X = t(apply(X = CenPtClust18sp[,c(12,2)], MARGIN = 1, FUN = "*", (ParamRanges$Upper[c(12,2)] - ParamRanges$Lower[c(12,2)]))), MARGIN = 1, FUN = "+", ParamRanges$Lower[c(12,2)])))
+marginalPlot(x = c(out_sCh10_3_s1200n$chain[,c(12,2)], out_sCh10_2_s1200n$chain[,c(12,2)], out_sCh10_1_s1200n$chain[,c(12,2)], out_sCh10_s1200n$chain[,c(12,2)]), prior = PriorSample[,c(12,2)], singlePanel = FALSE, trueVals = t(apply(X = t(apply(X = CenPtClust19sp[,c(12,2)], MARGIN = 1, FUN = "*", (ParamRanges$Upper[c(12,2)] - ParamRanges$Lower[c(12,2)]))), MARGIN = 1, FUN = "+", ParamRanges$Lower[c(12,2)])))
+
+#Combined
+png('OptSamplesMarginalPlot_atm.png', res = 300, units = 'in', width = 7, height = 7)
+marginalPlot(x = c(out_sCh10_3_s1200n$chain[,c(12,2)], out_sCh10_2_s1200n$chain[,c(12,2)], out_sCh10_1_s1200n$chain[,c(12,2)], out_sCh10_s1200n$chain[,c(12,2)]), prior = PriorSample[,c(12,2)], singlePanel = FALSE, 
+             trueVals = t(apply(X = t(apply(X = CenPtClust8sp[,c(12,2)], MARGIN = 1, FUN = "*", (ParamRanges$Upper[c(12,2)] - ParamRanges$Lower[c(12,2)]))), MARGIN = 1, FUN = "+", ParamRanges$Lower[c(12,2)])),
+             SynVals = SynParams[c(12,2)],
+             MAPVals = matrix(MaxLikes[32,c(15,5)], ncol = 2))
+dev.off()
+
+#s9 Parameters----
+#Synthetic
+marginalPlot(x = c(out_sCh10_3_s1200n$chain[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], out_sCh10_2_s1200n$chain[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], out_sCh10_1_s1200n$chain[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], out_sCh10_s1200n$chain[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)]), prior = PriorSample[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], singlePanel = FALSE, trueVals = SynParams[c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)])
+#MAP
+marginalPlot(x = c(out_sCh10_3_s1200n$chain[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], out_sCh10_2_s1200n$chain[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], out_sCh10_1_s1200n$chain[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], out_sCh10_s1200n$chain[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)]), prior = PriorSample[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], singlePanel = FALSE, trueVals = matrix(MaxLikes[32,(c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)+3)], ncol = 12))
+#All Centers
+marginalPlot(x = c(out_sCh10_3_s1200n$chain[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], out_sCh10_2_s1200n$chain[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], out_sCh10_1_s1200n$chain[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], out_sCh10_s1200n$chain[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)]), prior = PriorSample[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], singlePanel = FALSE, trueVals = t(apply(X = t(apply(X = CenPtClust8[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], MARGIN = 1, FUN = "*", (ParamRanges$Upper[c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)] - ParamRanges$Lower[c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)]))), MARGIN = 1, FUN = "+", ParamRanges$Lower[c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)])))
+marginalPlot(x = c(out_sCh10_3_s1200n$chain[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], out_sCh10_2_s1200n$chain[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], out_sCh10_1_s1200n$chain[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], out_sCh10_s1200n$chain[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)]), prior = PriorSample[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], singlePanel = FALSE, trueVals = t(apply(X = t(apply(X = CenPtClust9[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], MARGIN = 1, FUN = "*", (ParamRanges$Upper[c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)] - ParamRanges$Lower[c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)]))), MARGIN = 1, FUN = "+", ParamRanges$Lower[c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)])))
+marginalPlot(x = c(out_sCh10_3_s1200n$chain[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], out_sCh10_2_s1200n$chain[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], out_sCh10_1_s1200n$chain[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], out_sCh10_s1200n$chain[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)]), prior = PriorSample[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], singlePanel = FALSE, trueVals = t(apply(X = t(apply(X = CenPtClust18[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], MARGIN = 1, FUN = "*", (ParamRanges$Upper[c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)] - ParamRanges$Lower[c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)]))), MARGIN = 1, FUN = "+", ParamRanges$Lower[c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)])))
+marginalPlot(x = c(out_sCh10_3_s1200n$chain[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], out_sCh10_2_s1200n$chain[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], out_sCh10_1_s1200n$chain[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], out_sCh10_s1200n$chain[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)]), prior = PriorSample[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], singlePanel = FALSE, trueVals = t(apply(X = t(apply(X = CenPtClust19[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], MARGIN = 1, FUN = "*", (ParamRanges$Upper[c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)] - ParamRanges$Lower[c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)]))), MARGIN = 1, FUN = "+", ParamRanges$Lower[c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)])))
+#Scale normalization
+marginalPlot(x = c(out_sCh10_3_s1200n$chain[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], out_sCh10_2_s1200n$chain[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], out_sCh10_1_s1200n$chain[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], out_sCh10_s1200n$chain[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)]), prior = PriorSample[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], singlePanel = FALSE, trueVals = t(apply(X = t(apply(X = CenPtClust8sp[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], MARGIN = 1, FUN = "*", (ParamRanges$Upper[c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)] - ParamRanges$Lower[c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)]))), MARGIN = 1, FUN = "+", ParamRanges$Lower[c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)])))
+marginalPlot(x = c(out_sCh10_3_s1200n$chain[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], out_sCh10_2_s1200n$chain[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], out_sCh10_1_s1200n$chain[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], out_sCh10_s1200n$chain[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)]), prior = PriorSample[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], singlePanel = FALSE, trueVals = t(apply(X = t(apply(X = CenPtClust9sp[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], MARGIN = 1, FUN = "*", (ParamRanges$Upper[c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)] - ParamRanges$Lower[c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)]))), MARGIN = 1, FUN = "+", ParamRanges$Lower[c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)])))
+marginalPlot(x = c(out_sCh10_3_s1200n$chain[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], out_sCh10_2_s1200n$chain[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], out_sCh10_1_s1200n$chain[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], out_sCh10_s1200n$chain[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)]), prior = PriorSample[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], singlePanel = FALSE, trueVals = t(apply(X = t(apply(X = CenPtClust18sp[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], MARGIN = 1, FUN = "*", (ParamRanges$Upper[c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)] - ParamRanges$Lower[c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)]))), MARGIN = 1, FUN = "+", ParamRanges$Lower[c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)])))
+marginalPlot(x = c(out_sCh10_3_s1200n$chain[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], out_sCh10_2_s1200n$chain[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], out_sCh10_1_s1200n$chain[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], out_sCh10_s1200n$chain[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)]), prior = PriorSample[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], singlePanel = FALSE, trueVals = t(apply(X = t(apply(X = CenPtClust19sp[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], MARGIN = 1, FUN = "*", (ParamRanges$Upper[c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)] - ParamRanges$Lower[c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)]))), MARGIN = 1, FUN = "+", ParamRanges$Lower[c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)])))
+
+png('OptSamplesMarginalPlot_s9.png', res = 300, units = 'in', width = 7, height = 7)
+marginalPlot(x = c(out_sCh10_3_s1200n$chain[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], out_sCh10_2_s1200n$chain[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], out_sCh10_1_s1200n$chain[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], out_sCh10_s1200n$chain[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)]), prior = PriorSample[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], singlePanel = FALSE, 
+             trueVals = t(apply(X = t(apply(X = CenPtClust8sp[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], MARGIN = 1, FUN = "*", (ParamRanges$Upper[c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)] - ParamRanges$Lower[c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)]))), MARGIN = 1, FUN = "+", ParamRanges$Lower[c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)])),
+             SynVals = SynParams[c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)],
+             MAPVals = matrix(MaxLikes[32,(c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)+3)], ncol = 12))
+dev.off()
+
+#Veg Params----
+#Synthetic
+marginalPlot(x = c(out_sCh10_3_s1200n$chain[,c(1, 16:19)], out_sCh10_2_s1200n$chain[,c(1, 16:19)], out_sCh10_1_s1200n$chain[,c(1, 16:19)], out_sCh10_s1200n$chain[,c(1, 16:19)]), prior = PriorSample[,c(1, 16:19)], singlePanel = FALSE, trueVals = SynParams[c(1, 16:19)])
+#MAP
+marginalPlot(x = c(out_sCh10_3_s1200n$chain[,c(1, 16:19)], out_sCh10_2_s1200n$chain[,c(1, 16:19)], out_sCh10_1_s1200n$chain[,c(1, 16:19)], out_sCh10_s1200n$chain[,c(1, 16:19)]), prior = PriorSample[,c(1, 16:19)], singlePanel = FALSE, trueVals = matrix(MaxLikes[32,(c(1, 16:19)+3)], ncol = 5))
+#All Centers
+marginalPlot(x = c(out_sCh10_3_s1200n$chain[,c(1, 16:19)], out_sCh10_2_s1200n$chain[,c(1, 16:19)], out_sCh10_1_s1200n$chain[,c(1, 16:19)], out_sCh10_s1200n$chain[,c(1, 16:19)]), prior = PriorSample[,c(1, 16:19)], singlePanel = FALSE, trueVals = t(apply(X = t(apply(X = CenPtClust8[,c(1, 16:19)], MARGIN = 1, FUN = "*", (ParamRanges$Upper[c(1, 16:19)] - ParamRanges$Lower[c(1, 16:19)]))), MARGIN = 1, FUN = "+", ParamRanges$Lower[c(1, 16:19)])))
+marginalPlot(x = c(out_sCh10_3_s1200n$chain[,c(1, 16:19)], out_sCh10_2_s1200n$chain[,c(1, 16:19)], out_sCh10_1_s1200n$chain[,c(1, 16:19)], out_sCh10_s1200n$chain[,c(1, 16:19)]), prior = PriorSample[,c(1, 16:19)], singlePanel = FALSE, trueVals = t(apply(X = t(apply(X = CenPtClust9[,c(1, 16:19)], MARGIN = 1, FUN = "*", (ParamRanges$Upper[c(1, 16:19)] - ParamRanges$Lower[c(1, 16:19)]))), MARGIN = 1, FUN = "+", ParamRanges$Lower[c(1, 16:19)])))
+marginalPlot(x = c(out_sCh10_3_s1200n$chain[,c(1, 16:19)], out_sCh10_2_s1200n$chain[,c(1, 16:19)], out_sCh10_1_s1200n$chain[,c(1, 16:19)], out_sCh10_s1200n$chain[,c(1, 16:19)]), prior = PriorSample[,c(1, 16:19)], singlePanel = FALSE, trueVals = t(apply(X = t(apply(X = CenPtClust18[,c(1, 16:19)], MARGIN = 1, FUN = "*", (ParamRanges$Upper[c(1, 16:19)] - ParamRanges$Lower[c(1, 16:19)]))), MARGIN = 1, FUN = "+", ParamRanges$Lower[c(1, 16:19)])))
+marginalPlot(x = c(out_sCh10_3_s1200n$chain[,c(1, 16:19)], out_sCh10_2_s1200n$chain[,c(1, 16:19)], out_sCh10_1_s1200n$chain[,c(1, 16:19)], out_sCh10_s1200n$chain[,c(1, 16:19)]), prior = PriorSample[,c(1, 16:19)], singlePanel = FALSE, trueVals = t(apply(X = t(apply(X = CenPtClust19[,c(1, 16:19)], MARGIN = 1, FUN = "*", (ParamRanges$Upper[c(1, 16:19)] - ParamRanges$Lower[c(1, 16:19)]))), MARGIN = 1, FUN = "+", ParamRanges$Lower[c(1, 16:19)])))
+#Scale normalization
+marginalPlot(x = c(out_sCh10_3_s1200n$chain[,c(1, 16:19)], out_sCh10_2_s1200n$chain[,c(1, 16:19)], out_sCh10_1_s1200n$chain[,c(1, 16:19)], out_sCh10_s1200n$chain[,c(1, 16:19)]), prior = PriorSample[,c(1, 16:19)], singlePanel = FALSE, trueVals = t(apply(X = t(apply(X = CenPtClust8sp[,c(1, 16:19)], MARGIN = 1, FUN = "*", (ParamRanges$Upper[c(1, 16:19)] - ParamRanges$Lower[c(1, 16:19)]))), MARGIN = 1, FUN = "+", ParamRanges$Lower[c(1, 16:19)])))
+marginalPlot(x = c(out_sCh10_3_s1200n$chain[,c(1, 16:19)], out_sCh10_2_s1200n$chain[,c(1, 16:19)], out_sCh10_1_s1200n$chain[,c(1, 16:19)], out_sCh10_s1200n$chain[,c(1, 16:19)]), prior = PriorSample[,c(1, 16:19)], singlePanel = FALSE, trueVals = t(apply(X = t(apply(X = CenPtClust9sp[,c(1, 16:19)], MARGIN = 1, FUN = "*", (ParamRanges$Upper[c(1, 16:19)] - ParamRanges$Lower[c(1, 16:19)]))), MARGIN = 1, FUN = "+", ParamRanges$Lower[c(1, 16:19)])))
+marginalPlot(x = c(out_sCh10_3_s1200n$chain[,c(1, 16:19)], out_sCh10_2_s1200n$chain[,c(1, 16:19)], out_sCh10_1_s1200n$chain[,c(1, 16:19)], out_sCh10_s1200n$chain[,c(1, 16:19)]), prior = PriorSample[,c(1, 16:19)], singlePanel = FALSE, trueVals = t(apply(X = t(apply(X = CenPtClust18sp[,c(1, 16:19)], MARGIN = 1, FUN = "*", (ParamRanges$Upper[c(1, 16:19)] - ParamRanges$Lower[c(1, 16:19)]))), MARGIN = 1, FUN = "+", ParamRanges$Lower[c(1, 16:19)])))
+marginalPlot(x = c(out_sCh10_3_s1200n$chain[,c(1, 16:19)], out_sCh10_2_s1200n$chain[,c(1, 16:19)], out_sCh10_1_s1200n$chain[,c(1, 16:19)], out_sCh10_s1200n$chain[,c(1, 16:19)]), prior = PriorSample[,c(1, 16:19)], singlePanel = FALSE, trueVals = t(apply(X = t(apply(X = CenPtClust19sp[,c(1, 16:19)], MARGIN = 1, FUN = "*", (ParamRanges$Upper[c(1, 16:19)] - ParamRanges$Lower[c(1, 16:19)]))), MARGIN = 1, FUN = "+", ParamRanges$Lower[c(1, 16:19)])))
+
+png('OptSamplesMarginalPlot_veg.png', res = 300, units = 'in', width = 7, height = 7)
+marginalPlot(x = c(out_sCh10_3_s1200n$chain[,c(1, 16:19)], out_sCh10_2_s1200n$chain[,c(1, 16:19)], out_sCh10_1_s1200n$chain[,c(1, 16:19)], out_sCh10_s1200n$chain[,c(1, 16:19)]), prior = PriorSample[,c(1, 16:19)], singlePanel = FALSE, 
+             trueVals = t(apply(X = t(apply(X = CenPtClust8sp[,c(1, 16:19)], MARGIN = 1, FUN = "*", (ParamRanges$Upper[c(1, 16:19)] - ParamRanges$Lower[c(1, 16:19)]))), MARGIN = 1, FUN = "+", ParamRanges$Lower[c(1, 16:19)])),
+             SynVals = SynParams[c(1, 16:19)],
+             MAPVals = matrix(MaxLikes[32,(c(1, 16:19)+3)], ncol = 5))
+dev.off()
+
+#Create weights for each of the selected parameters based on their likelihoods----
+CenPtClust8s$weight = CenPtClust8s$LP/sum(CenPtClust8s$LP, MaxLikes[32,23])
+MaxLikeWeight = MaxLikes[32,23]/sum(CenPtClust8s$LP, MaxLikes[32,23])
+
+#MAP is parameter set 1, and then sets 2-9 are as ordered in CenPtClust8s$ID
+#"DCh10-1_R600_C5"  "DCh10-2_R630_C10" "DCh10_R695_C5"    "DCh10-2_R773_C7"  "DCh10-3_R1199_C8" "DCh10-1_R363_C7"  "DCh10_R263_C1"   "DCh10-1_R364_C5"
+
 #Posterior Predictive Checks----
 #Generate data from the parameter joint posterior distribution
 # compare to the calibrated observations (X and yRep), and/or to future values (XTilde and yTilde)
@@ -2677,32 +4112,46 @@ dev.off()
 
 #Credible intervals as barplots and as areas (mcmc_areas and mcmc_intervals)
 
-#Extract the maximum likelihood value
-#Loop over datasets and chains
-MaxLikes = matrix(NA, nrow = 40, ncol = ncol(out_Ch10_3_s600$chain[[1]])+3)
-for (ch in 1:10){
-  MaxLikes[ch,1] = 0
-  MaxLikes[ch,2] = ch
-  MaxLikes[ch,3] = which(out_Ch10_s600$chain[[ch]][,43] == max(out_Ch10_s600$chain[[ch]][,43]))[1]
-  MaxLikes[ch,-c(1,2,3)] = out_Ch10_s600$chain[[ch]][which(out_Ch10_s600$chain[[ch]][,43] == max(out_Ch10_s600$chain[[ch]][,43]))[1],]
-}
-for (ch in 11:20){
-  MaxLikes[ch,1] = 1
-  MaxLikes[ch,2] = ch-10
-  MaxLikes[ch,3] = which(out_Ch10_1_s600$chain[[ch-10]][,43] == max(out_Ch10_1_s600$chain[[ch-10]][,43]))[1]
-  MaxLikes[ch,-c(1,2,3)] = out_Ch10_1_s600$chain[[ch-10]][which(out_Ch10_1_s600$chain[[ch-10]][,43] == max(out_Ch10_1_s600$chain[[ch-10]][,43]))[1],]
-}
-for (ch in 21:30){
-  MaxLikes[ch,1] = 2
-  MaxLikes[ch,2] = ch-20
-  MaxLikes[ch,3] = which(out_Ch10_2_s600$chain[[ch-20]][,43] == max(out_Ch10_2_s600$chain[[ch-20]][,43]))[1]
-  MaxLikes[ch,-c(1,2,3)] = out_Ch10_2_s600$chain[[ch-20]][which(out_Ch10_2_s600$chain[[ch-20]][,43] == max(out_Ch10_2_s600$chain[[ch-20]][,43]))[1],]
-}
-for (ch in 31:40){
-  MaxLikes[ch,1] = 3
-  MaxLikes[ch,2] = ch-30
-  MaxLikes[ch,3] = which(out_Ch10_3_s600$chain[[ch-30]][,43] == max(out_Ch10_3_s600$chain[[ch-30]][,43]))[1]
-  MaxLikes[ch,-c(1,2,3)] = out_Ch10_3_s600$chain[[ch-30]][which(out_Ch10_3_s600$chain[[ch-30]][,43] == max(out_Ch10_3_s600$chain[[ch-30]][,43]))[1],]
-}
+#Plot timeseries Overlays----
+#Synthetic with error - used for calibration
+TestQ =  read.table("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\SyntheticHill11+12\\SyntheticDataCreation\\QSyn910_1.txt", header = TRUE, sep = '\t')
+#No error - what we hope RHESSys looks like
+SynObs = read.table("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\SyntheticHill11+12\\SyntheticDataCreation\\Q_NoErr_1.txt", header = TRUE, sep = '\t')
 
-MaxLikes[MaxLikes[,46] == max(MaxLikes[,46]),]
+#Load Likelihoods----
+Likes = read.csv("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\Calibration/SynCh10/LikeParamsQ_c_s400.csv", stringsAsFactors = FALSE)
+
+#Load simulated streamflow----
+SimQ = read.table("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\Calibration/SynCh10/Q_c_s400.txt", stringsAsFactors = FALSE, sep = '\t', header = TRUE)
+#Trim flows to only the top likelihoods
+SimQ_topL = SimQ[,which(colnames(SimQ) %in% paste0('Run',Likes$Replicate[Likes$logL > 5000], '_Ch', Likes$Chain[Likes$logL > 5000]))]
+
+#Plot the simulated flows
+matplotDates(x = as.Date(SynObs$Date), y = SimQ_topL, type = 'l', col = gray(level = 0.7, alpha = 0.2), ylim = c(0.1,15), xlab = 'Year', ylab = 'Streamflow (cfs)', xlim = c(as.Date('2004-01-01'), as.Date('2014-01-01')), log = 'y')
+par(new = TRUE)
+#Plot median of those flows
+plot(x = as.Date(SynObs$Date), y = apply(SimQ_topL, MARGIN = 1, FUN = median), type = 'l', col = 'red', ylim = c(0.1,15), axes = FALSE, xlab = '', ylab = '', xlim = c(as.Date('2004-01-01'), as.Date('2014-01-01')), log = 'y')
+par(new = TRUE)
+#Plot observed flows
+plot(x = as.Date(SynObs$Date), y = SynObs$streamflow, type = 'l', ylim = c(0.1,15), axes = FALSE, xlab = '', ylab = '', xlim = c(as.Date('2004-01-01'), as.Date('2014-01-01')), log = 'y')
+par(new=TRUE)
+#Plot what was used for calibration timeseries with error to previous
+plot(x = as.Date(SynObs$Date), y = TestQ$Flow, type = 'l', col = 'blue', ylim = c(0.1,15), axes = FALSE, xlab = '', ylab = '', xlim = c(as.Date('2004-01-01'), as.Date('2014-01-01')), log = 'y')
+
+#Plot median vs. observed
+plot(x = SynObs$streamflow, y = apply(SimQ_topL, MARGIN = 1, FUN = median), pch = 16, xlim = c(0,15), ylim = c(0,15))
+lines(x = c(0,15), y = c(0,15), col = 'red')
+
+#Plot mean vs. observed
+plot(x = SynObs$streamflow, y = apply(SimQ_topL, MARGIN = 1, FUN = mean), pch = 16, xlim = c(0,15), ylim = c(0,15))
+lines(x = c(0,15), y = c(0,15), col = 'red')
+
+
+#Plot log-likelihood for these flows
+png('LNSE.png', res = 200, height = 7, width = 7, units = 'in')
+layout(rbind(c(1,2), c(3,4)))
+hist(Likes$LNSEd[Likes$logL > 5000], xlim = c(0.75,1), main = 'LNSEd', xlab = 'LNSE')
+hist(Likes$LNSEw[Likes$logL > 5000], xlim = c(0.75,1), main = 'LNSEw', xlab = 'LNSE')
+hist(Likes$LNSEm[Likes$logL > 5000], xlim = c(0.75,1), main = 'LNSEm', xlab = 'LNSE')
+hist(Likes$LNSEa[Likes$logL > 5000], xlim = c(0.75,1), main = 'LNSEa', xlab = 'LNSE')
+dev.off()
