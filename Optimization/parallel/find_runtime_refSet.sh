@@ -1,17 +1,13 @@
 #/bin/bash
-MODEL=LakeComo
-NSEEDS=10
-NSTEPS=99
-SEEDS=$(seq 1 ${NSEEDS})
+MODEL=GInolic
+SEED=7
+NSTEPS=369
 STEPS=$(seq 0 ${NSTEPS})
 
-for SEED in ${SEEDS}
+for STEP in ${STEPS}
 do
-	for STEP in ${STEPS}
-	do
-		python pareto.py ./objs/runtime/${MODEL}_S${SEED}_M*/*_step${STEP}.obj -o 0-2 -e 0.5 25.0 0.05 \
-		--output ./objs/runtime/reference/${MODEL}_S${SEED}_step${STEP}.runref --delimiter=" " --comment="#" --blank
-		python pareto.py ./runtime/${MODEL}_S${SEED}_M*/*_step${STEP}.set -o 134-136 -e 0.5 25.0 0.05 \
-		--output ./runtime/reference/${MODEL}_S${SEED}_step${STEP}.runset --delimiter=" " -c "#" "//" --blank
-	done
+	python pareto.py ./objs/runtime/${MODEL}_S${SEED}_M*/*_step${STEP}.obj -o 0-2 -e 0.015 0.015 1.0 \
+	--output ./objs/runtime/reference/${MODEL}_S${SEED}_step${STEP}.runref --delimiter=" " --comment="#" --blank
+	python pareto.py ./runtime/${MODEL}_S${SEED}_M*/*_step${STEP}.set -o 6-8 -e 0.015 0.015 1.0 \
+	--output ./runtime/reference/${MODEL}_S${SEED}_step${STEP}.runset --delimiter=" " -c "#" "//" --blank
 done

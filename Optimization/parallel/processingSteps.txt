@@ -1,3 +1,7 @@
+0) If you are working with a version of Borg that prints licence information in the .runtime files, remove that information before starting this workflow (should be the first 5 lines of the files).
+
+0.1) Delete the second to last row of the .runtime files, which has a # in it. These files should have only a blank line at the end.
+
 1) get_objs.sh
 - assumes your runtime files are in a subdirectory "runtime" and have the file ending ".runtime"
 - assumes you will write files to a subdirectory "objs/runtime"
@@ -7,11 +11,15 @@
 2) separateRuntimeObjs.py
 - no changes needed
 
+- If the masters have a different number of steps: For the master that has fewer steps, copy and rename its last step#.obj file to match the step# of the master with more steps.
+
 3) separateRuntimeSets.py
 - no changes needed
 
+- If the masters have a different number of steps: For the master that has fewer steps, copy and rename its last step#.set file to match the step# of the master with more steps.
+
 4) find_runtime_refSet.sh (uses pareto.py)
-- assumes you will write files to a subdirectory "objs/runtime/reference"
+- assumes you will write files to subdirectory "objs/runtime/reference" and "/runtime/reference"
 - change lines 2-4 for your problem (steps are 0-indexed)
 - on line 12, change numbers after -o to columns of .obj files with objectives (0 indexing), and numbers after -e to epsilons for each objective
 - on line 14, change numbers after -o to columns of .set files (first nvars are decision variables) with objectives (0 indexing), and numbers after -e to epsilons for each objective
@@ -19,18 +27,33 @@
 5) concatenate_runref.sh
 - change lines 2-4 for your problem
 
+6.0)
+- Copy the current .set files into files called ${MODEL}_S${SEED}.setDVO
+
 6) find_refSet.sh (uses pareto.py)
-- assumes your set files are in a subdirectory "set" and have the file ending ".set"
+- assumes your set files are in a subdirectory "sets" and have the file ending ".set"
 - change line 2 for your problem
 - on line 4, change numbers after -o to columns of .set files (first nvars are decision variables) with objectives (0 indexing), and numbers after -e to epsilons for each objective
 - running this will create a file called "${MODEL}.reference"; add a new line to ${MODEL}.reference with just "#" (needed for next 2 scripts)
+- If your .reference file contains decision variables, they will need to be removed for use in the next function. The following command can be used in this shell script to make a file with only objectives. Replace 135-137 with the columns of the objectives, and adjust filenames as needed.
+cut -d ' ' -f 135-137 ${MODEL}.referenceDVO >> ${MODEL}.reference
+
+7.0)
+- If your .set files contain decision variables, they will need to be removed. Run the following command to make files with only objectives. Replace 135-137 with the columns of the objectives.
+cut -d ' ' -f 135-137 ./sets/${MODEL}_S${SEED}.setDVO > ./sets/${MODEL}_S${SEED}.set
+- If the last line in your .set files does not have a #, add a new line with just "#"
 
 7) find_metrics.sh (uses MOEAFramework)
 - assumes you will write files to a directory "metrics"
 - change lines 2-3 for your problem
-- on line 10, change number after -d to the number of decision variables
+- on line 10, change number after -d to the number of objectives
 
 8) find_runtime_metrics.sh (uses MOEAFramework)
 - assumes you will write files to a directory "metrics/runtime"
 - change lines 2-3 for your problem
-- on line 10, change number after -d to the number of decision variables
+- on line 10, change number after -d to the number of objectives
+
+9) extract_runtime_metrics.sh (uses MOEAFramework)
+- assumes you will write files to a directory "metrics/runtime"
+- change lines 2-3 for your problem
+- on line 10, change number after -d to the number of objectives

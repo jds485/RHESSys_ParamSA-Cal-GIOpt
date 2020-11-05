@@ -1,7 +1,7 @@
 import os
 
 maindir = os.getcwd()
-runtimeObjsList = [f for f in os.listdir(maindir + "/" + formulation + "/objs/runtime") if f[-4::] == '.obj']
+runtimeObjsList = [f for f in os.listdir(maindir + "/objs/runtime") if f[-4::] == '.obj']
 for j in range(len(runtimeObjsList)):
     os.chdir(maindir + "/objs/runtime")
     with open(runtimeObjsList[j], mode="r") as bigfile:
