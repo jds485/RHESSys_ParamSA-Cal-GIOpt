@@ -486,7 +486,7 @@ hist(O1_b80, breaks = 10, freq = TRUE, xlim = c(0,0.5), ylim = c(0,20), axes=FAL
 lines(x = c(O1_b100,O1_b100), y = c(0,20), col='red')
 dev.off()
 
-    #Quantile----
+#   Quantiles----
 Qo1_b20 = quantile(O1_b20, probs = c(0.05,0.25,0.5,0.75,0.95))
 Qo1_b40 = quantile(O1_b40, probs = c(0.05,0.25,0.5,0.75,0.95))
 Qo1_b60 = quantile(O1_b60, probs = c(0.05,0.25,0.5,0.75,0.95))
