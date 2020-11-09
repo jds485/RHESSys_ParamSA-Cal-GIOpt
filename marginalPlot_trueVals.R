@@ -168,7 +168,7 @@ marginalPlotDensity <- function(posteriorMat, priorMat = NULL, xrange = NULL, co
       }
       
       if (!is.null(MAPVals)){
-        lines(x = c(MAPVals[i],MAPVals[i]), y = yrange, lwd = 2, col = 'pink', lty = 3)
+        lines(x = c(MAPVals[i],MAPVals[i]), y = yrange, lwd = 2, col = 'blue', lty = 4)
       }
     }
     
@@ -206,7 +206,7 @@ marginalPlotDensity <- function(posteriorMat, priorMat = NULL, xrange = NULL, co
         lines(x = c(SynVals[i],SynVals[i]), y = yrange, lwd = 2, col = 'black', lty = 2)
       }
       if (!is.null(MAPVals)){
-        lines(x = c(MAPVals[i],MAPVals[i]), y = yrange, lwd = 2, col = 'pink', lty = 3)
+        lines(x = c(MAPVals[i],MAPVals[i]), y = yrange, lwd = 2, col = 'blue', lty = 4)
       }
     }
   }
@@ -216,7 +216,7 @@ marginalPlotDensity <- function(posteriorMat, priorMat = NULL, xrange = NULL, co
   plot(0, 0, type = 'n', bty = 'n', xaxt = 'n', yaxt = 'n')
   if(!is.null(SynVals)){
     legend('bottom', c('MAP', 'Samples', 'Synthetic Truth','posterior', 'prior'), xpd = TRUE, horiz = FALSE, inset = c(0, 0),
-           bty = 'n', pch = c(NA,NA,NA,15,15), col = c('pink','green','black',col), lty = c(3,1,2,NA,NA), cex = 1, ncol = 2)
+           bty = 'n', pch = c(NA,NA,NA,15,15), col = c('blue','green','black',col), lty = c(4,1,2,NA,NA), cex = 1, ncol = 2)
   }else{
     legend('bottom', if (!is.null(priorX)) c('posterior', 'prior') else 'posterior', xpd = TRUE, horiz = TRUE, inset = c(0, 0),
            bty = 'n', pch = 15, col = col, cex = 1.5)
