@@ -13,6 +13,8 @@ library(parallel)
 library(iterators)
 library(doParallel)
 library(GISTools)
+library(scico)
+library(TeachingDemos)
 
 #Load color functions - from JDS github repo: Geothermal_ESDA
 source('C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\Hydrology\\USGSGauges\\ColorFunctions.R')
@@ -53,8 +55,9 @@ writeOGR(lc1, dsn = "C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Da
 
 #Number the cells
 lc1$ID = seq(1,nrow(lc1@data),1)
-#Obtain the patch ID for each 1 m2 cell
+#Obtain the patch and hill ID for each 1 m2 cell
 lc1$patchID = 0
+lc1$hillID = 0
 #Loop over the patch cell centers and find the 900 1 m^2 cells that are closest to the cell center
 #Fixme: this should be parallelized
 for (p in 1:length(unique(Cells$patchID))){
@@ -76,8 +79,9 @@ for (p in 1:length(unique(Cells$patchID))){
     stop()
   }
   
-  #Assign the patch ID to these cells
+  #Assign the patch ID and hillID to these cells
   lc1$patchID[lc1$ID %in% cellPts$ID] = patch$patchID
+  lc1$hillID[lc1$ID %in% cellPts$ID] = patch$hillID
   
   rm(cellPts, Cell_p, patch)
 }
@@ -626,6 +630,56 @@ degAxis(side = 4, at = seq(39.45, 40,.01), labels = FALSE)
 north.arrow(xb = -76.712, yb = 39.469, len = .0005, lab = 'N', tcol = 'black', col='black')
 text(x = -76.712, y = 39.467, 'WGS84')
 box(which = 'figure', lwd = 2)
+dev.off()
+
+colLU = scico(4, palette = scico_palette_names()[22])
+
+png('LandUseFine_proposal_NewCols.png', res = 300, units = 'in', width = 6, height = 6)
+par(mar= c(2.5,2.5,1,1))
+plot(CellsWGS, col = 'black', pch = 15, lwd = 0, cex = 0.7)
+plot(lc1WGS[lc1WGS$BARN_1mLC_UTM == 1,], col = colLU[4], cex = 0.05, add = T)
+plot(lc1WGS[lc1WGS$BARN_1mLC_UTM == 3,], col = colLU[2], cex = 0.05, add = T)
+plot(lc1WGS[lc1WGS$BARN_1mLC_UTM == 5,], col = colLU[3], cex = 0.05, add = T)
+plot(lc1WGS[lc1WGS$BARN_1mLC_UTM == 6,], col = colLU[3], cex = 0.05, add = T)
+plot(lc1WGS[lc1WGS$BARN_1mLC_UTM %in% c(7,8,9,10,11,12),], col = colLU[1], cex = 0.05, add = T)
+degAxis(side = 1, at = seq(-77,-76,.01), labels = FALSE)
+degAxis(side = 1, at = seq(-76.7,-76,.02))
+degAxis(side = 3, at = seq(-77,-76,.01), labels = FALSE)
+degAxis(side = 2, at = seq(39.45, 40,.01))
+degAxis(side = 4, at = seq(39.45, 40,.01), labels = FALSE)
+north.arrow(xb = -76.712, yb = 39.469, len = .0005, lab = 'N', tcol = 'black', col='black')
+text(x = -76.712, y = 39.467, 'WGS84')
+box(which = 'figure', lwd = 2)
+dev.off()
+
+#Test what green and gray look like in grayscale
+plot(seq(0,4,1), col = c(col2gray('green'), col2gray('darkgreen'), col2gray('blue'), col2gray('black'), gray(0.9)), pch = 15)
+#Converter: https://onlineimagetools.com/grayscale-image
+
+png('LandUseFine_SApaper.png', res = 300, units = 'in', width = 6, height = 6)
+par(mar= c(2.5,2.5,1,1))
+plot(CellsWGS, col = 'black', pch = 15, lwd = 0, cex = 0.7)
+for (h in 1:14){
+  temp = CellsWGS[CellsWGS$hillID == h,]
+  plot(temp, col = gray(0.9), add = TRUE, lwd=7, pch = 22)
+  plot(temp, col = 'black', add = TRUE, pch = 15, cex = 0.7)
+  plot(lc1WGS[which((lc1WGS$hillID == h) & (lc1WGS$BARN_1mLC_UTM == 1)),], col = 'blue', cex = 0.05, add = T)
+  plot(lc1WGS[which((lc1WGS$hillID == h) & (lc1WGS$BARN_1mLC_UTM == 3)),], col = 'darkgreen', cex = 0.05, add = T)
+  plot(lc1WGS[which((lc1WGS$hillID == h) & (lc1WGS$BARN_1mLC_UTM == 5)),], col = 'green', cex = 0.05, add = T)
+  plot(lc1WGS[which((lc1WGS$hillID == h) & (lc1WGS$BARN_1mLC_UTM == 6)),], col = 'green', cex = 0.05, add = T)
+  plot(lc1WGS[which((lc1WGS$hillID == h) & (lc1WGS$BARN_1mLC_UTM %in% c(7,8,9,10,11,12))),], col = 'black', cex = 0.05, add = T)
+}
+rm(temp,h)
+degAxis(side = 1, at = seq(-77,-76,.01), labels = FALSE)
+degAxis(side = 1, at = seq(-76.7,-76,.02))
+degAxis(side = 3, at = seq(-77,-76,.01), labels = FALSE)
+degAxis(side = 2, at = seq(39.45, 40,.01))
+degAxis(side = 4, at = seq(39.45, 40,.01), labels = FALSE)
+north.arrow(xb = -76.712, yb = 39.469, len = .0005, lab = 'N', tcol = 'black', col='black')
+text(x = -76.712, y = 39.467, 'WGS84')
+box(which = 'figure', lwd = 2)
+legend('topleft', pch = 15, legend = c('Impervious', 'Forested', 'Grass'), col = c('black', 'darkgreen', 'green'))
+legend('topright', legend = c('Hillslope Outline'), col = gray(0.9), pch = 22, pt.cex = 2, pt.lwd=3)
 dev.off()
 
 #Get the Max GI for only hillslopes 9 and 10----
