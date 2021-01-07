@@ -505,9 +505,6 @@ setwd("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\
 DVO_MAP = read.table('GInolic.referenceDVO', header = FALSE, sep = ' ')
 colnames(DVO_MAP) = c('H9d','H9m','H9u','H10d','H10m','H10u', 'Flooding', 'LowFlow', 'NumTrees')
 
-#With ID numbers
-DVO_MAPIDs = read.table('GInolic_IDs.referenceDVO', header = TRUE, sep = '\t')
-
 #Load reference set transformed to synthetic true parameters
 DVO_MAPSyn = read.table('DVO_c_MAPSyn.txt', header = TRUE, sep = '\t')
 #Make sure Objective 3 is same
@@ -525,6 +522,17 @@ colnames(Metrics0_MAP) = colnames(Metrics1_MAP) = c('NFE', 'ElapsedTime', 'SBX',
 # Scatterplot matrix----
 #Interesting behavior of where trees are planted with the objectives that are being met. mid 1st, then up, then down for flooding.
 plot(DVO_MAP)
+
+plot(DVO_MAPSyn[,-c(7:11)])
+
+#Histogram of difference in objective values from MAP to synthetic
+png('ReEvalObjChangePct.png', res=200, width = 10, height = 5, units='in')
+layout(rbind(c(1,2)))
+hist(abs(DVO_MAPSyn$Flooding - DVO_MAPSyn$FloodingSyn)*100, breaks = seq(0,0.3,0.015)*100, xlab = 'Change from Synthetic (%)', main = 'MAP Flooding Objective', cex.lab=1.5, cex.axis=1.5, col = 'black', border = 'gray')
+lines(c(1.5,1.5), c(0,500), col = 'red', lwd=2)
+hist(abs(DVO_MAPSyn$LowFlow - DVO_MAPSyn$LowFlowSyn)*100, breaks = seq(0,0.5,0.015)*100, xlab = 'Change from Synthetic (%)', main = 'MAP Low Flow Objective', cex.lab=1.5, cex.axis=1.5, col = 'black', border = 'gray')
+lines(c(1.5,1.5), c(0,30), col = 'red', lwd=2)
+dev.off()
 
 # Plot Pareto front----
 scaleRange = c(0,18000)
@@ -568,6 +576,24 @@ plot3Drgl::scatter3Drgl(x = -DVO_MAP$Flooding, y = -DVO_MAP$LowFlow, z = DVO_MAP
                         xlab = 'Flooding', ylab = 'Low Flow', zlab = 'Number of Trees', 
                         cex.axis = 1.5, cex.lab = 1.5, main = 'Pareto Front:Reforestation Optimization to MAP', surface = FALSE)
 
+#  Reevaluated on Synthetic Truth----
+png('ParetoMAP_ColTrees_SynReEval.png', res = 300, units = 'in', width = 6, height = 6)
+plot(-DVO_MAPSyn$FloodingSyn*100, -DVO_MAPSyn$LowFlowSyn*100, col = colFun(DVO_MAPSyn$NumTreesSyn),
+     xlim = c(0, 60), ylim=c(-100, 10), xlab = 'Flooding Reduction (%)', ylab = 'Low Flow Reduction (%)', cex.axis = 1.5, cex.lab = 1.5, main = 'Reforestation Optimization to MAP on Synthetic Parameters', pch = 16)
+lines(c(-110,110), c(0,0))
+lines(c(-0,0), c(-120,120))
+#Add max GI point
+par(new=TRUE)
+plot(x = O1_b100*100, y = O2_b100*100, pch = 17, col = colFun(O3_b100),xlim = c(0, 60), ylim=c(-100, 10), axes=FALSE, xlab = '', ylab='')
+legend('bottomleft', title = 'Num. Trees (thous.)', 
+       legend = c('0 - <2', '2 - <4', '4 - <6', '6 - <8', '8 - <10', '10 - <12', '12 - <14', '14 - <16', '>16', 'Max GI'), col = colFun(c(seq(0,18000,2000), O3_b100)), pch = c(rep(16,9),17), cex=1.1)
+#Ideal point reference marker
+#par(new=TRUE)
+#plot(60, 0, pch = '|', col = 'red',xlim = c(0, 60), ylim=c(-100, 10), axes=FALSE, xlab = '', ylab='')
+#par(new=TRUE)
+#plot(60, 0, pch = 'X', col = 'red',xlim = c(0, 60), ylim=c(-100, 10), axes=FALSE, xlab = '', ylab='')
+dev.off()
+
 #  Thresholds for flooding and low flow----
 png('ParetoMAP_ColTrees_TargetThresh.png', res = 300, units = 'in', width = 6, height = 6)
 plot(-DVO_MAP$Flooding*100, -DVO_MAP$LowFlow*100, col = colFun(DVO_MAP$NumTrees),
@@ -586,8 +612,26 @@ legend('bottomleft', title = 'Num. Trees (thous.)',
 #plot(60, 0, pch = 'X', col = 'red',xlim = c(0, 60), ylim=c(-100, 10), axes=FALSE, xlab = '', ylab='')
 dev.off()
 
-#Number of trees for the solutions that meet this objective
-TreesThreshMAP = DVO_MAPSyn[which((DVO_MAP$Flooding <= -0.2) & (DVO_MAP$LowFlow <= 0.2)),]
+#Synthetic parameter set
+png('ParetoMAPSyn_ColTrees_TargetThresh.png', res = 300, units = 'in', width = 6, height = 6)
+plot(-DVO_MAPSyn$FloodingSyn*100, -DVO_MAPSyn$LowFlowSyn*100, col = colFun(DVO_MAPSyn$NumTreesSyn),
+     xlim = c(0, 60), ylim=c(-100, 10), xlab = 'Flooding Reduction (%)', ylab = 'Low Flow Reduction (%)', cex.axis = 1.5, cex.lab = 1.5, main = 'Reforestation Optimization to MAP', pch = 16)
+lines(c(-110,110), c(0,0))
+lines(c(-0,0), c(-120,120))
+lines(c(-110,110), c(-20,-20), col = 'red')
+lines(c(20,20), c(-120,120), col = 'red')
+#Add max GI point
+legend('bottomleft', title = 'Num. Trees (thous.)', 
+       legend = c('0 - <2', '2 - <4', '4 - <6', '6 - <8', '8 - <10', '10 - <12', '12 - <14', '14 - <16', '>16'), col = colFun(c(seq(0,18000,2000))), pch = c(rep(16,9)), cex=1.1)
+#Ideal point reference marker
+#par(new=TRUE)
+#plot(60, 0, pch = '|', col = 'red',xlim = c(0, 60), ylim=c(-100, 10), axes=FALSE, xlab = '', ylab='')
+#par(new=TRUE)
+#plot(60, 0, pch = 'X', col = 'red',xlim = c(0, 60), ylim=c(-100, 10), axes=FALSE, xlab = '', ylab='')
+dev.off()
+
+#Number of trees for the solutions that meet this objective in its space
+TreesThreshMAP = DVO_MAPSyn[which((DVO_MAPSyn$Flooding <= -0.2) & (DVO_MAPSyn$LowFlow <= 0.2)),]
 
 #  Pareto front movie----
 #   Load Pareto front over time----
@@ -1421,8 +1465,8 @@ CompromiseSyn = TreesThreshSyn[which(TreesThreshSyn$distIdeal == min(TreesThresh
 CompromiseSynMinTrees = TreesThreshSyn[which(TreesThreshSyn$NumTrees == min(TreesThreshSyn$NumTrees)),]
 
 # MAP----
-BestFloodMAP = DVO_MAP[DVO_MAP$Flooding == min(DVO_MAP$Flooding),]
-BestLowFlowMAP = DVO_MAP[DVO_MAP$NumTrees >= 1000,][which(DVO_MAP$LowFlow[DVO_MAP$NumTrees >= 1000] == min(DVO_MAP$LowFlow[DVO_MAP$NumTrees >= 1000])),]
+BestFloodMAP = DVO_MAPSyn[DVO_MAPSyn$Flooding == min(DVO_MAPSyn$Flooding),]
+BestLowFlowMAP = DVO_MAPSyn[DVO_MAPSyn$NumTrees >= 1000,][which(DVO_MAPSyn$LowFlow[DVO_MAPSyn$NumTrees >= 1000] == min(DVO_MAPSyn$LowFlow[DVO_MAPSyn$NumTrees >= 1000])),]
 #Compute compromise as the solution closest to the ideal point in all 3 objectives (minimum Euclidean distance after scaling to common scale)
 TreesThreshMAP$FloodingScaled = (TreesThreshMAP$Flooding - mean(TreesThreshMAP$Flooding)) / sd(TreesThreshMAP$Flooding)
 TreesThreshMAP$LowFlowScaled = (TreesThreshMAP$LowFlow - mean(TreesThreshMAP$LowFlow)) / sd(TreesThreshMAP$LowFlow)
@@ -1514,6 +1558,21 @@ legend('bottomleft', title = 'Num. Trees (thous.)',
        legend = c('0 - <2', '2 - <4', '4 - <6', '6 - <8', '8 - <10', '10 - <12', '12 - <14', '14 - <16', '>16', 'Compromise Sol.'), col = colFun(c(seq(0,16000,2000), CompromiseMAP$NumTrees)), pch = c(rep(16,9),15), cex=1.1)
 dev.off()
 
+png('ParetoMAP_ColTrees_TargetThresh_CompSolMinTrees.png', res = 300, units = 'in', width = 6, height = 6)
+plot(-DVO_MAP$Flooding*100, -DVO_MAP$LowFlow*100, col = colFun(DVO_MAP$NumTrees),
+     xlim = c(0, 60), ylim=c(-100, 10), xlab = 'Flooding Reduction (%)', ylab = 'Low Flow Reduction (%)', cex.axis = 1.5, cex.lab = 1.5, main = 'Reforestation Optimization to Synthetic Truth', pch = 16)
+lines(c(-110,110), c(0,0))
+lines(c(-0,0), c(-120,120))
+lines(c(-110,110), c(-20,-20), col = 'red')
+lines(c(20,20), c(-120,120), col = 'red')
+#Add compromise solution
+par(new=TRUE)
+plot(-CompromiseMAPMinTrees$Flooding*100, -CompromiseMAPMinTrees$LowFlow*100, col = colFun(CompromiseMAPMinTrees$NumTrees),
+     xlim = c(0, 60), ylim=c(-100, 10), xlab = '', ylab = '', axes=FALSE, pch = 15)
+legend('bottomleft', title = 'Num. Trees (thous.)', 
+       legend = c('0 - <2', '2 - <4', '4 - <6', '6 - <8', '8 - <10', '10 - <12', '12 - <14', '14 - <16', '>16', 'Compromise Sol.'), col = colFun(c(seq(0,16000,2000), CompromiseMAPMinTrees$NumTrees)), pch = c(rep(16,9),15), cex=1.1)
+dev.off()
+
 # MORO----
 setwd("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\SyntheticHill11+12\\OptMORO")
 png('ParetoMORO_ColTrees_TargetThresh_CompSol.png', res = 300, units = 'in', width = 6, height = 6)
@@ -1529,6 +1588,21 @@ plot(-CompromiseMORO$Flooding*100, -CompromiseMORO$LowFlow*100, col = colFun(Com
      xlim = c(0, 60), ylim=c(-100, 10), xlab = '', ylab = '', axes=FALSE, pch = 15)
 legend('bottomleft', title = 'Num. Trees (thous.)', 
        legend = c('0 - <2', '2 - <4', '4 - <6', '6 - <8', '8 - <10', '10 - <12', '12 - <14', '14 - <16', '>16', 'Compromise Sol.'), col = colFun(c(seq(0,16000,2000), CompromiseMORO$NumTrees)), pch = c(rep(16,9),15), cex=1.1)
+dev.off()
+
+png('ParetoMORO_ColTrees_TargetThresh_CompSolMinTrees.png', res = 300, units = 'in', width = 6, height = 6)
+plot(-DVO_MORO$Flooding*100, -DVO_MORO$LowFlow*100, col = colFun(DVO_MORO$NumTrees),
+     xlim = c(0, 60), ylim=c(-100, 10), xlab = 'Flooding Reduction (%)', ylab = 'Low Flow Reduction (%)', cex.axis = 1.5, cex.lab = 1.5, main = 'Reforestation Optimization to Synthetic Truth', pch = 16)
+lines(c(-110,110), c(0,0))
+lines(c(-0,0), c(-120,120))
+lines(c(-110,110), c(-20,-20), col = 'red')
+lines(c(20,20), c(-120,120), col = 'red')
+#Add compromise solution
+par(new=TRUE)
+plot(-CompromiseMOROMinTrees$Flooding*100, -CompromiseMOROMinTrees$LowFlow*100, col = colFun(CompromiseMOROMinTrees$NumTrees),
+     xlim = c(0, 60), ylim=c(-100, 10), xlab = '', ylab = '', axes=FALSE, pch = 15)
+legend('bottomleft', title = 'Num. Trees (thous.)', 
+       legend = c('0 - <2', '2 - <4', '4 - <6', '6 - <8', '8 - <10', '10 - <12', '12 - <14', '14 - <16', '>16', 'Compromise Sol.'), col = colFun(c(seq(0,16000,2000), CompromiseMOROMinTrees$NumTrees)), pch = c(rep(16,9),15), cex=1.1)
 dev.off()
 
 # Re-evaluated in Synthetic Space----
@@ -1730,6 +1804,34 @@ legend('bottomleft', title = 'Num. Trees (thous.)',
        legend = c('0 - <2', '2 - <4', '4 - <6', '6 - <8', '8 - <10', '10 - <12', '12 - <14', '14 - <16', '>16'), col = colFun(c(seq(0,16000,2000))), pch = c(rep(16,9)), cex=1.1)
 dev.off()
 
+#Lines with only compromise sols
+png('ParetoSyn_ColTrees_MAP+MOROsols_linesThresh_CompSolOnly.png', res = 300, units = 'in', width = 6, height = 6)
+plot(-CompromiseSynMinTrees$Flooding*100, -CompromiseSynMinTrees$LowFlow*100, col = colFun(CompromiseSynMinTrees$NumTrees),
+     xlim = c(0, 60), ylim=c(-100, 10), xlab = 'Flooding Reduction (%)', ylab = 'Low Flow Reduction (%)', cex.axis = 1.5, cex.lab = 1.5, main = 'Reforestation Optimization to Synthetic Truth', pch = 16)
+lines(c(-110,110), c(0,0))
+lines(c(-0,0), c(-120,120))
+#MAP solutions
+par(new=TRUE)
+plot(-CompromiseMAPMinTrees$Flooding*100, -CompromiseMAPMinTrees$LowFlow*100, col = colFun(CompromiseMAPMinTrees$NumTrees),
+     xlim = c(0, 60), ylim=c(-100, 10), xlab = '', ylab = '', axes=FALSE, pch = 15)
+par(new=TRUE)
+plot(-CompromiseMAPMinTrees$FloodingSyn*100, -CompromiseMAPMinTrees$LowFlowSyn*100, col = colFun(CompromiseMAPMinTrees$NumTreesSyn),
+     xlim = c(0, 60), ylim=c(-100, 10), xlab = '', ylab = '', axes=FALSE, pch = 15)
+lines(x = c(-CompromiseMAPMinTrees$Flooding*100, -CompromiseMAPMinTrees$FloodingSyn*100), y = c(-CompromiseMAPMinTrees$LowFlow*100, -CompromiseMAPMinTrees$LowFlowSyn*100), lwd = 2)
+
+#MORO solutions
+par(new=TRUE)
+plot(-CompromiseMOROMinTrees$Flooding*100, -CompromiseMOROMinTrees$LowFlow*100, col = colFun(CompromiseMOROMinTrees$NumTrees),
+     xlim = c(0, 60), ylim=c(-100, 10), xlab = '', ylab = '', axes=FALSE, pch = 17)
+par(new=TRUE)
+plot(-CompromiseMOROMinTrees$FloodingSyn*100, -CompromiseMOROMinTrees$LowFlowSyn*100, col = colFun(CompromiseMOROMinTrees$NumTreesSyn),
+     xlim = c(0, 60), ylim=c(-100, 10), xlab = '', ylab = '', axes=FALSE, pch = 17)
+lines(x = c(-CompromiseMOROMinTrees$Flooding*100, -CompromiseMOROMinTrees$FloodingSyn*100), y = c(-CompromiseMOROMinTrees$LowFlow*100, -CompromiseMOROMinTrees$LowFlowSyn*100), lwd = 2)
+
+lines(c(-110,110), c(-20,-20), col = 'red')
+lines(c(20,20), c(-120,120), col = 'red')
+dev.off()
+
 #Plot maps of the trees added for selected policies----
 #worldfile cells
 Cells = read.csv('worldfile.csv', stringsAsFactors = FALSE)
@@ -1887,8 +1989,90 @@ text(x = -76.694, y = 39.480, 'WGS84')
 box(which = 'figure', lwd = 2)
 dev.off()
 
+png('CompromiseMapSynMinTrees_HillOutlines.png', res = 300, units = 'in', width = 6, height = 5)
+par(mar= c(2.5,2.5,1,1))
+plot(CellsWGS, col = 'black', pch = 15, lwd = 0, cex=1.2)
+for (h in 9:10){
+        #For hillslope boundaries
+        plot(CellsWGS[which((CellsWGS$hillID == h)),], col = 'gray', add = TRUE, lwd=7, pch = 22, cex = 1.2)
+        plot(CellsWGS[which((CellsWGS$hillID == h)),], col = 'black', add = TRUE, pch = 15, cex = 1.2)
+        for (l in 1:3){
+                plot(CellsWGS[which((CellsWGS$hillID == h) & (CellsWGS@data[,116+l] == h) & (CellsWGS$MaxGI > 0)),], col = 'black', add = TRUE, pch = 15, cex = 1.2)
+                plot(CellsWGS[which((CellsWGS$hillID == h) & (CellsWGS@data[,116+l] == h) & (CellsWGS$MaxGI > 0)),], col = colFun(CompromiseSynMinTrees[1,l+3*(h-9)]), add = TRUE, pch = 15, cex = 1.2)
+        }
+}
+rm(h)
+legend('topleft', title = expression(bold('GI Proportion')), legend = c(paste(seq(0,0.8,0.2), '-', seq(0.2,1,0.2))), col = c(colFun(seq(scaleRange[1],scaleRange[2],scaleBy))), pch = 15)
+degAxis(side = 1, at = seq(-77,-76,.005), labels = FALSE)
+degAxis(side = 1, at = seq(-77,-76,.01))
+degAxis(side = 3, at = seq(-77,-76,.005), labels = FALSE)
+degAxis(side = 2, at = seq(39.45, 40,.005))
+degAxis(side = 4, at = seq(39.45, 40,.005), labels = FALSE)
+north.arrow(xb = -76.694, yb = 39.481, len = .0005, lab = 'N', tcol = 'black', col='black')
+text(x = -76.694, y = 39.480, 'WGS84')
+box(which = 'figure', lwd = 2)
+dev.off()
+
+#Average compromise map----
+png('CompromiseMapSynMinTrees_HillOutlines_Mean.png', res = 300, units = 'in', width = 6, height = 5)
+par(mar= c(2.5,2.5,1,1))
+plot(CellsWGS, col = 'black', pch = 15, lwd = 0, cex=1.2)
+for (h in 9:10){
+        #For hillslope boundaries
+        plot(CellsWGS[which((CellsWGS$hillID == h)),], col = 'gray', add = TRUE, lwd=7, pch = 22, cex = 1.2)
+        plot(CellsWGS[which((CellsWGS$hillID == h)),], col = 'black', add = TRUE, pch = 15, cex = 1.2)
+        for (l in 1:3){
+                plot(CellsWGS[which((CellsWGS$hillID == h) & (CellsWGS@data[,116+l] == h) & (CellsWGS$MaxGI > 0)),], col = 'black', add = TRUE, pch = 15, cex = 1.2)
+                plot(CellsWGS[which((CellsWGS$hillID == h) & (CellsWGS@data[,116+l] == h) & (CellsWGS$MaxGI > 0)),], col = colFun(colMeans(TreesThreshSyn)[l+3*(h-9)]), add = TRUE, pch = 15, cex = 1.2)
+        }
+}
+rm(h)
+legend('topleft', title = expression(bold('Mean Proportion')), legend = c(paste(seq(0,0.8,0.2), '-', seq(0.2,1,0.2))), col = c(colFun(seq(scaleRange[1],scaleRange[2],scaleBy))), pch = 15)
+degAxis(side = 1, at = seq(-77,-76,.005), labels = FALSE)
+degAxis(side = 1, at = seq(-77,-76,.01))
+degAxis(side = 3, at = seq(-77,-76,.005), labels = FALSE)
+degAxis(side = 2, at = seq(39.45, 40,.005))
+degAxis(side = 4, at = seq(39.45, 40,.005), labels = FALSE)
+north.arrow(xb = -76.694, yb = 39.481, len = .0005, lab = 'N', tcol = 'black', col='black')
+text(x = -76.694, y = 39.480, 'WGS84')
+box(which = 'figure', lwd = 2)
+dev.off()
+
+#SD compromise map----
+scaleRange = c(0,0.4)
+scaleBy = 0.1
+Pal = rev(gray.colors((scaleRange[2] - scaleRange[1])/scaleBy))
+
+png('CompromiseMapSynMinTrees_HillOutlines_SD.png', res = 300, units = 'in', width = 6, height = 5)
+par(mar= c(2.5,2.5,1,1))
+plot(CellsWGS, col = 'black', pch = 15, lwd = 0, cex=1.2)
+for (h in 9:10){
+        #For hillslope boundaries
+        plot(CellsWGS[which((CellsWGS$hillID == h)),], col = 'gray', add = TRUE, lwd=7, pch = 22, cex = 1.2)
+        plot(CellsWGS[which((CellsWGS$hillID == h)),], col = 'black', add = TRUE, pch = 15, cex = 1.2)
+        for (l in 1:3){
+                plot(CellsWGS[which((CellsWGS$hillID == h) & (CellsWGS@data[,116+l] == h) & (CellsWGS$MaxGI > 0)),], col = 'black', add = TRUE, pch = 15, cex = 1.2)
+                plot(CellsWGS[which((CellsWGS$hillID == h) & (CellsWGS@data[,116+l] == h) & (CellsWGS$MaxGI > 0)),], col = colFun(apply(TreesThreshSyn,2,sd)[l+3*(h-9)]), add = TRUE, pch = 15, cex = 1.2)
+        }
+}
+rm(h)
+legend('topleft', title = expression(bold('SD Proportion')), legend = c(paste(seq(0,0.3,0.1), '-', seq(0.1,0.4,0.1))), col = c(colFun(seq(scaleRange[1],scaleRange[2],scaleBy))), pch = 15)
+degAxis(side = 1, at = seq(-77,-76,.005), labels = FALSE)
+degAxis(side = 1, at = seq(-77,-76,.01))
+degAxis(side = 3, at = seq(-77,-76,.005), labels = FALSE)
+degAxis(side = 2, at = seq(39.45, 40,.005))
+degAxis(side = 4, at = seq(39.45, 40,.005), labels = FALSE)
+north.arrow(xb = -76.694, yb = 39.481, len = .0005, lab = 'N', tcol = 'black', col='black')
+text(x = -76.694, y = 39.480, 'WGS84')
+box(which = 'figure', lwd = 2)
+dev.off()
+
 # MAP----
 setwd("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\SyntheticHill11+12\\OptMAP")
+scaleRange = c(0,1)
+scaleBy = 0.2
+Pal = rev(rainbow((scaleRange[2] - scaleRange[1])/scaleBy))
+
 #  Best Flooding----
 png('BestFloodingMapMAP_HillOutlines.png', res = 300, units = 'in', width = 6, height = 5)
 par(mar= c(2.5,2.5,1,1))
@@ -1964,8 +2148,90 @@ text(x = -76.694, y = 39.480, 'WGS84')
 box(which = 'figure', lwd = 2)
 dev.off()
 
+png('CompromiseMapMAPMinTrees_HillOutlines.png', res = 300, units = 'in', width = 6, height = 5)
+par(mar= c(2.5,2.5,1,1))
+plot(CellsWGS, col = 'black', pch = 15, lwd = 0, cex=1.2)
+for (h in 9:10){
+        #For hillslope boundaries
+        plot(CellsWGS[which((CellsWGS$hillID == h)),], col = 'gray', add = TRUE, lwd=7, pch = 22, cex = 1.2)
+        plot(CellsWGS[which((CellsWGS$hillID == h)),], col = 'black', add = TRUE, pch = 15, cex = 1.2)
+        for (l in 1:3){
+                plot(CellsWGS[which((CellsWGS$hillID == h) & (CellsWGS@data[,116+l] == h) & (CellsWGS$MaxGI > 0)),], col = 'black', add = TRUE, pch = 15, cex = 1.2)
+                plot(CellsWGS[which((CellsWGS$hillID == h) & (CellsWGS@data[,116+l] == h) & (CellsWGS$MaxGI > 0)),], col = colFun(CompromiseMAPMinTrees[1,l+3*(h-9)]), add = TRUE, pch = 15, cex = 1.2)
+        }
+}
+rm(h)
+legend('topleft', title = expression(bold('GI Proportion')), legend = c(paste(seq(0,0.8,0.2), '-', seq(0.2,1,0.2))), col = c(colFun(seq(scaleRange[1],scaleRange[2],scaleBy))), pch = 15)
+degAxis(side = 1, at = seq(-77,-76,.005), labels = FALSE)
+degAxis(side = 1, at = seq(-77,-76,.01))
+degAxis(side = 3, at = seq(-77,-76,.005), labels = FALSE)
+degAxis(side = 2, at = seq(39.45, 40,.005))
+degAxis(side = 4, at = seq(39.45, 40,.005), labels = FALSE)
+north.arrow(xb = -76.694, yb = 39.481, len = .0005, lab = 'N', tcol = 'black', col='black')
+text(x = -76.694, y = 39.480, 'WGS84')
+box(which = 'figure', lwd = 2)
+dev.off()
+
+#Average compromise map----
+png('CompromiseMapMAPMinTrees_HillOutlines_Mean.png', res = 300, units = 'in', width = 6, height = 5)
+par(mar= c(2.5,2.5,1,1))
+plot(CellsWGS, col = 'black', pch = 15, lwd = 0, cex=1.2)
+for (h in 9:10){
+        #For hillslope boundaries
+        plot(CellsWGS[which((CellsWGS$hillID == h)),], col = 'gray', add = TRUE, lwd=7, pch = 22, cex = 1.2)
+        plot(CellsWGS[which((CellsWGS$hillID == h)),], col = 'black', add = TRUE, pch = 15, cex = 1.2)
+        for (l in 1:3){
+                plot(CellsWGS[which((CellsWGS$hillID == h) & (CellsWGS@data[,116+l] == h) & (CellsWGS$MaxGI > 0)),], col = 'black', add = TRUE, pch = 15, cex = 1.2)
+                plot(CellsWGS[which((CellsWGS$hillID == h) & (CellsWGS@data[,116+l] == h) & (CellsWGS$MaxGI > 0)),], col = colFun(colMeans(TreesThreshMAP)[l+3*(h-9)]), add = TRUE, pch = 15, cex = 1.2)
+        }
+}
+rm(h)
+legend('topleft', title = expression(bold('Mean Proportion')), legend = c(paste(seq(0,0.8,0.2), '-', seq(0.2,1,0.2))), col = c(colFun(seq(scaleRange[1],scaleRange[2],scaleBy))), pch = 15)
+degAxis(side = 1, at = seq(-77,-76,.005), labels = FALSE)
+degAxis(side = 1, at = seq(-77,-76,.01))
+degAxis(side = 3, at = seq(-77,-76,.005), labels = FALSE)
+degAxis(side = 2, at = seq(39.45, 40,.005))
+degAxis(side = 4, at = seq(39.45, 40,.005), labels = FALSE)
+north.arrow(xb = -76.694, yb = 39.481, len = .0005, lab = 'N', tcol = 'black', col='black')
+text(x = -76.694, y = 39.480, 'WGS84')
+box(which = 'figure', lwd = 2)
+dev.off()
+
+#SD compromise map----
+scaleRange = c(0,0.4)
+scaleBy = 0.1
+Pal = rev(gray.colors((scaleRange[2] - scaleRange[1])/scaleBy))
+
+png('CompromiseMapMAPMinTrees_HillOutlines_SD.png', res = 300, units = 'in', width = 6, height = 5)
+par(mar= c(2.5,2.5,1,1))
+plot(CellsWGS, col = 'black', pch = 15, lwd = 0, cex=1.2)
+for (h in 9:10){
+        #For hillslope boundaries
+        plot(CellsWGS[which((CellsWGS$hillID == h)),], col = 'gray', add = TRUE, lwd=7, pch = 22, cex = 1.2)
+        plot(CellsWGS[which((CellsWGS$hillID == h)),], col = 'black', add = TRUE, pch = 15, cex = 1.2)
+        for (l in 1:3){
+                plot(CellsWGS[which((CellsWGS$hillID == h) & (CellsWGS@data[,116+l] == h) & (CellsWGS$MaxGI > 0)),], col = 'black', add = TRUE, pch = 15, cex = 1.2)
+                plot(CellsWGS[which((CellsWGS$hillID == h) & (CellsWGS@data[,116+l] == h) & (CellsWGS$MaxGI > 0)),], col = colFun(apply(TreesThreshMAP,2,sd)[l+3*(h-9)]), add = TRUE, pch = 15, cex = 1.2)
+        }
+}
+rm(h)
+legend('topleft', title = expression(bold('SD Proportion')), legend = c(paste(seq(0,0.3,0.1), '-', seq(0.1,0.4,0.1))), col = c(colFun(seq(scaleRange[1],scaleRange[2],scaleBy))), pch = 15)
+degAxis(side = 1, at = seq(-77,-76,.005), labels = FALSE)
+degAxis(side = 1, at = seq(-77,-76,.01))
+degAxis(side = 3, at = seq(-77,-76,.005), labels = FALSE)
+degAxis(side = 2, at = seq(39.45, 40,.005))
+degAxis(side = 4, at = seq(39.45, 40,.005), labels = FALSE)
+north.arrow(xb = -76.694, yb = 39.481, len = .0005, lab = 'N', tcol = 'black', col='black')
+text(x = -76.694, y = 39.480, 'WGS84')
+box(which = 'figure', lwd = 2)
+dev.off()
+
 # MORO----
 setwd("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\SyntheticHill11+12\\OptMORO")
+scaleRange = c(0,1)
+scaleBy = 0.2
+Pal = rev(rainbow((scaleRange[2] - scaleRange[1])/scaleBy))
+
 #  Best Flooding----
 png('BestFloodingMapMORO_HillOutlines.png', res = 300, units = 'in', width = 6, height = 5)
 par(mar= c(2.5,2.5,1,1))
@@ -2031,6 +2297,84 @@ for (h in 9:10){
 }
 rm(h)
 legend('topleft', title = expression(bold('GI Proportion')), legend = c(paste(seq(0,0.8,0.2), '-', seq(0.2,1,0.2))), col = c(colFun(seq(scaleRange[1],scaleRange[2],scaleBy))), pch = 15)
+degAxis(side = 1, at = seq(-77,-76,.005), labels = FALSE)
+degAxis(side = 1, at = seq(-77,-76,.01))
+degAxis(side = 3, at = seq(-77,-76,.005), labels = FALSE)
+degAxis(side = 2, at = seq(39.45, 40,.005))
+degAxis(side = 4, at = seq(39.45, 40,.005), labels = FALSE)
+north.arrow(xb = -76.694, yb = 39.481, len = .0005, lab = 'N', tcol = 'black', col='black')
+text(x = -76.694, y = 39.480, 'WGS84')
+box(which = 'figure', lwd = 2)
+dev.off()
+
+png('BestCompromiseMapMOROMinTrees_HillOutlines.png', res = 300, units = 'in', width = 6, height = 5)
+par(mar= c(2.5,2.5,1,1))
+plot(CellsWGS, col = 'black', pch = 15, lwd = 0, cex=1.2)
+for (h in 9:10){
+        #For hillslope boundaries
+        plot(CellsWGS[which((CellsWGS$hillID == h)),], col = 'gray', add = TRUE, lwd=7, pch = 22, cex = 1.2)
+        plot(CellsWGS[which((CellsWGS$hillID == h)),], col = 'black', add = TRUE, pch = 15, cex = 1.2)
+        for (l in 1:3){
+                plot(CellsWGS[which((CellsWGS$hillID == h) & (CellsWGS@data[,116+l] == h) & (CellsWGS$MaxGI > 0)),], col = 'black', add = TRUE, pch = 15, cex = 1.2)
+                plot(CellsWGS[which((CellsWGS$hillID == h) & (CellsWGS@data[,116+l] == h) & (CellsWGS$MaxGI > 0)),], col = colFun(CompromiseMOROMinTrees[1,l+3*(h-9)]), add = TRUE, pch = 15, cex = 1.2)
+        }
+}
+rm(h)
+legend('topleft', title = expression(bold('GI Proportion')), legend = c(paste(seq(0,0.8,0.2), '-', seq(0.2,1,0.2))), col = c(colFun(seq(scaleRange[1],scaleRange[2],scaleBy))), pch = 15)
+degAxis(side = 1, at = seq(-77,-76,.005), labels = FALSE)
+degAxis(side = 1, at = seq(-77,-76,.01))
+degAxis(side = 3, at = seq(-77,-76,.005), labels = FALSE)
+degAxis(side = 2, at = seq(39.45, 40,.005))
+degAxis(side = 4, at = seq(39.45, 40,.005), labels = FALSE)
+north.arrow(xb = -76.694, yb = 39.481, len = .0005, lab = 'N', tcol = 'black', col='black')
+text(x = -76.694, y = 39.480, 'WGS84')
+box(which = 'figure', lwd = 2)
+dev.off()
+
+#Average compromise map----
+png('BestCompromiseMapMOROMinTrees_HillOutlines_Mean.png', res = 300, units = 'in', width = 6, height = 5)
+par(mar= c(2.5,2.5,1,1))
+plot(CellsWGS, col = 'black', pch = 15, lwd = 0, cex=1.2)
+for (h in 9:10){
+        #For hillslope boundaries
+        plot(CellsWGS[which((CellsWGS$hillID == h)),], col = 'gray', add = TRUE, lwd=7, pch = 22, cex = 1.2)
+        plot(CellsWGS[which((CellsWGS$hillID == h)),], col = 'black', add = TRUE, pch = 15, cex = 1.2)
+        for (l in 1:3){
+                plot(CellsWGS[which((CellsWGS$hillID == h) & (CellsWGS@data[,116+l] == h) & (CellsWGS$MaxGI > 0)),], col = 'black', add = TRUE, pch = 15, cex = 1.2)
+                plot(CellsWGS[which((CellsWGS$hillID == h) & (CellsWGS@data[,116+l] == h) & (CellsWGS$MaxGI > 0)),], col = colFun(colMeans(TreesThreshMORO)[l+3*(h-9)]), add = TRUE, pch = 15, cex = 1.2)
+        }
+}
+rm(h)
+legend('topleft', title = expression(bold('Mean Proportion')), legend = c(paste(seq(0,0.8,0.2), '-', seq(0.2,1,0.2))), col = c(colFun(seq(scaleRange[1],scaleRange[2],scaleBy))), pch = 15)
+degAxis(side = 1, at = seq(-77,-76,.005), labels = FALSE)
+degAxis(side = 1, at = seq(-77,-76,.01))
+degAxis(side = 3, at = seq(-77,-76,.005), labels = FALSE)
+degAxis(side = 2, at = seq(39.45, 40,.005))
+degAxis(side = 4, at = seq(39.45, 40,.005), labels = FALSE)
+north.arrow(xb = -76.694, yb = 39.481, len = .0005, lab = 'N', tcol = 'black', col='black')
+text(x = -76.694, y = 39.480, 'WGS84')
+box(which = 'figure', lwd = 2)
+dev.off()
+
+#SD compromise map----
+scaleRange = c(0,0.4)
+scaleBy = 0.1
+Pal = rev(gray.colors((scaleRange[2] - scaleRange[1])/scaleBy))
+
+png('BestCompromiseMapMOROMinTrees_HillOutlines_SD.png', res = 300, units = 'in', width = 6, height = 5)
+par(mar= c(2.5,2.5,1,1))
+plot(CellsWGS, col = 'black', pch = 15, lwd = 0, cex=1.2)
+for (h in 9:10){
+        #For hillslope boundaries
+        plot(CellsWGS[which((CellsWGS$hillID == h)),], col = 'gray', add = TRUE, lwd=7, pch = 22, cex = 1.2)
+        plot(CellsWGS[which((CellsWGS$hillID == h)),], col = 'black', add = TRUE, pch = 15, cex = 1.2)
+        for (l in 1:3){
+                plot(CellsWGS[which((CellsWGS$hillID == h) & (CellsWGS@data[,116+l] == h) & (CellsWGS$MaxGI > 0)),], col = 'black', add = TRUE, pch = 15, cex = 1.2)
+                plot(CellsWGS[which((CellsWGS$hillID == h) & (CellsWGS@data[,116+l] == h) & (CellsWGS$MaxGI > 0)),], col = colFun(apply(TreesThreshMORO,2,sd)[l+3*(h-9)]), add = TRUE, pch = 15, cex = 1.2)
+        }
+}
+rm(h)
+legend('topleft', title = expression(bold('SD Proportion')), legend = c(paste(seq(0,0.3,0.1), '-', seq(0.1,0.4,0.1))), col = c(colFun(seq(scaleRange[1],scaleRange[2],scaleBy))), pch = 15)
 degAxis(side = 1, at = seq(-77,-76,.005), labels = FALSE)
 degAxis(side = 1, at = seq(-77,-76,.01))
 degAxis(side = 3, at = seq(-77,-76,.005), labels = FALSE)
