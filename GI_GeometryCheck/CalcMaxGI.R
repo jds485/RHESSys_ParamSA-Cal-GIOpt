@@ -690,10 +690,10 @@ for (h in 1:14){
   temp = CellsWGS[CellsWGS$hillID == h,]
   plot(temp, col = gray(0.9), add = TRUE, lwd=7, pch = 22)
   plot(temp, col = 'black', add = TRUE, pch = 15, cex = 0.7)
-  plot(CellsWGS[which((CellsWGS$hillID == h) & (Cells$patchsoilID == 8)),], col = SoilCols[1], add = T, pch = 15)
-  plot(CellsWGS[which((CellsWGS$hillID == h) & (Cells$patchsoilID == 108)),], col = SoilCols[2], add = T, pch = 15)
-  plot(CellsWGS[which((CellsWGS$hillID == h) & (Cells$patchsoilID == 9)),], col = SoilCols[3], add = T, pch = 15)
-  plot(CellsWGS[which((CellsWGS$hillID == h) & (Cells$patchsoilID == 109)),], col = SoilCols[4], add = T, pch = 15)
+  plot(CellsWGS[which((CellsWGS$hillID == h) & (Cells$patchsoilID == 8)),], col = SoilCols[1], add = T, pch = 15,cex=0.7)
+  plot(CellsWGS[which((CellsWGS$hillID == h) & (Cells$patchsoilID == 108)),], col = SoilCols[2], add = T, pch = 15,cex=0.7)
+  plot(CellsWGS[which((CellsWGS$hillID == h) & (Cells$patchsoilID == 9)),], col = SoilCols[3], add = T, pch = 15,cex=0.7)
+  plot(CellsWGS[which((CellsWGS$hillID == h) & (Cells$patchsoilID == 109)),], col = SoilCols[4], add = T, pch = 15,cex=0.7)
 }
 rm(temp,h)
 degAxis(side = 1, at = seq(-77,-76,.01), labels = FALSE)
