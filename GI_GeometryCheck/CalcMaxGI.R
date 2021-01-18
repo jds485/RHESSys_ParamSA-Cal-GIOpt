@@ -682,6 +682,32 @@ legend('topleft', pch = 15, legend = c('Impervious', 'Forested', 'Grass'), col =
 legend('topright', legend = c('Hillslope Outline'), col = gray(0.9), pch = 22, pt.cex = 2, pt.lwd=3)
 dev.off()
 
+SoilCols = scico(n = 4, palette = 'vik')
+png('Soils_SApaper.png', res = 300, units = 'in', width = 6, height = 6)
+par(mar= c(2.5,2.5,1,1))
+plot(CellsWGS, col = 'black', pch = 15, lwd = 0, cex = 0.7)
+for (h in 1:14){
+  temp = CellsWGS[CellsWGS$hillID == h,]
+  plot(temp, col = gray(0.9), add = TRUE, lwd=7, pch = 22)
+  plot(temp, col = 'black', add = TRUE, pch = 15, cex = 0.7)
+  plot(CellsWGS[which((CellsWGS$hillID == h) & (Cells$patchsoilID == 8)),], col = SoilCols[1], add = T, pch = 15)
+  plot(CellsWGS[which((CellsWGS$hillID == h) & (Cells$patchsoilID == 108)),], col = SoilCols[2], add = T, pch = 15)
+  plot(CellsWGS[which((CellsWGS$hillID == h) & (Cells$patchsoilID == 9)),], col = SoilCols[3], add = T, pch = 15)
+  plot(CellsWGS[which((CellsWGS$hillID == h) & (Cells$patchsoilID == 109)),], col = SoilCols[4], add = T, pch = 15)
+}
+rm(temp,h)
+degAxis(side = 1, at = seq(-77,-76,.01), labels = FALSE)
+degAxis(side = 1, at = seq(-76.7,-76,.02))
+degAxis(side = 3, at = seq(-77,-76,.01), labels = FALSE)
+degAxis(side = 2, at = seq(39.45, 40,.01))
+degAxis(side = 4, at = seq(39.45, 40,.01), labels = FALSE)
+north.arrow(xb = -76.712, yb = 39.469, len = .0005, lab = 'N', tcol = 'black', col='black')
+text(x = -76.712, y = 39.467, 'WGS84')
+box(which = 'figure', lwd = 2)
+legend('bottomright', title = expression(bold('Soils')), pch = 15, legend = c('Riparian S8', 'Riparian S108', 'Other S9', 'Other S109'), col = SoilCols)
+legend('topright', legend = c('Hillslope Outline'), col = gray(0.9), pch = 22, pt.cex = 2, pt.lwd=3)
+dev.off()
+
 #Get the Max GI for only hillslopes 9 and 10----
 setwd("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\SyntheticHill11+12")
 lcMax_gr910 = lcMax_gr[lcMax_gr$patchID %in% Cells$patchID[Cells$hillID %in% c(9,10)],]
