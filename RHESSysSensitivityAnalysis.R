@@ -366,6 +366,21 @@ any(is.na(EEsTNMed_h))))){
   print('There are NA Values in EE tables. Please fix.')
 }
 
+#Corrections are needed to v102_epc.frootlitr_fcel to correct a numerical issue
+EEs05_b$v102_epc.frootlitr_fcel[c(13,19)] = 0
+EEsot_b$v102_epc.frootlitr_fcel[c(13,19)] = 0
+EEs95_b$v102_epc.frootlitr_fcel[c(13,19)] = 0
+EEsTN05_b$v102_epc.frootlitr_fcel[c(13,19)] = 0
+EEsTNMed_b$v102_epc.frootlitr_fcel[c(13,19)] = 0
+EEsTN95_b$v102_epc.frootlitr_fcel[c(13,19)] = 0
+
+EEs05_h$v102_epc.frootlitr_fcel[c(12*14+seq(1,14,1),14*18+seq(1,14,1))] = 0
+EEsot_h$v102_epc.frootlitr_fcel[c(12*14+seq(1,14,1),14*18+seq(1,14,1))] = 0
+EEs95_h$v102_epc.frootlitr_fcel[c(12*14+seq(1,14,1),14*18+seq(1,14,1))] = 0
+EEsTN05_h$v102_epc.frootlitr_fcel[c(12*14+seq(1,14,1),14*18+seq(1,14,1))] = 0
+EEsTNMed_h$v102_epc.frootlitr_fcel[c(12*14+seq(1,14,1),14*18+seq(1,14,1))] = 0
+EEsTN95_h$v102_epc.frootlitr_fcel[c(12*14+seq(1,14,1),14*18+seq(1,14,1))] = 0
+
 #Aggregate the EEs for variables that require it----
 #Fixme: move to a function file
 AggregateEEs = function(EEs, #The elementary effect matrix
@@ -838,7 +853,7 @@ EEsTNMed_h_mua_cons = array(NA, dim = c(reps*length(uhills),r,length(ColsAggrega
 for (p in 1:(nrow(ParamRanges))){
   #Draw bootstrapped samples for that parameter
   tReps = t(replicate(expr = ceiling(runif(n = r, min = 0, max = r)), n = reps))
-  #Extract the EEs for that parameter using the indices in Reps.
+  #Extract the EEs for that parameter using the indices in tReps.
   EEs05_b_mua[,p] = apply(matrix(EEs05_b[tReps,p], ncol = r, nrow = reps), MARGIN = 1, FUN = meanabs)
   EEs95_b_mua[,p] = apply(matrix(EEs95_b[tReps,p], ncol = r, nrow = reps), MARGIN = 1, FUN = meanabs)
   EEsot_b_mua[,p] = apply(matrix(EEsot_b[tReps,p], ncol = r, nrow = reps), MARGIN = 1, FUN = meanabs)
@@ -866,7 +881,7 @@ for (p in 1:(nrow(ParamRanges))){
     EEsTNMed_h_mua[indsh, 1] = uhills[h]
   }
   rm(indsh, h)
-  #If the variable p is one of the ones that is used to aggregate, save the bootstrapped EEs array
+  #If the variable p is one of the ones that is used to aggregate, save the bootstrapped EEs array for aggregation later
   if (colnames(EEs05_b)[p] %in% ColsAggregated){
     indp = which(ColsAggregated == colnames(EEs05_b)[p])
     EEs05_b_mua_cons[ , , indp] = matrix(EEs05_b[tReps,p], ncol = r, nrow = reps)
@@ -892,9 +907,10 @@ for (p in 1:(nrow(ParamRanges))){
       EEsTN95_h_mua_cons[indsh, , 1] = uhills[h]
       EEsTNMed_h_mua_cons[indsh, , 1] = uhills[h]
     }
+    rm(indsh, h, indp)
   }
 }
-rm(p, tReps, indp, h)
+rm(p, tReps)
 #Assign column names
 colnames(EEs05_b_mua) = colnames(EEs95_b_mua) = colnames(EEsot_b_mua) = colnames(EEsTN05_b_mua) = colnames(EEsTN95_b_mua) = colnames(EEsTNMed_b_mua) = colnames(EEs05_b)[1:nrow(ParamRanges)]
 colnames(EEs05_h_mua) = colnames(EEs95_h_mua) = colnames(EEsot_h_mua) = colnames(EEsTN05_h_mua) = colnames(EEsTN95_h_mua) = colnames(EEsTNMed_h_mua) = colnames(EEs05_h)[1:(nrow(ParamRanges)+1)]
@@ -1598,7 +1614,7 @@ colnames(EEs05_h_mua_95) = colnames(EEs95_h_mua_95) = colnames(EEsot_h_mua_95) =
 # Make plots of the distributions for variables----
 #Fixme: currently only plotting for one of the 6 metrics. Not sure it's necessary to show more.
 for (p in 1:ncol(EEs05_b_mua)){
-  png(paste0('EEs05_b_mua_', colnames(EEs05_b_mua)[p], '.png'), res = 300, units = 'in', width = 5, height = 5)
+  png(paste0(getwd(), '/EEs05_b_muaDists/EEs05_b_mua_', colnames(EEs05_b_mua)[p], '.png'), res = 300, units = 'in', width = 5, height = 5)
   hist(EEs05_b_mua[,p], breaks = 50, main = colnames(EEs05_b_mua)[p], xlab = 'Elementary Effect', cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5)
   dev.off()
 }
@@ -1693,8 +1709,32 @@ for (h in 1:length(uhills)){
 names(RanksMua05_h_Agg) = names(RanksMua95_h_Agg) = names(RanksMuaot_h_Agg) = names(RanksMuaTN05_h_Agg) = names(RanksMuaTN95_h_Agg) = names(RanksMuaTNMed_h_Agg) = paste0('Hill', seq(1,14,1))
 rm(h)
 
+#Paper SI table info with confidence intervals added
+RanksMua05_b_AggCI = cbind(RanksMua05_b_Agg, data.frame(P05 = as.numeric(EEs05_b_mua_05[-which(names(EEs05_b_mua_m) %in% ColsAggregated)][order(EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)]), P95 = as.numeric(EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)][order(EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)])))
+RanksMuaot_b_AggCI = cbind(RanksMuaot_b_Agg, data.frame(P05 = as.numeric(EEsot_b_mua_05[-which(names(EEsot_b_mua_m) %in% ColsAggregated)][order(EEsot_b_mua_m[-which(names(EEsot_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)]), P95 = as.numeric(EEsot_b_mua_95[-which(names(EEsot_b_mua_m) %in% ColsAggregated)][order(EEsot_b_mua_m[-which(names(EEsot_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)])))
+RanksMua95_b_AggCI = cbind(RanksMua95_b_Agg, data.frame(P05 = as.numeric(EEs95_b_mua_05[-which(names(EEs95_b_mua_m) %in% ColsAggregated)][order(EEs95_b_mua_m[-which(names(EEs95_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)]), P95 = as.numeric(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)][order(EEs95_b_mua_m[-which(names(EEs95_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)])))
+RanksMuaTN05_b_AggCI = cbind(RanksMuaTN05_b_Agg, data.frame(P05 = as.numeric(EEsTN05_b_mua_05[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)][order(EEsTN05_b_mua_m[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)]), P95 = as.numeric(EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)][order(EEsTN05_b_mua_m[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)])))
+RanksMuaTNMed_b_AggCI = cbind(RanksMuaTNMed_b_Agg, data.frame(P05 = as.numeric(EEsTNMed_b_mua_05[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)][order(EEsTNMed_b_mua_m[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)]), P95 = as.numeric(EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)][order(EEsTNMed_b_mua_m[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)])))
+RanksMuaTN95_b_AggCI = cbind(RanksMuaTN95_b_Agg, data.frame(P05 = as.numeric(EEsTN95_b_mua_05[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)][order(EEsTN95_b_mua_m[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)]), P95 = as.numeric(EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)][order(EEsTN95_b_mua_m[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)])))
+
+RanksMua05_b_AggCI[,c(2,3,4)] = signif(RanksMua05_b_AggCI[,c(2,3,4)], 3)
+RanksMuaot_b_AggCI[,c(2,3,4)] = signif(RanksMuaot_b_AggCI[,c(2,3,4)], 3)
+RanksMua95_b_AggCI[,c(2,3,4)] = signif(RanksMua95_b_AggCI[,c(2,3,4)], 3)
+RanksMuaTN05_b_AggCI[,c(2,3,4)] = signif(RanksMuaTN05_b_AggCI[,c(2,3,4)], 3)
+RanksMuaTNMed_b_AggCI[,c(2,3,4)] = signif(RanksMuaTNMed_b_AggCI[,c(2,3,4)], 3)
+RanksMuaTN95_b_AggCI[,c(2,3,4)] = signif(RanksMuaTN95_b_AggCI[,c(2,3,4)], 3)
+
 #Get the top X% unique variables based on the flow and TN metrics----
 #Top 10% of the parameters is desired. Get the index of the 10% of non-zero EEs, rounded up
+#Note that one could use the bootstrapped mean or the original mean. 
+#Maximum difference in EE value:
+MaxDiffEEs05Boot = max(abs(muaEEs05_b/max(muaEEs05_b) - EEs05_b_mua_m[1:271]/max(EEs05_b_mua_m[1:271])))
+MaxDiffEEsotBoot = max(abs(muaEEsot_b/max(muaEEsot_b) - EEsot_b_mua_m[1:271]/max(EEsot_b_mua_m[1:271])))
+MaxDiffEEs95Boot = max(abs(muaEEs95_b/max(muaEEs95_b) - EEs95_b_mua_m[1:271]/max(EEs95_b_mua_m[1:271])))
+MaxDiffEEsTN05Boot = max(abs(muaEEsTN05_b/max(muaEEsTN05_b) - EEsTN05_b_mua_m[1:271]/max(EEsTN05_b_mua_m[1:271])))
+MaxDiffEEsTNMedBoot = max(abs(muaEEsTNMed_b/max(muaEEsTNMed_b) - EEsTNMed_b_mua_m[1:271]/max(EEsTNMed_b_mua_m[1:271])))
+MaxDiffEEsTN95Boot = max(abs(muaEEsTN95_b/max(muaEEsTN95_b) - EEsTN95_b_mua_m[1:271]/max(EEsTN95_b_mua_m[1:271])))
+
 Top1005 = ceiling((length(muaEEs05_b) - length(which(muaEEs05_b == 0)))*0.1)
 Top10ot = ceiling((length(muaEEsot_b) - length(which(muaEEsot_b == 0)))*0.1)
 Top1095 = ceiling((length(muaEEs95_b) - length(which(muaEEs95_b == 0)))*0.1)
@@ -1753,6 +1793,7 @@ for (h in 1:length(uhills)){
   RanksMua_h_Agg = unique(c(RanksMua_h_Agg, RanksMua05_h_Agg[[h]]$Param[1:Top10h05_Agg],RanksMuaot_h_Agg[[h]]$Param[1:Top10hot_Agg],RanksMua95_h_Agg[[h]]$Param[1:Top10h95_Agg]))
   RanksMuaTN_h_Agg = unique(c(RanksMuaTN_h_Agg, RanksMuaTN05_h_Agg[[h]]$Param[1:Top10hTN05_Agg],RanksMuaTNMed_h_Agg[[h]]$Param[1:Top10hTNMed_Agg],RanksMuaTN95_h_Agg[[h]]$Param[1:Top10hTN95_Agg]))
 }
+rm(h)
 
 RanksMua_h_Agg910 = NULL
 for (h in 9:10){
@@ -1762,6 +1803,7 @@ for (h in 9:10){
 
   RanksMua_h_Agg910 = unique(c(RanksMua_h_Agg910, RanksMua05_h_Agg[[h]]$Param[1:Top10h05_Agg],RanksMuaot_h_Agg[[h]]$Param[1:Top10hot_Agg],RanksMua95_h_Agg[[h]]$Param[1:Top10h95_Agg]))
 }
+rm(h)
 
 # Select all parameters whose 95th quantile estimate of EE is greater than the selected threshold point
 ParamSelect_h_Agg = ParamSelectTN_h_Agg = NULL
@@ -1773,6 +1815,9 @@ for (h in 1:length(uhills)){
                                                       colnames(EEsTNMed_h_mua_95)[-c(1,which(colnames(EEsTNMed_h_mua_m) %in% ColsAggregated))][EEsTNMed_h_mua_95[h,-c(1,which(colnames(EEsTNMed_h_mua_m) %in% ColsAggregated))] >= RanksMuaTNMed_h_Agg[[h]][Top10hTNMed_Agg,2]],
                                                       colnames(EEsTN95_h_mua_95)[-c(1,which(colnames(EEsTN95_h_mua_m) %in% ColsAggregated))][EEsTN95_h_mua_95[h,-c(1,which(colnames(EEsTN95_h_mua_m) %in% ColsAggregated))] >= RanksMuaTN95_h_Agg[[h]][Top10hTN95_Agg,2]]))
 }
+rm(h)
+
+length(unique(c(ParamSelect_h_Agg, ParamSelectTN_h_Agg)))
 
 ParamSelect_h_Agg910 = NULL
 for (h in 9:10){
@@ -1780,6 +1825,7 @@ for (h in 9:10){
                                colnames(EEsot_h_mua_95)[-c(1,which(colnames(EEsot_h_mua_m) %in% ColsAggregated))][EEsot_h_mua_95[h,-c(1,which(colnames(EEsot_h_mua_m) %in% ColsAggregated))] >= RanksMuaot_h_Agg[[h]][Top10hot_Agg,2]],
                                colnames(EEs95_h_mua_95)[-c(1,which(colnames(EEs95_h_mua_m) %in% ColsAggregated))][EEs95_h_mua_95[h,-c(1,which(colnames(EEs95_h_mua_m) %in% ColsAggregated))] >= RanksMua95_h_Agg[[h]][Top10h95_Agg,2]]))
 }
+rm(h)
 
 #Make a plot of the number of parameters selected versus the threshold percentage----
 x = seq(0.01,1,0.01)
@@ -1829,15 +1875,16 @@ for (i in 1:length(x)){
 rm(pb, pbTN, Tops05, Topsot, Tops95, TopsTN05, TopsTNMed, TopsTN95, i, x)
 
 png('ParamsInThresholdCutoff_Agg.png', res = 300, units = 'in', width = 5, height = 5)
-plot(x = seq(1,100,1), y = ParamTotals_ThreshPercent_Agg, type = 'l', xlab = 'Top X Percent Selected', ylab = 'Number of Parameters Selected', ylim = c(0,120), xlim = c(0,100))
+plot(x = seq(1,100,1), y = ParamTotals_ThreshPercent_Agg, type = 'l', xlab = 'Top X Percent Selected', ylab = 'Number of Parameters Selected', ylim = c(0,105), xlim = c(0,100))
 par(new=TRUE)
-plot(x = seq(1,100,1), y = ceiling((length(EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]) - length(which(EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)] == 0)))*seq(0.01,1,0.01)), type = 'l', ylim = c(0,120), xlim = c(0,100), col = 'red', xlab = '', ylab = '', axes = FALSE)
+plot(x = seq(1,100,1), y = ceiling((length(EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]) - length(which(EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)] == 0)))*seq(0.01,1,0.01)), type = 'l', ylim = c(0,105), xlim = c(0,100), col = 'red', xlab = '', ylab = '', axes = FALSE)
 legend('topleft', legend = c('Based on Mean', 'Based on 95th Percentile'), lty = 1, col = c('red', 'black'))
 dev.off()
 
 # Aggregated with hillslope variables----
 x = seq(0.01,1,0.01)
 ParamTotals_ThreshPercent_h_Agg = vector('numeric', length(x))
+ParamTotals_ThreshPercent_onlyh_Agg = vector('numeric', length(x))
 for (i in 1:length(x)){
   Tops05 = ceiling((length(EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]) - length(which(EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)] == 0)))*x[i])
   Topsot = ceiling((length(EEsot_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]) - length(which(EEsot_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)] == 0)))*x[i])
@@ -1856,6 +1903,9 @@ for (i in 1:length(x)){
   
   # Select all parameters whose 95th quantile estimate of EE is greater than the selected threshold point
   ph = phTN = NULL
+  if (round(x[i],2) == 0.1){
+    ph10 = phTN10 = list()
+  }
   for (h in 1:length(uhills)){
     Topsh05 = ceiling((length(EEs05_h_mua_m[h,-c(1,which(colnames(EEs05_h_mua_m) %in% ColsAggregated))]) - length(which(EEs05_h_mua_m[h,-c(1,which(colnames(EEs05_h_mua_m) %in% ColsAggregated))] == 0)))*x[i])
     Topshot = ceiling((length(EEsot_h_mua_m[h,-c(1,which(colnames(EEs05_h_mua_m) %in% ColsAggregated))]) - length(which(EEsot_h_mua_m[h,-c(1,which(colnames(EEs05_h_mua_m) %in% ColsAggregated))] == 0)))*x[i])
@@ -1870,17 +1920,37 @@ for (i in 1:length(x)){
     phTN = unique(c(phTN, colnames(EEsTN05_h_mua_95)[-c(1,which(colnames(EEsTN05_h_mua_m) %in% ColsAggregated))][EEsTN05_h_mua_95[h,-c(1,which(colnames(EEsTN05_h_mua_m) %in% ColsAggregated))] >= RanksMuaTN05_h_Agg[[h]][TopshTN05,2]],
                                    colnames(EEsTNMed_h_mua_95)[-c(1,which(colnames(EEsTNMed_h_mua_m) %in% ColsAggregated))][EEsTNMed_h_mua_95[h,-c(1,which(colnames(EEsTNMed_h_mua_m) %in% ColsAggregated))] >= RanksMuaTNMed_h_Agg[[h]][TopshTNMed,2]],
                                    colnames(EEsTN95_h_mua_95)[-c(1,which(colnames(EEsTN95_h_mua_m) %in% ColsAggregated))][EEsTN95_h_mua_95[h,-c(1,which(colnames(EEsTN95_h_mua_m) %in% ColsAggregated))] >= RanksMuaTN95_h_Agg[[h]][TopshTN95,2]]))
+    if (round(x[i],2) == 0.10){
+      ph10 = c(ph10, list(unique(c(colnames(EEs05_h_mua_95)[-c(1,which(colnames(EEs05_h_mua_m) %in% ColsAggregated))][EEs05_h_mua_95[h,-c(1,which(colnames(EEs05_h_mua_m) %in% ColsAggregated))] >= RanksMua05_h_Agg[[h]][Topsh05,2]],
+                      colnames(EEsot_h_mua_95)[-c(1,which(colnames(EEsot_h_mua_m) %in% ColsAggregated))][EEsot_h_mua_95[h,-c(1,which(colnames(EEsot_h_mua_m) %in% ColsAggregated))] >= RanksMuaot_h_Agg[[h]][Topshot,2]],
+                      colnames(EEs95_h_mua_95)[-c(1,which(colnames(EEs95_h_mua_m) %in% ColsAggregated))][EEs95_h_mua_95[h,-c(1,which(colnames(EEs95_h_mua_m) %in% ColsAggregated))] >= RanksMua95_h_Agg[[h]][Topsh95,2]]))))
+      phTN10 = c(phTN10, list(unique(c(colnames(EEsTN05_h_mua_95)[-c(1,which(colnames(EEsTN05_h_mua_m) %in% ColsAggregated))][EEsTN05_h_mua_95[h,-c(1,which(colnames(EEsTN05_h_mua_m) %in% ColsAggregated))] >= RanksMuaTN05_h_Agg[[h]][TopshTN05,2]],
+                      colnames(EEsTNMed_h_mua_95)[-c(1,which(colnames(EEsTNMed_h_mua_m) %in% ColsAggregated))][EEsTNMed_h_mua_95[h,-c(1,which(colnames(EEsTNMed_h_mua_m) %in% ColsAggregated))] >= RanksMuaTNMed_h_Agg[[h]][TopshTNMed,2]],
+                      colnames(EEsTN95_h_mua_95)[-c(1,which(colnames(EEsTN95_h_mua_m) %in% ColsAggregated))][EEsTN95_h_mua_95[h,-c(1,which(colnames(EEsTN95_h_mua_m) %in% ColsAggregated))] >= RanksMuaTN95_h_Agg[[h]][TopshTN95,2]]))))
+    }
   }
   
   ParamTotals_ThreshPercent_h_Agg[i] = length(unique(c(pb, pbTN, ph, phTN)))
+  ParamTotals_ThreshPercent_onlyh_Agg[i] = length(unique(c(ph, phTN)))
 }
 rm(pb, pbTN, Tops05, Tops95, Topsot, Topsh05, Topsh95, Topshot, TopsTN05, TopsTNMed, TopsTN95, TopshTN05, TopshTNMed, TopshTN95, i, x, h, ph, phTN)
 
 png('ParamsInThresholdCutoff_h_Agg.png', res = 300, units = 'in', width = 5, height = 5)
-plot(x = seq(1,100,1), y = ParamTotals_ThreshPercent_h_Agg, type = 'l', xlab = 'Top X Percent Selected', ylab = 'Number of Parameters Selected', ylim = c(0,120), xlim = c(0,100))
+plot(x = seq(1,100,1), y = ParamTotals_ThreshPercent_h_Agg, type = 'l', xlab = 'Top X Percent Selected', ylab = 'Number of Parameters Selected', ylim = c(0,105), xlim = c(0,100))
 par(new=TRUE)
-plot(x = seq(1,100,1), y = ceiling((length(EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]) - length(which(EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)] == 0)))*seq(0.01,1,0.01)), type = 'l', ylim = c(0,120), xlim = c(0,100), col = 'red', xlab = '', ylab = '', axes = FALSE)
+plot(x = seq(1,100,1), y = ceiling((length(EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]) - length(which(EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)] == 0)))*seq(0.01,1,0.01)), type = 'l', ylim = c(0,105), xlim = c(0,100), col = 'red', xlab = '', ylab = '', axes = FALSE)
 legend('topleft', legend = c('Based on Mean', 'Based on 95th Percentile'), lty = 1, col = c('red', 'black'))
+dev.off()
+
+png('ParamsInThresholdCutoff_bh_Agg.png', res = 300, units = 'in', width = 5, height = 5)
+par(mar=c(4,4,0.5,0.5))
+plot(x = seq(1,100,1), y = ParamTotals_ThreshPercent_onlyh_Agg, type = 'l', xlab = 'Top X Percent Selected', ylab = 'Number of Parameters Selected', ylim = c(0,105), xlim = c(0,100), col = 'gray')
+par(new=TRUE)
+plot(x = seq(1,100,1), y = ParamTotals_ThreshPercent_h_Agg, type = 'l', ylim = c(0,105), xlim = c(0,100), col = 'black', xlab = '', ylab = '', axes = FALSE)
+par(new=TRUE)
+plot(x = seq(1,100,1), y = ParamTotals_ThreshPercent_Agg, type = 'o', ylim = c(0,105), xlim = c(0,100), col = 'blue', xlab = '', ylab = '', axes = FALSE, pch = 15, cex = 0.3)
+lines(c(10,10), c(-10,200), lty=2, col='gray')
+legend('bottomright', legend = c('Hillslope + Basin Outlets', 'Hillslope Outlets Only', 'Basin Outlet Only', 'Selected Percentage'), lty = c(1,1,1,2), col = c('black', 'gray', 'blue', 'gray'), pch = c(NA,NA,15,NA), pt.cex = 0.3)
 dev.off()
 
 #Color scheme for plotting EEs in categories of parameters----
@@ -2242,7 +2312,7 @@ lines(x = c(0.5+grep(colnames(InputParams), pattern = '^v4_')[length(grep(colnam
 legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
 dev.off()
 
-#Paper figures----
+# Paper figures----
 png('Panel_mua_b_Agg_Paper.png', res = 300, units = 'in', height = 8, width = 12)
 layout(rbind(c(1,2,3), c(4,5,6)))
 #Streamflow 05
@@ -2437,9 +2507,7 @@ lines(x = c(0.5+grep(SortNames, pattern = '^z_')[length(grep(SortNames, pattern 
 par(new=TRUE)
 #plot(x = c(1,3.5,5.5,8,11.5,24,46,67,89,135,193,222,232), y = c(-0.06, -0.08, -0.06, -0.08, -0.06, rep(-0.08,8)), col = colos_paper[c(1,3,3,3,3,2,2,2,2,4,4,6,5)], pch = c(16,16,17,18,15,16,17,18,15,16,17,16,16), xlim = c(0,250), ylim = c(0,1), axes = FALSE, xlab = '', ylab = '')
 plot(x = c(1,3.5,5.5,8,11.5,35,78,135,193,222,232), y = c(-0.06, -0.08, -0.06, -0.08, -0.06, rep(-0.08,6)), col = colos_paper[c(1,3,3,3,3,2,2,4,4,6,5)], pch = c(16,16,17,18,15,16,17,16,17,16,16), xlim = c(0,250), ylim = c(0,1), axes = FALSE, xlab = '', ylab = '')
-
 dev.off()
-
 
 #Hillslope Plots for mua----
 # Normalized EE value - not used----
@@ -2516,14 +2584,14 @@ dev.off()
 #  Rank order----
 #colPal = colorRampPalette(colors = rev(c('red', 'orange', 'gray', 'green', 'blue')))
 colPal = colorRampPalette(colors = scico(n = 4, palette = 'nuuk'))
-scaleRange = c(0, 63)
-scaleBy = 21
+scaleRange = c(0, 45)
+scaleBy = 15
 Pal = colPal((scaleRange[2] - scaleRange[1])/scaleBy + 1)
 Ranks_Agg=NULL
-LabelNames = c('H: GW Loss Coef.', 'Z: Wind Speed', 'Z: Avg. Temp. Coef.', 'Z: Atm. Trans. Coef.', 
-               'Riparian Soil (S8+S108): m', 'Other Soil (S9+S109): m', 'Other Soil (S9+S109): Ksat', 'Other Soil (S9+S109): Poro.', 'S9: Sat. to GW Coef.', 'S9: Soil Thickness', 
-               'S9: Pore Size', 'S9: Air Entry Pres.', 'S109: Soil Thickness', 'S109: Air Entry Pres.', 'S109: Sat. to GW Coef.', 
-               'Tree: Max Stomatal Cond.', 'Tree: Stomatal Fraction', 'Tree: Rainwater Capacity', 'Tree: Day Leaf On', 'Tree: Leaf Cuticular Cond.', 'L4: Septic Water Load')
+LabelNames = c('H: GW Loss Coef.', 'Z: Wind Speed', 'Riparian Soil (S8+S108): m', 'Other Soil (S9+S109): m', 
+               'Other Soil (S9+S109): Ksat', 'Other Soil (S9+S109): Poro.', 'S9: Sat. to GW Coef.', 'S9: Soil Thickness', 
+               'S9: Air Entry Pres.', 'S109: Sat. to GW Coef.', 'Tree: Max Stomatal Cond.', 'Tree: Rainwater Capacity',
+               'Tree: Stomatal Fraction', 'Tree: Day Leaf On', 'L4: Septic Water Load')
 png('HillRankTop12_Agg.png', res = 300, height = 6, width = 6, units = 'in')
 par(mar = c(2,11.5,0,4.5), mgp = c(1,1,0))
 for (h in 1:length(uhills)){
@@ -2551,13 +2619,512 @@ axis(side = 1, at = seq(1,14,1), labels = TRUE, pos = 0.5)
 #axis(side = 2, at = seq(1,length(SortRanksMua_b_Agg),1), labels = SortRanksMua_b_Agg, las = 1)
 axis(side = 2, at = seq(1,length(SortRanksMua_b_Agg),1), labels = LabelNames, las = 1)
 #legend('top', title = expression(bold('Parameter Sensitivity Rank')), legend = c('1 - 14', '15 - 29', '30 - 44', '45 - 60', '61 - 101'), horiz = TRUE, pch = 15, col = colFun(seq(0,60,15)), inset = -0.1, xpd = TRUE)
-legend('right', title = expression(bold('Rank')), legend = c('1 - 21', '22 - 42', '43 - 63', '>64'), pch = 15, col = colFun(seq(0,63,21)), inset = -0.3, xpd = TRUE)
+legend('right', title = expression(bold('Rank')), legend = c('1 - 15', '16 - 30', '31 - 45', '>45'), pch = 15, col = colFun(seq(0,45,15)), inset = -0.3, xpd = TRUE)
 box(which = 'figure')
 dev.off()
 
+#Hillslope Plots for mua with all parameters with EEs > 95% of 10% threshold----
+SortRanksMua_b_Agg = unique(c(ParamSelect_b_Agg, ParamSelectTN_b_Agg))[c(1,2,16,17,13,14,12,18,4,3,19,20,5,6,7,9,10,11,15,21,8)]
+LabelNames = c('H: GW Loss Coef.', 'Z: Wind Speed', 'Z: Avg. Temp. Coef.', 'Z: Atm. Trans. Coef.', 
+               'Riparian Soil (S8+S108): m', 'Other Soil (S9+S109): m', 'Other Soil (S9+S109): Ksat', 'Other Soil (S9+S109): Poro.', 'S9: Sat. to GW Coef.', 'S9: Soil Thickness', 
+               'S9: Pore Size', 'S9: Air Entry Pres.', 'S109: Soil Thickness', 'S109: Air Entry Pres.', 'S109: Sat. to GW Coef.', 
+               'Tree: Max Stomatal Cond.', 'Tree: Stomatal Fraction', 'Tree: Rainwater Capacity', 'Tree: Day Leaf On', 'Tree: Leaf Cuticular Cond.', 'L4: Septic Water Load')
 SortRanksMua_b_Agg_paper = rev(SortRanksMua_b_Agg[c(1,21,5:10,12,11,15,13,14,16:20,2:4)])
 LabelNames_paper = rev(LabelNames[c(1,21,5:10,12,11,15,13,14,16:20,2:4)])
-png('HillRankTop12_Agg_paper.png', res = 300, height = 6, width = 6, units = 'in')
+SortRanksMua_h_Agg = unique(c(ParamSelect_b_Agg, ParamSelectTN_b_Agg, ParamSelect_h_Agg, ParamSelectTN_h_Agg))[c(1,2,16,17,24,28,30,13,29,22,23,33,14,12,18,3,4,19,20,5,6,7,31,9,10,11,15,21,25,26,27,35,32,34,8)]
+LabelNames_h = c('H: GW Loss Coef.', 'Z: Wind Speed', 'Z: Avg. Temp. Coef.', 'Z: Atm. Trans. Coef. 2', 'Z: Atm. Trans. Coef. 1', 'Z: Clear Sky Trans.', 
+               'Riparian Soil (S8+S108): Ksat','Riparian Soil (S8+S108): m', 'S8: Air Entry Pres.', 'S8: Soil Thickness', 'S8: Sat. to GW Coef.', 'S108: Sat. to GW Coef.',
+               'Other Soil (S9+S109): m', 'Other Soil (S9+S109): Ksat', 'Other Soil (S9+S109): Poro.', 'S9: Soil Thickness', 'S9: Sat. to GW Coef.', 
+               'S9: Pore Size', 'S9: Air Entry Pres.', 'S109: Soil Thickness', 'S109: Air Entry Pres.', 'S109: Sat. to GW Coef.', 'S109: Pore Size', 
+               'Tree: Max Stomatal Cond.', 'Tree: Stomatal Fraction', 'Tree: Rainwater Capacity', 'Tree: Day Leaf On', 'Tree: Leaf Cuticular Cond.', 'Tree: Day Leaf Off', 'Tree: Days Leaves Expand', 'Tree: Days Leaves Fall', 'Grass: Rainwater Capacity', 
+               'L3: Percent Impervious', 'L4: Percent Impervious', 'L4: Septic Water Load')
+SortRanksMua_h_Agg_paper = rev(SortRanksMua_h_Agg[c(1,33:35,7:12,14,13,15:26,28,27,29:32,2:6)])
+LabelNames_h_paper = rev(LabelNames_h[c(1,33:35,7:12,14,13,15:26,28,27,29:32,2:6)])
+
+# Heatmap parameters----
+HeatParams05s_Thresh = sort(unique(c(RanksMua05_h_Agg[[1]]$Param[RanksMua05_h_Agg[[1]]$EE05_h >= 0.01],
+                      RanksMua05_h_Agg[[2]]$Param[RanksMua05_h_Agg[[2]]$EE05_h >= 0.01],
+                      RanksMua05_h_Agg[[3]]$Param[RanksMua05_h_Agg[[3]]$EE05_h >= 0.01],
+                      RanksMua05_h_Agg[[4]]$Param[RanksMua05_h_Agg[[4]]$EE05_h >= 0.01],
+                      RanksMua05_h_Agg[[5]]$Param[RanksMua05_h_Agg[[5]]$EE05_h >= 0.01],
+                      RanksMua05_h_Agg[[6]]$Param[RanksMua05_h_Agg[[6]]$EE05_h >= 0.01],
+                      RanksMua05_h_Agg[[7]]$Param[RanksMua05_h_Agg[[7]]$EE05_h >= 0.01],
+                      RanksMua05_h_Agg[[8]]$Param[RanksMua05_h_Agg[[8]]$EE05_h >= 0.01],
+                      RanksMua05_h_Agg[[9]]$Param[RanksMua05_h_Agg[[9]]$EE05_h >= 0.01],
+                      RanksMua05_h_Agg[[10]]$Param[RanksMua05_h_Agg[[10]]$EE05_h >= 0.01],
+                      RanksMua05_h_Agg[[11]]$Param[RanksMua05_h_Agg[[11]]$EE05_h >= 0.01],
+                      RanksMua05_h_Agg[[12]]$Param[RanksMua05_h_Agg[[12]]$EE05_h >= 0.01],
+                      RanksMua05_h_Agg[[13]]$Param[RanksMua05_h_Agg[[13]]$EE05_h >= 0.01],
+                      RanksMua05_h_Agg[[14]]$Param[RanksMua05_h_Agg[[14]]$EE05_h >= 0.01])))
+HeatParamsots_Thresh = sort(unique(c(RanksMuaot_h_Agg[[1]]$Param[RanksMuaot_h_Agg[[1]]$EEot_h >= 0.01],
+                                     RanksMuaot_h_Agg[[2]]$Param[RanksMuaot_h_Agg[[2]]$EEot_h >= 0.01],
+                                     RanksMuaot_h_Agg[[3]]$Param[RanksMuaot_h_Agg[[3]]$EEot_h >= 0.01],
+                                     RanksMuaot_h_Agg[[4]]$Param[RanksMuaot_h_Agg[[4]]$EEot_h >= 0.01],
+                                     RanksMuaot_h_Agg[[5]]$Param[RanksMuaot_h_Agg[[5]]$EEot_h >= 0.01],
+                                     RanksMuaot_h_Agg[[6]]$Param[RanksMuaot_h_Agg[[6]]$EEot_h >= 0.01],
+                                     RanksMuaot_h_Agg[[7]]$Param[RanksMuaot_h_Agg[[7]]$EEot_h >= 0.01],
+                                     RanksMuaot_h_Agg[[8]]$Param[RanksMuaot_h_Agg[[8]]$EEot_h >= 0.01],
+                                     RanksMuaot_h_Agg[[9]]$Param[RanksMuaot_h_Agg[[9]]$EEot_h >= 0.01],
+                                     RanksMuaot_h_Agg[[10]]$Param[RanksMuaot_h_Agg[[10]]$EEot_h >= 0.01],
+                                     RanksMuaot_h_Agg[[11]]$Param[RanksMuaot_h_Agg[[11]]$EEot_h >= 0.01],
+                                     RanksMuaot_h_Agg[[12]]$Param[RanksMuaot_h_Agg[[12]]$EEot_h >= 0.01],
+                                     RanksMuaot_h_Agg[[13]]$Param[RanksMuaot_h_Agg[[13]]$EEot_h >= 0.01],
+                                     RanksMuaot_h_Agg[[14]]$Param[RanksMuaot_h_Agg[[14]]$EEot_h >= 0.01])))
+HeatParams95s_Thresh = sort(unique(c(RanksMua95_h_Agg[[1]]$Param[RanksMua95_h_Agg[[1]]$EE95_h >= 0.01],
+                                     RanksMua95_h_Agg[[2]]$Param[RanksMua95_h_Agg[[2]]$EE95_h >= 0.01],
+                                     RanksMua95_h_Agg[[3]]$Param[RanksMua95_h_Agg[[3]]$EE95_h >= 0.01],
+                                     RanksMua95_h_Agg[[4]]$Param[RanksMua95_h_Agg[[4]]$EE95_h >= 0.01],
+                                     RanksMua95_h_Agg[[5]]$Param[RanksMua95_h_Agg[[5]]$EE95_h >= 0.01],
+                                     RanksMua95_h_Agg[[6]]$Param[RanksMua95_h_Agg[[6]]$EE95_h >= 0.01],
+                                     RanksMua95_h_Agg[[7]]$Param[RanksMua95_h_Agg[[7]]$EE95_h >= 0.01],
+                                     RanksMua95_h_Agg[[8]]$Param[RanksMua95_h_Agg[[8]]$EE95_h >= 0.01],
+                                     RanksMua95_h_Agg[[9]]$Param[RanksMua95_h_Agg[[9]]$EE95_h >= 0.01],
+                                     RanksMua95_h_Agg[[10]]$Param[RanksMua95_h_Agg[[10]]$EE95_h >= 0.01],
+                                     RanksMua95_h_Agg[[11]]$Param[RanksMua95_h_Agg[[11]]$EE95_h >= 0.01],
+                                     RanksMua95_h_Agg[[12]]$Param[RanksMua95_h_Agg[[12]]$EE95_h >= 0.01],
+                                     RanksMua95_h_Agg[[13]]$Param[RanksMua95_h_Agg[[13]]$EE95_h >= 0.01],
+                                     RanksMua95_h_Agg[[14]]$Param[RanksMua95_h_Agg[[14]]$EE95_h >= 0.01])))
+HeatParamsTN05_Thresh = sort(unique(c(RanksMuaTN05_h_Agg[[1]]$Param[RanksMuaTN05_h_Agg[[1]]$EETN05_h >= 0.01],
+                                     RanksMuaTN05_h_Agg[[2]]$Param[RanksMuaTN05_h_Agg[[2]]$EETN05_h >= 0.01],
+                                     RanksMuaTN05_h_Agg[[3]]$Param[RanksMuaTN05_h_Agg[[3]]$EETN05_h >= 0.01],
+                                     RanksMuaTN05_h_Agg[[4]]$Param[RanksMuaTN05_h_Agg[[4]]$EETN05_h >= 0.01],
+                                     RanksMuaTN05_h_Agg[[5]]$Param[RanksMuaTN05_h_Agg[[5]]$EETN05_h >= 0.01],
+                                     RanksMuaTN05_h_Agg[[6]]$Param[RanksMuaTN05_h_Agg[[6]]$EETN05_h >= 0.01],
+                                     RanksMuaTN05_h_Agg[[7]]$Param[RanksMuaTN05_h_Agg[[7]]$EETN05_h >= 0.01],
+                                     RanksMuaTN05_h_Agg[[8]]$Param[RanksMuaTN05_h_Agg[[8]]$EETN05_h >= 0.01],
+                                     RanksMuaTN05_h_Agg[[9]]$Param[RanksMuaTN05_h_Agg[[9]]$EETN05_h >= 0.01],
+                                     RanksMuaTN05_h_Agg[[10]]$Param[RanksMuaTN05_h_Agg[[10]]$EETN05_h >= 0.01],
+                                     RanksMuaTN05_h_Agg[[11]]$Param[RanksMuaTN05_h_Agg[[11]]$EETN05_h >= 0.01],
+                                     RanksMuaTN05_h_Agg[[12]]$Param[RanksMuaTN05_h_Agg[[12]]$EETN05_h >= 0.01],
+                                     RanksMuaTN05_h_Agg[[13]]$Param[RanksMuaTN05_h_Agg[[13]]$EETN05_h >= 0.01],
+                                     RanksMuaTN05_h_Agg[[14]]$Param[RanksMuaTN05_h_Agg[[14]]$EETN05_h >= 0.01])))
+HeatParamsTNMed_Thresh = sort(unique(c(RanksMuaTNMed_h_Agg[[1]]$Param[RanksMuaTNMed_h_Agg[[1]]$EETNMed_h >= 0.01],
+                                     RanksMuaTNMed_h_Agg[[2]]$Param[RanksMuaTNMed_h_Agg[[2]]$EETNMed_h >= 0.01],
+                                     RanksMuaTNMed_h_Agg[[3]]$Param[RanksMuaTNMed_h_Agg[[3]]$EETNMed_h >= 0.01],
+                                     RanksMuaTNMed_h_Agg[[4]]$Param[RanksMuaTNMed_h_Agg[[4]]$EETNMed_h >= 0.01],
+                                     RanksMuaTNMed_h_Agg[[5]]$Param[RanksMuaTNMed_h_Agg[[5]]$EETNMed_h >= 0.01],
+                                     RanksMuaTNMed_h_Agg[[6]]$Param[RanksMuaTNMed_h_Agg[[6]]$EETNMed_h >= 0.01],
+                                     RanksMuaTNMed_h_Agg[[7]]$Param[RanksMuaTNMed_h_Agg[[7]]$EETNMed_h >= 0.01],
+                                     RanksMuaTNMed_h_Agg[[8]]$Param[RanksMuaTNMed_h_Agg[[8]]$EETNMed_h >= 0.01],
+                                     RanksMuaTNMed_h_Agg[[9]]$Param[RanksMuaTNMed_h_Agg[[9]]$EETNMed_h >= 0.01],
+                                     RanksMuaTNMed_h_Agg[[10]]$Param[RanksMuaTNMed_h_Agg[[10]]$EETNMed_h >= 0.01],
+                                     RanksMuaTNMed_h_Agg[[11]]$Param[RanksMuaTNMed_h_Agg[[11]]$EETNMed_h >= 0.01],
+                                     RanksMuaTNMed_h_Agg[[12]]$Param[RanksMuaTNMed_h_Agg[[12]]$EETNMed_h >= 0.01],
+                                     RanksMuaTNMed_h_Agg[[13]]$Param[RanksMuaTNMed_h_Agg[[13]]$EETNMed_h >= 0.01],
+                                     RanksMuaTNMed_h_Agg[[14]]$Param[RanksMuaTNMed_h_Agg[[14]]$EETNMed_h >= 0.01])))
+HeatParamsTN95_Thresh = sort(unique(c(RanksMuaTN95_h_Agg[[1]]$Param[RanksMuaTN95_h_Agg[[1]]$EETN95_h >= 0.01],
+                                     RanksMuaTN95_h_Agg[[2]]$Param[RanksMuaTN95_h_Agg[[2]]$EETN95_h >= 0.01],
+                                     RanksMuaTN95_h_Agg[[3]]$Param[RanksMuaTN95_h_Agg[[3]]$EETN95_h >= 0.01],
+                                     RanksMuaTN95_h_Agg[[4]]$Param[RanksMuaTN95_h_Agg[[4]]$EETN95_h >= 0.01],
+                                     RanksMuaTN95_h_Agg[[5]]$Param[RanksMuaTN95_h_Agg[[5]]$EETN95_h >= 0.01],
+                                     RanksMuaTN95_h_Agg[[6]]$Param[RanksMuaTN95_h_Agg[[6]]$EETN95_h >= 0.01],
+                                     RanksMuaTN95_h_Agg[[7]]$Param[RanksMuaTN95_h_Agg[[7]]$EETN95_h >= 0.01],
+                                     RanksMuaTN95_h_Agg[[8]]$Param[RanksMuaTN95_h_Agg[[8]]$EETN95_h >= 0.01],
+                                     RanksMuaTN95_h_Agg[[9]]$Param[RanksMuaTN95_h_Agg[[9]]$EETN95_h >= 0.01],
+                                     RanksMuaTN95_h_Agg[[10]]$Param[RanksMuaTN95_h_Agg[[10]]$EETN95_h >= 0.01],
+                                     RanksMuaTN95_h_Agg[[11]]$Param[RanksMuaTN95_h_Agg[[11]]$EETN95_h >= 0.01],
+                                     RanksMuaTN95_h_Agg[[12]]$Param[RanksMuaTN95_h_Agg[[12]]$EETN95_h >= 0.01],
+                                     RanksMuaTN95_h_Agg[[13]]$Param[RanksMuaTN95_h_Agg[[13]]$EETN95_h >= 0.01],
+                                     RanksMuaTN95_h_Agg[[14]]$Param[RanksMuaTN95_h_Agg[[14]]$EETN95_h >= 0.01])))
+HeatLabels05s = c('H', 'L3', 'L4', 'S108', 'S109', 'S8', 'S9', 'Tree', 'Grass', 'Z')
+HeatLabels95s = c('H', 'L3', 'L4', 'S108', 'S109', 'S8', 'S9', 'Tree', 'Grass', 'Z')
+colPal = colorRampPalette(colors = scico(n = 5, palette = 'batlow'))
+scaleRange = c(1, 81)
+scaleBy = 20
+Pal = rev(colPal((scaleRange[2] - scaleRange[1])/scaleBy + 1))
+png('HillHeatRank95_05s_Agg_paper.png', res = 300, height = 7, width = 7, units = 'in')
+par(mar = c(2,4,2,4.5), mgp = c(1,1,0))
+for (h in 1:length(uhills)){
+  #Loop over the top 10% ranks for basin
+  for (j in 1:length(HeatParams05s_Thresh)){
+    if(j == 1){
+      if(h == 1){
+        plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,length(HeatParams05s_Thresh)), pch = 15, xlab = 'Hillslope ID', ylab = '', col = colFun(which(RanksMua05_h_Agg[[h]]$Param == HeatParams05s_Thresh[j])), axes = FALSE, cex.lab = 1.5)
+        polygon(x = c(0.5,0.5,14.5,14.5), y = c(0.5,97,97,0.5), col='black')
+        par(new=TRUE)
+        plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,length(HeatParams05s_Thresh)), pch = 15, xlab = '', ylab = '', col = colFun(which(RanksMua05_h_Agg[[h]]$Param == HeatParams05s_Thresh[j])), axes = FALSE, cex.lab = 1.5)
+      }else{
+        plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,length(HeatParams05s_Thresh)), pch = 15, xlab = 'Hillslope ID', ylab = '', col = colFun(which(RanksMua05_h_Agg[[h]]$Param == HeatParams05s_Thresh[j])), axes = FALSE, cex.lab = 1.5)
+      }
+    }else{
+      plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,length(HeatParams05s_Thresh)), pch = 15, xlab = '', ylab = '', col = colFun(which(RanksMua05_h_Agg[[h]]$Param == HeatParams05s_Thresh[j])), axes = FALSE)
+    }
+    par(new=TRUE)
+  }
+}
+rm(h,j)
+par(new=FALSE, mgp = c(3,1,0))
+axis(side = 1, at = seq(1,14,1), labels = TRUE, pos = 0.5)
+axis(side = 2, at = c(0,1.5,2.5,4.5,12.5,20.5,27.5,40.5,67.5,87.5,96.5), labels = FALSE, las = 1)
+axis(side = 2, at = c(1,2,3.5,11,17,23,32,56,77,92), labels = HeatLabels05s, las = 1, tick = 0)
+legend('right', title = expression(bold('Rank')), legend = c('1 - 20', '21 - 40', '41 - 60', '61 - 80', '81 - 96'), pch = 15, col = colFun(seq(1,101,20)), inset = -0.15, xpd = TRUE)
+lines(c(8.5,8.5), c(0,105), col = 'white')
+par(xpd = TRUE)
+text(x = 4.5, y = 98.5, expression(bold('   More\nForested')))
+text(x = 11.5, y = 98.5, expression(bold('     More\nImpervious')))
+par(xpd=FALSE)
+box(which = 'figure')
+dev.off()
+
+png('HillHeatRank95_95s_Agg_paper.png', res = 300, height = 7, width = 7, units = 'in')
+par(mar = c(2,4,2,4.5), mgp = c(1,1,0))
+for (h in 1:length(uhills)){
+  #Loop over the top 10% ranks for basin
+  for (j in 1:length(HeatParams95s_Thresh)){
+    if(j == 1){
+      if(h == 1){
+        plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,length(HeatParams95s_Thresh)), pch = 15, xlab = 'Hillslope ID', ylab = '', col = colFun(which(RanksMua95_h_Agg[[h]]$Param == HeatParams95s_Thresh[j])), axes = FALSE, cex.lab = 1.5)
+        polygon(x = c(0.5,0.5,14.5,14.5), y = c(0.5,103,103,0.5), col='black')
+        par(new=TRUE)
+        plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,length(HeatParams95s_Thresh)), pch = 15, xlab = '', ylab = '', col = colFun(which(RanksMua95_h_Agg[[h]]$Param == HeatParams95s_Thresh[j])), axes = FALSE, cex.lab = 1.5)
+      }else{
+        plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,length(HeatParams95s_Thresh)), pch = 15, xlab = 'Hillslope ID', ylab = '', col = colFun(which(RanksMua95_h_Agg[[h]]$Param == HeatParams95s_Thresh[j])), axes = FALSE, cex.lab = 1.5)
+      }
+    }else{
+      plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,length(HeatParams95s_Thresh)), pch = 15, xlab = '', ylab = '', col = colFun(which(RanksMua95_h_Agg[[h]]$Param == HeatParams95s_Thresh[j])), axes = FALSE)
+    }
+    par(new=TRUE)
+  }
+}
+rm(h,j)
+par(new=FALSE, mgp = c(3,1,0))
+axis(side = 1, at = seq(1,14,1), labels = TRUE, pos = 0.5)
+axis(side = 2, at = c(0,1.5,2.5,4.5,13.5,22.5,31.5,46.5,73.5,92.5,102.5), labels = FALSE, las = 1)
+axis(side = 2, at = c(1,2,3.5,9,17,28,36,58,82,97), labels = HeatLabels95s, las = 1, tick = 0)
+legend('right', title = expression(bold('Rank')), legend = c('1 - 20', '21 - 40', '41 - 60', '61 - 80', '81 - 96'), pch = 15, col = colFun(seq(1,101,20)), inset = -0.15, xpd = TRUE)
+lines(c(8.5,8.5), c(0,105), col = 'white')
+par(xpd = TRUE)
+text(x = 4.5, y = 104, expression(bold('   More\nForested')))
+text(x = 11.5, y = 104, expression(bold('     More\nImpervious')))
+par(xpd=FALSE)
+box(which = 'figure')
+dev.off()
+
+# Aggregated Rank order----
+Ranks05_Agg = Ranksot_Agg = Ranks95_Agg = RanksTN05_Agg = RanksTNMed_Agg = RanksTN95_Agg = NULL
+#  In or not in the selected parameters to calibrate aggregated over all 6 metrics----
+scaleRange = c(0,1)
+scaleBy = 1
+Pal = colPal((scaleRange[2] - scaleRange[1])/scaleBy + 1)
+png('HillRankTop1295_All_Aggh_paper.png', res = 300, height = 7, width = 7, units = 'in')
+par(mar = c(2,12.5,2,4.5), mgp = c(1,1,0))
+for (h in 0:length(uhills)){
+  #Loop over the top 10% ranks
+  for (j in 1:length(SortRanksMua_h_Agg_paper)){
+    if (h == 0){
+      #Basin
+      if (j == 1){
+        plot(x = h, y = j, xlim = c(-1, 15), ylim = c(0,length(SortRanksMua_h_Agg_paper)), pch = 15, xlab = 'Hillslope ID', ylab = '', col = colFun(ifelse(SortRanksMua_h_Agg_paper[j] %in% unique(c(ParamSelect_b_Agg, ParamSelectTN_b_Agg)), 1, 0)), axes = FALSE, cex.lab = 1.5)
+        polygon(x = c(-0.5,-0.5,14.5,14.5), y = c(0.5,35.5,35.5,0.5), col='black')
+        par(new=TRUE)
+        plot(x = h, y = j, xlim = c(-1, 15), ylim = c(0,length(SortRanksMua_h_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(ifelse(SortRanksMua_h_Agg_paper[j] %in% unique(c(ParamSelect_b_Agg, ParamSelectTN_b_Agg)), 1, 0)), axes = FALSE, cex.lab = 1.5)
+      }else{
+        plot(x = h, y = j, xlim = c(-1, 15), ylim = c(0,length(SortRanksMua_h_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(ifelse(SortRanksMua_h_Agg_paper[j] %in% unique(c(ParamSelect_b_Agg, ParamSelectTN_b_Agg)), 1, 0)), axes = FALSE)
+      }
+    }else{
+      #Hillslopes
+      plot(x = h, y = j, xlim = c(-1, 15), ylim = c(0,length(SortRanksMua_h_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(ifelse(SortRanksMua_h_Agg_paper[j] %in% unique(c(ph10[[h]], phTN10[[h]])), 1, 0)), axes = FALSE)
+    }
+    par(new=TRUE)
+  }
+}
+rm(h,j)
+par(new=FALSE, mgp = c(3,1,0))
+axis(side = 1, at = 0, labels = 'B', pos = 0.5)
+axis(side = 1, at = seq(1,14,1), labels = TRUE, pos = 0.5)
+axis(side = 2, at = seq(1,length(SortRanksMua_h_Agg_paper),1), labels = LabelNames_h_paper, las = 1)
+legend('right', title = expression(bold('Selected for\nCalibration?')), legend = c('Yes', 'No'), pch = 15, col = colFun(c(1,0)), inset = -0.23, xpd = TRUE, bty = 'n')
+lines(c(-0.5,15), c(34.5,34.5), col = 'white')
+lines(c(-0.5,15), c(33.5,33.5), col = 'white')
+lines(c(-0.5,15), c(31.5,31.5), col = 'white')
+lines(c(-0.5,15), c(25.5,25.5), col = 'white')
+lines(c(-0.5,15), c(14.5,14.5), col = 'white')
+lines(c(-0.5,15), c(6.5,6.5), col = 'white')
+lines(c(-0.5,15), c(5.5,5.5), col = 'white')
+lines(c(8.5,8.5), c(0,40), col = 'white')
+lines(c(0.5,0.5), c(0,40), col = 'white')
+#Category symbol from EE plot
+par(new=TRUE, xpd = TRUE)
+plot(x = rep(-1,8),y = c(3,6,10.5,20,27,32.5,34,35), col = colos_paper[c(5,4,4,2,2,3,3,1)], pch = c(16,17,16,17,16,15,18,16), axes=FALSE, xlab = '', ylab = '', xlim = c(-1,15), ylim = c(0,length(SortRanksMua_h_Agg_paper)))
+text(x = 4.5, y = 36.5, expression(bold('   More\nForested')))
+text(x = 11.5, y = 36.5, expression(bold('     More\nImpervious')))
+text(x = 0, y = 37, expression(bold('Basin')), srt = 90)
+par(xpd=FALSE)
+box(which = 'figure')
+dev.off()
+
+#  Streamflow 5th %-ile----
+#colPal = colorRampPalette(colors = rev(c('red', 'orange', 'gray', 'green', 'blue')))
+colPal = colorRampPalette(colors = scico(n = 4, palette = 'nuuk'))
+scaleRange = c(1, 34)
+scaleBy = 11
+Pal = colPal((scaleRange[2] - scaleRange[1])/scaleBy + 1)
+png('HillRankTop1295_05s_Agg.png', res = 300, height = 6, width = 6, units = 'in')
+par(mar = c(1,11,0,5))
+for (h in 1:length(uhills)){
+  #Loop over the top 10% ranks for basin
+  for (j in 1:length(SortRanksMua_b_Agg)){
+    if(j == 1){
+      plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,length(SortRanksMua_b_Agg)), pch = 15, xlab = 'Hillslope ID', ylab = 'Parameter', col = colFun(which(RanksMua05_h_Agg[[h]]$Param == SortRanksMua_b_Agg[j])), axes = FALSE, cex.lab = 1.5)
+    }else{
+      plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,length(SortRanksMua_b_Agg)), pch = 15, xlab = '', ylab = '', col = colFun(which(RanksMua05_h_Agg[[h]]$Param == SortRanksMua_b_Agg[j])), axes = FALSE)
+    }
+    par(new=TRUE)
+    Ranks05_Agg = c(Ranks05_Agg,which(RanksMua05_h_Agg[[h]]$Param == SortRanksMua_b_Agg[j]))
+  }
+}
+rm(h,j)
+par(new=FALSE)
+axis(side = 1, at = seq(1,14,1), labels = TRUE, pos = 0.5)
+axis(side = 2, at = seq(1,length(SortRanksMua_b_Agg),1), labels = LabelNames, las = 1)
+#legend('top', title = expression(bold('Parameter Sensitivity Rank')), legend = c('1 - 14', '15 - 29', '30 - 44', '45 - 60', '61 - 101'), horiz = TRUE, pch = 15, col = colFun(seq(0,60,15)), inset = -0.1, xpd = TRUE)
+legend('right', title = expression(bold('Rank')), legend = c('1 - 11', '12 - 22', '23 - 33', '>33'), pch = 15, col = colFun(seq(1,34,11)), inset = -0.3, xpd = TRUE)
+dev.off()
+
+scaleRange = c(1, 64)
+scaleBy = 21
+Pal = colPal((scaleRange[2] - scaleRange[1])/scaleBy + 1)
+png('HillRankTop1295_05s_Agg_paper.png', res = 300, height = 6, width = 6, units = 'in')
+par(mar = c(2,11.5,2,4.5), mgp = c(1,1,0))
+for (h in 1:length(uhills)){
+  #Loop over the top 10% ranks for basin
+  for (j in 1:length(SortRanksMua_b_Agg_paper)){
+    if(j == 1){
+      if(h == 1){
+        plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,length(SortRanksMua_b_Agg_paper)), pch = 15, xlab = 'Hillslope ID', ylab = '', col = colFun(which(RanksMua05_h_Agg[[h]]$Param == SortRanksMua_b_Agg_paper[j])), axes = FALSE, cex.lab = 1.5)
+        polygon(x = c(0.5,0.5,14.5,14.5), y = c(0.5,21.5,21.5,0.5), col='black')
+        par(new=TRUE)
+        plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,length(SortRanksMua_b_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(which(RanksMua05_h_Agg[[h]]$Param == SortRanksMua_b_Agg_paper[j])), axes = FALSE, cex.lab = 1.5)
+      }else{
+        plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,length(SortRanksMua_b_Agg_paper)), pch = 15, xlab = 'Hillslope ID', ylab = '', col = colFun(which(RanksMua05_h_Agg[[h]]$Param == SortRanksMua_b_Agg_paper[j])), axes = FALSE, cex.lab = 1.5)
+      }
+    }else{
+      plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,length(SortRanksMua_b_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(which(RanksMua05_h_Agg[[h]]$Param == SortRanksMua_b_Agg_paper[j])), axes = FALSE)
+    }
+    par(new=TRUE)
+  }
+}
+rm(h,j)
+par(new=FALSE, mgp = c(3,1,0))
+axis(side = 1, at = seq(1,14,1), labels = TRUE, pos = 0.5)
+axis(side = 2, at = seq(1,length(SortRanksMua_b_Agg_paper),1), labels = LabelNames_paper, las = 1)
+legend('right', title = expression(bold('Rank')), legend = c('1 - 21', '22 - 42', '43 - 63', '>63'), pch = 15, col = colFun(seq(1,64,21)), inset = -0.3, xpd = TRUE)
+lines(c(0,15), c(20.5,20.5), col = 'white')
+lines(c(0,15), c(19.5,19.5), col = 'white')
+lines(c(0,15), c(18.5,18.5), col = 'white')
+lines(c(0,15), c(8.5,8.5), col = 'white')
+lines(c(0,15), c(3.5,3.5), col = 'white')
+lines(c(8.5,8.5), c(0,30), col = 'white')
+#Category symbol from EE plot
+par(new=TRUE, xpd = TRUE)
+plot(x = rep(15,6),y = c(2,6,15,19,20,21), col = colos_paper[c(5,4,2,2,3,1)], pch = c(16,16,17,16,15,16), axes=FALSE, xlab = '', ylab = '', xlim = c(0,15), ylim = c(0,21))
+text(x = 4.5, y = 22, expression(bold('   More\nForested')))
+text(x = 11.5, y = 22, expression(bold('     More\nImpervious')))
+par(xpd=FALSE)
+box(which = 'figure')
+dev.off()
+
+scaleRange = c(1, 34)
+scaleBy = 11
+Pal = rev(colPal((scaleRange[2] - scaleRange[1])/scaleBy + 1))
+png('HillRankTop1295_05s_Aggh_paper.png', res = 300, height = 7, width = 7, units = 'in')
+par(mar = c(2,12.5,2,4.5), mgp = c(1,1,0))
+for (h in 0:length(uhills)){
+  #Loop over the top 10% ranks
+  for (j in 1:length(SortRanksMua_h_Agg_paper)){
+    if (h == 0){
+      #Basin
+      if (j == 1){
+        plot(x = h, y = j, xlim = c(-1, 15), ylim = c(0,length(SortRanksMua_h_Agg_paper)), pch = 15, xlab = 'Hillslope ID', ylab = '', col = colFun(which(RanksMua05_b_Agg$Param == SortRanksMua_h_Agg_paper[j])), axes = FALSE, cex.lab = 1.5)
+        polygon(x = c(-0.5,-0.5,14.5,14.5), y = c(0.5,35.5,35.5,0.5), col='black')
+        par(new=TRUE)
+        plot(x = h, y = j, xlim = c(-1, 15), ylim = c(0,length(SortRanksMua_h_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(which(RanksMua05_b_Agg$Param == SortRanksMua_h_Agg_paper[j])), axes = FALSE, cex.lab = 1.5)
+      }else{
+        plot(x = h, y = j, xlim = c(-1, 15), ylim = c(0,length(SortRanksMua_h_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(which(RanksMua05_b_Agg$Param == SortRanksMua_h_Agg_paper[j])), axes = FALSE)
+      }
+    }else{
+      #Hillslopes
+      plot(x = h, y = j, xlim = c(-1, 15), ylim = c(0,length(SortRanksMua_h_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(which(RanksMua05_h_Agg[[h]]$Param == SortRanksMua_h_Agg_paper[j])), axes = FALSE)
+    }
+    par(new=TRUE)
+  }
+}
+rm(h,j)
+par(new=FALSE, mgp = c(3,1,0))
+axis(side = 1, at = 0, labels = 'B', pos = 0.5)
+axis(side = 1, at = seq(1,14,1), labels = TRUE, pos = 0.5)
+axis(side = 2, at = seq(1,length(SortRanksMua_h_Agg_paper),1), labels = LabelNames_h_paper, las = 1)
+legend('right', title = expression(bold('Rank')), legend = c('1 - 11', '12 - 22', '23 - 33', '>33'), pch = 15, col = colFun(seq(1,34,11)), inset = -0.2, xpd = TRUE)
+lines(c(-0.5,15), c(34.5,34.5), col = 'white')
+lines(c(-0.5,15), c(33.5,33.5), col = 'white')
+lines(c(-0.5,15), c(31.5,31.5), col = 'white')
+lines(c(-0.5,15), c(25.5,25.5), col = 'white')
+lines(c(-0.5,15), c(14.5,14.5), col = 'white')
+lines(c(-0.5,15), c(6.5,6.5), col = 'white')
+lines(c(-0.5,15), c(5.5,5.5), col = 'white')
+lines(c(8.5,8.5), c(0,40), col = 'white')
+lines(c(0.5,0.5), c(0,40), col = 'white')
+#Category symbol from EE plot
+par(new=TRUE, xpd = TRUE)
+plot(x = rep(-1,8),y = c(3,6,10.5,20,27,32.5,34,35), col = colos_paper[c(5,4,4,2,2,3,3,1)], pch = c(16,17,16,17,16,15,18,16), axes=FALSE, xlab = '', ylab = '', xlim = c(-1,15), ylim = c(0,length(SortRanksMua_h_Agg_paper)))
+text(x = 4.5, y = 36.5, expression(bold('   More\nForested')))
+text(x = 11.5, y = 36.5, expression(bold('     More\nImpervious')))
+text(x = 0, y = 37, expression(bold('Basin')), srt = 90)
+text(x = 17, y = 23, expression(bold('      Metric:\n  Streamflow\n   Lower 5th\n   Percentile')))
+par(xpd=FALSE)
+box(which = 'figure')
+dev.off()
+
+#  Streamflow 5th-95th %-ile----
+scaleRange = c(1, 34)
+scaleBy = 11
+Pal = colPal((scaleRange[2] - scaleRange[1])/scaleBy + 1)
+png('HillRankTop1295_ots_Agg.png', res = 300, height = 6, width = 6, units = 'in')
+par(mar = c(1,11,0,5))
+for (h in 1:length(uhills)){
+  #Loop over the top 10% ranks for basin
+  for (j in 1:length(SortRanksMua_b_Agg)){
+    if(j == 1){
+      plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,length(SortRanksMua_b_Agg)), pch = 15, xlab = 'Hillslope ID', ylab = 'Parameter', col = colFun(which(RanksMuaot_h_Agg[[h]]$Param == SortRanksMua_b_Agg[j])), axes = FALSE, cex.lab = 1.5)
+    }else{
+      plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,length(SortRanksMua_b_Agg)), pch = 15, xlab = '', ylab = '', col = colFun(which(RanksMuaot_h_Agg[[h]]$Param == SortRanksMua_b_Agg[j])), axes = FALSE)
+    }
+    par(new=TRUE)
+    Ranksot_Agg = c(Ranksot_Agg,which(RanksMuaot_h_Agg[[h]]$Param == SortRanksMua_b_Agg[j]))
+  }
+}
+rm(h,j)
+par(new=FALSE)
+axis(side = 1, at = seq(1,14,1), labels = TRUE, pos = 0.5)
+axis(side = 2, at = seq(1,length(SortRanksMua_b_Agg),1), labels = LabelNames, las = 1)
+#legend('top', title = expression(bold('Parameter Sensitivity Rank')), legend = c('1 - 14', '15 - 29', '30 - 44', '45 - 60', '61 - 101'), horiz = TRUE, pch = 15, col = colFun(seq(0,60,15)), inset = -0.1, xpd = TRUE)
+legend('right', title = expression(bold('Rank')), legend = c('1 - 11', '12 - 22', '23 - 33', '>33'), pch = 15, col = colFun(seq(1,34,11)), inset = -0.3, xpd = TRUE)
+dev.off()
+
+scaleRange = c(1, 64)
+scaleBy = 21
+Pal = colPal((scaleRange[2] - scaleRange[1])/scaleBy + 1)
+png('HillRankTop1295_ots_Agg_paper.png', res = 300, height = 6, width = 6, units = 'in')
+par(mar = c(2,11.5,2,4.5), mgp = c(1,1,0))
+for (h in 1:length(uhills)){
+  #Loop over the top 10% ranks for basin
+  for (j in 1:length(SortRanksMua_b_Agg_paper)){
+    if(j == 1){
+      if(h == 1){
+        plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,length(SortRanksMua_b_Agg_paper)), pch = 15, xlab = 'Hillslope ID', ylab = '', col = colFun(which(RanksMuaot_h_Agg[[h]]$Param == SortRanksMua_b_Agg_paper[j])), axes = FALSE, cex.lab = 1.5)
+        polygon(x = c(0.5,0.5,14.5,14.5), y = c(0.5,21.5,21.5,0.5), col='black')
+        par(new=TRUE)
+        plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,length(SortRanksMua_b_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(which(RanksMuaot_h_Agg[[h]]$Param == SortRanksMua_b_Agg_paper[j])), axes = FALSE, cex.lab = 1.5)
+      }else{
+        plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,length(SortRanksMua_b_Agg_paper)), pch = 15, xlab = 'Hillslope ID', ylab = '', col = colFun(which(RanksMuaot_h_Agg[[h]]$Param == SortRanksMua_b_Agg_paper[j])), axes = FALSE, cex.lab = 1.5)
+      }
+    }else{
+      plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,length(SortRanksMua_b_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(which(RanksMuaot_h_Agg[[h]]$Param == SortRanksMua_b_Agg_paper[j])), axes = FALSE)
+    }
+    par(new=TRUE)
+  }
+}
+rm(h,j)
+par(new=FALSE, mgp = c(3,1,0))
+axis(side = 1, at = seq(1,14,1), labels = TRUE, pos = 0.5)
+axis(side = 2, at = seq(1,length(SortRanksMua_b_Agg_paper),1), labels = LabelNames_paper, las = 1)
+legend('right', title = expression(bold('Rank')), legend = c('1 - 21', '22 - 42', '43 - 63', '>63'), pch = 15, col = colFun(seq(1,64,21)), inset = -0.3, xpd = TRUE)
+lines(c(0,15), c(20.5,20.5), col = 'white')
+lines(c(0,15), c(19.5,19.5), col = 'white')
+lines(c(0,15), c(18.5,18.5), col = 'white')
+lines(c(0,15), c(8.5,8.5), col = 'white')
+lines(c(0,15), c(3.5,3.5), col = 'white')
+lines(c(8.5,8.5), c(0,30), col = 'white')
+#Category symbol from EE plot
+par(new=TRUE, xpd = TRUE)
+plot(x = rep(15,6),y = c(2,6,15,19,20,21), col = colos_paper[c(5,4,2,2,3,1)], pch = c(16,16,17,16,15,16), axes=FALSE, xlab = '', ylab = '', xlim = c(0,15), ylim = c(0,21))
+text(x = 4.5, y = 22, expression(bold('   More\nForested')))
+text(x = 11.5, y = 22, expression(bold('     More\nImpervious')))
+par(xpd=FALSE)
+box(which = 'figure')
+dev.off()
+
+scaleRange = c(1, 34)
+scaleBy = 11
+Pal = rev(colPal((scaleRange[2] - scaleRange[1])/scaleBy + 1))
+png('HillRankTop1295_ots_Aggh_paper.png', res = 300, height = 7, width = 7, units = 'in')
+par(mar = c(2,12.5,2,4.5), mgp = c(1,1,0))
+for (h in 0:length(uhills)){
+  #Loop over the top 10% ranks
+  for (j in 1:length(SortRanksMua_h_Agg_paper)){
+    if (h == 0){
+      #Basin
+      if (j == 1){
+        plot(x = h, y = j, xlim = c(-1, 15), ylim = c(0,length(SortRanksMua_h_Agg_paper)), pch = 15, xlab = 'Hillslope ID', ylab = '', col = colFun(which(RanksMuaot_b_Agg$Param == SortRanksMua_h_Agg_paper[j])), axes = FALSE, cex.lab = 1.5)
+        polygon(x = c(-0.5,-0.5,14.5,14.5), y = c(0.5,35.5,35.5,0.5), col='black')
+        par(new=TRUE)
+        plot(x = h, y = j, xlim = c(-1, 15), ylim = c(0,length(SortRanksMua_h_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(which(RanksMuaot_b_Agg$Param == SortRanksMua_h_Agg_paper[j])), axes = FALSE, cex.lab = 1.5)
+      }else{
+        plot(x = h, y = j, xlim = c(-1, 15), ylim = c(0,length(SortRanksMua_h_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(which(RanksMuaot_b_Agg$Param == SortRanksMua_h_Agg_paper[j])), axes = FALSE)
+      }
+    }else{
+      #Hillslopes
+      plot(x = h, y = j, xlim = c(-1, 15), ylim = c(0,length(SortRanksMua_h_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(which(RanksMuaot_h_Agg[[h]]$Param == SortRanksMua_h_Agg_paper[j])), axes = FALSE)
+    }
+    par(new=TRUE)
+  }
+}
+rm(h,j)
+par(new=FALSE, mgp = c(3,1,0))
+axis(side = 1, at = 0, labels = 'B', pos = 0.5)
+axis(side = 1, at = seq(1,14,1), labels = TRUE, pos = 0.5)
+axis(side = 2, at = seq(1,length(SortRanksMua_h_Agg_paper),1), labels = LabelNames_h_paper, las = 1)
+legend('right', title = expression(bold('Rank')), legend = c('1 - 11', '12 - 22', '23 - 33', '>33'), pch = 15, col = colFun(seq(1,34,11)), inset = -0.2, xpd = TRUE)
+lines(c(-0.5,15), c(34.5,34.5), col = 'white')
+lines(c(-0.5,15), c(33.5,33.5), col = 'white')
+lines(c(-0.5,15), c(31.5,31.5), col = 'white')
+lines(c(-0.5,15), c(25.5,25.5), col = 'white')
+lines(c(-0.5,15), c(14.5,14.5), col = 'white')
+lines(c(-0.5,15), c(6.5,6.5), col = 'white')
+lines(c(-0.5,15), c(5.5,5.5), col = 'white')
+lines(c(8.5,8.5), c(0,40), col = 'white')
+lines(c(0.5,0.5), c(0,40), col = 'white')
+#Category symbol from EE plot
+par(new=TRUE, xpd = TRUE)
+plot(x = rep(-1,8),y = c(3,6,10.5,20,27,32.5,34,35), col = colos_paper[c(5,4,4,2,2,3,3,1)], pch = c(16,17,16,17,16,15,18,16), axes=FALSE, xlab = '', ylab = '', xlim = c(-1,15), ylim = c(0,length(SortRanksMua_h_Agg_paper)))
+text(x = 4.5, y = 36.5, expression(bold('   More\nForested')))
+text(x = 11.5, y = 36.5, expression(bold('     More\nImpervious')))
+text(x = 0, y = 37, expression(bold('Basin')), srt = 90)
+text(x = 17, y = 23, expression(bold('    Metric:\nStreamflow\n   5th-95th\n Percentile')))
+par(xpd=FALSE)
+box(which = 'figure')
+dev.off()
+
+#  Streamflow 95th %-ile----
+scaleRange = c(1, 34)
+scaleBy = 11
+Pal = colPal((scaleRange[2] - scaleRange[1])/scaleBy + 1)
+png('HillRankTop1295_95s_Agg.png', res = 300, height = 6, width = 6, units = 'in')
+par(mar = c(1,11,0,5))
+for (h in 1:length(uhills)){
+  #Loop over the top 10% ranks for basin
+  for (j in 1:length(SortRanksMua_b_Agg)){
+    if(j == 1){
+      plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,length(SortRanksMua_b_Agg)), pch = 15, xlab = 'Hillslope ID', ylab = 'Parameter', col = colFun(which(RanksMua95_h_Agg[[h]]$Param == SortRanksMua_b_Agg[j])), axes = FALSE, cex.lab = 1.5)
+    }else{
+      plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,length(SortRanksMua_b_Agg)), pch = 15, xlab = '', ylab = '', col = colFun(which(RanksMua95_h_Agg[[h]]$Param == SortRanksMua_b_Agg[j])), axes = FALSE)
+    }
+    par(new=TRUE)
+    Ranks95_Agg = c(Ranks95_Agg,which(RanksMua95_h_Agg[[h]]$Param == SortRanksMua_b_Agg[j]))
+  }
+}
+rm(h,j)
+par(new=FALSE)
+axis(side = 1, at = seq(1,14,1), labels = TRUE, pos = 0.5)
+axis(side = 2, at = seq(1,length(SortRanksMua_b_Agg),1), labels = LabelNames, las = 1)
+#legend('top', title = expression(bold('Parameter Sensitivity Rank')), legend = c('1 - 14', '15 - 29', '30 - 44', '45 - 60', '61 - 101'), horiz = TRUE, pch = 15, col = colFun(seq(0,60,15)), inset = -0.1, xpd = TRUE)
+legend('right', title = expression(bold('Rank')), legend = c('1 - 11', '12 - 22', '23 - 33', '>33'), pch = 15, col = colFun(seq(1,34,11)), inset = -0.3, xpd = TRUE)
+dev.off()
+
+scaleRange = c(1, 64)
+scaleBy = 21
+Pal = colPal((scaleRange[2] - scaleRange[1])/scaleBy + 1)
+png('HillRankTop1295_95s_Agg_paper.png', res = 300, height = 6, width = 6, units = 'in')
 par(mar = c(2,11.5,2,4.5), mgp = c(1,1,0))
 for (h in 1:length(uhills)){
   #Loop over the top 10% ranks for basin
@@ -2583,7 +3150,7 @@ axis(side = 1, at = seq(1,14,1), labels = TRUE, pos = 0.5)
 #axis(side = 2, at = seq(1,length(SortRanksMua_b_Agg_paper),1), labels = SortRanksMua_b_Agg_paper, las = 1)
 axis(side = 2, at = seq(1,length(SortRanksMua_b_Agg_paper),1), labels = LabelNames_paper, las = 1)
 #legend('top', title = expression(bold('Parameter Sensitivity Rank')), legend = c('1 - 14', '15 - 29', '30 - 44', '45 - 60', '61 - 101'), horiz = TRUE, pch = 15, col = colFun(seq(0,60,15)), inset = -0.1, xpd = TRUE)
-legend('right', title = expression(bold('Rank')), legend = c('1 - 21', '22 - 42', '43 - 63', '>64'), pch = 15, col = colFun(seq(0,63,21)), inset = -0.3, xpd = TRUE)
+legend('right', title = expression(bold('Rank')), legend = c('1 - 21', '22 - 42', '43 - 63', '>63'), pch = 15, col = colFun(seq(1,64,21)), inset = -0.3, xpd = TRUE)
 lines(c(0,15), c(20.5,20.5), col = 'white')
 lines(c(0,15), c(19.5,19.5), col = 'white')
 lines(c(0,15), c(18.5,18.5), col = 'white')
@@ -2599,85 +3166,61 @@ par(xpd=FALSE)
 box(which = 'figure')
 dev.off()
 
-#Hillslope Plots for mua with all parameters with EEs > 95% of 10% threshold----
-SortRanksMua_b_Agg = unique(c(ParamSelect_b_Agg, ParamSelectTN_b_Agg))[c(1,2,16,17,13,14,12,18,4,3,19,20,5,6,7,9,10,11,15,21,8)]
-SortRanksMua_h_Agg = unique(c(ParamSelect_b_Agg, ParamSelectTN_b_Agg, ParamSelect_h_Agg, ParamSelectTN_h_Agg))[c(1,2,16,17,24,28,30,13,29,22,23,33,14,12,18,3,4,19,20,5,6,7,31,9,10,11,15,21,25,26,27,35,32,34,8)]
-# Aggregated Rank order----
-colPal = colorRampPalette(colors = rev(c('red', 'orange', 'gray', 'green', 'blue')))
-scaleRange = c(0, 50)
-scaleBy = 15
-Pal = colPal((scaleRange[2] - scaleRange[1])/scaleBy + 1)
-Ranks05_Agg = Ranksot_Agg = Ranks95_Agg = RanksTN05_Agg = RanksTNMed_Agg = RanksTN95_Agg = NULL
-#  Streamflow 5th %-ile----
-png('HillRankTop1295_05s_Agg.png', res = 300, height = 6, width = 6, units = 'in')
-par(mar = c(1,11,0,5))
-for (h in 1:length(uhills)){
-  #Loop over the top 10% ranks for basin
-  for (j in 1:length(SortRanksMua_b_Agg)){
-    if(j == 1){
-      plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,length(SortRanksMua_b_Agg)), pch = 15, xlab = 'Hillslope ID', ylab = 'Parameter', col = colFun(which(RanksMua05_h_Agg[[h]]$Param == SortRanksMua_b_Agg[j])), axes = FALSE, cex.lab = 1.5)
+scaleRange = c(1, 34)
+scaleBy = 11
+Pal = rev(colPal((scaleRange[2] - scaleRange[1])/scaleBy + 1))
+png('HillRankTop1295_95s_Aggh_paper.png', res = 300, height = 7, width = 7, units = 'in')
+par(mar = c(2,12.5,2,4.5), mgp = c(1,1,0))
+for (h in 0:length(uhills)){
+  #Loop over the top 10% ranks
+  for (j in 1:length(SortRanksMua_h_Agg_paper)){
+    if (h == 0){
+      #Basin
+      if (j == 1){
+        plot(x = h, y = j, xlim = c(-1, 15), ylim = c(0,length(SortRanksMua_h_Agg_paper)), pch = 15, xlab = 'Hillslope ID', ylab = '', col = colFun(which(RanksMua95_b_Agg$Param == SortRanksMua_h_Agg_paper[j])), axes = FALSE, cex.lab = 1.5)
+        polygon(x = c(-0.5,-0.5,14.5,14.5), y = c(0.5,35.5,35.5,0.5), col='black')
+        par(new=TRUE)
+        plot(x = h, y = j, xlim = c(-1, 15), ylim = c(0,length(SortRanksMua_h_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(which(RanksMua95_b_Agg$Param == SortRanksMua_h_Agg_paper[j])), axes = FALSE, cex.lab = 1.5)
+      }else{
+        plot(x = h, y = j, xlim = c(-1, 15), ylim = c(0,length(SortRanksMua_h_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(which(RanksMua95_b_Agg$Param == SortRanksMua_h_Agg_paper[j])), axes = FALSE)
+      }
     }else{
-      plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,length(SortRanksMua_b_Agg)), pch = 15, xlab = '', ylab = '', col = colFun(which(RanksMua05_h_Agg[[h]]$Param == SortRanksMua_b_Agg[j])), axes = FALSE)
+      #Hillslopes
+      plot(x = h, y = j, xlim = c(-1, 15), ylim = c(0,length(SortRanksMua_h_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(which(RanksMua95_h_Agg[[h]]$Param == SortRanksMua_h_Agg_paper[j])), axes = FALSE)
     }
     par(new=TRUE)
-    Ranks05_Agg = c(Ranks05_Agg,which(RanksMua05_h_Agg[[h]]$Param == SortRanksMua_b_Agg[j]))
   }
 }
 rm(h,j)
-par(new=FALSE)
+par(new=FALSE, mgp = c(3,1,0))
+axis(side = 1, at = 0, labels = 'B', pos = 0.5)
 axis(side = 1, at = seq(1,14,1), labels = TRUE, pos = 0.5)
-axis(side = 2, at = seq(1,length(SortRanksMua_b_Agg),1), labels = SortRanksMua_b_Agg, las = 1)
-#legend('top', title = expression(bold('Parameter Sensitivity Rank')), legend = c('1 - 14', '15 - 29', '30 - 44', '45 - 60', '61 - 101'), horiz = TRUE, pch = 15, col = colFun(seq(0,60,15)), inset = -0.1, xpd = TRUE)
-legend('right', title = expression(bold('Rank')), legend = c('1 - 14', '15 - 29', '30 - 44', '45 - 60', '61 - 101'), pch = 15, col = colFun(seq(0,60,15)), inset = -0.3, xpd = TRUE)
-dev.off()
-
-#  Streamflow 5th-95th %-ile----
-png('HillRankTop1295_ots_Agg.png', res = 300, height = 6, width = 6, units = 'in')
-par(mar = c(1,11,0,5))
-for (h in 1:length(uhills)){
-  #Loop over the top 10% ranks for basin
-  for (j in 1:length(SortRanksMua_b_Agg)){
-    if(j == 1){
-      plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,length(SortRanksMua_b_Agg)), pch = 15, xlab = 'Hillslope ID', ylab = 'Parameter', col = colFun(which(RanksMuaot_h_Agg[[h]]$Param == SortRanksMua_b_Agg[j])), axes = FALSE, cex.lab = 1.5)
-    }else{
-      plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,length(SortRanksMua_b_Agg)), pch = 15, xlab = '', ylab = '', col = colFun(which(RanksMuaot_h_Agg[[h]]$Param == SortRanksMua_b_Agg[j])), axes = FALSE)
-    }
-    par(new=TRUE)
-    Ranksot_Agg = c(Ranksot_Agg,which(RanksMuaot_h_Agg[[h]]$Param == SortRanksMua_b_Agg[j]))
-  }
-}
-rm(h,j)
-par(new=FALSE)
-axis(side = 1, at = seq(1,14,1), labels = TRUE, pos = 0.5)
-axis(side = 2, at = seq(1,length(SortRanksMua_b_Agg),1), labels = SortRanksMua_b_Agg, las = 1)
-#legend('top', title = expression(bold('Parameter Sensitivity Rank')), legend = c('1 - 14', '15 - 29', '30 - 44', '45 - 60', '61 - 101'), horiz = TRUE, pch = 15, col = colFun(seq(0,60,15)), inset = -0.1, xpd = TRUE)
-legend('right', title = expression(bold('Rank')), legend = c('1 - 14', '15 - 29', '30 - 44', '45 - 60', '61 - 101'), pch = 15, col = colFun(seq(0,60,15)), inset = -0.3, xpd = TRUE)
-dev.off()
-
-#  Streamflow 95th %-ile----
-png('HillRankTop1295_95s_Agg.png', res = 300, height = 6, width = 6, units = 'in')
-par(mar = c(1,11,0,5))
-for (h in 1:length(uhills)){
-  #Loop over the top 10% ranks for basin
-  for (j in 1:length(SortRanksMua_b_Agg)){
-    if(j == 1){
-      plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,length(SortRanksMua_b_Agg)), pch = 15, xlab = 'Hillslope ID', ylab = 'Parameter', col = colFun(which(RanksMua95_h_Agg[[h]]$Param == SortRanksMua_b_Agg[j])), axes = FALSE, cex.lab = 1.5)
-    }else{
-      plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,length(SortRanksMua_b_Agg)), pch = 15, xlab = '', ylab = '', col = colFun(which(RanksMua95_h_Agg[[h]]$Param == SortRanksMua_b_Agg[j])), axes = FALSE)
-    }
-    par(new=TRUE)
-    Ranks95_Agg = c(Ranks95_Agg,which(RanksMua95_h_Agg[[h]]$Param == SortRanksMua_b_Agg[j]))
-  }
-}
-rm(h,j)
-par(new=FALSE)
-axis(side = 1, at = seq(1,14,1), labels = TRUE, pos = 0.5)
-axis(side = 2, at = seq(1,length(SortRanksMua_b_Agg),1), labels = SortRanksMua_b_Agg, las = 1)
-#legend('top', title = expression(bold('Parameter Sensitivity Rank')), legend = c('1 - 14', '15 - 29', '30 - 44', '45 - 60', '61 - 101'), horiz = TRUE, pch = 15, col = colFun(seq(0,60,15)), inset = -0.1, xpd = TRUE)
-legend('right', title = expression(bold('Rank')), legend = c('1 - 14', '15 - 29', '30 - 44', '45 - 60', '61 - 101'), pch = 15, col = colFun(seq(0,60,15)), inset = -0.3, xpd = TRUE)
+axis(side = 2, at = seq(1,length(SortRanksMua_h_Agg_paper),1), labels = LabelNames_h_paper, las = 1)
+legend('right', title = expression(bold('Rank')), legend = c('1 - 11', '12 - 22', '23 - 33', '>33'), pch = 15, col = colFun(seq(1,34,11)), inset = -0.2, xpd = TRUE)
+lines(c(-0.5,15), c(34.5,34.5), col = 'white')
+lines(c(-0.5,15), c(33.5,33.5), col = 'white')
+lines(c(-0.5,15), c(31.5,31.5), col = 'white')
+lines(c(-0.5,15), c(25.5,25.5), col = 'white')
+lines(c(-0.5,15), c(14.5,14.5), col = 'white')
+lines(c(-0.5,15), c(6.5,6.5), col = 'white')
+lines(c(-0.5,15), c(5.5,5.5), col = 'white')
+lines(c(8.5,8.5), c(0,40), col = 'white')
+lines(c(0.5,0.5), c(0,40), col = 'white')
+#Category symbol from EE plot
+par(new=TRUE, xpd = TRUE)
+plot(x = rep(-1,8),y = c(3,6,10.5,20,27,32.5,34,35), col = colos_paper[c(5,4,4,2,2,3,3,1)], pch = c(16,17,16,17,16,15,18,16), axes=FALSE, xlab = '', ylab = '', xlim = c(-1,15), ylim = c(0,length(SortRanksMua_h_Agg_paper)))
+text(x = 4.5, y = 36.5, expression(bold('   More\nForested')))
+text(x = 11.5, y = 36.5, expression(bold('     More\nImpervious')))
+text(x = 0, y = 37, expression(bold('Basin')), srt = 90)
+text(x = 17, y = 23, expression(bold('      Metric:\n  Streamflow\n   Upper 5th\n   Percentile')))
+par(xpd=FALSE)
+box(which = 'figure')
 dev.off()
 
 #  TN 5th %-ile----
+scaleRange = c(1, 34)
+scaleBy = 11
+Pal = colPal((scaleRange[2] - scaleRange[1])/scaleBy + 1)
 png('HillRankTop1295_TN05_Agg.png', res = 300, height = 6, width = 6, units = 'in')
 par(mar = c(1,11,0,5))
 for (h in 1:length(uhills)){
@@ -2695,12 +3238,108 @@ for (h in 1:length(uhills)){
 rm(h,j)
 par(new=FALSE)
 axis(side = 1, at = seq(1,14,1), labels = TRUE, pos = 0.5)
-axis(side = 2, at = seq(1,length(SortRanksMua_b_Agg),1), labels = SortRanksMua_b_Agg, las = 1)
+axis(side = 2, at = seq(1,length(SortRanksMua_b_Agg),1), labels = LabelNames, las = 1)
 #legend('top', title = expression(bold('Parameter Sensitivity Rank')), legend = c('1 - 14', '15 - 29', '30 - 44', '45 - 60', '61 - 101'), horiz = TRUE, pch = 15, col = colFun(seq(0,60,15)), inset = -0.1, xpd = TRUE)
-legend('right', title = expression(bold('Rank')), legend = c('1 - 14', '15 - 29', '30 - 44', '45 - 60', '61 - 101'), pch = 15, col = colFun(seq(0,60,15)), inset = -0.3, xpd = TRUE)
+legend('right', title = expression(bold('Rank')), legend = c('1 - 11', '12 - 22', '23 - 33', '>33'), pch = 15, col = colFun(seq(1,34,11)), inset = -0.3, xpd = TRUE)
+dev.off()
+
+scaleRange = c(1, 64)
+scaleBy = 21
+Pal = colPal((scaleRange[2] - scaleRange[1])/scaleBy + 1)
+png('HillRankTop1295_TN05_Agg_paper.png', res = 300, height = 6, width = 6, units = 'in')
+par(mar = c(2,11.5,2,4.5), mgp = c(1,1,0))
+for (h in 1:length(uhills)){
+  #Loop over the top 10% ranks for basin
+  for (j in 1:length(SortRanksMua_b_Agg_paper)){
+    if(j == 1){
+      if(h == 1){
+        plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,length(SortRanksMua_b_Agg_paper)), pch = 15, xlab = 'Hillslope ID', ylab = '', col = colFun(which(RanksMuaTN05_h_Agg[[h]]$Param == SortRanksMua_b_Agg_paper[j])), axes = FALSE, cex.lab = 1.5)
+        polygon(x = c(0.5,0.5,14.5,14.5), y = c(0.5,21.5,21.5,0.5), col='black')
+        par(new=TRUE)
+        plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,length(SortRanksMua_b_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(which(RanksMuaTN05_h_Agg[[h]]$Param == SortRanksMua_b_Agg_paper[j])), axes = FALSE, cex.lab = 1.5)
+      }else{
+        plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,length(SortRanksMua_b_Agg_paper)), pch = 15, xlab = 'Hillslope ID', ylab = '', col = colFun(which(RanksMuaTN05_h_Agg[[h]]$Param == SortRanksMua_b_Agg_paper[j])), axes = FALSE, cex.lab = 1.5)
+      }
+    }else{
+      plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,length(SortRanksMua_b_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(which(RanksMuaTN05_h_Agg[[h]]$Param == SortRanksMua_b_Agg_paper[j])), axes = FALSE)
+    }
+    par(new=TRUE)
+  }
+}
+rm(h,j)
+par(new=FALSE, mgp = c(3,1,0))
+axis(side = 1, at = seq(1,14,1), labels = TRUE, pos = 0.5)
+axis(side = 2, at = seq(1,length(SortRanksMua_b_Agg_paper),1), labels = LabelNames_paper, las = 1)
+legend('right', title = expression(bold('Rank')), legend = c('1 - 21', '22 - 42', '43 - 63', '>63'), pch = 15, col = colFun(seq(1,64,21)), inset = -0.3, xpd = TRUE)
+lines(c(0,15), c(20.5,20.5), col = 'white')
+lines(c(0,15), c(19.5,19.5), col = 'white')
+lines(c(0,15), c(18.5,18.5), col = 'white')
+lines(c(0,15), c(8.5,8.5), col = 'white')
+lines(c(0,15), c(3.5,3.5), col = 'white')
+lines(c(8.5,8.5), c(0,30), col = 'white')
+#Category symbol from EE plot
+par(new=TRUE, xpd = TRUE)
+plot(x = rep(15,6),y = c(2,6,15,19,20,21), col = colos_paper[c(5,4,2,2,3,1)], pch = c(16,16,17,16,15,16), axes=FALSE, xlab = '', ylab = '', xlim = c(0,15), ylim = c(0,21))
+text(x = 4.5, y = 22, expression(bold('   More\nForested')))
+text(x = 11.5, y = 22, expression(bold('     More\nImpervious')))
+par(xpd=FALSE)
+box(which = 'figure')
+dev.off()
+
+scaleRange = c(1, 34)
+scaleBy = 11
+Pal = rev(colPal((scaleRange[2] - scaleRange[1])/scaleBy + 1))
+png('HillRankTop1295_TN05s_Aggh_paper.png', res = 300, height = 7, width = 7, units = 'in')
+par(mar = c(2,12.5,2,4.5), mgp = c(1,1,0))
+for (h in 0:length(uhills)){
+  #Loop over the top 10% ranks
+  for (j in 1:length(SortRanksMua_h_Agg_paper)){
+    if (h == 0){
+      #Basin
+      if (j == 1){
+        plot(x = h, y = j, xlim = c(-1, 15), ylim = c(0,length(SortRanksMua_h_Agg_paper)), pch = 15, xlab = 'Hillslope ID', ylab = '', col = colFun(which(RanksMuaTN05_b_Agg$Param == SortRanksMua_h_Agg_paper[j])), axes = FALSE, cex.lab = 1.5)
+        polygon(x = c(-0.5,-0.5,14.5,14.5), y = c(0.5,35.5,35.5,0.5), col='black')
+        par(new=TRUE)
+        plot(x = h, y = j, xlim = c(-1, 15), ylim = c(0,length(SortRanksMua_h_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(which(RanksMuaTN05_b_Agg$Param == SortRanksMua_h_Agg_paper[j])), axes = FALSE, cex.lab = 1.5)
+      }else{
+        plot(x = h, y = j, xlim = c(-1, 15), ylim = c(0,length(SortRanksMua_h_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(which(RanksMuaTN05_b_Agg$Param == SortRanksMua_h_Agg_paper[j])), axes = FALSE)
+      }
+    }else{
+      #Hillslopes
+      plot(x = h, y = j, xlim = c(-1, 15), ylim = c(0,length(SortRanksMua_h_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(which(RanksMuaTN05_h_Agg[[h]]$Param == SortRanksMua_h_Agg_paper[j])), axes = FALSE)
+    }
+    par(new=TRUE)
+  }
+}
+rm(h,j)
+par(new=FALSE, mgp = c(3,1,0))
+axis(side = 1, at = 0, labels = 'B', pos = 0.5)
+axis(side = 1, at = seq(1,14,1), labels = TRUE, pos = 0.5)
+axis(side = 2, at = seq(1,length(SortRanksMua_h_Agg_paper),1), labels = LabelNames_h_paper, las = 1)
+legend('right', title = expression(bold('Rank')), legend = c('1 - 11', '12 - 22', '23 - 33', '>33'), pch = 15, col = colFun(seq(1,34,11)), inset = -0.2, xpd = TRUE)
+lines(c(-0.5,15), c(34.5,34.5), col = 'white')
+lines(c(-0.5,15), c(33.5,33.5), col = 'white')
+lines(c(-0.5,15), c(31.5,31.5), col = 'white')
+lines(c(-0.5,15), c(25.5,25.5), col = 'white')
+lines(c(-0.5,15), c(14.5,14.5), col = 'white')
+lines(c(-0.5,15), c(6.5,6.5), col = 'white')
+lines(c(-0.5,15), c(5.5,5.5), col = 'white')
+lines(c(8.5,8.5), c(0,40), col = 'white')
+lines(c(0.5,0.5), c(0,40), col = 'white')
+#Category symbol from EE plot
+par(new=TRUE, xpd = TRUE)
+plot(x = rep(-1,8),y = c(3,6,10.5,20,27,32.5,34,35), col = colos_paper[c(5,4,4,2,2,3,3,1)], pch = c(16,17,16,17,16,15,18,16), axes=FALSE, xlab = '', ylab = '', xlim = c(-1,15), ylim = c(0,length(SortRanksMua_h_Agg_paper)))
+text(x = 4.5, y = 36.5, expression(bold('   More\nForested')))
+text(x = 11.5, y = 36.5, expression(bold('     More\nImpervious')))
+text(x = 0, y = 37, expression(bold('Basin')), srt = 90)
+text(x = 17, y = 23, expression(bold('  Metric: TN\n   Lower 5th\n   Percentile')))
+par(xpd=FALSE)
+box(which = 'figure')
 dev.off()
 
 #  TN 5th-95th %-ile----
+scaleRange = c(1, 34)
+scaleBy = 11
 png('HillRankTop1295_TNMed_Agg.png', res = 300, height = 6, width = 6, units = 'in')
 par(mar = c(1,11,0,5))
 for (h in 1:length(uhills)){
@@ -2718,12 +3357,108 @@ for (h in 1:length(uhills)){
 rm(h,j)
 par(new=FALSE)
 axis(side = 1, at = seq(1,14,1), labels = TRUE, pos = 0.5)
-axis(side = 2, at = seq(1,length(SortRanksMua_b_Agg),1), labels = SortRanksMua_b_Agg, las = 1)
+axis(side = 2, at = seq(1,length(SortRanksMua_b_Agg),1), labels = LabelNames, las = 1)
 #legend('top', title = expression(bold('Parameter Sensitivity Rank')), legend = c('1 - 14', '15 - 29', '30 - 44', '45 - 60', '61 - 101'), horiz = TRUE, pch = 15, col = colFun(seq(0,60,15)), inset = -0.1, xpd = TRUE)
-legend('right', title = expression(bold('Rank')), legend = c('1 - 14', '15 - 29', '30 - 44', '45 - 60', '61 - 101'), pch = 15, col = colFun(seq(0,60,15)), inset = -0.3, xpd = TRUE)
+legend('right', title = expression(bold('Rank')), legend = c('1 - 11', '12 - 22', '23 - 33', '>33'), pch = 15, col = colFun(seq(1,34,11)), inset = -0.3, xpd = TRUE)
+dev.off()
+
+scaleRange = c(1, 64)
+scaleBy = 21
+Pal = colPal((scaleRange[2] - scaleRange[1])/scaleBy + 1)
+png('HillRankTop1295_TNMed_Agg_paper.png', res = 300, height = 6, width = 6, units = 'in')
+par(mar = c(2,11.5,2,4.5), mgp = c(1,1,0))
+for (h in 1:length(uhills)){
+  #Loop over the top 10% ranks for basin
+  for (j in 1:length(SortRanksMua_b_Agg_paper)){
+    if(j == 1){
+      if(h == 1){
+        plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,length(SortRanksMua_b_Agg_paper)), pch = 15, xlab = 'Hillslope ID', ylab = '', col = colFun(which(RanksMuaTNMed_h_Agg[[h]]$Param == SortRanksMua_b_Agg_paper[j])), axes = FALSE, cex.lab = 1.5)
+        polygon(x = c(0.5,0.5,14.5,14.5), y = c(0.5,21.5,21.5,0.5), col='black')
+        par(new=TRUE)
+        plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,length(SortRanksMua_b_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(which(RanksMuaTNMed_h_Agg[[h]]$Param == SortRanksMua_b_Agg_paper[j])), axes = FALSE, cex.lab = 1.5)
+      }else{
+        plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,length(SortRanksMua_b_Agg_paper)), pch = 15, xlab = 'Hillslope ID', ylab = '', col = colFun(which(RanksMuaTNMed_h_Agg[[h]]$Param == SortRanksMua_b_Agg_paper[j])), axes = FALSE, cex.lab = 1.5)
+      }
+    }else{
+      plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,length(SortRanksMua_b_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(which(RanksMuaTNMed_h_Agg[[h]]$Param == SortRanksMua_b_Agg_paper[j])), axes = FALSE)
+    }
+    par(new=TRUE)
+  }
+}
+rm(h,j)
+par(new=FALSE, mgp = c(3,1,0))
+axis(side = 1, at = seq(1,14,1), labels = TRUE, pos = 0.5)
+axis(side = 2, at = seq(1,length(SortRanksMua_b_Agg_paper),1), labels = LabelNames_paper, las = 1)
+legend('right', title = expression(bold('Rank')), legend = c('1 - 21', '22 - 42', '43 - 63', '>63'), pch = 15, col = colFun(seq(1,64,21)), inset = -0.3, xpd = TRUE)
+lines(c(0,15), c(20.5,20.5), col = 'white')
+lines(c(0,15), c(19.5,19.5), col = 'white')
+lines(c(0,15), c(18.5,18.5), col = 'white')
+lines(c(0,15), c(8.5,8.5), col = 'white')
+lines(c(0,15), c(3.5,3.5), col = 'white')
+lines(c(8.5,8.5), c(0,30), col = 'white')
+#Category symbol from EE plot
+par(new=TRUE, xpd = TRUE)
+plot(x = rep(15,6),y = c(2,6,15,19,20,21), col = colos_paper[c(5,4,2,2,3,1)], pch = c(16,16,17,16,15,16), axes=FALSE, xlab = '', ylab = '', xlim = c(0,15), ylim = c(0,21))
+text(x = 4.5, y = 22, expression(bold('   More\nForested')))
+text(x = 11.5, y = 22, expression(bold('     More\nImpervious')))
+par(xpd=FALSE)
+box(which = 'figure')
+dev.off()
+
+scaleRange = c(1, 34)
+scaleBy = 11
+Pal = rev(colPal((scaleRange[2] - scaleRange[1])/scaleBy + 1))
+png('HillRankTop1295_TNMeds_Aggh_paper.png', res = 300, height = 7, width = 7, units = 'in')
+par(mar = c(2,12.5,2,4.5), mgp = c(1,1,0))
+for (h in 0:length(uhills)){
+  #Loop over the top 10% ranks
+  for (j in 1:length(SortRanksMua_h_Agg_paper)){
+    if (h == 0){
+      #Basin
+      if (j == 1){
+        plot(x = h, y = j, xlim = c(-1, 15), ylim = c(0,length(SortRanksMua_h_Agg_paper)), pch = 15, xlab = 'Hillslope ID', ylab = '', col = colFun(which(RanksMuaTNMed_b_Agg$Param == SortRanksMua_h_Agg_paper[j])), axes = FALSE, cex.lab = 1.5)
+        polygon(x = c(-0.5,-0.5,14.5,14.5), y = c(0.5,35.5,35.5,0.5), col='black')
+        par(new=TRUE)
+        plot(x = h, y = j, xlim = c(-1, 15), ylim = c(0,length(SortRanksMua_h_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(which(RanksMuaTNMed_b_Agg$Param == SortRanksMua_h_Agg_paper[j])), axes = FALSE, cex.lab = 1.5)
+      }else{
+        plot(x = h, y = j, xlim = c(-1, 15), ylim = c(0,length(SortRanksMua_h_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(which(RanksMuaTNMed_b_Agg$Param == SortRanksMua_h_Agg_paper[j])), axes = FALSE)
+      }
+    }else{
+      #Hillslopes
+      plot(x = h, y = j, xlim = c(-1, 15), ylim = c(0,length(SortRanksMua_h_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(which(RanksMuaTNMed_h_Agg[[h]]$Param == SortRanksMua_h_Agg_paper[j])), axes = FALSE)
+    }
+    par(new=TRUE)
+  }
+}
+rm(h,j)
+par(new=FALSE, mgp = c(3,1,0))
+axis(side = 1, at = 0, labels = 'B', pos = 0.5)
+axis(side = 1, at = seq(1,14,1), labels = TRUE, pos = 0.5)
+axis(side = 2, at = seq(1,length(SortRanksMua_h_Agg_paper),1), labels = LabelNames_h_paper, las = 1)
+legend('right', title = expression(bold('Rank')), legend = c('1 - 11', '12 - 22', '23 - 33', '>33'), pch = 15, col = colFun(seq(1,34,11)), inset = -0.2, xpd = TRUE)
+lines(c(-0.5,15), c(34.5,34.5), col = 'white')
+lines(c(-0.5,15), c(33.5,33.5), col = 'white')
+lines(c(-0.5,15), c(31.5,31.5), col = 'white')
+lines(c(-0.5,15), c(25.5,25.5), col = 'white')
+lines(c(-0.5,15), c(14.5,14.5), col = 'white')
+lines(c(-0.5,15), c(6.5,6.5), col = 'white')
+lines(c(-0.5,15), c(5.5,5.5), col = 'white')
+lines(c(8.5,8.5), c(0,40), col = 'white')
+lines(c(0.5,0.5), c(0,40), col = 'white')
+#Category symbol from EE plot
+par(new=TRUE, xpd = TRUE)
+plot(x = rep(-1,8),y = c(3,6,10.5,20,27,32.5,34,35), col = colos_paper[c(5,4,4,2,2,3,3,1)], pch = c(16,17,16,17,16,15,18,16), axes=FALSE, xlab = '', ylab = '', xlim = c(-1,15), ylim = c(0,length(SortRanksMua_h_Agg_paper)))
+text(x = 4.5, y = 36.5, expression(bold('   More\nForested')))
+text(x = 11.5, y = 36.5, expression(bold('     More\nImpervious')))
+text(x = 0, y = 37, expression(bold('Basin')), srt = 90)
+text(x = 17, y = 23, expression(bold('  Metric: TN\n    Median\n   Percentile')))
+par(xpd=FALSE)
+box(which = 'figure')
 dev.off()
 
 #  TN 95th %-ile----
+scaleRange = c(1, 34)
+scaleBy = 11
 png('HillRankTop1295_TN95_Agg.png', res = 300, height = 6, width = 6, units = 'in')
 par(mar = c(1,11,0,5))
 for (h in 1:length(uhills)){
@@ -2743,7 +3478,101 @@ par(new=FALSE)
 axis(side = 1, at = seq(1,14,1), labels = TRUE, pos = 0.5)
 axis(side = 2, at = seq(1,length(SortRanksMua_b_Agg),1), labels = SortRanksMua_b_Agg, las = 1)
 #legend('top', title = expression(bold('Parameter Sensitivity Rank')), legend = c('1 - 14', '15 - 29', '30 - 44', '45 - 60', '61 - 101'), horiz = TRUE, pch = 15, col = colFun(seq(0,60,15)), inset = -0.1, xpd = TRUE)
-legend('right', title = expression(bold('Rank')), legend = c('1 - 14', '15 - 29', '30 - 44', '45 - 60', '61 - 101'), pch = 15, col = colFun(seq(0,60,15)), inset = -0.3, xpd = TRUE)
+legend('right', title = expression(bold('Rank')), legend = c('1 - 11', '12 - 22', '23 - 33', '>33'), pch = 15, col = colFun(seq(1,34,11)), inset = -0.3, xpd = TRUE)
+dev.off()
+
+scaleRange = c(1, 64)
+scaleBy = 21
+Pal = colPal((scaleRange[2] - scaleRange[1])/scaleBy + 1)
+png('HillRankTop1295_TN95_Agg_paper.png', res = 300, height = 6, width = 6, units = 'in')
+par(mar = c(2,11.5,2,4.5), mgp = c(1,1,0))
+for (h in 1:length(uhills)){
+  #Loop over the top 10% ranks for basin
+  for (j in 1:length(SortRanksMua_b_Agg_paper)){
+    if(j == 1){
+      if(h == 1){
+        plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,length(SortRanksMua_b_Agg_paper)), pch = 15, xlab = 'Hillslope ID', ylab = '', col = colFun(which(RanksMuaTN95_h_Agg[[h]]$Param == SortRanksMua_b_Agg_paper[j])), axes = FALSE, cex.lab = 1.5)
+        polygon(x = c(0.5,0.5,14.5,14.5), y = c(0.5,21.5,21.5,0.5), col='black')
+        par(new=TRUE)
+        plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,length(SortRanksMua_b_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(which(RanksMuaTN95_h_Agg[[h]]$Param == SortRanksMua_b_Agg_paper[j])), axes = FALSE, cex.lab = 1.5)
+      }else{
+        plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,length(SortRanksMua_b_Agg_paper)), pch = 15, xlab = 'Hillslope ID', ylab = '', col = colFun(which(RanksMuaTN95_h_Agg[[h]]$Param == SortRanksMua_b_Agg_paper[j])), axes = FALSE, cex.lab = 1.5)
+      }
+    }else{
+      plot(x = h, y = j, xlim = c(0, 15), ylim = c(0,length(SortRanksMua_b_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(which(RanksMuaTN95_h_Agg[[h]]$Param == SortRanksMua_b_Agg_paper[j])), axes = FALSE)
+    }
+    par(new=TRUE)
+  }
+}
+rm(h,j)
+par(new=FALSE, mgp = c(3,1,0))
+axis(side = 1, at = seq(1,14,1), labels = TRUE, pos = 0.5)
+axis(side = 2, at = seq(1,length(SortRanksMua_b_Agg_paper),1), labels = LabelNames_paper, las = 1)
+legend('right', title = expression(bold('Rank')), legend = c('1 - 21', '22 - 42', '43 - 63', '>63'), pch = 15, col = colFun(seq(1,64,21)), inset = -0.3, xpd = TRUE)
+lines(c(0,15), c(20.5,20.5), col = 'white')
+lines(c(0,15), c(19.5,19.5), col = 'white')
+lines(c(0,15), c(18.5,18.5), col = 'white')
+lines(c(0,15), c(8.5,8.5), col = 'white')
+lines(c(0,15), c(3.5,3.5), col = 'white')
+lines(c(8.5,8.5), c(0,30), col = 'white')
+#Category symbol from EE plot
+par(new=TRUE, xpd = TRUE)
+plot(x = rep(15,6),y = c(2,6,15,19,20,21), col = colos_paper[c(5,4,2,2,3,1)], pch = c(16,16,17,16,15,16), axes=FALSE, xlab = '', ylab = '', xlim = c(0,15), ylim = c(0,21))
+text(x = 4.5, y = 22, expression(bold('   More\nForested')))
+text(x = 11.5, y = 22, expression(bold('     More\nImpervious')))
+par(xpd=FALSE)
+box(which = 'figure')
+dev.off()
+
+scaleRange = c(1, 34)
+scaleBy = 11
+Pal = rev(colPal((scaleRange[2] - scaleRange[1])/scaleBy + 1))
+png('HillRankTop1295_TN95s_Aggh_paper.png', res = 300, height = 7, width = 7, units = 'in')
+par(mar = c(2,12.5,2,4.5), mgp = c(1,1,0))
+for (h in 0:length(uhills)){
+  #Loop over the top 10% ranks
+  for (j in 1:length(SortRanksMua_h_Agg_paper)){
+    if (h == 0){
+      #Basin
+      if (j == 1){
+        plot(x = h, y = j, xlim = c(-1, 15), ylim = c(0,length(SortRanksMua_h_Agg_paper)), pch = 15, xlab = 'Hillslope ID', ylab = '', col = colFun(which(RanksMuaTN95_b_Agg$Param == SortRanksMua_h_Agg_paper[j])), axes = FALSE, cex.lab = 1.5)
+        polygon(x = c(-0.5,-0.5,14.5,14.5), y = c(0.5,35.5,35.5,0.5), col='black')
+        par(new=TRUE)
+        plot(x = h, y = j, xlim = c(-1, 15), ylim = c(0,length(SortRanksMua_h_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(which(RanksMuaTN95_b_Agg$Param == SortRanksMua_h_Agg_paper[j])), axes = FALSE, cex.lab = 1.5)
+      }else{
+        plot(x = h, y = j, xlim = c(-1, 15), ylim = c(0,length(SortRanksMua_h_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(which(RanksMuaTN95_b_Agg$Param == SortRanksMua_h_Agg_paper[j])), axes = FALSE)
+      }
+    }else{
+      #Hillslopes
+      plot(x = h, y = j, xlim = c(-1, 15), ylim = c(0,length(SortRanksMua_h_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(which(RanksMuaTN95_h_Agg[[h]]$Param == SortRanksMua_h_Agg_paper[j])), axes = FALSE)
+    }
+    par(new=TRUE)
+  }
+}
+rm(h,j)
+par(new=FALSE, mgp = c(3,1,0))
+axis(side = 1, at = 0, labels = 'B', pos = 0.5)
+axis(side = 1, at = seq(1,14,1), labels = TRUE, pos = 0.5)
+axis(side = 2, at = seq(1,length(SortRanksMua_h_Agg_paper),1), labels = LabelNames_h_paper, las = 1)
+legend('right', title = expression(bold('Rank')), legend = c('1 - 11', '12 - 22', '23 - 33', '>33'), pch = 15, col = colFun(seq(1,34,11)), inset = -0.2, xpd = TRUE)
+lines(c(-0.5,15), c(34.5,34.5), col = 'white')
+lines(c(-0.5,15), c(33.5,33.5), col = 'white')
+lines(c(-0.5,15), c(31.5,31.5), col = 'white')
+lines(c(-0.5,15), c(25.5,25.5), col = 'white')
+lines(c(-0.5,15), c(14.5,14.5), col = 'white')
+lines(c(-0.5,15), c(6.5,6.5), col = 'white')
+lines(c(-0.5,15), c(5.5,5.5), col = 'white')
+lines(c(8.5,8.5), c(0,40), col = 'white')
+lines(c(0.5,0.5), c(0,40), col = 'white')
+#Category symbol from EE plot
+par(new=TRUE, xpd = TRUE)
+plot(x = rep(-1,8),y = c(3,6,10.5,20,27,32.5,34,35), col = colos_paper[c(5,4,4,2,2,3,3,1)], pch = c(16,17,16,17,16,15,18,16), axes=FALSE, xlab = '', ylab = '', xlim = c(-1,15), ylim = c(0,length(SortRanksMua_h_Agg_paper)))
+text(x = 4.5, y = 36.5, expression(bold('   More\nForested')))
+text(x = 11.5, y = 36.5, expression(bold('     More\nImpervious')))
+text(x = 0, y = 37, expression(bold('Basin')), srt = 90)
+text(x = 17, y = 23, expression(bold('  Metric: TN\n  Upper 5th \n   Percentile')))
+par(xpd=FALSE)
+box(which = 'figure')
 dev.off()
 
 #  Streamflow 5th %-ile - hillslope params top 10%----
@@ -2888,11 +3717,340 @@ dev.off()
 
 #Compare the parameters affected by multipliers after aggregating constrained parameters to see if they are different in sensitivity----
 #Using m as an example for now because it's in the top 12
+#Streamflow 5%----
 png('BasinKsatDecayEEs.png', res = 300, width = 3, height = 5, units = 'in')
-barplot(height = RanksMua05_b$EE05_b[c(grep(RanksMua05_b$Param, pattern = '9_m', fixed=TRUE, ignore.case = FALSE)[c(1,2)], grep(RanksMua05_b$Param, pattern = '8_m', fixed=TRUE, ignore.case = FALSE)[c(1,2)])]/max(RanksMua05_b$EE05_b), names.arg = c('s9_m', 's109_m', 's8_m', 's108_m'), ylab = 'Normalized Elementary Effect', ylim = c(0,1), cex.axis = 1.5, cex.lab = 1.5)
+barplot(height = EEs05_b_mua_m[c(grep(names(EEs05_b_mua_m), pattern = '9_m', fixed=TRUE, ignore.case = FALSE)[c(1,3,5)], grep(names(EEs05_b_mua_m), pattern = '8_m', fixed=TRUE, ignore.case = FALSE)[c(1,3,5)])][c(1,2,4,5,6,3)]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
+        names.arg = c('S9', 'S109', 'S8', 'S108', 'S8 and S108', 'S9 and S109'), ylab = 'Normalized Elementary Effect', ylim = c(0,1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'm: Decay of Ksat with increasing Sat. Def.', xlab = 'Soils')
+arrows(seq(0.5,6.5,1), 
+       EEs05_b_mua_05[c(grep(names(EEs05_b_mua_05), pattern = '9_m', fixed=TRUE, ignore.case = FALSE)[c(1,3,5)], grep(names(EEs05_b_mua_05), pattern = '8_m', fixed=TRUE, ignore.case = FALSE)[c(1,3,5)])][c(1,2,4,5,6,3)]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
+       seq(0.5,6.5,1), 
+       EEs05_b_mua_95[c(grep(names(EEs05_b_mua_95), pattern = '9_m', fixed=TRUE, ignore.case = FALSE)[c(1,3,5)], grep(names(EEs05_b_mua_95), pattern = '8_m', fixed=TRUE, ignore.case = FALSE)[c(1,3,5)])][c(1,2,4,5,6,3)]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
+       length=0.05, angle=90, code=3)
 dev.off()
 
-# Fixme: Compare using the bootstrapped distributions----
+png('BasinKsatEEs.png', res = 300, width = 3, height = 5, units = 'in')
+par(mar=c(6,4,3,0.5))
+barplot(height = EEs05_b_mua_m[c(grep(names(EEs05_b_mua_m), pattern = 'Ksat', fixed=TRUE, ignore.case = FALSE))]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
+        names.arg = c('S9 Ksat', 'S9 vKsat', 'S109 Ksat', 'S109 vKsat', 'S8 Ksat', 'S8 vKsat', 'S108 Ksat', 'S108 vKsat', 'S8 and S108', 'S9 and S109'), ylab = 'Normalized Elementary Effect', ylim = c(0,1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Hydraulic Conductivity', xlab = '', las = 2)
+axis(side = 1, at = 5, labels = 'Soils', line = 4, cex.axis = 1.2, tick = FALSE)
+arrows(seq(0.5,9.5,1), 
+       EEs05_b_mua_05[grep(names(EEs05_b_mua_05), pattern = 'Ksat', fixed=TRUE, ignore.case = FALSE)]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
+       seq(0.5,9.5,1), 
+       EEs05_b_mua_95[grep(names(EEs05_b_mua_95), pattern = 'Ksat', fixed=TRUE, ignore.case = FALSE)]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
+       length=0.05, angle=90, code=3)
+dev.off()
+
+png('BasinSatToGWEEs.png', res = 300, width = 3, height = 5, units = 'in')
+barplot(height = EEs05_b_mua_m[c(grep(names(EEs05_b_mua_m), pattern = 'sat_to_gw', fixed=TRUE, ignore.case = FALSE))]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
+        names.arg = c('S9', 'S109', 'S8', 'S108'), ylab = 'Normalized Elementary Effect', ylim = c(0,1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Sat. to GW Coef.', xlab = 'Soils')
+arrows(seq(0.5,6.5,1), 
+       EEs05_b_mua_05[c(grep(names(EEs05_b_mua_m), pattern = 'sat_to_gw', fixed=TRUE, ignore.case = FALSE))]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
+       seq(0.5,6.5,1), 
+       EEs05_b_mua_95[c(grep(names(EEs05_b_mua_m), pattern = 'sat_to_gw', fixed=TRUE, ignore.case = FALSE))]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
+       length=0.05, angle=90, code=3)
+dev.off()
+
+png('BasinAirEntryPresEEs.png', res = 300, width = 3, height = 5, units = 'in')
+barplot(height = EEs05_b_mua_m[c(grep(names(EEs05_b_mua_m), pattern = 'psi_air', fixed=TRUE, ignore.case = FALSE))]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
+        names.arg = c('S9', 'S109', 'S8', 'S108'), ylab = 'Normalized Elementary Effect', ylim = c(0,1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Air Entry Pressure', xlab = 'Soils')
+arrows(seq(0.5,6.5,1), 
+       EEs05_b_mua_05[c(grep(names(EEs05_b_mua_m), pattern = 'psi_air', fixed=TRUE, ignore.case = FALSE))]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
+       seq(0.5,6.5,1), 
+       EEs05_b_mua_95[c(grep(names(EEs05_b_mua_m), pattern = 'psi_air', fixed=TRUE, ignore.case = FALSE))]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
+       length=0.05, angle=90, code=3)
+dev.off()
+
+png('BasinPoreSizeEEs.png', res = 300, width = 3, height = 5, units = 'in')
+barplot(height = EEs05_b_mua_m[c(grep(names(EEs05_b_mua_m), pattern = 'pore', fixed=TRUE, ignore.case = FALSE))]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
+        names.arg = c('S9', 'S109', 'S8', 'S108'), ylab = 'Normalized Elementary Effect', ylim = c(0,1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Pore Size', xlab = 'Soils')
+arrows(seq(0.5,6.5,1), 
+       EEs05_b_mua_05[c(grep(names(EEs05_b_mua_m), pattern = 'pore', fixed=TRUE, ignore.case = FALSE))]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
+       seq(0.5,6.5,1), 
+       EEs05_b_mua_95[c(grep(names(EEs05_b_mua_m), pattern = 'pore', fixed=TRUE, ignore.case = FALSE))]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
+       length=0.05, angle=90, code=3)
+dev.off()
+
+png('BasinSoilDepthEEs.png', res = 300, width = 3, height = 5, units = 'in')
+barplot(height = EEs05_b_mua_m[c(grep(names(EEs05_b_mua_m), pattern = 'active', fixed=TRUE, ignore.case = FALSE))]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
+        names.arg = c('S9', 'S109', 'S8', 'S108'), ylab = 'Normalized Elementary Effect', ylim = c(0,1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Soil Thickness', xlab = 'Soils', las = 1)
+arrows(seq(0.5,4.5,1), 
+       EEs05_b_mua_05[grep(names(EEs05_b_mua_05), pattern = 'active', fixed=TRUE, ignore.case = FALSE)]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
+       seq(0.5,4.5,1), 
+       EEs05_b_mua_95[grep(names(EEs05_b_mua_95), pattern = 'active', fixed=TRUE, ignore.case = FALSE)]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
+       length=0.05, angle=90, code=3)
+dev.off()
+
+png('BasinSnowMeltEEs.png', res = 300, width = 3, height = 5, units = 'in')
+barplot(height = EEs05_b_mua_m[c(grep(names(EEs05_b_mua_m), pattern = 'snow_melt', fixed=TRUE, ignore.case = FALSE))]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
+        names.arg = c('S9', 'S109', 'S8', 'S108'), ylab = 'Normalized Elementary Effect', ylim = c(0,0.001), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Snow Melt Temp. Coef.', xlab = 'Soils')
+arrows(seq(0.5,4.5,1), 
+       EEs05_b_mua_05[grep(names(EEs05_b_mua_05), pattern = 'snow_melt', fixed=TRUE, ignore.case = FALSE)]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
+       seq(0.5,4.5,1), 
+       EEs05_b_mua_95[grep(names(EEs05_b_mua_95), pattern = 'snow_melt', fixed=TRUE, ignore.case = FALSE)]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
+       length=0.05, angle=90, code=3)
+dev.off()
+
+png('BasinSnowEnergyEEs.png', res = 300, width = 3, height = 5, units = 'in')
+barplot(height = EEs05_b_mua_m[c(grep(names(EEs05_b_mua_m), pattern = 'snow_energy', fixed=TRUE, ignore.case = FALSE))]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
+        names.arg = c('S9', 'S109', 'S8', 'S108'), ylab = 'Normalized Elementary Effect', ylim = c(0,0.001), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Max Snow Energy Deficit', xlab = 'Soils')
+arrows(seq(0.5,4.5,1), 
+       EEs05_b_mua_05[grep(names(EEs05_b_mua_05), pattern = 'snow_energy', fixed=TRUE, ignore.case = FALSE)]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
+       seq(0.5,4.5,1), 
+       EEs05_b_mua_95[grep(names(EEs05_b_mua_95), pattern = 'snow_energy', fixed=TRUE, ignore.case = FALSE)]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
+       length=0.05, angle=90, code=3)
+dev.off()
+
+png('BasinVegSLAEEs.png', res = 300, width = 3, height = 5, units = 'in')
+barplot(height = EEs05_b_mua_m[c(grep(names(EEs05_b_mua_m), pattern = 'sla', fixed=TRUE, ignore.case = FALSE))]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
+        names.arg = c('Tree', 'Grass'), ylab = 'Normalized Elementary Effect', ylim = c(0,0.1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Specific Leaf Area', xlab = 'Vegetation')
+arrows(seq(0.5,4.5,1), 
+       EEs05_b_mua_05[grep(names(EEs05_b_mua_05), pattern = 'sla', fixed=TRUE, ignore.case = FALSE)]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
+       seq(0.5,4.5,1), 
+       EEs05_b_mua_95[grep(names(EEs05_b_mua_95), pattern = 'sla', fixed=TRUE, ignore.case = FALSE)]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
+       length=0.05, angle=90, code=3)
+dev.off()
+
+#  panel----
+png('BasinAllMultEEs_05s.png', res = 300, width = 9, height = 9, units = 'in')
+opar=par
+layout(rbind(c(1,2,3), c(4,5,6), c(7,8,9)))
+barplot(height = EEs05_b_mua_m[c(grep(names(EEs05_b_mua_m), pattern = '9_m', fixed=TRUE, ignore.case = FALSE)[c(1,3,5)], grep(names(EEs05_b_mua_m), pattern = '8_m', fixed=TRUE, ignore.case = FALSE)[c(1,3,5)])][c(1,2,4,5,6,3)]/max(EEs05_b_mua_95), 
+        names.arg = c('S9', 'S109', 'S8', 'S108', 'S8 and S108', 'S9 and S109'), ylab = 'Normalized Elementary Effect', ylim = c(0,1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'm: Decay of Ksat with increasing Sat. Def.', xlab = 'Soils')
+arrows(seq(0.5,5.5,1), 
+       EEs05_b_mua_05[c(grep(names(EEs05_b_mua_05), pattern = '9_m', fixed=TRUE, ignore.case = FALSE)[c(1,3,5)], grep(names(EEs05_b_mua_05), pattern = '8_m', fixed=TRUE, ignore.case = FALSE)[c(1,3,5)])][c(1,2,4,5,6,3)]/max(EEs05_b_mua_95), 
+       seq(0.5,5.5,1), 
+       EEs05_b_mua_95[c(grep(names(EEs05_b_mua_95), pattern = '9_m', fixed=TRUE, ignore.case = FALSE)[c(1,3,5)], grep(names(EEs05_b_mua_95), pattern = '8_m', fixed=TRUE, ignore.case = FALSE)[c(1,3,5)])][c(1,2,4,5,6,3)]/max(EEs05_b_mua_95), 
+       length=0.05, angle=90, code=3)
+
+barplot(height = EEs05_b_mua_m[c(grep(names(EEs05_b_mua_m), pattern = 'sat_to_gw', fixed=TRUE, ignore.case = FALSE))]/max(EEs05_b_mua_95), 
+        names.arg = c('S9', 'S109', 'S8', 'S108'), ylab = 'Normalized Elementary Effect', ylim = c(0,1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Sat. to GW Coef.', xlab = 'Soils')
+arrows(seq(0.5,3.5,1), 
+       EEs05_b_mua_05[c(grep(names(EEs05_b_mua_m), pattern = 'sat_to_gw', fixed=TRUE, ignore.case = FALSE))]/max(EEs05_b_mua_95), 
+       seq(0.5,3.5,1), 
+       EEs05_b_mua_95[c(grep(names(EEs05_b_mua_m), pattern = 'sat_to_gw', fixed=TRUE, ignore.case = FALSE))]/max(EEs05_b_mua_95), 
+       length=0.05, angle=90, code=3)
+
+par(mar=c(6,4,3,0.5))
+barplot(height = EEs05_b_mua_m[c(grep(names(EEs05_b_mua_m), pattern = 'Ksat', fixed=TRUE, ignore.case = FALSE))]/max(EEs05_b_mua_95), 
+        names.arg = c('S9 Ksat', 'S9 vKsat', 'S109 Ksat', 'S109 vKsat', 'S8 Ksat', 'S8 vKsat', 'S108 Ksat', 'S108 vKsat', 'S8 and S108', 'S9 and S109'), ylab = 'Normalized Elementary Effect', ylim = c(0,1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Hydraulic Conductivity', xlab = '', las = 2)
+axis(side = 1, at = 5, labels = 'Soils', line = 4, cex.axis = 1.2, tick = FALSE)
+arrows(seq(0.5,9.5,1), 
+       EEs05_b_mua_05[grep(names(EEs05_b_mua_05), pattern = 'Ksat', fixed=TRUE, ignore.case = FALSE)]/max(EEs05_b_mua_95), 
+       seq(0.5,9.5,1), 
+       EEs05_b_mua_95[grep(names(EEs05_b_mua_95), pattern = 'Ksat', fixed=TRUE, ignore.case = FALSE)]/max(EEs05_b_mua_95), 
+       length=0.05, angle=90, code=3)
+
+par(opar)
+barplot(height = EEs05_b_mua_m[c(grep(names(EEs05_b_mua_m), pattern = 'psi_air', fixed=TRUE, ignore.case = FALSE))]/max(EEs05_b_mua_95), 
+        names.arg = c('S9', 'S109', 'S8', 'S108'), ylab = 'Normalized Elementary Effect', ylim = c(0,1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Air Entry Pressure', xlab = 'Soils')
+arrows(seq(0.5,3.5,1), 
+       EEs05_b_mua_05[c(grep(names(EEs05_b_mua_m), pattern = 'psi_air', fixed=TRUE, ignore.case = FALSE))]/max(EEs05_b_mua_95), 
+       seq(0.5,3.5,1), 
+       EEs05_b_mua_95[c(grep(names(EEs05_b_mua_m), pattern = 'psi_air', fixed=TRUE, ignore.case = FALSE))]/max(EEs05_b_mua_95), 
+       length=0.05, angle=90, code=3)
+
+barplot(height = EEs05_b_mua_m[c(grep(names(EEs05_b_mua_m), pattern = 'pore', fixed=TRUE, ignore.case = FALSE))]/max(EEs05_b_mua_95), 
+        names.arg = c('S9', 'S109', 'S8', 'S108'), ylab = 'Normalized Elementary Effect', ylim = c(0,1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Pore Size', xlab = 'Soils')
+arrows(seq(0.5,3.5,1), 
+       EEs05_b_mua_05[c(grep(names(EEs05_b_mua_m), pattern = 'pore', fixed=TRUE, ignore.case = FALSE))]/max(EEs05_b_mua_95), 
+       seq(0.5,3.5,1), 
+       EEs05_b_mua_95[c(grep(names(EEs05_b_mua_m), pattern = 'pore', fixed=TRUE, ignore.case = FALSE))]/max(EEs05_b_mua_95), 
+       length=0.05, angle=90, code=3)
+
+barplot(height = EEs05_b_mua_m[c(grep(names(EEs05_b_mua_m), pattern = 'active', fixed=TRUE, ignore.case = FALSE))]/max(EEs05_b_mua_95), 
+        names.arg = c('S9', 'S109', 'S8', 'S108'), ylab = 'Normalized Elementary Effect', ylim = c(0,1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Soil Thickness', xlab = 'Soils')
+arrows(seq(0.5,3.5,1), 
+       EEs05_b_mua_05[grep(names(EEs05_b_mua_05), pattern = 'active', fixed=TRUE, ignore.case = FALSE)]/max(EEs05_b_mua_95), 
+       seq(0.5,3.5,1), 
+       EEs05_b_mua_95[grep(names(EEs05_b_mua_95), pattern = 'active', fixed=TRUE, ignore.case = FALSE)]/max(EEs05_b_mua_95), 
+       length=0.05, angle=90, code=3)
+
+barplot(height = EEs05_b_mua_m[c(grep(names(EEs05_b_mua_m), pattern = 'snow_melt', fixed=TRUE, ignore.case = FALSE))]/max(EEs05_b_mua_95), 
+        names.arg = c('S9', 'S109', 'S8', 'S108'), ylab = 'Normalized Elementary Effect', ylim = c(0,0.001), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Snow Melt Temp. Coef.', xlab = 'Soils')
+arrows(seq(0.5,3.5,1), 
+       EEs05_b_mua_05[grep(names(EEs05_b_mua_05), pattern = 'snow_melt', fixed=TRUE, ignore.case = FALSE)]/max(EEs05_b_mua_95), 
+       seq(0.5,3.5,1), 
+       EEs05_b_mua_95[grep(names(EEs05_b_mua_95), pattern = 'snow_melt', fixed=TRUE, ignore.case = FALSE)]/max(EEs05_b_mua_95), 
+       length=0.05, angle=90, code=3)
+
+barplot(height = EEs05_b_mua_m[c(grep(names(EEs05_b_mua_m), pattern = 'snow_energy', fixed=TRUE, ignore.case = FALSE))]/max(EEs05_b_mua_95), 
+        names.arg = c('S9', 'S109', 'S8', 'S108'), ylab = 'Normalized Elementary Effect', ylim = c(0,0.001), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Max Snow Energy Deficit', xlab = 'Soils')
+arrows(seq(0.5,3.5,1), 
+       EEs05_b_mua_05[grep(names(EEs05_b_mua_05), pattern = 'snow_energy', fixed=TRUE, ignore.case = FALSE)]/max(EEs05_b_mua_95), 
+       seq(0.5,3.5,1), 
+       EEs05_b_mua_95[grep(names(EEs05_b_mua_95), pattern = 'snow_energy', fixed=TRUE, ignore.case = FALSE)]/max(EEs05_b_mua_95), 
+       length=0.05, angle=90, code=3)
+
+barplot(height = EEs05_b_mua_m[c(grep(names(EEs05_b_mua_m), pattern = 'sla', fixed=TRUE, ignore.case = FALSE))]/max(EEs05_b_mua_95), 
+        names.arg = c('Tree', 'Grass'), ylab = 'Normalized Elementary Effect', ylim = c(0,0.1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Specific Leaf Area', xlab = 'Vegetation')
+arrows(seq(0.5,1.5,1), 
+       EEs05_b_mua_05[grep(names(EEs05_b_mua_05), pattern = 'sla', fixed=TRUE, ignore.case = FALSE)]/max(EEs05_b_mua_95), 
+       seq(0.5,1.5,1), 
+       EEs05_b_mua_95[grep(names(EEs05_b_mua_95), pattern = 'sla', fixed=TRUE, ignore.case = FALSE)]/max(EEs05_b_mua_95), 
+       length=0.05, angle=90, code=3)
+dev.off()
+
+#Streamflow 5-95----
+#  panel----
+png('BasinAllMultEEs_ots.png', res = 300, width = 9, height = 9, units = 'in')
+opar=par
+layout(rbind(c(1,2,3), c(4,5,6), c(7,8,9)))
+barplot(height = EEsot_b_mua_m[c(grep(names(EEsot_b_mua_m), pattern = '9_m', fixed=TRUE, ignore.case = FALSE)[c(1,3,5)], grep(names(EEsot_b_mua_m), pattern = '8_m', fixed=TRUE, ignore.case = FALSE)[c(1,3,5)])][c(1,2,4,5,6,3)]/max(EEsot_b_mua_95), 
+        names.arg = c('S9', 'S109', 'S8', 'S108', 'S8 and S108', 'S9 and S109'), ylab = 'Normalized Elementary Effect', ylim = c(0,1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'm: Decay of Ksat with increasing Sat. Def.', xlab = 'Soils')
+arrows(seq(0.5,5.5,1), 
+       EEsot_b_mua_05[c(grep(names(EEsot_b_mua_05), pattern = '9_m', fixed=TRUE, ignore.case = FALSE)[c(1,3,5)], grep(names(EEsot_b_mua_05), pattern = '8_m', fixed=TRUE, ignore.case = FALSE)[c(1,3,5)])][c(1,2,4,5,6,3)]/max(EEsot_b_mua_95), 
+       seq(0.5,5.5,1), 
+       EEsot_b_mua_95[c(grep(names(EEsot_b_mua_95), pattern = '9_m', fixed=TRUE, ignore.case = FALSE)[c(1,3,5)], grep(names(EEsot_b_mua_95), pattern = '8_m', fixed=TRUE, ignore.case = FALSE)[c(1,3,5)])][c(1,2,4,5,6,3)]/max(EEsot_b_mua_95), 
+       length=0.05, angle=90, code=3)
+
+barplot(height = EEsot_b_mua_m[c(grep(names(EEsot_b_mua_m), pattern = 'sat_to_gw', fixed=TRUE, ignore.case = FALSE))]/max(EEsot_b_mua_95), 
+        names.arg = c('S9', 'S109', 'S8', 'S108'), ylab = 'Normalized Elementary Effect', ylim = c(0,1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Sat. to GW Coef.', xlab = 'Soils')
+arrows(seq(0.5,3.5,1), 
+       EEsot_b_mua_05[c(grep(names(EEsot_b_mua_m), pattern = 'sat_to_gw', fixed=TRUE, ignore.case = FALSE))]/max(EEsot_b_mua_95), 
+       seq(0.5,3.5,1), 
+       EEsot_b_mua_95[c(grep(names(EEsot_b_mua_m), pattern = 'sat_to_gw', fixed=TRUE, ignore.case = FALSE))]/max(EEsot_b_mua_95), 
+       length=0.05, angle=90, code=3)
+
+par(mar=c(6,4,3,0.5))
+barplot(height = EEsot_b_mua_m[c(grep(names(EEsot_b_mua_m), pattern = 'Ksat', fixed=TRUE, ignore.case = FALSE))]/max(EEsot_b_mua_95), 
+        names.arg = c('S9 Ksat', 'S9 vKsat', 'S109 Ksat', 'S109 vKsat', 'S8 Ksat', 'S8 vKsat', 'S108 Ksat', 'S108 vKsat', 'S8 and S108', 'S9 and S109'), ylab = 'Normalized Elementary Effect', ylim = c(0,1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Hydraulic Conductivity', xlab = '', las = 2)
+axis(side = 1, at = 5, labels = 'Soils', line = 4, cex.axis = 1.2, tick = FALSE)
+arrows(seq(0.5,9.5,1), 
+       EEsot_b_mua_05[grep(names(EEsot_b_mua_05), pattern = 'Ksat', fixed=TRUE, ignore.case = FALSE)]/max(EEsot_b_mua_95), 
+       seq(0.5,9.5,1), 
+       EEsot_b_mua_95[grep(names(EEsot_b_mua_95), pattern = 'Ksat', fixed=TRUE, ignore.case = FALSE)]/max(EEsot_b_mua_95), 
+       length=0.05, angle=90, code=3)
+
+par(opar)
+barplot(height = EEsot_b_mua_m[c(grep(names(EEsot_b_mua_m), pattern = 'psi_air', fixed=TRUE, ignore.case = FALSE))]/max(EEsot_b_mua_95), 
+        names.arg = c('S9', 'S109', 'S8', 'S108'), ylab = 'Normalized Elementary Effect', ylim = c(0,1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Air Entry Pressure', xlab = 'Soils')
+arrows(seq(0.5,3.5,1), 
+       EEsot_b_mua_05[c(grep(names(EEsot_b_mua_m), pattern = 'psi_air', fixed=TRUE, ignore.case = FALSE))]/max(EEsot_b_mua_95), 
+       seq(0.5,3.5,1), 
+       EEsot_b_mua_95[c(grep(names(EEsot_b_mua_m), pattern = 'psi_air', fixed=TRUE, ignore.case = FALSE))]/max(EEsot_b_mua_95), 
+       length=0.05, angle=90, code=3)
+
+barplot(height = EEsot_b_mua_m[c(grep(names(EEsot_b_mua_m), pattern = 'pore', fixed=TRUE, ignore.case = FALSE))]/max(EEsot_b_mua_95), 
+        names.arg = c('S9', 'S109', 'S8', 'S108'), ylab = 'Normalized Elementary Effect', ylim = c(0,1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Pore Size', xlab = 'Soils')
+arrows(seq(0.5,3.5,1), 
+       EEsot_b_mua_05[grep(names(EEsot_b_mua_05), pattern = 'pore', fixed=TRUE, ignore.case = FALSE)]/max(EEsot_b_mua_95), 
+       seq(0.5,3.5,1), 
+       EEsot_b_mua_95[grep(names(EEsot_b_mua_95), pattern = 'pore', fixed=TRUE, ignore.case = FALSE)]/max(EEsot_b_mua_95), 
+       length=0.05, angle=90, code=3)
+
+barplot(height = EEsot_b_mua_m[c(grep(names(EEsot_b_mua_m), pattern = 'active', fixed=TRUE, ignore.case = FALSE))]/max(EEsot_b_mua_95), 
+        names.arg = c('S9', 'S109', 'S8', 'S108'), ylab = 'Normalized Elementary Effect', ylim = c(0,1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Soil Thickness', xlab = 'Soils')
+arrows(seq(0.5,3.5,1), 
+       EEsot_b_mua_05[grep(names(EEsot_b_mua_05), pattern = 'active', fixed=TRUE, ignore.case = FALSE)]/max(EEsot_b_mua_95), 
+       seq(0.5,3.5,1), 
+       EEsot_b_mua_95[grep(names(EEsot_b_mua_95), pattern = 'active', fixed=TRUE, ignore.case = FALSE)]/max(EEsot_b_mua_95), 
+       length=0.05, angle=90, code=3)
+
+barplot(height = EEsot_b_mua_m[c(grep(names(EEsot_b_mua_m), pattern = 'snow_melt', fixed=TRUE, ignore.case = FALSE))]/max(EEsot_b_mua_95), 
+        names.arg = c('S9', 'S109', 'S8', 'S108'), ylab = 'Normalized Elementary Effect', ylim = c(0,0.001), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Snow Melt Temp. Coef.', xlab = 'Soils')
+arrows(seq(0.5,3.5,1), 
+       EEsot_b_mua_05[grep(names(EEsot_b_mua_05), pattern = 'snow_melt', fixed=TRUE, ignore.case = FALSE)]/max(EEsot_b_mua_95), 
+       seq(0.5,3.5,1), 
+       EEsot_b_mua_95[grep(names(EEsot_b_mua_95), pattern = 'snow_melt', fixed=TRUE, ignore.case = FALSE)]/max(EEsot_b_mua_95), 
+       length=0.05, angle=90, code=3)
+
+barplot(height = EEsot_b_mua_m[c(grep(names(EEsot_b_mua_m), pattern = 'snow_energy', fixed=TRUE, ignore.case = FALSE))]/max(EEsot_b_mua_95), 
+        names.arg = c('S9', 'S109', 'S8', 'S108'), ylab = 'Normalized Elementary Effect', ylim = c(0,0.001), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Max Snow Energy Deficit', xlab = 'Soils')
+arrows(seq(0.5,3.5,1), 
+       EEsot_b_mua_05[grep(names(EEsot_b_mua_05), pattern = 'snow_energy', fixed=TRUE, ignore.case = FALSE)]/max(EEsot_b_mua_95), 
+       seq(0.5,3.5,1), 
+       EEsot_b_mua_95[grep(names(EEsot_b_mua_95), pattern = 'snow_energy', fixed=TRUE, ignore.case = FALSE)]/max(EEsot_b_mua_95), 
+       length=0.05, angle=90, code=3)
+
+barplot(height = EEsot_b_mua_m[c(grep(names(EEsot_b_mua_m), pattern = 'sla', fixed=TRUE, ignore.case = FALSE))]/max(EEsot_b_mua_95), 
+        names.arg = c('Tree', 'Grass'), ylab = 'Normalized Elementary Effect', ylim = c(0,0.1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Specific Leaf Area', xlab = 'Vegetation')
+arrows(seq(0.5,1.5,1), 
+       EEsot_b_mua_05[grep(names(EEsot_b_mua_05), pattern = 'sla', fixed=TRUE, ignore.case = FALSE)]/max(EEsot_b_mua_95), 
+       seq(0.5,1.5,1), 
+       EEsot_b_mua_95[grep(names(EEsot_b_mua_95), pattern = 'sla', fixed=TRUE, ignore.case = FALSE)]/max(EEsot_b_mua_95), 
+       length=0.05, angle=90, code=3)
+dev.off()
+
+#Streamflow 95%----
+#  panel----
+png('BasinAllMultEEs_95s.png', res = 300, width = 9, height = 9, units = 'in')
+opar=par
+layout(rbind(c(1,2,3), c(4,5,6), c(7,8,9)))
+barplot(height = EEs95_b_mua_m[c(grep(names(EEs95_b_mua_m), pattern = '9_m', fixed=TRUE, ignore.case = FALSE)[c(1,3,5)], grep(names(EEs95_b_mua_m), pattern = '8_m', fixed=TRUE, ignore.case = FALSE)[c(1,3,5)])][c(1,2,4,5,6,3)]/max(EEs95_b_mua_95), 
+        names.arg = c('S9', 'S109', 'S8', 'S108', 'S8 and S108', 'S9 and S109'), ylab = 'Normalized Elementary Effect', ylim = c(0,1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'm: Decay of Ksat with increasing Sat. Def.', xlab = 'Soils', las=2)
+arrows(seq(0.5,5.5,1), 
+       EEs95_b_mua_05[c(grep(names(EEs95_b_mua_05), pattern = '9_m', fixed=TRUE, ignore.case = FALSE)[c(1,3,5)], grep(names(EEs95_b_mua_05), pattern = '8_m', fixed=TRUE, ignore.case = FALSE)[c(1,3,5)])][c(1,2,4,5,6,3)]/max(EEs95_b_mua_95), 
+       seq(0.5,5.5,1), 
+       EEs95_b_mua_95[c(grep(names(EEs95_b_mua_95), pattern = '9_m', fixed=TRUE, ignore.case = FALSE)[c(1,3,5)], grep(names(EEs95_b_mua_95), pattern = '8_m', fixed=TRUE, ignore.case = FALSE)[c(1,3,5)])][c(1,2,4,5,6,3)]/max(EEs95_b_mua_95), 
+       length=0.05, angle=90, code=3)
+
+barplot(height = EEs95_b_mua_m[c(grep(names(EEs95_b_mua_m), pattern = 'sat_to_gw', fixed=TRUE, ignore.case = FALSE))]/max(EEs95_b_mua_95), 
+        names.arg = c('S9', 'S109', 'S8', 'S108'), ylab = 'Normalized Elementary Effect', ylim = c(0,1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Sat. to GW Coef.', xlab = 'Soils')
+arrows(seq(0.5,3.5,1), 
+       EEs95_b_mua_05[c(grep(names(EEs95_b_mua_m), pattern = 'sat_to_gw', fixed=TRUE, ignore.case = FALSE))]/max(EEs95_b_mua_95), 
+       seq(0.5,3.5,1), 
+       EEs95_b_mua_95[c(grep(names(EEs95_b_mua_m), pattern = 'sat_to_gw', fixed=TRUE, ignore.case = FALSE))]/max(EEs95_b_mua_95), 
+       length=0.05, angle=90, code=3)
+
+par(mar=c(6,4,3,0.5))
+barplot(height = EEs95_b_mua_m[c(grep(names(EEs95_b_mua_m), pattern = 'Ksat', fixed=TRUE, ignore.case = FALSE))]/max(EEs95_b_mua_95), 
+        names.arg = c('S9 Ksat', 'S9 vKsat', 'S109 Ksat', 'S109 vKsat', 'S8 Ksat', 'S8 vKsat', 'S108 Ksat', 'S108 vKsat', 'S8 and S108', 'S9 and S109'), ylab = 'Normalized Elementary Effect', ylim = c(0,1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Hydraulic Conductivity', xlab = '', las = 2)
+axis(side = 1, at = 5, labels = 'Soils', line = 4, cex.axis = 1.2, tick = FALSE)
+arrows(seq(0.5,9.5,1), 
+       EEs95_b_mua_05[grep(names(EEs95_b_mua_05), pattern = 'Ksat', fixed=TRUE, ignore.case = FALSE)]/max(EEs95_b_mua_95), 
+       seq(0.5,9.5,1), 
+       EEs95_b_mua_95[grep(names(EEs95_b_mua_95), pattern = 'Ksat', fixed=TRUE, ignore.case = FALSE)]/max(EEs95_b_mua_95), 
+       length=0.05, angle=90, code=3)
+
+par(opar)
+barplot(height = EEs95_b_mua_m[c(grep(names(EEs95_b_mua_m), pattern = 'psi_air', fixed=TRUE, ignore.case = FALSE))]/max(EEs95_b_mua_95), 
+        names.arg = c('S9', 'S109', 'S8', 'S108'), ylab = 'Normalized Elementary Effect', ylim = c(0,1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Air Entry Pressure', xlab = 'Soils')
+arrows(seq(0.5,3.5,1), 
+       EEs95_b_mua_05[c(grep(names(EEs95_b_mua_m), pattern = 'psi_air', fixed=TRUE, ignore.case = FALSE))]/max(EEs95_b_mua_95), 
+       seq(0.5,3.5,1), 
+       EEs95_b_mua_95[c(grep(names(EEs95_b_mua_m), pattern = 'psi_air', fixed=TRUE, ignore.case = FALSE))]/max(EEs95_b_mua_95), 
+       length=0.05, angle=90, code=3)
+
+barplot(height = EEs95_b_mua_m[c(grep(names(EEs95_b_mua_m), pattern = 'pore', fixed=TRUE, ignore.case = FALSE))]/max(EEs95_b_mua_95), 
+        names.arg = c('S9', 'S109', 'S8', 'S108'), ylab = 'Normalized Elementary Effect', ylim = c(0,1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Pore Size', xlab = 'Soils')
+arrows(seq(0.5,3.5,1), 
+       EEs95_b_mua_05[grep(names(EEs95_b_mua_05), pattern = 'pore', fixed=TRUE, ignore.case = FALSE)]/max(EEs95_b_mua_95), 
+       seq(0.5,3.5,1), 
+       EEs95_b_mua_95[grep(names(EEs95_b_mua_95), pattern = 'pore', fixed=TRUE, ignore.case = FALSE)]/max(EEs95_b_mua_95), 
+       length=0.05, angle=90, code=3)
+
+barplot(height = EEs95_b_mua_m[c(grep(names(EEs95_b_mua_m), pattern = 'active', fixed=TRUE, ignore.case = FALSE))]/max(EEs95_b_mua_95), 
+        names.arg = c('S9', 'S109', 'S8', 'S108'), ylab = 'Normalized Elementary Effect', ylim = c(0,1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Soil Thickness', xlab = 'Soils')
+arrows(seq(0.5,3.5,1), 
+       EEs95_b_mua_05[grep(names(EEs95_b_mua_05), pattern = 'active', fixed=TRUE, ignore.case = FALSE)]/max(EEs95_b_mua_95), 
+       seq(0.5,3.5,1), 
+       EEs95_b_mua_95[grep(names(EEs95_b_mua_95), pattern = 'active', fixed=TRUE, ignore.case = FALSE)]/max(EEs95_b_mua_95), 
+       length=0.05, angle=90, code=3)
+
+barplot(height = EEs95_b_mua_m[c(grep(names(EEs95_b_mua_m), pattern = 'snow_melt', fixed=TRUE, ignore.case = FALSE))]/max(EEs95_b_mua_95), 
+        names.arg = c('S9', 'S109', 'S8', 'S108'), ylab = 'Normalized Elementary Effect', ylim = c(0,0.005), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Snow Melt Temp. Coef.', xlab = 'Soils')
+arrows(seq(0.5,3.5,1), 
+       EEs95_b_mua_05[grep(names(EEs95_b_mua_05), pattern = 'snow_melt', fixed=TRUE, ignore.case = FALSE)]/max(EEs95_b_mua_95), 
+       seq(0.5,3.5,1), 
+       EEs95_b_mua_95[grep(names(EEs95_b_mua_95), pattern = 'snow_melt', fixed=TRUE, ignore.case = FALSE)]/max(EEs95_b_mua_95), 
+       length=0.05, angle=90, code=3)
+
+barplot(height = EEs95_b_mua_m[c(grep(names(EEs95_b_mua_m), pattern = 'snow_energy', fixed=TRUE, ignore.case = FALSE))]/max(EEs95_b_mua_95), 
+        names.arg = c('S9', 'S109', 'S8', 'S108'), ylab = 'Normalized Elementary Effect', ylim = c(0,0.005), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Max Snow Energy Deficit', xlab = 'Soils')
+arrows(seq(0.5,3.5,1), 
+       EEs95_b_mua_05[grep(names(EEs95_b_mua_05), pattern = 'snow_energy', fixed=TRUE, ignore.case = FALSE)]/max(EEs95_b_mua_95), 
+       seq(0.5,3.5,1), 
+       EEs95_b_mua_95[grep(names(EEs95_b_mua_95), pattern = 'snow_energy', fixed=TRUE, ignore.case = FALSE)]/max(EEs95_b_mua_95), 
+       length=0.05, angle=90, code=3)
+
+barplot(height = EEs95_b_mua_m[c(grep(names(EEs95_b_mua_m), pattern = 'sla', fixed=TRUE, ignore.case = FALSE))]/max(EEs95_b_mua_95), 
+        names.arg = c('Tree', 'Grass'), ylab = 'Normalized Elementary Effect', ylim = c(0,0.1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Specific Leaf Area', xlab = 'Vegetation')
+arrows(seq(0.5,1.5,1), 
+       EEs95_b_mua_05[grep(names(EEs95_b_mua_05), pattern = 'sla', fixed=TRUE, ignore.case = FALSE)]/max(EEs95_b_mua_95), 
+       seq(0.5,1.5,1), 
+       EEs95_b_mua_95[grep(names(EEs95_b_mua_95), pattern = 'sla', fixed=TRUE, ignore.case = FALSE)]/max(EEs95_b_mua_95), 
+       length=0.05, angle=90, code=3)
+dev.off()
 
 #Compute the correlation of parameters that have non-zero EEs----
 #Squared norm (L2) of a vector
@@ -3034,7 +4192,7 @@ dev.off()
 ClustMethods <- c( "average", "single", "complete", "ward")
 names(ClustMethods) <- c( "average", "single", "complete", "ward")
 
-#All variables----
+# All variables----
 df = (EEs05_b[,which((!(colnames(EEs05_b) %in% ColsAggregated)) & (EEs05_b_mua_m != 0))])
 #Seems to be very odd clusters when they are scaled, but good clusters when they are not scaled
 # for (i in 1:ncol(df)){
@@ -3053,8 +4211,8 @@ map_dbl(ClustMethods, ac)
 pltree(agnes(t(df), method = 'ward'), cex = 0.6, hang = -1, main = "Dendrogram of agnes", )
 pltree(agnes(t(df), method = 'complete'), cex = 0.6, hang = -1, main = "Dendrogram of agnes", )
 
-#Only the ParamsCluster----
-# Streamflow 5th %-ile----
+# Only the ParamsCluster----
+#  Streamflow 5th %-ile----
 df = (EEs05_b[,which((colnames(EEs05_b) %in% ParamsCluster))])
 for (i in 1:ncol(df)){
   #Get column mean and sd to normalize
@@ -3098,7 +4256,7 @@ fviz_cluster(list(data = t(df), cluster = cutree(as.hclust(agnes(t(df), method =
 #Panel plot with PCAs
 fviz_cluster(list(data = t(df), cluster = cutree(as.hclust(agnes(t(df), method = 'ward')), k = 15)), stand = TRUE, show.clust.cent = FALSE, ellipse = TRUE, shape = 16, geom = 'point', axes = c(1,2))
 
-# Streamflow 5th-95th %-ile----
+#  Streamflow 5th-95th %-ile----
 df = (EEsot_b[,which((colnames(EEsot_b) %in% ParamsCluster))])
 for (i in 1:ncol(df)){
   #Get column mean and sd to normalize
@@ -3146,7 +4304,7 @@ fviz_cluster(list(data = t(df), cluster = cutree(as.hclust(agnes(t(df), method =
 #Panel plot with PCAs
 fviz_cluster(list(data = t(df), cluster = cutree(as.hclust(agnes(t(df), method = 'ward')), k = 15)), stand = TRUE, show.clust.cent = FALSE, ellipse = TRUE, shape = 16, geom = 'point', axes = c(1,2))
 
-# Streamflow 95th %-ile----
+#  Streamflow 95th %-ile----
 df = (EEs95_b[,which((colnames(EEs95_b) %in% ParamsCluster))])
 for (i in 1:ncol(df)){
  #Get column mean and sd to normalize
@@ -3195,7 +4353,7 @@ fviz_cluster(list(data = t(df), cluster = cutree(as.hclust(agnes(t(df), method =
 fviz_cluster(list(data = t(df), cluster = cutree(as.hclust(agnes(t(df), method = 'ward')), k = 15)), stand = TRUE, show.clust.cent = FALSE, ellipse = TRUE, shape = 16, geom = 'point', axes = c(1,2))
 
 
-# TN 5th %-ile----
+#  TN 5th %-ile----
 df = (EEsTN05_b[,which((colnames(EEs05_b) %in% ParamsCluster))])
 for (i in 1:ncol(df)){
   #Get column mean and sd to normalize
@@ -3221,7 +4379,7 @@ for (k in seq(15,35,5)){
   dev.off()
 }
 
-# TN 50th %-ile----
+#  TN 50th %-ile----
 df = (EEsTNMed_b[,which((colnames(EEs05_b) %in% ParamsCluster))])
 for (i in 1:ncol(df)){
   #Get column mean and sd to normalize
@@ -3247,7 +4405,7 @@ for (k in seq(15,35,5)){
   dev.off()
 }
 
-# TN 5th %-ile----
+#  TN 5th %-ile----
 df = (EEsTN95_b[,which((colnames(EEs05_b) %in% ParamsCluster))])
 for (i in 1:ncol(df)){
   #Get column mean and sd to normalize
@@ -3369,7 +4527,6 @@ options(scipen = 0)
 #Determine the practical significance of the largest EEs----
 #Get all of the indices for which a particular parameter changed.
 which((OrigParams[2:nrow(OrigParams),"h_gw_loss_coeff"] - OrigParams[1:(nrow(OrigParams)-1),"h_gw_loss_coeff"]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),"h_gw_loss_coeff"] - OrigParams[1:(nrow(OrigParams)-1),"h_gw_loss_coeff"]) != 0) %in% seq(272,10880,272))]
-
 
 #Check that EEs match (they do)
 #Basin
