@@ -43,6 +43,9 @@ cut -d ' ' -f 135-137 ${MODEL}.referenceDVO >> ${MODEL}.reference
 cut -d ' ' -f 135-137 ./sets/${MODEL}_S${SEED}.setDVO > ./sets/${MODEL}_S${SEED}.set
 - If the last line in your .set files does not have a #, add a new line with just "#"
 
+- Hypervolume calculations for more than ~4 objectives can take a very long time to compute with the built-in function. Try instead using these methods: https://github.com/MOEAFramework/Hypervolume
+  I followed the directions for WFG setup. After you change the global.properties file, you run the .jar file from within the MOEAFramework file.
+
 7) find_metrics.sh (uses MOEAFramework)
 - assumes you will write files to a directory "metrics"
 - change lines 2-3 for your problem
