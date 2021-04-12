@@ -453,6 +453,27 @@ psych::pairs.panels(Likes200[,c(8,9,13,17,21)], smooth = FALSE, scale = TRUE,
                     jiggle = FALSE, stars = FALSE, smoother = TRUE, breaks = 20, rug = FALSE, hist.col = 'gray')
 dev.off()
 
+#Add decision metrics to plot
+SAE05g = apply(X = apply(X = apply(X = BasinSF05g, MARGIN = 1, FUN = "-", obs05g$Flow), MARGIN = 2, FUN = abs), MARGIN = 2, FUN = sum)
+SAEotg = apply(X = apply(X = apply(X = BasinSFotg, MARGIN = 1, FUN = "-", obsotg$Flow), MARGIN = 2, FUN = abs), MARGIN = 2, FUN = sum)
+SAE95 = apply(X = apply(X = apply(X = BasinSF95, MARGIN = 1, FUN = "-", obs95$Flow), MARGIN = 2, FUN = abs), MARGIN = 2, FUN = sum)
+SAETN05 = apply(X = apply(X = apply(X = BasinTN05[,-1], MARGIN = 1, FUN = "-", obsTN$TN), MARGIN = 2, FUN = abs), MARGIN = 2, FUN = sum)
+SAETNMed = apply(X = apply(X = apply(X = BasinTNMed[,-1], MARGIN = 1, FUN = "-", obsTN$TN), MARGIN = 2, FUN = abs), MARGIN = 2, FUN = sum)
+SAETN95 = apply(X = apply(X = apply(X = BasinTN95[,-1], MARGIN = 1, FUN = "-", obsTN$TN), MARGIN = 2, FUN = abs), MARGIN = 2, FUN = sum)
+
+#Plot of calibration metric correlations
+png('MetricScatterplot_CalDec_Pearson.png', res = 300, width = 7, height = 7, units = 'in')
+psych::pairs.panels(cbind(Likes200[,c(8,13,17,21)], SAE05g, SAEotg, SAE95, SAETN05, SAETNMed, SAETN95), smooth = FALSE, scale = TRUE, 
+                    density = FALSE, ellipses = FALSE, digits = 2, method = 'pearson',pch = 16, 
+                    jiggle = FALSE, stars = FALSE, smoother = TRUE, breaks = 20, rug = FALSE, hist.col = 'gray', cex.cor = 0.8)
+dev.off()
+
+png('MetricScatterplot_CalDec_Spearman.png', res = 300, width = 7, height = 7, units = 'in')
+psych::pairs.panels(cbind(Likes200[,c(8,13,17,21)], SAE05g, SAEotg, SAE95, SAETN05, SAETNMed, SAETN95), 
+                    smooth = FALSE, scale = FALSE, density = FALSE, ellipses = FALSE, digits = 2, method = 'spearman',pch = 16, 
+                    stars = FALSE, smoother = TRUE, breaks = 20, rug = FALSE, hist.col = 'gray', jiggle = FALSE, cex.cor = 0.8)
+dev.off()
+
 #Save input data for Rivanna run----
 #save.image(file = "C:/Users/js4yd/OneDrive - University of Virginia/BES_Data/BES_Data/RHESSysFiles/BR&POBR/EEs_All_Setup.RData")
 #All data
