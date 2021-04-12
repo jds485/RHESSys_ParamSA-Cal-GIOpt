@@ -1,7 +1,5 @@
 #Script used to sample parameters for Morris SA of RHESSys streamflow-specific def parameters
 
-library(sensitivity)
-
 arg = commandArgs(trailingOnly = TRUE)
 #1: working directory
 #2: problem file name
@@ -9,6 +7,10 @@ arg = commandArgs(trailingOnly = TRUE)
 #4: number of trajectories
 #5: grid levels
 #6: grid jump
+#7: R library path
+
+.libPaths(arg[7])
+library(sensitivity)
 
 #setwd("/scratch/js4yd/MorrisSA/RHESSysRuns/")
 setwd(arg[1])
