@@ -5,6 +5,8 @@
 dir_ColFuns = "C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\Hydrology\\USGSGauges"
 
 #Load libraries----
+library(sp)
+library(rgdal)
 library(vroom)
 library(cluster)
 library(factoextra)
@@ -3205,7 +3207,7 @@ dev.off()
 # legend('bottomright', legend = c('95th: Hillslopes', 'Mean: Hillslopes', '95th: Basin', 'Mean: Basin', 'Selected Percentage'), lty = c(1,1,1,1,2), col = c('black', 'gray', 'blue', 'skyblue', 'gray'), pch = c(NA,NA,16,16,NA), pt.cex = 0.4)
 # dev.off()
 
-pdf(file = 'fig1.pdf', width = 5, height = 5, title = 'SAfig2')
+pdf(file = 'fig1_old.pdf', width = 5, height = 5, title = 'SAfig2')
 par(mar=c(4,4,0.5,0.5))
 plot(x = seq(1,100,1), y = ParamTotals_ThreshPercent_onlyhg_Agg, type = 'l', xlab = 'Top X Percent of Parameters Selected', ylab = 'Number of Parameters Selected', ylim = c(0,105), xlim = c(0,100), col = 'gray')
 par(new=TRUE)
@@ -3220,7 +3222,7 @@ lines(c(10,10), c(-10,200), lty=2, col='gray')
 legend('bottomright', legend = c('95th: Hillslopes', 'Mean: Hillslopes', '95th: Basin', 'Mean: Basin', 'Selected Percentage'), lty = c(1,1,1,1,2), col = c('black', 'gray', 'blue', 'skyblue', 'gray'), pch = c(NA,NA,16,16,NA), pt.cex = 0.4)
 dev.off()
 
-png(file = 'fig1_NoHillTN.png', width = 5, height = 5, units = 'in', res = 300)
+png(file = 'fig1_NoHillTN_PrevRed.png', width = 5, height = 5, units = 'in', res = 300)
 par(mar=c(4,4,0.5,0.5))
 plot(x = seq(1,100,1), y = ParamTotals_ThreshPercent_onlyhg_Agg_NoTN, type = 'l', xlab = 'Top X Percent of Parameters Selected', ylab = 'Number of Parameters Selected', ylim = c(0,105), xlim = c(0,100), col = 'gray')
 par(new=TRUE)
@@ -3235,6 +3237,36 @@ lines(c(10,10), c(-10,200), lty=2, col='gray')
 par(new=TRUE)
 plot(x = seq(1,100,1), y = ParamTotals_ThreshPercent_onlyhg_Agg, type = 'l', xlab = '', ylab = '', ylim = c(0,105), xlim = c(0,100), col = 'red', axes=FALSE)
 legend('bottomright', legend = c('95th: Hillslopes (paper)', '95th: Hillslopes (No TN Metrics)', 'Mean: Hillslopes (No TN Metrics)', '95th: Basin', 'Mean: Basin', 'Selected Percentage'), lty = c(1,1,1,1,1,2), col = c('red', 'black', 'gray', 'blue', 'skyblue', 'gray'), pch = c(NA,NA,NA,16,16,NA), pt.cex = 0.4, cex=0.8)
+dev.off()
+
+png(file = 'fig1_NoHillTN.png', width = 5, height = 5, units = 'in', res = 300)
+par(mar=c(4,4,0.5,0.5))
+plot(x = seq(1,100,1), y = ParamTotals_ThreshPercent_onlyhg_Agg_NoTN, type = 'l', xlab = 'Top X Percent of Parameters Selected', ylab = 'Number of Parameters Selected', ylim = c(0,105), xlim = c(0,100), col = 'gray')
+par(new=TRUE)
+plot(x = seq(1,100,1), y = ParamTotals_hg_Agg_NoTN, type = 'l', ylim = c(0,105), xlim = c(0,100), col = 'gray', xlab = '', ylab = '', axes = FALSE, cex = 0.4)
+par(new=TRUE)
+plot(x = seq(1,100,1), y = ParamTotals_ThreshPercent_hg_Agg_NoTN, type = 'l', ylim = c(0,105), xlim = c(0,100), col = 'black', xlab = '', ylab = '', axes = FALSE)
+par(new=TRUE)
+plot(x = seq(1,100,1), y = ParamTotals_bg_Agg, type = 'o', pch = 16, ylim = c(0,105), xlim = c(0,100), col = 'skyblue', xlab = '', ylab = '', axes = FALSE, cex = 0.4)
+par(new=TRUE)
+plot(x = seq(1,100,1), y = ParamTotals_ThreshPercent_g_Agg, type = 'o', ylim = c(0,105), xlim = c(0,100), col = 'blue', xlab = '', ylab = '', axes = FALSE, pch = 16, cex = 0.4)
+lines(c(10,10), c(-10,200), lty=2, col='gray')
+legend('bottomright', legend = c('95th: Hillslopes (No TN Metrics)', 'Mean: Hillslopes (No TN Metrics)', '95th: Basin', 'Mean: Basin', 'Selected Percentage'), lty = c(1,1,1,1,2), col = c('black', 'gray', 'blue', 'skyblue', 'gray'), pch = c(NA,NA,16,16,NA), pt.cex = 0.4, cex=0.8)
+dev.off()
+
+pdf(file = 'fig1.pdf', width = 5, height = 5, title = 'SAfig1')
+par(mar=c(4,4,0.5,0.5))
+plot(x = seq(1,100,1), y = ParamTotals_ThreshPercent_onlyhg_Agg_NoTN, type = 'l', xlab = 'Top X Percent of Parameters Selected', ylab = 'Number of Parameters Selected', ylim = c(0,105), xlim = c(0,100), col = 'gray')
+par(new=TRUE)
+plot(x = seq(1,100,1), y = ParamTotals_hg_Agg_NoTN, type = 'l', ylim = c(0,105), xlim = c(0,100), col = 'gray', xlab = '', ylab = '', axes = FALSE, cex = 0.4)
+par(new=TRUE)
+plot(x = seq(1,100,1), y = ParamTotals_ThreshPercent_hg_Agg_NoTN, type = 'l', ylim = c(0,105), xlim = c(0,100), col = 'black', xlab = '', ylab = '', axes = FALSE)
+par(new=TRUE)
+plot(x = seq(1,100,1), y = ParamTotals_bg_Agg, type = 'o', pch = 16, ylim = c(0,105), xlim = c(0,100), col = 'skyblue', xlab = '', ylab = '', axes = FALSE, cex = 0.4)
+par(new=TRUE)
+plot(x = seq(1,100,1), y = ParamTotals_ThreshPercent_g_Agg, type = 'o', ylim = c(0,105), xlim = c(0,100), col = 'blue', xlab = '', ylab = '', axes = FALSE, pch = 16, cex = 0.4)
+lines(c(10,10), c(-10,200), lty=2, col='gray')
+legend('bottomright', legend = c('95th: Hillslopes (No TN Metrics)', 'Mean: Hillslopes (No TN Metrics)', '95th: Basin', 'Mean: Basin', 'Selected Percentage'), lty = c(1,1,1,1,2), col = c('black', 'gray', 'blue', 'skyblue', 'gray'), pch = c(NA,NA,16,16,NA), pt.cex = 0.4, cex=0.8)
 dev.off()
 
 #Color scheme for plotting EEs in categories of parameters----
@@ -5348,6 +5380,151 @@ plot(x = rep(-1,8),y = c(3,6.5,11.5,21,30,34.5,36,37), col = colos_paper[c(5,4,4
 text(x = 4.5, y = 38.5, expression(bold('   More\nForested')))
 text(x = 11.5, y = 38.5, expression(bold('     More\nImpervious')))
 text(x = 0, y = 39, expression(bold('Basin')), srt = 90)
+text(x = -12, y = 39, 'D', cex = 1.5)
+par(xpd=FALSE)
+box(which = 'figure')
+dev.off()
+
+png('HillRankTop1295_All_AgghbNoTN_paper_g.png', res = 300, height = 7, width = 7, units = 'in')
+par(mar = c(2,12.5,2,4.5), mgp = c(1,1,0))
+for (h in 0:length(uhills)){
+  #Loop over the top 10% ranks
+  for (j in 1:length(SortRanksMua_hg_Agg_paper)){
+    if (h == 0){
+      #Basin
+      if (j == 1){
+        plot(x = h, y = j, xlim = c(-1, 15), ylim = c(0,length(SortRanksMua_hg_Agg_paper)), pch = 15, xlab = 'Hillslope ID', ylab = '', col = colFun(ifelse(SortRanksMua_hg_Agg_paper[j] %in% unique(c(ParamSelect_bg_Agg)), 1, 0)), axes = FALSE, cex.lab = 1.5)
+        polygon(x = c(-0.5,-0.5,14.5,14.5), y = c(0.5,37.5,37.5,0.5), col='black')
+        par(new=TRUE)
+        plot(x = h, y = j, xlim = c(-1, 15), ylim = c(0,length(SortRanksMua_hg_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(ifelse(SortRanksMua_hg_Agg_paper[j] %in% unique(c(ParamSelect_bg_Agg)), 1, 0)), axes = FALSE, cex.lab = 1.5)
+      }else{
+        plot(x = h, y = j, xlim = c(-1, 15), ylim = c(0,length(SortRanksMua_hg_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(ifelse(SortRanksMua_hg_Agg_paper[j] %in% unique(c(ParamSelect_bg_Agg)), 1, 0)), axes = FALSE)
+      }
+    }else{
+      #Hillslopes
+      plot(x = h, y = j, xlim = c(-1, 15), ylim = c(0,length(SortRanksMua_hg_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(ifelse(SortRanksMua_hg_Agg_paper[j] %in% unique(c(ph10g[[h]])), 1, 0)), axes = FALSE)
+    }
+    par(new=TRUE)
+  }
+}
+rm(h,j)
+par(new=FALSE, mgp = c(3,1,0))
+axis(side = 1, at = 0, labels = 'B', pos = 0.5)
+axis(side = 1, at = seq(1,14,1), labels = TRUE, pos = 0.5)
+axis(side = 2, at = seq(1,length(SortRanksMua_hg_Agg_paper),1), labels = LabelNames_h_paper, las = 1)
+legend('right', title = expression(bold('Selected for\nCalibration?')), legend = c('Yes', 'No'), pch = 15, col = colFun(c(1,0)), inset = -0.23, xpd = TRUE, bty = 'n')
+lines(c(-0.5,15), c(36.5,36.5), col = 'white')
+lines(c(-0.5,15), c(35.5,35.5), col = 'white')
+lines(c(-0.5,15), c(33.5,33.5), col = 'white')
+lines(c(-0.5,15), c(26.5,26.5), col = 'white')
+lines(c(-0.5,15), c(15.5,15.5), col = 'white')
+lines(c(-0.5,15), c(7.5,7.5), col = 'white')
+lines(c(-0.5,15), c(5.5,5.5), col = 'white')
+lines(c(8.5,8.5), c(0,40), col = 'white')
+lines(c(0.5,0.5), c(0,40), col = 'white')
+#Category symbol from EE plot
+par(new=TRUE, xpd = TRUE)
+plot(x = rep(-1,8),y = c(3,6.5,11.5,21,30,34.5,36,37), col = colos_paper[c(5,4,4,2,2,3,3,1)], pch = c(16,17,16,17,16,15,18,16), axes=FALSE, xlab = '', ylab = '', xlim = c(-1,15), ylim = c(0,length(SortRanksMua_hg_Agg_paper)))
+text(x = 4.5, y = 38.5, expression(bold('   More\nForested')))
+text(x = 11.5, y = 38.5, expression(bold('     More\nImpervious')))
+text(x = 0, y = 39, expression(bold('Basin')), srt = 90)
+text(x = -12, y = 39, 'D', cex = 1.5)
+par(xpd=FALSE)
+box(which = 'figure')
+dev.off()
+
+pdf('HillRankTop1295_All_AgghNoTN_paper_g.pdf', height = 7, width = 7, title = 'SAfig3d')
+par(mar = c(2,12.5,2,4.5), mgp = c(1,1,0))
+for (h in 0:length(uhills)){
+  #Loop over the top 10% ranks
+  for (j in 1:length(SortRanksMua_hg_Agg_paper)){
+    if (h == 0){
+      #Basin
+      if (j == 1){
+        plot(x = h, y = j, xlim = c(-1, 15), ylim = c(0,length(SortRanksMua_hg_Agg_paper)), pch = 15, xlab = 'Hillslope ID', ylab = '', col = colFun(ifelse(SortRanksMua_hg_Agg_paper[j] %in% unique(c(ParamSelect_bg_Agg, ParamSelectTN_b_Agg)), 1, 0)), axes = FALSE, cex.lab = 1.5)
+        polygon(x = c(-0.5,-0.5,14.5,14.5), y = c(0.5,37.5,37.5,0.5), col='black')
+        par(new=TRUE)
+        plot(x = h, y = j, xlim = c(-1, 15), ylim = c(0,length(SortRanksMua_hg_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(ifelse(SortRanksMua_hg_Agg_paper[j] %in% unique(c(ParamSelect_bg_Agg, ParamSelectTN_b_Agg)), 1, 0)), axes = FALSE, cex.lab = 1.5)
+      }else{
+        plot(x = h, y = j, xlim = c(-1, 15), ylim = c(0,length(SortRanksMua_hg_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(ifelse(SortRanksMua_hg_Agg_paper[j] %in% unique(c(ParamSelect_bg_Agg, ParamSelectTN_b_Agg)), 1, 0)), axes = FALSE)
+      }
+    }else{
+      #Hillslopes
+      plot(x = h, y = j, xlim = c(-1, 15), ylim = c(0,length(SortRanksMua_hg_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(ifelse(SortRanksMua_hg_Agg_paper[j] %in% unique(c(ph10g[[h]])), 1, 0)), axes = FALSE)
+    }
+    par(new=TRUE)
+  }
+}
+rm(h,j)
+par(new=FALSE, mgp = c(3,1,0))
+axis(side = 1, at = 0, labels = 'B', pos = 0.5)
+axis(side = 1, at = seq(1,14,1), labels = TRUE, pos = 0.5)
+axis(side = 2, at = seq(1,length(SortRanksMua_hg_Agg_paper),1), labels = LabelNames_h_paper, las = 1)
+legend('right', title = expression(bold('Selected for\nCalibration?')), legend = c('Yes', 'No'), pch = 15, col = colFun(c(1,0)), inset = -0.23, xpd = TRUE, bty = 'n')
+lines(c(-0.5,15), c(36.5,36.5), col = 'white')
+lines(c(-0.5,15), c(35.5,35.5), col = 'white')
+lines(c(-0.5,15), c(33.5,33.5), col = 'white')
+lines(c(-0.5,15), c(26.5,26.5), col = 'white')
+lines(c(-0.5,15), c(15.5,15.5), col = 'white')
+lines(c(-0.5,15), c(7.5,7.5), col = 'white')
+lines(c(-0.5,15), c(5.5,5.5), col = 'white')
+lines(c(8.5,8.5), c(0,40), col = 'white')
+lines(c(0.5,0.5), c(0,40), col = 'white')
+#Category symbol from EE plot
+par(new=TRUE, xpd = TRUE)
+plot(x = rep(-1,8),y = c(3,6.5,11.5,21,30,34.5,36,37), col = colos_paper[c(5,4,4,2,2,3,3,1)], pch = c(16,17,16,17,16,15,18,16), axes=FALSE, xlab = '', ylab = '', xlim = c(-1,15), ylim = c(0,length(SortRanksMua_hg_Agg_paper)))
+text(x = 4.5, y = 38.5, expression(bold('   More\nForested')))
+text(x = 11.5, y = 38.5, expression(bold('     More\nImpervious')))
+text(x = 0, y = 39, expression(bold('Basin')), srt = 90)
+text(x = -12, y = 39, 'D', cex = 1.5)
+par(xpd=FALSE)
+box(which = 'figure')
+dev.off()
+
+pdf('HillRankTop1295_All_AgghbNoTN_paper_g.pdf', height = 7, width = 7, title = 'SAfig3d')
+par(mar = c(2,12.5,2,4.5), mgp = c(1,1,0))
+for (h in 0:length(uhills)){
+  #Loop over the top 10% ranks
+  for (j in 1:length(SortRanksMua_hg_Agg_paper)){
+    if (h == 0){
+      #Basin
+      if (j == 1){
+        plot(x = h, y = j, xlim = c(-1, 15), ylim = c(0,length(SortRanksMua_hg_Agg_paper)), pch = 15, xlab = 'Hillslope ID', ylab = '', col = colFun(ifelse(SortRanksMua_hg_Agg_paper[j] %in% unique(c(ParamSelect_bg_Agg)), 1, 0)), axes = FALSE, cex.lab = 1.5)
+        polygon(x = c(-0.5,-0.5,14.5,14.5), y = c(0.5,37.5,37.5,0.5), col='black')
+        par(new=TRUE)
+        plot(x = h, y = j, xlim = c(-1, 15), ylim = c(0,length(SortRanksMua_hg_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(ifelse(SortRanksMua_hg_Agg_paper[j] %in% unique(c(ParamSelect_bg_Agg)), 1, 0)), axes = FALSE, cex.lab = 1.5)
+      }else{
+        plot(x = h, y = j, xlim = c(-1, 15), ylim = c(0,length(SortRanksMua_hg_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(ifelse(SortRanksMua_hg_Agg_paper[j] %in% unique(c(ParamSelect_bg_Agg)), 1, 0)), axes = FALSE)
+      }
+    }else{
+      #Hillslopes
+      plot(x = h, y = j, xlim = c(-1, 15), ylim = c(0,length(SortRanksMua_hg_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(ifelse(SortRanksMua_hg_Agg_paper[j] %in% unique(c(ph10g[[h]])), 1, 0)), axes = FALSE)
+    }
+    par(new=TRUE)
+  }
+}
+rm(h,j)
+par(new=FALSE, mgp = c(3,1,0))
+axis(side = 1, at = 0, labels = 'B', pos = 0.5)
+axis(side = 1, at = seq(1,14,1), labels = TRUE, pos = 0.5)
+axis(side = 2, at = seq(1,length(SortRanksMua_hg_Agg_paper),1), labels = LabelNames_h_paper, las = 1)
+legend('right', title = expression(bold('Selected for\nCalibration?')), legend = c('Yes', 'No'), pch = 15, col = colFun(c(1,0)), inset = -0.23, xpd = TRUE, bty = 'n')
+lines(c(-0.5,15), c(36.5,36.5), col = 'white')
+lines(c(-0.5,15), c(35.5,35.5), col = 'white')
+lines(c(-0.5,15), c(33.5,33.5), col = 'white')
+lines(c(-0.5,15), c(26.5,26.5), col = 'white')
+lines(c(-0.5,15), c(15.5,15.5), col = 'white')
+lines(c(-0.5,15), c(7.5,7.5), col = 'white')
+lines(c(-0.5,15), c(5.5,5.5), col = 'white')
+lines(c(8.5,8.5), c(0,40), col = 'white')
+lines(c(0.5,0.5), c(0,40), col = 'white')
+#Category symbol from EE plot
+par(new=TRUE, xpd = TRUE)
+plot(x = rep(-1,8),y = c(3,6.5,11.5,21,30,34.5,36,37), col = colos_paper[c(5,4,4,2,2,3,3,1)], pch = c(16,17,16,17,16,15,18,16), axes=FALSE, xlab = '', ylab = '', xlim = c(-1,15), ylim = c(0,length(SortRanksMua_hg_Agg_paper)))
+text(x = 4.5, y = 38.5, expression(bold('   More\nForested')))
+text(x = 11.5, y = 38.5, expression(bold('     More\nImpervious')))
+text(x = 0, y = 39, expression(bold('Basin')), srt = 90)
+text(x = -12, y = 39, 'D', cex = 1.5)
 par(xpd=FALSE)
 box(which = 'figure')
 dev.off()
