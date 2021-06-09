@@ -4025,6 +4025,17 @@ marginalPlot(x = c(out_sCh10_3_s1200n$chain[,c(12,2)], out_sCh10_2_s1200n$chain[
              MAPVals = matrix(MaxLikes[32,c(15,5)], ncol = 2))
 dev.off()
 
+png('OptSamplesMarginalPlot_atm_NoSamps.png', res = 300, units = 'in', width = 7, height = 7)
+marginalPlot(x = c(out_sCh10_3_s1200n$chain[,c(12,2)], out_sCh10_2_s1200n$chain[,c(12,2)], out_sCh10_1_s1200n$chain[,c(12,2)], out_sCh10_s1200n$chain[,c(12,2)]), prior = PriorSample[,c(12,2)], singlePanel = FALSE)
+dev.off()
+
+png('OptSamplesMarginalPlot_atm_NoSyn.png', res = 300, units = 'in', width = 7, height = 7)
+marginalPlot(x = c(out_sCh10_3_s1200n$chain[,c(12,2)], out_sCh10_2_s1200n$chain[,c(12,2)], out_sCh10_1_s1200n$chain[,c(12,2)], out_sCh10_s1200n$chain[,c(12,2)]), prior = PriorSample[,c(12,2)], singlePanel = FALSE, 
+             trueVals = t(apply(X = t(apply(X = CenPtClust8sp[,c(12,2)], MARGIN = 1, FUN = "*", (ParamRanges$Upper[c(12,2)] - ParamRanges$Lower[c(12,2)]))), MARGIN = 1, FUN = "+", ParamRanges$Lower[c(12,2)])),
+             SynVals = NULL,
+             MAPVals = matrix(MaxLikes[32,c(15,5)], ncol = 2))
+dev.off()
+
 #s9 Parameters----
 #Synthetic
 marginalPlot(x = c(out_sCh10_3_s1200n$chain[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], out_sCh10_2_s1200n$chain[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], out_sCh10_1_s1200n$chain[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], out_sCh10_s1200n$chain[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)]), prior = PriorSample[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], singlePanel = FALSE, trueVals = SynParams[c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)])
@@ -4046,6 +4057,20 @@ marginalPlot(x = c(out_sCh10_3_s1200n$chain[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 
              trueVals = t(apply(X = t(apply(X = CenPtClust8sp[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], MARGIN = 1, FUN = "*", (ParamRanges$Upper[c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)] - ParamRanges$Lower[c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)]))), MARGIN = 1, FUN = "+", ParamRanges$Lower[c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)])),
              SynVals = SynParams[c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)],
              MAPVals = matrix(MaxLikes[32,(c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)+3)], ncol = 12))
+dev.off()
+
+png('OptSamplesMarginalPlot_s9_Sel_NoSyn.png', res = 300, units = 'in', width = 7, height = 7)
+marginalPlot(x = c(out_sCh10_3_s1200n$chain[,c(4,13)], out_sCh10_2_s1200n$chain[,c(4,13)], out_sCh10_1_s1200n$chain[,c(4,13)], out_sCh10_s1200n$chain[,c(4,13)]), prior = PriorSample[,c(4,13)], singlePanel = FALSE, 
+             trueVals = t(apply(X = t(apply(X = CenPtClust8sp[,c(4,13)], MARGIN = 1, FUN = "*", (ParamRanges$Upper[c(4,13)] - ParamRanges$Lower[c(4,13)]))), MARGIN = 1, FUN = "+", ParamRanges$Lower[c(4,13)])),
+             SynVals = NULL,
+             MAPVals = matrix(MaxLikes[32,c(7,16)], ncol = 2))
+dev.off()
+
+png('OptSamplesMarginalPlot_s9_Sel_NoSamps.png', res = 300, units = 'in', width = 7, height = 7)
+marginalPlot(x = c(out_sCh10_3_s1200n$chain[,c(4,13)], out_sCh10_2_s1200n$chain[,c(4,13)], out_sCh10_1_s1200n$chain[,c(4,13)], out_sCh10_s1200n$chain[,c(4,13)]), prior = PriorSample[,c(4,13)], singlePanel = FALSE, 
+             trueVals = NULL,
+             SynVals = NULL,
+             MAPVals = NULL)
 dev.off()
 
 #Veg Params----
