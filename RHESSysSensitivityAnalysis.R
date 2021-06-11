@@ -498,6 +498,9 @@ save.image(file = "C:/Users/js4yd/OneDrive - University of Virginia/BES_Data/BES
 #load("C:/Users/js4yd/OneDrive - University of Virginia/BES_Data/BES_Data/RHESSysFiles/BR&POBR/EEs_All_Setup.RData")
 load("C:/Users/js4yd/OneDrive - University of Virginia/BES_Data/BES_Data/RHESSysFiles/BR&POBR/EEs_All_Setup_paper.RData")
 
+#Load Helper Functions
+source("C:\\Users\\js4yd\\OneDrive - University of Virginia\\RHESSys_ParameterSA\\SAScriptFunctions.R")
+
 # Load EE and Deltas info----
 setwd("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR")
 Deltas = read.table(file = paste0(getwd(), '/Deltas_AllMetrics.txt'), sep = '\t', header = TRUE, stringsAsFactors = FALSE)
@@ -570,24 +573,6 @@ EEsTNMed_h$v102_epc.frootlitr_fcel[c(12*14+seq(1,14,1),14*18+seq(1,14,1))] = 0
 EEsTN95_h$v102_epc.frootlitr_fcel[c(12*14+seq(1,14,1),14*18+seq(1,14,1))] = 0
 
 #Aggregate the EEs for variables that require it----
-#Fixme: move to a function file
-AggregateEEs = function(EEs, #The elementary effect matrix
-                        ColNames, #Matrix or vector containing the names of the columns. One row per item to be summed
-                        FUN #The function to use to aggregate the columns (e.g., mean, max)
-                        )
-{
-  EEmat = matrix(NA, nrow = nrow(ColNames), ncol = nrow(EEs))
-  for (i in 1:nrow(EEmat)){
-    EEmat[i,] = apply(X = EEs[, colnames(EEs) %in% ColNames[i,]], MARGIN = 1, FUN = FUN)
-  }
-  return(t(EEmat))
-}
-
-#Mean absolute value function
-meanabs = function(x){
-  mean(abs(x))
-}
-
 # Make a vector of the column names that will be aggregated---- 
 #Later, they will be removed from the dataframe.
 ColsAggregated = c('s8_silt', 's8_sand', 's8_clay', 's108_silt', 's108_sand', 's108_clay', 's9_silt', 's9_sand', 's9_clay', 's109_silt', 's109_sand', 's109_clay',
@@ -3629,14 +3614,6 @@ legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9',
 dev.off()
 
 # Paper figures----
-offset = function(x){
-  if ((x>=0.3) & (x < 0.8)){
-    x = x + (x - 0.3)*0.13
-  }else if (x >= 0.8) {
-    x = x + (x - 0.3)*0.08
-  }
-  return(x)
-}
 png('Panel_mua_b_Agg_Paper.png', res = 300, units = 'in', height = 8, width = 12)
 layout(rbind(c(1,2,3), c(4,5,6)))
 #Streamflow 05
@@ -8210,10 +8187,6 @@ for (h in 1:length(uhills)){
 }
 
 #Compute the correlation of parameters that have non-zero EEs----
-#Squared norm (L2) of a vector
-norm_vec <- function(x){
-  sqrt(sum(x^2))
-}
 #Matrix for the similarity measure
 #Determine number of columns based on number of non-zero EEs
 CorCols = length(which(RanksMua05_b$EE05_b != 0))
@@ -8358,11 +8331,6 @@ df = (EEs05_b[,which((!(colnames(EEs05_b) %in% ColsAggregated)) & (EEs05_b_mua_m
 # }
 # rm(i)
 
-# function to compute coefficient
-ac <- function(x) {
-  agnes(t(df), method = x)$ac
-}
-
 map_dbl(ClustMethods, ac)
 
 pltree(agnes(t(df), method = 'ward'), cex = 0.6, hang = -1, main = "Dendrogram of agnes", )
@@ -8376,11 +8344,6 @@ for (i in 1:ncol(df)){
   df[,i] = (df[,i] - colMeans(x = df)[i])/sd(df[,i])
 }
 rm(i)
-
-# function to compute coefficient
-ac <- function(x) {
-  agnes(t(df), method = x)$ac
-}
 
 map_dbl(ClustMethods, ac)
 
@@ -8420,11 +8383,6 @@ for (i in 1:ncol(df)){
   df[,i] = (df[,i] - colMeans(x = df)[i])/sd(df[,i])
 }
 rm(i)
-
-# function to compute coefficient
-ac <- function(x) {
-  agnes(t(df), method = x)$ac
-}
 
 map_dbl(ClustMethods, ac)
 
@@ -8468,11 +8426,6 @@ for (i in 1:ncol(df)){
  df[,i] = (df[,i] - colMeans(x = df)[i])/sd(df[,i])
 }
 rm(i)
-
-# function to compute coefficient
-ac <- function(x) {
-  agnes(t(df), method = x)$ac
-}
 
 map_dbl(ClustMethods, ac)
 
