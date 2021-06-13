@@ -2,7 +2,15 @@
 
 #Set directories----
 #Color functions - from JDS github repo: Geothermal_ESDA
+dir_Main = "C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR"
+dir_ParamInCutoff = paste0(dir_Main, '/SelectedParamsTotals+Fig1')
+dir_EEpanels = paste0(dir_Main, '/EEpanels+Fig2+Fig5a')
+dir_HillPanels = paste0(dir_Main, '/Hillpanels+Fig3cd+Fig5b')
+dir_Mult = paste0(dir_Main, '/MultiplierEval+Fig4')
 dir_ColFuns = "C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\Hydrology\\USGSGauges"
+
+#Set file locations----
+f_HelpFuns = "C:\\Users\\js4yd\\OneDrive - University of Virginia\\RHESSys_ParameterSA\\SAScriptFunctions.R"
 
 #Load libraries----
 library(sp)
@@ -496,13 +504,13 @@ save.image(file = "C:/Users/js4yd/OneDrive - University of Virginia/BES_Data/BES
 #Load data from Rivanna run----
 #Input data load - loads all data that were saved in the save.image file above this line
 #load("C:/Users/js4yd/OneDrive - University of Virginia/BES_Data/BES_Data/RHESSysFiles/BR&POBR/EEs_All_Setup.RData")
-load("C:/Users/js4yd/OneDrive - University of Virginia/BES_Data/BES_Data/RHESSysFiles/BR&POBR/EEs_All_Setup_paper.RData")
+setwd(dir_Main)
+load("EEs_All_Setup_paper.RData")
 
 #Load Helper Functions
-source("C:\\Users\\js4yd\\OneDrive - University of Virginia\\RHESSys_ParameterSA\\SAScriptFunctions.R")
+source(f_HelpFuns)
 
 # Load EE and Deltas info----
-setwd("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR")
 Deltas = read.table(file = paste0(getwd(), '/Deltas_AllMetrics.txt'), sep = '\t', header = TRUE, stringsAsFactors = FALSE)
 EEs05_b = read.table(file = paste0(getwd(), '/EEs05_b_AllMetrics.txt'), sep = '\t', header = TRUE, stringsAsFactors = FALSE)
 EEs95_b = read.table(file = paste0(getwd(), '/EEs95_b_AllMetrics.txt'), sep = '\t', header = TRUE, stringsAsFactors = FALSE) 
@@ -1380,7 +1388,7 @@ colnames(EEs05_b_mua)[ncol(EEs05_b_mua)] = 's9_SoilTexture'
 EEs05_b_mua = cbind(EEs05_b_mua, apply(X = (abs(EEs05_b_mua_cons[,,which(ColsAggregated == 's109_silt')])+abs(EEs05_b_mua_cons[,,which(ColsAggregated == 's109_sand')])+abs(EEs05_b_mua_cons[,,which(ColsAggregated == 's109_clay')]))/3, MARGIN = 1, FUN = mean))
 colnames(EEs05_b_mua)[ncol(EEs05_b_mua)] = 's109_SoilTexture'
 
-#Fixme: these results are the same as this. Cannot make the ColNames have >1 row because the resulting matrix will have 40*rows to aggregate. 
+#these results are the same as this. Cannot make the ColNames have >1 row because the resulting matrix will have 40*rows to aggregate. 
 #apply(apply(X = EEs05_b_mua_cons, MARGIN = 1, FUN = AggregateEEs, ColNames = as.matrix(rbind(c('v102_K_absorptance', 'v102_K_reflectance', 'v102_K_transmittance'))), meanabs), 2, mean)
 EEs05_b_mua = cbind(EEs05_b_mua, apply(X = (abs(EEs05_b_mua_cons[,,which(ColsAggregated == 'v102_K_absorptance')])+abs(EEs05_b_mua_cons[,,which(ColsAggregated == 'v102_K_reflectance')])+abs(EEs05_b_mua_cons[,,which(ColsAggregated == 'v102_K_transmittance')]))/3, MARGIN = 1, FUN = mean))
 colnames(EEs05_b_mua)[ncol(EEs05_b_mua)] = 'v102_K_All'
@@ -1433,8 +1441,6 @@ colnames(EEs95_b_mua)[ncol(EEs95_b_mua)] = 's9_SoilTexture'
 EEs95_b_mua = cbind(EEs95_b_mua, apply(X = (abs(EEs95_b_mua_cons[,,which(ColsAggregated == 's109_silt')])+abs(EEs95_b_mua_cons[,,which(ColsAggregated == 's109_sand')])+abs(EEs95_b_mua_cons[,,which(ColsAggregated == 's109_clay')]))/3, MARGIN = 1, FUN = mean))
 colnames(EEs95_b_mua)[ncol(EEs95_b_mua)] = 's109_SoilTexture'
 
-#Fixme: these results are the same as this. Cannot make the ColNames have >1 row because the resulting matrix will have 40*rows to aggregate. 
-#apply(apply(X = EEs95_b_mua_cons, MARGIN = 1, FUN = AggregateEEs, ColNames = as.matrix(rbind(c('v102_K_absorptance', 'v102_K_reflectance', 'v102_K_transmittance'))), meanabs), 2, mean)
 EEs95_b_mua = cbind(EEs95_b_mua, apply(X = (abs(EEs95_b_mua_cons[,,which(ColsAggregated == 'v102_K_absorptance')])+abs(EEs95_b_mua_cons[,,which(ColsAggregated == 'v102_K_reflectance')])+abs(EEs95_b_mua_cons[,,which(ColsAggregated == 'v102_K_transmittance')]))/3, MARGIN = 1, FUN = mean))
 colnames(EEs95_b_mua)[ncol(EEs95_b_mua)] = 'v102_K_All'
 
@@ -1486,8 +1492,6 @@ colnames(EEsot_b_mua)[ncol(EEsot_b_mua)] = 's9_SoilTexture'
 EEsot_b_mua = cbind(EEsot_b_mua, apply(X = (abs(EEsot_b_mua_cons[,,which(ColsAggregated == 's109_silt')])+abs(EEsot_b_mua_cons[,,which(ColsAggregated == 's109_sand')])+abs(EEsot_b_mua_cons[,,which(ColsAggregated == 's109_clay')]))/3, MARGIN = 1, FUN = mean))
 colnames(EEsot_b_mua)[ncol(EEsot_b_mua)] = 's109_SoilTexture'
 
-#Fixme: these results are the same as this. Cannot make the ColNames have >1 row because the resulting matrix will have 40*rows to aggregate. 
-#apply(apply(X = EEsot_b_mua_cons, MARGIN = 1, FUN = AggregateEEs, ColNames = as.matrix(rbind(c('v102_K_absorptance', 'v102_K_reflectance', 'v102_K_transmittance'))), meanabs), 2, mean)
 EEsot_b_mua = cbind(EEsot_b_mua, apply(X = (abs(EEsot_b_mua_cons[,,which(ColsAggregated == 'v102_K_absorptance')])+abs(EEsot_b_mua_cons[,,which(ColsAggregated == 'v102_K_reflectance')])+abs(EEsot_b_mua_cons[,,which(ColsAggregated == 'v102_K_transmittance')]))/3, MARGIN = 1, FUN = mean))
 colnames(EEsot_b_mua)[ncol(EEsot_b_mua)] = 'v102_K_All'
 
@@ -1539,8 +1543,6 @@ colnames(EEs05g_b_mua)[ncol(EEs05g_b_mua)] = 's9_SoilTexture'
 EEs05g_b_mua = cbind(EEs05g_b_mua, apply(X = (abs(EEs05g_b_mua_cons[,,which(ColsAggregated == 's109_silt')])+abs(EEs05g_b_mua_cons[,,which(ColsAggregated == 's109_sand')])+abs(EEs05g_b_mua_cons[,,which(ColsAggregated == 's109_clay')]))/3, MARGIN = 1, FUN = mean))
 colnames(EEs05g_b_mua)[ncol(EEs05g_b_mua)] = 's109_SoilTexture'
 
-#Fixme: these results are the same as this. Cannot make the ColNames have >1 row because the resulting matrix will have 40*rows to aggregate. 
-#apply(apply(X = EEsot_b_mua_cons, MARGIN = 1, FUN = AggregateEEs, ColNames = as.matrix(rbind(c('v102_K_absorptance', 'v102_K_reflectance', 'v102_K_transmittance'))), meanabs), 2, mean)
 EEs05g_b_mua = cbind(EEs05g_b_mua, apply(X = (abs(EEs05g_b_mua_cons[,,which(ColsAggregated == 'v102_K_absorptance')])+abs(EEs05g_b_mua_cons[,,which(ColsAggregated == 'v102_K_reflectance')])+abs(EEs05g_b_mua_cons[,,which(ColsAggregated == 'v102_K_transmittance')]))/3, MARGIN = 1, FUN = mean))
 colnames(EEs05g_b_mua)[ncol(EEs05g_b_mua)] = 'v102_K_All'
 
@@ -1592,8 +1594,6 @@ colnames(EEsotg_b_mua)[ncol(EEsotg_b_mua)] = 's9_SoilTexture'
 EEsotg_b_mua = cbind(EEsotg_b_mua, apply(X = (abs(EEsotg_b_mua_cons[,,which(ColsAggregated == 's109_silt')])+abs(EEsotg_b_mua_cons[,,which(ColsAggregated == 's109_sand')])+abs(EEsotg_b_mua_cons[,,which(ColsAggregated == 's109_clay')]))/3, MARGIN = 1, FUN = mean))
 colnames(EEsotg_b_mua)[ncol(EEsotg_b_mua)] = 's109_SoilTexture'
 
-#Fixme: these results are the same as this. Cannot make the ColNames have >1 row because the resulting matrix will have 40*rows to aggregate. 
-#apply(apply(X = EEsot_b_mua_cons, MARGIN = 1, FUN = AggregateEEs, ColNames = as.matrix(rbind(c('v102_K_absorptance', 'v102_K_reflectance', 'v102_K_transmittance'))), meanabs), 2, mean)
 EEsotg_b_mua = cbind(EEsotg_b_mua, apply(X = (abs(EEsotg_b_mua_cons[,,which(ColsAggregated == 'v102_K_absorptance')])+abs(EEsotg_b_mua_cons[,,which(ColsAggregated == 'v102_K_reflectance')])+abs(EEsotg_b_mua_cons[,,which(ColsAggregated == 'v102_K_transmittance')]))/3, MARGIN = 1, FUN = mean))
 colnames(EEsotg_b_mua)[ncol(EEsotg_b_mua)] = 'v102_K_All'
 
@@ -1645,8 +1645,6 @@ colnames(EEsLNSE_b_mua)[ncol(EEsLNSE_b_mua)] = 's9_SoilTexture'
 EEsLNSE_b_mua = cbind(EEsLNSE_b_mua, apply(X = (abs(EEsLNSE_b_mua_cons[,,which(ColsAggregated == 's109_silt')])+abs(EEsLNSE_b_mua_cons[,,which(ColsAggregated == 's109_sand')])+abs(EEsLNSE_b_mua_cons[,,which(ColsAggregated == 's109_clay')]))/3, MARGIN = 1, FUN = mean))
 colnames(EEsLNSE_b_mua)[ncol(EEsLNSE_b_mua)] = 's109_SoilTexture'
 
-#Fixme: these results are the same as this. Cannot make the ColNames have >1 row because the resulting matrix will have 40*rows to aggregate. 
-#apply(apply(X = EEsot_b_mua_cons, MARGIN = 1, FUN = AggregateEEs, ColNames = as.matrix(rbind(c('v102_K_absorptance', 'v102_K_reflectance', 'v102_K_transmittance'))), meanabs), 2, mean)
 EEsLNSE_b_mua = cbind(EEsLNSE_b_mua, apply(X = (abs(EEsLNSE_b_mua_cons[,,which(ColsAggregated == 'v102_K_absorptance')])+abs(EEsLNSE_b_mua_cons[,,which(ColsAggregated == 'v102_K_reflectance')])+abs(EEsLNSE_b_mua_cons[,,which(ColsAggregated == 'v102_K_transmittance')]))/3, MARGIN = 1, FUN = mean))
 colnames(EEsLNSE_b_mua)[ncol(EEsLNSE_b_mua)] = 'v102_K_All'
 
@@ -1698,8 +1696,6 @@ colnames(EEsNSE_b_mua)[ncol(EEsNSE_b_mua)] = 's9_SoilTexture'
 EEsNSE_b_mua = cbind(EEsNSE_b_mua, apply(X = (abs(EEsNSE_b_mua_cons[,,which(ColsAggregated == 's109_silt')])+abs(EEsNSE_b_mua_cons[,,which(ColsAggregated == 's109_sand')])+abs(EEsNSE_b_mua_cons[,,which(ColsAggregated == 's109_clay')]))/3, MARGIN = 1, FUN = mean))
 colnames(EEsNSE_b_mua)[ncol(EEsNSE_b_mua)] = 's109_SoilTexture'
 
-#Fixme: these results are the same as this. Cannot make the ColNames have >1 row because the resulting matrix will have 40*rows to aggregate. 
-#apply(apply(X = EEsot_b_mua_cons, MARGIN = 1, FUN = AggregateEEs, ColNames = as.matrix(rbind(c('v102_K_absorptance', 'v102_K_reflectance', 'v102_K_transmittance'))), meanabs), 2, mean)
 EEsNSE_b_mua = cbind(EEsNSE_b_mua, apply(X = (abs(EEsNSE_b_mua_cons[,,which(ColsAggregated == 'v102_K_absorptance')])+abs(EEsNSE_b_mua_cons[,,which(ColsAggregated == 'v102_K_reflectance')])+abs(EEsNSE_b_mua_cons[,,which(ColsAggregated == 'v102_K_transmittance')]))/3, MARGIN = 1, FUN = mean))
 colnames(EEsNSE_b_mua)[ncol(EEsNSE_b_mua)] = 'v102_K_All'
 
@@ -1751,8 +1747,6 @@ colnames(EEspBias_b_mua)[ncol(EEspBias_b_mua)] = 's9_SoilTexture'
 EEspBias_b_mua = cbind(EEspBias_b_mua, apply(X = (abs(EEspBias_b_mua_cons[,,which(ColsAggregated == 's109_silt')])+abs(EEspBias_b_mua_cons[,,which(ColsAggregated == 's109_sand')])+abs(EEspBias_b_mua_cons[,,which(ColsAggregated == 's109_clay')]))/3, MARGIN = 1, FUN = mean))
 colnames(EEspBias_b_mua)[ncol(EEspBias_b_mua)] = 's109_SoilTexture'
 
-#Fixme: these results are the same as this. Cannot make the ColNames have >1 row because the resulting matrix will have 40*rows to aggregate. 
-#apply(apply(X = EEsot_b_mua_cons, MARGIN = 1, FUN = AggregateEEs, ColNames = as.matrix(rbind(c('v102_K_absorptance', 'v102_K_reflectance', 'v102_K_transmittance'))), meanabs), 2, mean)
 EEspBias_b_mua = cbind(EEspBias_b_mua, apply(X = (abs(EEspBias_b_mua_cons[,,which(ColsAggregated == 'v102_K_absorptance')])+abs(EEspBias_b_mua_cons[,,which(ColsAggregated == 'v102_K_reflectance')])+abs(EEspBias_b_mua_cons[,,which(ColsAggregated == 'v102_K_transmittance')]))/3, MARGIN = 1, FUN = mean))
 colnames(EEspBias_b_mua)[ncol(EEspBias_b_mua)] = 'v102_K_All'
 
@@ -1804,8 +1798,6 @@ colnames(EEsLogL_b_mua)[ncol(EEsLogL_b_mua)] = 's9_SoilTexture'
 EEsLogL_b_mua = cbind(EEsLogL_b_mua, apply(X = (abs(EEsLogL_b_mua_cons[,,which(ColsAggregated == 's109_silt')])+abs(EEsLogL_b_mua_cons[,,which(ColsAggregated == 's109_sand')])+abs(EEsLogL_b_mua_cons[,,which(ColsAggregated == 's109_clay')]))/3, MARGIN = 1, FUN = mean))
 colnames(EEsLogL_b_mua)[ncol(EEsLogL_b_mua)] = 's109_SoilTexture'
 
-#Fixme: these results are the same as this. Cannot make the ColNames have >1 row because the resulting matrix will have 40*rows to aggregate. 
-#apply(apply(X = EEsot_b_mua_cons, MARGIN = 1, FUN = AggregateEEs, ColNames = as.matrix(rbind(c('v102_K_absorptance', 'v102_K_reflectance', 'v102_K_transmittance'))), meanabs), 2, mean)
 EEsLogL_b_mua = cbind(EEsLogL_b_mua, apply(X = (abs(EEsLogL_b_mua_cons[,,which(ColsAggregated == 'v102_K_absorptance')])+abs(EEsLogL_b_mua_cons[,,which(ColsAggregated == 'v102_K_reflectance')])+abs(EEsLogL_b_mua_cons[,,which(ColsAggregated == 'v102_K_transmittance')]))/3, MARGIN = 1, FUN = mean))
 colnames(EEsLogL_b_mua)[ncol(EEsLogL_b_mua)] = 'v102_K_All'
 
@@ -1857,8 +1849,6 @@ colnames(EEsTN05_b_mua)[ncol(EEsTN05_b_mua)] = 's9_SoilTexture'
 EEsTN05_b_mua = cbind(EEsTN05_b_mua, apply(X = (abs(EEsTN05_b_mua_cons[,,which(ColsAggregated == 's109_silt')])+abs(EEsTN05_b_mua_cons[,,which(ColsAggregated == 's109_sand')])+abs(EEsTN05_b_mua_cons[,,which(ColsAggregated == 's109_clay')]))/3, MARGIN = 1, FUN = mean))
 colnames(EEsTN05_b_mua)[ncol(EEsTN05_b_mua)] = 's109_SoilTexture'
 
-#Fixme: these results are the same as this. Cannot make the ColNames have >1 row because the resulting matrix will have 40*rows to aggregate. 
-#apply(apply(X = EEsTN05_b_mua_cons, MARGIN = 1, FUN = AggregateEEs, ColNames = as.matrix(rbind(c('v102_K_absorptance', 'v102_K_reflectance', 'v102_K_transmittance'))), meanabs), 2, mean)
 EEsTN05_b_mua = cbind(EEsTN05_b_mua, apply(X = (abs(EEsTN05_b_mua_cons[,,which(ColsAggregated == 'v102_K_absorptance')])+abs(EEsTN05_b_mua_cons[,,which(ColsAggregated == 'v102_K_reflectance')])+abs(EEsTN05_b_mua_cons[,,which(ColsAggregated == 'v102_K_transmittance')]))/3, MARGIN = 1, FUN = mean))
 colnames(EEsTN05_b_mua)[ncol(EEsTN05_b_mua)] = 'v102_K_All'
 
@@ -1910,8 +1900,6 @@ colnames(EEsTN95_b_mua)[ncol(EEsTN95_b_mua)] = 's9_SoilTexture'
 EEsTN95_b_mua = cbind(EEsTN95_b_mua, apply(X = (abs(EEsTN95_b_mua_cons[,,which(ColsAggregated == 's109_silt')])+abs(EEsTN95_b_mua_cons[,,which(ColsAggregated == 's109_sand')])+abs(EEsTN95_b_mua_cons[,,which(ColsAggregated == 's109_clay')]))/3, MARGIN = 1, FUN = mean))
 colnames(EEsTN95_b_mua)[ncol(EEsTN95_b_mua)] = 's109_SoilTexture'
 
-#Fixme: these results are the same as this. Cannot make the ColNames have >1 row because the resulting matrix will have 40*rows to aggregate. 
-#apply(apply(X = EEsTN95_b_mua_cons, MARGIN = 1, FUN = AggregateEEs, ColNames = as.matrix(rbind(c('v102_K_absorptance', 'v102_K_reflectance', 'v102_K_transmittance'))), meanabs), 2, mean)
 EEsTN95_b_mua = cbind(EEsTN95_b_mua, apply(X = (abs(EEsTN95_b_mua_cons[,,which(ColsAggregated == 'v102_K_absorptance')])+abs(EEsTN95_b_mua_cons[,,which(ColsAggregated == 'v102_K_reflectance')])+abs(EEsTN95_b_mua_cons[,,which(ColsAggregated == 'v102_K_transmittance')]))/3, MARGIN = 1, FUN = mean))
 colnames(EEsTN95_b_mua)[ncol(EEsTN95_b_mua)] = 'v102_K_All'
 
@@ -1963,8 +1951,6 @@ colnames(EEsTNMed_b_mua)[ncol(EEsTNMed_b_mua)] = 's9_SoilTexture'
 EEsTNMed_b_mua = cbind(EEsTNMed_b_mua, apply(X = (abs(EEsTNMed_b_mua_cons[,,which(ColsAggregated == 's109_silt')])+abs(EEsTNMed_b_mua_cons[,,which(ColsAggregated == 's109_sand')])+abs(EEsTNMed_b_mua_cons[,,which(ColsAggregated == 's109_clay')]))/3, MARGIN = 1, FUN = mean))
 colnames(EEsTNMed_b_mua)[ncol(EEsTNMed_b_mua)] = 's109_SoilTexture'
 
-#Fixme: these results are the same as this. Cannot make the ColNames have >1 row because the resulting matrix will have 40*rows to aggregate. 
-#apply(apply(X = EEsTNMed_b_mua_cons, MARGIN = 1, FUN = AggregateEEs, ColNames = as.matrix(rbind(c('v102_K_absorptance', 'v102_K_reflectance', 'v102_K_transmittance'))), meanabs), 2, mean)
 EEsTNMed_b_mua = cbind(EEsTNMed_b_mua, apply(X = (abs(EEsTNMed_b_mua_cons[,,which(ColsAggregated == 'v102_K_absorptance')])+abs(EEsTNMed_b_mua_cons[,,which(ColsAggregated == 'v102_K_reflectance')])+abs(EEsTNMed_b_mua_cons[,,which(ColsAggregated == 'v102_K_transmittance')]))/3, MARGIN = 1, FUN = mean))
 colnames(EEsTNMed_b_mua)[ncol(EEsTNMed_b_mua)] = 'v102_K_All'
 
@@ -2016,8 +2002,6 @@ colnames(EEs05_h_mua)[ncol(EEs05_h_mua)] = 's9_SoilTexture'
 EEs05_h_mua = cbind(EEs05_h_mua, apply(X = (abs(EEs05_h_mua_cons[,,which(dimnames(EEs05_h_mua_cons)$Cols == 's109_silt')])+abs(EEs05_h_mua_cons[,,which(dimnames(EEs05_h_mua_cons)$Cols == 's109_sand')])+abs(EEs05_h_mua_cons[,,which(dimnames(EEs05_h_mua_cons)$Cols == 's109_clay')]))/3, MARGIN = 1, FUN = mean))
 colnames(EEs05_h_mua)[ncol(EEs05_h_mua)] = 's109_SoilTexture'
 
-#Fixme: these results are the same as this. Cannot make the ColNames have >1 row because the resulting matrix will have 40*rows to aggregate. 
-#apply(apply(X = EEs05_h_mua_cons, MARGIN = 1, FUN = AggregateEEs, ColNames = as.matrix(rbind(c('v102_K_absorptance', 'v102_K_reflectance', 'v102_K_transmittance'))), meanabs), 2, mean)
 EEs05_h_mua = cbind(EEs05_h_mua, apply(X = (abs(EEs05_h_mua_cons[,,which(dimnames(EEs05_h_mua_cons)$Cols == 'v102_K_absorptance')])+abs(EEs05_h_mua_cons[,,which(dimnames(EEs05_h_mua_cons)$Cols == 'v102_K_reflectance')])+abs(EEs05_h_mua_cons[,,which(dimnames(EEs05_h_mua_cons)$Cols == 'v102_K_transmittance')]))/3, MARGIN = 1, FUN = mean))
 colnames(EEs05_h_mua)[ncol(EEs05_h_mua)] = 'v102_K_All'
 
@@ -2069,8 +2053,6 @@ colnames(EEs95_h_mua)[ncol(EEs95_h_mua)] = 's9_SoilTexture'
 EEs95_h_mua = cbind(EEs95_h_mua, apply(X = (abs(EEs95_h_mua_cons[,,which(dimnames(EEs95_h_mua_cons)$Cols == 's109_silt')])+abs(EEs95_h_mua_cons[,,which(dimnames(EEs95_h_mua_cons)$Cols == 's109_sand')])+abs(EEs95_h_mua_cons[,,which(dimnames(EEs95_h_mua_cons)$Cols == 's109_clay')]))/3, MARGIN = 1, FUN = mean))
 colnames(EEs95_h_mua)[ncol(EEs95_h_mua)] = 's109_SoilTexture'
 
-#Fixme: these results are the same as this. Cannot make the ColNames have >1 row because the resulting matrix will have 40*rows to aggregate. 
-#apply(apply(X = EEs95_h_mua_cons, MARGIN = 1, FUN = AggregateEEs, ColNames = as.matrix(rbind(c('v102_K_absorptance', 'v102_K_reflectance', 'v102_K_transmittance'))), meanabs), 2, mean)
 EEs95_h_mua = cbind(EEs95_h_mua, apply(X = (abs(EEs95_h_mua_cons[,,which(dimnames(EEs95_h_mua_cons)$Cols == 'v102_K_absorptance')])+abs(EEs95_h_mua_cons[,,which(dimnames(EEs95_h_mua_cons)$Cols == 'v102_K_reflectance')])+abs(EEs95_h_mua_cons[,,which(dimnames(EEs95_h_mua_cons)$Cols == 'v102_K_transmittance')]))/3, MARGIN = 1, FUN = mean))
 colnames(EEs95_h_mua)[ncol(EEs95_h_mua)] = 'v102_K_All'
 
@@ -2121,8 +2103,6 @@ colnames(EEsot_h_mua)[ncol(EEsot_h_mua)] = 's9_SoilTexture'
 EEsot_h_mua = cbind(EEsot_h_mua, apply(X = (abs(EEsot_h_mua_cons[,,which(dimnames(EEsot_h_mua_cons)$Cols == 's109_silt')])+abs(EEsot_h_mua_cons[,,which(dimnames(EEsot_h_mua_cons)$Cols == 's109_sand')])+abs(EEsot_h_mua_cons[,,which(dimnames(EEsot_h_mua_cons)$Cols == 's109_clay')]))/3, MARGIN = 1, FUN = mean))
 colnames(EEsot_h_mua)[ncol(EEsot_h_mua)] = 's109_SoilTexture'
 
-#Fixme: these results are the same as this. Cannot make the ColNames have >1 row because the resulting matrix will have 40*rows to aggregate. 
-#apply(apply(X = EEsot_h_mua_cons, MARGIN = 1, FUN = AggregateEEs, ColNames = as.matrix(rbind(c('v102_K_absorptance', 'v102_K_reflectance', 'v102_K_transmittance'))), meanabs), 2, mean)
 EEsot_h_mua = cbind(EEsot_h_mua, apply(X = (abs(EEsot_h_mua_cons[,,which(dimnames(EEsot_h_mua_cons)$Cols == 'v102_K_absorptance')])+abs(EEsot_h_mua_cons[,,which(dimnames(EEsot_h_mua_cons)$Cols == 'v102_K_reflectance')])+abs(EEsot_h_mua_cons[,,which(dimnames(EEsot_h_mua_cons)$Cols == 'v102_K_transmittance')]))/3, MARGIN = 1, FUN = mean))
 colnames(EEsot_h_mua)[ncol(EEsot_h_mua)] = 'v102_K_All'
 
@@ -2173,8 +2153,6 @@ colnames(EEs05g_h_mua)[ncol(EEs05g_h_mua)] = 's9_SoilTexture'
 EEs05g_h_mua = cbind(EEs05g_h_mua, apply(X = (abs(EEs05g_h_mua_cons[,,which(dimnames(EEs05g_h_mua_cons)$Cols == 's109_silt')])+abs(EEs05g_h_mua_cons[,,which(dimnames(EEs05g_h_mua_cons)$Cols == 's109_sand')])+abs(EEs05g_h_mua_cons[,,which(dimnames(EEs05g_h_mua_cons)$Cols == 's109_clay')]))/3, MARGIN = 1, FUN = mean))
 colnames(EEs05g_h_mua)[ncol(EEs05g_h_mua)] = 's109_SoilTexture'
 
-#Fixme: these results are the same as this. Cannot make the ColNames have >1 row because the resulting matrix will have 40*rows to aggregate. 
-#apply(apply(X = EEs05_h_mua_cons, MARGIN = 1, FUN = AggregateEEs, ColNames = as.matrix(rbind(c('v102_K_absorptance', 'v102_K_reflectance', 'v102_K_transmittance'))), meanabs), 2, mean)
 EEs05g_h_mua = cbind(EEs05g_h_mua, apply(X = (abs(EEs05g_h_mua_cons[,,which(dimnames(EEs05g_h_mua_cons)$Cols == 'v102_K_absorptance')])+abs(EEs05g_h_mua_cons[,,which(dimnames(EEs05g_h_mua_cons)$Cols == 'v102_K_reflectance')])+abs(EEs05g_h_mua_cons[,,which(dimnames(EEs05g_h_mua_cons)$Cols == 'v102_K_transmittance')]))/3, MARGIN = 1, FUN = mean))
 colnames(EEs05g_h_mua)[ncol(EEs05g_h_mua)] = 'v102_K_All'
 
@@ -2226,8 +2204,6 @@ colnames(EEsotg_h_mua)[ncol(EEsotg_h_mua)] = 's9_SoilTexture'
 EEsotg_h_mua = cbind(EEsotg_h_mua, apply(X = (abs(EEsotg_h_mua_cons[,,which(dimnames(EEsotg_h_mua_cons)$Cols == 's109_silt')])+abs(EEsotg_h_mua_cons[,,which(dimnames(EEsotg_h_mua_cons)$Cols == 's109_sand')])+abs(EEsotg_h_mua_cons[,,which(dimnames(EEsotg_h_mua_cons)$Cols == 's109_clay')]))/3, MARGIN = 1, FUN = mean))
 colnames(EEsotg_h_mua)[ncol(EEsotg_h_mua)] = 's109_SoilTexture'
 
-#Fixme: these results are the same as this. Cannot make the ColNames have >1 row because the resulting matrix will have 40*rows to aggregate. 
-#apply(apply(X = EEsotg_h_mua_cons, MARGIN = 1, FUN = AggregateEEs, ColNames = as.matrix(rbind(c('v102_K_absorptance', 'v102_K_reflectance', 'v102_K_transmittance'))), meanabs), 2, mean)
 EEsotg_h_mua = cbind(EEsotg_h_mua, apply(X = (abs(EEsotg_h_mua_cons[,,which(dimnames(EEsotg_h_mua_cons)$Cols == 'v102_K_absorptance')])+abs(EEsotg_h_mua_cons[,,which(dimnames(EEsotg_h_mua_cons)$Cols == 'v102_K_reflectance')])+abs(EEsotg_h_mua_cons[,,which(dimnames(EEsotg_h_mua_cons)$Cols == 'v102_K_transmittance')]))/3, MARGIN = 1, FUN = mean))
 colnames(EEsotg_h_mua)[ncol(EEsotg_h_mua)] = 'v102_K_All'
 
@@ -2279,8 +2255,6 @@ colnames(EEsTN05_h_mua)[ncol(EEsTN05_h_mua)] = 's9_SoilTexture'
 EEsTN05_h_mua = cbind(EEsTN05_h_mua, apply(X = (abs(EEsTN05_h_mua_cons[,,which(dimnames(EEsTN05_h_mua_cons)$Cols == 's109_silt')])+abs(EEsTN05_h_mua_cons[,,which(dimnames(EEsTN05_h_mua_cons)$Cols == 's109_sand')])+abs(EEsTN05_h_mua_cons[,,which(dimnames(EEsTN05_h_mua_cons)$Cols == 's109_clay')]))/3, MARGIN = 1, FUN = mean))
 colnames(EEsTN05_h_mua)[ncol(EEsTN05_h_mua)] = 's109_SoilTexture'
 
-#Fixme: these results are the same as this. Cannot make the ColNames have >1 row because the resulting matrix will have 40*rows to aggregate. 
-#apply(apply(X = EEsTN05_h_mua_cons, MARGIN = 1, FUN = AggregateEEs, ColNames = as.matrix(rbind(c('v102_K_absorptance', 'v102_K_reflectance', 'v102_K_transmittance'))), meanabs), 2, mean)
 EEsTN05_h_mua = cbind(EEsTN05_h_mua, apply(X = (abs(EEsTN05_h_mua_cons[,,which(dimnames(EEsTN05_h_mua_cons)$Cols == 'v102_K_absorptance')])+abs(EEsTN05_h_mua_cons[,,which(dimnames(EEsTN05_h_mua_cons)$Cols == 'v102_K_reflectance')])+abs(EEsTN05_h_mua_cons[,,which(dimnames(EEsTN05_h_mua_cons)$Cols == 'v102_K_transmittance')]))/3, MARGIN = 1, FUN = mean))
 colnames(EEsTN05_h_mua)[ncol(EEsTN05_h_mua)] = 'v102_K_All'
 
@@ -2331,8 +2305,6 @@ colnames(EEsTN95_h_mua)[ncol(EEsTN95_h_mua)] = 's9_SoilTexture'
 EEsTN95_h_mua = cbind(EEsTN95_h_mua, apply(X = (abs(EEsTN95_h_mua_cons[,,which(dimnames(EEsTN95_h_mua_cons)$Cols == 's109_silt')])+abs(EEsTN95_h_mua_cons[,,which(dimnames(EEsTN95_h_mua_cons)$Cols == 's109_sand')])+abs(EEsTN95_h_mua_cons[,,which(dimnames(EEsTN95_h_mua_cons)$Cols == 's109_clay')]))/3, MARGIN = 1, FUN = mean))
 colnames(EEsTN95_h_mua)[ncol(EEsTN95_h_mua)] = 's109_SoilTexture'
 
-#Fixme: these results are the same as this. Cannot make the ColNames have >1 row because the resulting matrix will have 40*rows to aggregate. 
-#apply(apply(X = EEsTN95_h_mua_cons, MARGIN = 1, FUN = AggregateEEs, ColNames = as.matrix(rbind(c('v102_K_absorptance', 'v102_K_reflectance', 'v102_K_transmittance'))), meanabs), 2, mean)
 EEsTN95_h_mua = cbind(EEsTN95_h_mua, apply(X = (abs(EEsTN95_h_mua_cons[,,which(dimnames(EEsTN95_h_mua_cons)$Cols == 'v102_K_absorptance')])+abs(EEsTN95_h_mua_cons[,,which(dimnames(EEsTN95_h_mua_cons)$Cols == 'v102_K_reflectance')])+abs(EEsTN95_h_mua_cons[,,which(dimnames(EEsTN95_h_mua_cons)$Cols == 'v102_K_transmittance')]))/3, MARGIN = 1, FUN = mean))
 colnames(EEsTN95_h_mua)[ncol(EEsTN95_h_mua)] = 'v102_K_All'
 
@@ -2383,8 +2355,6 @@ colnames(EEsTNMed_h_mua)[ncol(EEsTNMed_h_mua)] = 's9_SoilTexture'
 EEsTNMed_h_mua = cbind(EEsTNMed_h_mua, apply(X = (abs(EEsTNMed_h_mua_cons[,,which(dimnames(EEsTNMed_h_mua_cons)$Cols == 's109_silt')])+abs(EEsTNMed_h_mua_cons[,,which(dimnames(EEsTNMed_h_mua_cons)$Cols == 's109_sand')])+abs(EEsTNMed_h_mua_cons[,,which(dimnames(EEsTNMed_h_mua_cons)$Cols == 's109_clay')]))/3, MARGIN = 1, FUN = mean))
 colnames(EEsTNMed_h_mua)[ncol(EEsTNMed_h_mua)] = 's109_SoilTexture'
 
-#Fixme: these results are the same as this. Cannot make the ColNames have >1 row because the resulting matrix will have 40*rows to aggregate. 
-#apply(apply(X = EEsTNMed_h_mua_cons, MARGIN = 1, FUN = AggregateEEs, ColNames = as.matrix(rbind(c('v102_K_absorptance', 'v102_K_reflectance', 'v102_K_transmittance'))), meanabs), 2, mean)
 EEsTNMed_h_mua = cbind(EEsTNMed_h_mua, apply(X = (abs(EEsTNMed_h_mua_cons[,,which(dimnames(EEsTNMed_h_mua_cons)$Cols == 'v102_K_absorptance')])+abs(EEsTNMed_h_mua_cons[,,which(dimnames(EEsTNMed_h_mua_cons)$Cols == 'v102_K_reflectance')])+abs(EEsTNMed_h_mua_cons[,,which(dimnames(EEsTNMed_h_mua_cons)$Cols == 'v102_K_transmittance')]))/3, MARGIN = 1, FUN = mean))
 colnames(EEsTNMed_h_mua)[ncol(EEsTNMed_h_mua)] = 'v102_K_All'
 
@@ -2519,7 +2489,7 @@ colnames(EEs05_h_mua_05) = colnames(EEs95_h_mua_05) = colnames(EEsot_h_mua_05) =
 colnames(EEs05_h_mua_95) = colnames(EEs95_h_mua_95) = colnames(EEsot_h_mua_95) = colnames(EEs05g_h_mua_95) = colnames(EEsotg_h_mua_95) = colnames(EEsTN05_h_mua_95) = colnames(EEsTN95_h_mua_95) = colnames(EEsTNMed_h_mua_95) = c('HillID', names(EEs05_b_mua_95))
 
 # Make plots of the distributions for variables----
-#Fixme: currently only plotting for one of the 6 metrics. Not sure it's necessary to show more.
+#Currently only plotting for one of the 6 metrics. Not sure it's necessary to show more.
 #for (p in 1:ncol(EEs05_b_mua)){
 #  png(paste0(getwd(), '/EEs05_b_muaDists/EEs05_b_mua_', colnames(EEs05_b_mua)[p], '.png'), res = 300, units = 'in', width = 5, height = 5)
 #  hist(EEs05_b_mua[,p], breaks = 50, main = colnames(EEs05_b_mua)[p], xlab = 'Elementary Effect', cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5)
@@ -2930,6 +2900,8 @@ rm(h)
 #"z_trans_coeff1", "v102_epc.day_leafon", "z_trans_coeff2", "v3_epc.gl_smax", "s9_pore_size_index", "Soil8_m", "Soil9_porosity_0"
 
 #Make a plot of the number of parameters selected versus the threshold percentage----
+dir.create(dir_ParamInCutoff, showWarnings = FALSE)
+setwd(dir_ParamInCutoff)
 x = seq(0.01,1,0.01)
 ParamTotals_ThreshPercent = ParamTotals_ThreshPercent_g = vector('numeric', length(x))
 for (i in 1:length(x)){
@@ -2950,7 +2922,7 @@ for (i in 1:length(x)){
 }
 rm(pb, pbg, pbTN, Tops, i, x)
 
-png('ParamsInThresholdCutoff.png', res = 300, units = 'in', width = 5, height = 5)
+png('ParamsInThresholdCutoff_b.png', res = 300, units = 'in', width = 5, height = 5)
 plot(x = seq(1,100,1), y = ParamTotals_ThreshPercent, type = 'l', xlab = 'Top X Percent Selected', ylab = 'Number of Parameters Selected', ylim = c(0,120), xlim = c(0,100))
 par(new=TRUE)
 plot(x = seq(1,100,1), y = ParamTotals_ThreshPercent_g, type = 'l', xlab = 'Top X Percent Selected', ylab = 'Number of Parameters Selected', ylim = c(0,120), xlim = c(0,100), col = 'red')
@@ -2986,7 +2958,7 @@ for (i in 1:length(x)){
 }
 rm(pb, pbg, pbTN, Tops05, Topsot, Tops05g, Topsotg, Tops95, TopsTN05, TopsTNMed, TopsTN95, i, x)
 
-png('ParamsInThresholdCutoff_Agg.png', res = 300, units = 'in', width = 5, height = 5)
+png('ParamsInThresholdCutoff_b_Agg.png', res = 300, units = 'in', width = 5, height = 5)
 plot(x = seq(1,100,1), y = ParamTotals_ThreshPercent_Agg, type = 'l', xlab = 'Top X Percent Selected', ylab = 'Number of Parameters Selected', ylim = c(0,105), xlim = c(0,100))
 par(new=TRUE)
 plot(x = seq(1,100,1), y = ParamTotals_ThreshPercent_g_Agg, type = 'l', xlab = 'Top X Percent Selected', ylab = 'Number of Parameters Selected', ylim = c(0,105), xlim = c(0,100), col = 'red')
@@ -3192,39 +3164,39 @@ dev.off()
 # legend('bottomright', legend = c('95th: Hillslopes', 'Mean: Hillslopes', '95th: Basin', 'Mean: Basin', 'Selected Percentage'), lty = c(1,1,1,1,2), col = c('black', 'gray', 'blue', 'skyblue', 'gray'), pch = c(NA,NA,16,16,NA), pt.cex = 0.4)
 # dev.off()
 
-pdf(file = 'fig1_old.pdf', width = 5, height = 5, title = 'SAfig2')
-par(mar=c(4,4,0.5,0.5))
-plot(x = seq(1,100,1), y = ParamTotals_ThreshPercent_onlyhg_Agg, type = 'l', xlab = 'Top X Percent of Parameters Selected', ylab = 'Number of Parameters Selected', ylim = c(0,105), xlim = c(0,100), col = 'gray')
-par(new=TRUE)
-plot(x = seq(1,100,1), y = ParamTotals_hg_Agg, type = 'l', ylim = c(0,105), xlim = c(0,100), col = 'gray', xlab = '', ylab = '', axes = FALSE, cex = 0.4)
-par(new=TRUE)
-plot(x = seq(1,100,1), y = ParamTotals_ThreshPercent_hg_Agg, type = 'l', ylim = c(0,105), xlim = c(0,100), col = 'black', xlab = '', ylab = '', axes = FALSE)
-par(new=TRUE)
-plot(x = seq(1,100,1), y = ParamTotals_bg_Agg, type = 'o', pch = 16, ylim = c(0,105), xlim = c(0,100), col = 'skyblue', xlab = '', ylab = '', axes = FALSE, cex = 0.4)
-par(new=TRUE)
-plot(x = seq(1,100,1), y = ParamTotals_ThreshPercent_g_Agg, type = 'o', ylim = c(0,105), xlim = c(0,100), col = 'blue', xlab = '', ylab = '', axes = FALSE, pch = 16, cex = 0.4)
-lines(c(10,10), c(-10,200), lty=2, col='gray')
-legend('bottomright', legend = c('95th: Hillslopes', 'Mean: Hillslopes', '95th: Basin', 'Mean: Basin', 'Selected Percentage'), lty = c(1,1,1,1,2), col = c('black', 'gray', 'blue', 'skyblue', 'gray'), pch = c(NA,NA,16,16,NA), pt.cex = 0.4)
-dev.off()
+# pdf(file = 'fig1_old.pdf', width = 5, height = 5, title = 'SAfig2')
+# par(mar=c(4,4,0.5,0.5))
+# plot(x = seq(1,100,1), y = ParamTotals_ThreshPercent_onlyhg_Agg, type = 'l', xlab = 'Top X Percent of Parameters Selected', ylab = 'Number of Parameters Selected', ylim = c(0,105), xlim = c(0,100), col = 'gray')
+# par(new=TRUE)
+# plot(x = seq(1,100,1), y = ParamTotals_hg_Agg, type = 'l', ylim = c(0,105), xlim = c(0,100), col = 'gray', xlab = '', ylab = '', axes = FALSE, cex = 0.4)
+# par(new=TRUE)
+# plot(x = seq(1,100,1), y = ParamTotals_ThreshPercent_hg_Agg, type = 'l', ylim = c(0,105), xlim = c(0,100), col = 'black', xlab = '', ylab = '', axes = FALSE)
+# par(new=TRUE)
+# plot(x = seq(1,100,1), y = ParamTotals_bg_Agg, type = 'o', pch = 16, ylim = c(0,105), xlim = c(0,100), col = 'skyblue', xlab = '', ylab = '', axes = FALSE, cex = 0.4)
+# par(new=TRUE)
+# plot(x = seq(1,100,1), y = ParamTotals_ThreshPercent_g_Agg, type = 'o', ylim = c(0,105), xlim = c(0,100), col = 'blue', xlab = '', ylab = '', axes = FALSE, pch = 16, cex = 0.4)
+# lines(c(10,10), c(-10,200), lty=2, col='gray')
+# legend('bottomright', legend = c('95th: Hillslopes', 'Mean: Hillslopes', '95th: Basin', 'Mean: Basin', 'Selected Percentage'), lty = c(1,1,1,1,2), col = c('black', 'gray', 'blue', 'skyblue', 'gray'), pch = c(NA,NA,16,16,NA), pt.cex = 0.4)
+# dev.off()
 
-png(file = 'fig1_NoHillTN_PrevRed.png', width = 5, height = 5, units = 'in', res = 300)
-par(mar=c(4,4,0.5,0.5))
-plot(x = seq(1,100,1), y = ParamTotals_ThreshPercent_onlyhg_Agg_NoTN, type = 'l', xlab = 'Top X Percent of Parameters Selected', ylab = 'Number of Parameters Selected', ylim = c(0,105), xlim = c(0,100), col = 'gray')
-par(new=TRUE)
-plot(x = seq(1,100,1), y = ParamTotals_hg_Agg_NoTN, type = 'l', ylim = c(0,105), xlim = c(0,100), col = 'gray', xlab = '', ylab = '', axes = FALSE, cex = 0.4)
-par(new=TRUE)
-plot(x = seq(1,100,1), y = ParamTotals_ThreshPercent_hg_Agg_NoTN, type = 'l', ylim = c(0,105), xlim = c(0,100), col = 'black', xlab = '', ylab = '', axes = FALSE)
-par(new=TRUE)
-plot(x = seq(1,100,1), y = ParamTotals_bg_Agg, type = 'o', pch = 16, ylim = c(0,105), xlim = c(0,100), col = 'skyblue', xlab = '', ylab = '', axes = FALSE, cex = 0.4)
-par(new=TRUE)
-plot(x = seq(1,100,1), y = ParamTotals_ThreshPercent_g_Agg, type = 'o', ylim = c(0,105), xlim = c(0,100), col = 'blue', xlab = '', ylab = '', axes = FALSE, pch = 16, cex = 0.4)
-lines(c(10,10), c(-10,200), lty=2, col='gray')
-par(new=TRUE)
-plot(x = seq(1,100,1), y = ParamTotals_ThreshPercent_onlyhg_Agg, type = 'l', xlab = '', ylab = '', ylim = c(0,105), xlim = c(0,100), col = 'red', axes=FALSE)
-legend('bottomright', legend = c('95th: Hillslopes (paper)', '95th: Hillslopes (No TN Metrics)', 'Mean: Hillslopes (No TN Metrics)', '95th: Basin', 'Mean: Basin', 'Selected Percentage'), lty = c(1,1,1,1,1,2), col = c('red', 'black', 'gray', 'blue', 'skyblue', 'gray'), pch = c(NA,NA,NA,16,16,NA), pt.cex = 0.4, cex=0.8)
-dev.off()
+# png(file = 'fig1_NoHillTN_PrevRed.png', width = 5, height = 5, units = 'in', res = 300)
+# par(mar=c(4,4,0.5,0.5))
+# plot(x = seq(1,100,1), y = ParamTotals_ThreshPercent_onlyhg_Agg_NoTN, type = 'l', xlab = 'Top X Percent of Parameters Selected', ylab = 'Number of Parameters Selected', ylim = c(0,105), xlim = c(0,100), col = 'gray')
+# par(new=TRUE)
+# plot(x = seq(1,100,1), y = ParamTotals_hg_Agg_NoTN, type = 'l', ylim = c(0,105), xlim = c(0,100), col = 'gray', xlab = '', ylab = '', axes = FALSE, cex = 0.4)
+# par(new=TRUE)
+# plot(x = seq(1,100,1), y = ParamTotals_ThreshPercent_hg_Agg_NoTN, type = 'l', ylim = c(0,105), xlim = c(0,100), col = 'black', xlab = '', ylab = '', axes = FALSE)
+# par(new=TRUE)
+# plot(x = seq(1,100,1), y = ParamTotals_bg_Agg, type = 'o', pch = 16, ylim = c(0,105), xlim = c(0,100), col = 'skyblue', xlab = '', ylab = '', axes = FALSE, cex = 0.4)
+# par(new=TRUE)
+# plot(x = seq(1,100,1), y = ParamTotals_ThreshPercent_g_Agg, type = 'o', ylim = c(0,105), xlim = c(0,100), col = 'blue', xlab = '', ylab = '', axes = FALSE, pch = 16, cex = 0.4)
+# lines(c(10,10), c(-10,200), lty=2, col='gray')
+# par(new=TRUE)
+# plot(x = seq(1,100,1), y = ParamTotals_ThreshPercent_onlyhg_Agg, type = 'l', xlab = '', ylab = '', ylim = c(0,105), xlim = c(0,100), col = 'red', axes=FALSE)
+# legend('bottomright', legend = c('95th: Hillslopes (paper)', '95th: Hillslopes (No TN Metrics)', 'Mean: Hillslopes (No TN Metrics)', '95th: Basin', 'Mean: Basin', 'Selected Percentage'), lty = c(1,1,1,1,1,2), col = c('red', 'black', 'gray', 'blue', 'skyblue', 'gray'), pch = c(NA,NA,NA,16,16,NA), pt.cex = 0.4, cex=0.8)
+# dev.off()
 
-png(file = 'fig1_NoHillTN.png', width = 5, height = 5, units = 'in', res = 300)
+png(file = 'ParamsInThresholdCutoff_bhg_Agg_Mean_NoHillTN.png', width = 5, height = 5, units = 'in', res = 300)
 par(mar=c(4,4,0.5,0.5))
 plot(x = seq(1,100,1), y = ParamTotals_ThreshPercent_onlyhg_Agg_NoTN, type = 'l', xlab = 'Top X Percent of Parameters Selected', ylab = 'Number of Parameters Selected', ylim = c(0,105), xlim = c(0,100), col = 'gray')
 par(new=TRUE)
@@ -3254,7 +3226,13 @@ lines(c(10,10), c(-10,200), lty=2, col='gray')
 legend('bottomright', legend = c('95th: Hillslopes (No TN Metrics)', 'Mean: Hillslopes (No TN Metrics)', '95th: Basin', 'Mean: Basin', 'Selected Percentage'), lty = c(1,1,1,1,2), col = c('black', 'gray', 'blue', 'skyblue', 'gray'), pch = c(NA,NA,16,16,NA), pt.cex = 0.4, cex=0.8)
 dev.off()
 
-#Color scheme for plotting EEs in categories of parameters----
+setwd(dir_Main)
+
+#Plot EEs by mu, sd, and mua----
+dir.create(dir_EEpanels, showWarnings = FALSE)
+setwd(dir_EEpanels)
+
+# Color scheme for plotting EEs in categories of parameters----
 #One color per category
 colos = c(rainbow(12), 'black')
 colos[3] = 'gray'
@@ -3375,243 +3353,243 @@ legend('bottomleft', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9
 dev.off()
 
 #Make plots of the ranking for mean absolute value - basin----
-png('EE05_mua_b.png', res = 300, units = 'in', height = 7, width = 7)
-barplot(height = EEs05_b_mua_m[1:nrow(ParamRanges)]/max(EEs05_b_mua_95[1:nrow(ParamRanges)]), ylab = 'Normalized Mean Abs. Val. of Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Lower 5th Percentile of Flow', col = ColPlots, border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,300))
-arrows(seq(0.5,nrow(ParamRanges)-0.5,1), EEs05_b_mua_05[1:nrow(ParamRanges)]/max(EEs05_b_mua_95[1:nrow(ParamRanges)]), seq(0.5,nrow(ParamRanges)-0.5,1), EEs05_b_mua_95[1:nrow(ParamRanges)]/max(EEs05_b_mua_95[1:nrow(ParamRanges)]), length=0.05, angle=90, code=3)
-lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(RanksMua05_b[Top1005,2]/max(EEs05_b_mua_95[1:nrow(ParamRanges)]),RanksMua05_b[Top1005,2]/max(EEs05_b_mua_95[1:nrow(ParamRanges)])), col = 'black', lwd = 2)
-legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
-dev.off()
-
-png('EE05_mua_b_Agg.png', res = 300, units = 'in', height = 7, width = 7)
-barplot(height = EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]), ylab = 'Normalized Mean Abs. Val. of Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Lower 5th Percentile of Flow', col = ColPlots_Agg, border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,300))
-arrows(seq(0.5,length(EEs05_b_mua_05[-which(names(EEs05_b_mua_m) %in% ColsAggregated)])-0.5,1), EEs05_b_mua_05[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]), seq(0.5,length(EEs05_b_mua_05[-which(names(EEs05_b_mua_m) %in% ColsAggregated)])-0.5,1), EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]), length=0.05, angle=90, code=3)
-lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(as.numeric(sort(EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top1005_Agg])/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]), as.numeric(sort(EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top1005_Agg])/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)])), col = 'black', lwd = 2)
-legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
-dev.off()
-
-png('EE05_mua_b_Agg_Paper.png', res = 300, units = 'in', height = 7, width = 7)
-barplot(height = EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)][order(names(EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]), ylab = 'Normalized Mean Abs. Val. of Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Lower 5th Percentile of Flow', col = ColPlots_Agg_Paper[order(names(EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]))], border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,250))
-arrows(seq(0.5,length(EEs05_b_mua_05[-which(names(EEs05_b_mua_m) %in% ColsAggregated)])-0.5,1), EEs05_b_mua_05[-which(names(EEs05_b_mua_m) %in% ColsAggregated)][order(names(EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]), seq(0.5,length(EEs05_b_mua_05[-which(names(EEs05_b_mua_m) %in% ColsAggregated)])-0.5,1), EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)][order(names(EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]), length=0.05, angle=90, code=3)
-lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(as.numeric(sort(EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top1005_Agg])/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]), as.numeric(sort(EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top1005_Agg])/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)])), col = 'black', lwd = 2)
-#legend('topright', legend = c('Hillslope: GW', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Soil: #8', 'Soil: Comp. #8', 'Soil: #9', 'Soil: Comp. #9', 'Veg: Trees', 'Veg: Grass', 'Buildings', 'Zone: Atm.'), col = colos_paper[c(1,3,3,3,3,2,2,2,2,4,4,6,5)], pch = c(16,16,17,18,15,16,17,18,15,16,17,16,16), cex = 1, ncol = 2)
-legend('topright', legend = c('Hillslope: GW', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Soil: Riparian', 'Soil: Other', 'Veg: Trees', 'Veg: Grass', 'Buildings', 'Zone: Atm.'), col = colos_paper[c(1,3,3,3,3,2,2,4,4,6,5)], pch = c(16,16,17,18,15,16,17,16,17,16,16), cex = 1.2, ncol = 2)
-
-#x-axis lines
-par(xpd=TRUE)
-SortNames = sort(names(EEs05_b_mua_m)[-which(names(EEs05_b_mua_m) %in% ColsAggregated)])
-SortNames = SortNames[c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]
-lines(x = c(-1,-1), y = c(-0.05,0), lty = 1, col = 'black')
-lines(x = c(0.5+grep(SortNames, pattern = '^h_')[length(grep(SortNames, pattern = '^h_'))], 0.5+grep(SortNames, pattern = '^h_')[length(grep(SortNames, pattern = '^h_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-lines(x = c(0.5+grep(SortNames, pattern = '^l1_')[length(grep(SortNames, pattern = '^l1_'))], 0.5+grep(SortNames, pattern = '^l1_')[length(grep(SortNames, pattern = '^l1_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-lines(x = c(0.5+grep(SortNames, pattern = '^l2_')[length(grep(SortNames, pattern = '^l2_'))], 0.5+grep(SortNames, pattern = '^l2_')[length(grep(SortNames, pattern = '^l2_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-lines(x = c(0.5+grep(SortNames, pattern = '^l3_')[length(grep(SortNames, pattern = '^l3_'))], 0.5+grep(SortNames, pattern = '^l3_')[length(grep(SortNames, pattern = '^l3_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-lines(x = c(0.5+grep(SortNames, pattern = '^l4_')[length(grep(SortNames, pattern = '^l4_'))], 0.5+grep(SortNames, pattern = '^l4_')[length(grep(SortNames, pattern = '^l4_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-#lines(x = c(0.5+grep(SortNames, pattern = '^s8_')[length(grep(SortNames, pattern = '^s8_'))], 0.5+grep(SortNames, pattern = '^s8_')[length(grep(SortNames, pattern = '^s8_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-#lines(x = c(0.5+grep(SortNames, pattern = '^s108_')[length(grep(SortNames, pattern = '^s108_'))], 0.5+grep(SortNames, pattern = '^s108_')[length(grep(SortNames, pattern = '^s108_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-lines(x = c(0.5+grep(SortNames, pattern = '^Soil8_')[length(grep(SortNames, pattern = '^Soil8_'))], 0.5+grep(SortNames, pattern = '^Soil8_')[length(grep(SortNames, pattern = '^Soil8_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-#lines(x = c(0.5+grep(SortNames, pattern = '^s9_')[length(grep(SortNames, pattern = '^s9_'))], 0.5+grep(SortNames, pattern = '^s9_')[length(grep(SortNames, pattern = '^s9_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-#lines(x = c(0.5+grep(SortNames, pattern = '^s109_')[length(grep(SortNames, pattern = '^s109_'))], 0.5+grep(SortNames, pattern = '^s109_')[length(grep(SortNames, pattern = '^s109_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-lines(x = c(0.5+grep(SortNames, pattern = '^Soil9_')[length(grep(SortNames, pattern = '^Soil9_'))], 0.5+grep(SortNames, pattern = '^Soil9_')[length(grep(SortNames, pattern = '^Soil9_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-lines(x = c(0.5+grep(SortNames, pattern = '^v102_')[length(grep(SortNames, pattern = '^v102_'))], 0.5+grep(SortNames, pattern = '^v102_')[length(grep(SortNames, pattern = '^v102_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-lines(x = c(0.5+grep(SortNames, pattern = '^v3_')[length(grep(SortNames, pattern = '^v3_'))], 0.5+grep(SortNames, pattern = '^v3_')[length(grep(SortNames, pattern = '^v3_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-lines(x = c(0.5+grep(SortNames, pattern = '^v4_')[length(grep(SortNames, pattern = '^v4_'))], 0.5+grep(SortNames, pattern = '^v4_')[length(grep(SortNames, pattern = '^v4_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-lines(x = c(0.5+grep(SortNames, pattern = '^z_')[length(grep(SortNames, pattern = '^z_'))], 0.5+grep(SortNames, pattern = '^z_')[length(grep(SortNames, pattern = '^z_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-
-#x-axis pch
-par(new=TRUE)
-#plot(x = c(1,3.5,5.5,8,11.5,24,46,67,89,135,193,222,232), y = c(-0.06, -0.08, -0.06, -0.08, -0.06, rep(-0.08,8)), col = colos_paper[c(1,3,3,3,3,2,2,2,2,4,4,6,5)], pch = c(16,16,17,18,15,16,17,18,15,16,17,16,16), xlim = c(0,250), ylim = c(0,1), axes = FALSE, xlab = '', ylab = '')
-plot(x = c(1,3.5,5.5,8,11.5,35,78,135,193,222,232), y = c(-0.06, -0.08, -0.06, -0.08, -0.06, rep(-0.08,6)), col = colos_paper[c(1,3,3,3,3,2,2,4,4,6,5)], pch = c(16,16,17,18,15,16,17,16,17,16,16), xlim = c(0,250), ylim = c(0,1), axes = FALSE, xlab = '', ylab = '')
-dev.off()
-
-png('EE05_mua_b_lines.png', res = 300, units = 'in', height = 7, width = 7)
-barplot(height = muaEEs05_b, ylab = 'Mean Absolute Value of the Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Lower 5th Percentile of Flow', col = ColPlots, border = NA, ylim = c(0,120), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5)
-#Make lines separating the different classes of variables
-lines(x = c(-1,-1), y = c(-10,130), lty = 1, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^h_')[length(grep(colnames(InputParams), pattern = '^h_'))], 0.5+grep(colnames(InputParams), pattern = '^h_')[length(grep(colnames(InputParams), pattern = '^h_'))]), y = c(-10,130), lty = 1, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^z_')[length(grep(colnames(InputParams), pattern = '^z_'))], 0.5+grep(colnames(InputParams), pattern = '^z_')[length(grep(colnames(InputParams), pattern = '^z_'))]), y = c(-10,130), lty = 1, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^s9_')[length(grep(colnames(InputParams), pattern = '^s9_'))], 0.5+grep(colnames(InputParams), pattern = '^s9_')[length(grep(colnames(InputParams), pattern = '^s9_'))]), y = c(-10,130), lty = 2, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^s109_')[length(grep(colnames(InputParams), pattern = '^s109_'))], 0.5+grep(colnames(InputParams), pattern = '^s109_')[length(grep(colnames(InputParams), pattern = '^s109_'))]), y = c(-10,130), lty = 2, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^s8_')[length(grep(colnames(InputParams), pattern = '^s8_'))], 0.5+grep(colnames(InputParams), pattern = '^s8_')[length(grep(colnames(InputParams), pattern = '^s8_'))]), y = c(-10,130), lty = 2, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^s108_')[length(grep(colnames(InputParams), pattern = '^s108_'))], 0.5+grep(colnames(InputParams), pattern = '^s108_')[length(grep(colnames(InputParams), pattern = '^s108_'))]), y = c(-10,130), lty = 1, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^l1_')[length(grep(colnames(InputParams), pattern = '^l1_'))], 0.5+grep(colnames(InputParams), pattern = '^l1_')[length(grep(colnames(InputParams), pattern = '^l1_'))]), y = c(-10,130), lty = 2, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^l2_')[length(grep(colnames(InputParams), pattern = '^l2_'))], 0.5+grep(colnames(InputParams), pattern = '^l2_')[length(grep(colnames(InputParams), pattern = '^l2_'))]), y = c(-10,130), lty = 2, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^l3_')[length(grep(colnames(InputParams), pattern = '^l3_'))], 0.5+grep(colnames(InputParams), pattern = '^l3_')[length(grep(colnames(InputParams), pattern = '^l3_'))]), y = c(-10,130), lty = 2, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^l4_')[length(grep(colnames(InputParams), pattern = '^l4_'))], 0.5+grep(colnames(InputParams), pattern = '^l4_')[length(grep(colnames(InputParams), pattern = '^l4_'))]), y = c(-10,130), lty = 1, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^v102_')[length(grep(colnames(InputParams), pattern = '^v102_'))], 0.5+grep(colnames(InputParams), pattern = '^v102_')[length(grep(colnames(InputParams), pattern = '^v102_'))]), y = c(-10,130), lty = 2, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^v3_')[length(grep(colnames(InputParams), pattern = '^v3_'))], 0.5+grep(colnames(InputParams), pattern = '^v3_')[length(grep(colnames(InputParams), pattern = '^v3_'))]), y = c(-10,130), lty = 2, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^v4_')[length(grep(colnames(InputParams), pattern = '^v4_'))], 0.5+grep(colnames(InputParams), pattern = '^v4_')[length(grep(colnames(InputParams), pattern = '^v4_'))]), y = c(-10,130), lty = 1, col = 'black')
-legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
-dev.off()
-
-png('EE95_mua_b.png', res = 300, units = 'in', height = 7, width = 7)
-barplot(height = EEs95_b_mua_m[1:nrow(ParamRanges)]/max(EEs95_b_mua_95[1:nrow(ParamRanges)]), ylab = 'Normalized Mean Abs. Val. of Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Upper 5th Percentile of Flow', col = ColPlots, border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,300))
-arrows(seq(0.5,nrow(ParamRanges)-0.5,1), EEs95_b_mua_05[1:nrow(ParamRanges)]/max(EEs95_b_mua_95[1:nrow(ParamRanges)]), seq(0.5,nrow(ParamRanges)-0.5,1), EEs95_b_mua_95[1:nrow(ParamRanges)]/max(EEs95_b_mua_95[1:nrow(ParamRanges)]), length=0.05, angle=90, code=3)
-lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(RanksMua95_b[Top1095,2]/max(EEs95_b_mua_95[1:nrow(ParamRanges)]),RanksMua95_b[Top1095,2]/max(EEs95_b_mua_95[1:nrow(ParamRanges)])), col = 'black', lwd = 2)
-legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
-dev.off()
-
-png('EE95_mua_b_Agg.png', res = 300, units = 'in', height = 7, width = 7)
-barplot(height = EEs95_b_mua_m[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]/max(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]), ylab = 'Normalized Mean Abs. Val. of Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Upper 5th Percentile of Flow', col = ColPlots_Agg, border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,300))
-arrows(seq(0.5,length(EEs95_b_mua_05[-which(names(EEs95_b_mua_m) %in% ColsAggregated)])-0.5,1), EEs95_b_mua_05[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]/max(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]), seq(0.5,length(EEs95_b_mua_05[-which(names(EEs95_b_mua_m) %in% ColsAggregated)])-0.5,1), EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]/max(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]), length=0.05, angle=90, code=3)
-lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(as.numeric(sort(EEs95_b_mua_m[-which(names(EEs95_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top1095_Agg])/max(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]), as.numeric(sort(EEs95_b_mua_m[-which(names(EEs95_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top1095_Agg])/max(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)])), col = 'black', lwd = 2)
-legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
-dev.off()
-
-png('EE95_mua_b_lines.png', res = 300, units = 'in', height = 7, width = 7)
-barplot(height = muaEEs95_b, ylab = 'Mean Absolute Value of the Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Upper 5th Percentile of Flow', col = ColPlots, border = NA, ylim = c(0,120), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5)
-#Make lines separating the different classes of variables
-lines(x = c(-1,-1), y = c(-10,130), lty = 1, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^h_')[length(grep(colnames(InputParams), pattern = '^h_'))], 0.5+grep(colnames(InputParams), pattern = '^h_')[length(grep(colnames(InputParams), pattern = '^h_'))]), y = c(-10,130), lty = 1, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^z_')[length(grep(colnames(InputParams), pattern = '^z_'))], 0.5+grep(colnames(InputParams), pattern = '^z_')[length(grep(colnames(InputParams), pattern = '^z_'))]), y = c(-10,130), lty = 1, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^s9_')[length(grep(colnames(InputParams), pattern = '^s9_'))], 0.5+grep(colnames(InputParams), pattern = '^s9_')[length(grep(colnames(InputParams), pattern = '^s9_'))]), y = c(-10,130), lty = 2, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^s109_')[length(grep(colnames(InputParams), pattern = '^s109_'))], 0.5+grep(colnames(InputParams), pattern = '^s109_')[length(grep(colnames(InputParams), pattern = '^s109_'))]), y = c(-10,130), lty = 2, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^s8_')[length(grep(colnames(InputParams), pattern = '^s8_'))], 0.5+grep(colnames(InputParams), pattern = '^s8_')[length(grep(colnames(InputParams), pattern = '^s8_'))]), y = c(-10,130), lty = 2, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^s108_')[length(grep(colnames(InputParams), pattern = '^s108_'))], 0.5+grep(colnames(InputParams), pattern = '^s108_')[length(grep(colnames(InputParams), pattern = '^s108_'))]), y = c(-10,130), lty = 1, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^l1_')[length(grep(colnames(InputParams), pattern = '^l1_'))], 0.5+grep(colnames(InputParams), pattern = '^l1_')[length(grep(colnames(InputParams), pattern = '^l1_'))]), y = c(-10,130), lty = 2, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^l2_')[length(grep(colnames(InputParams), pattern = '^l2_'))], 0.5+grep(colnames(InputParams), pattern = '^l2_')[length(grep(colnames(InputParams), pattern = '^l2_'))]), y = c(-10,130), lty = 2, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^l3_')[length(grep(colnames(InputParams), pattern = '^l3_'))], 0.5+grep(colnames(InputParams), pattern = '^l3_')[length(grep(colnames(InputParams), pattern = '^l3_'))]), y = c(-10,130), lty = 2, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^l4_')[length(grep(colnames(InputParams), pattern = '^l4_'))], 0.5+grep(colnames(InputParams), pattern = '^l4_')[length(grep(colnames(InputParams), pattern = '^l4_'))]), y = c(-10,130), lty = 1, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^v102_')[length(grep(colnames(InputParams), pattern = '^v102_'))], 0.5+grep(colnames(InputParams), pattern = '^v102_')[length(grep(colnames(InputParams), pattern = '^v102_'))]), y = c(-10,130), lty = 2, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^v3_')[length(grep(colnames(InputParams), pattern = '^v3_'))], 0.5+grep(colnames(InputParams), pattern = '^v3_')[length(grep(colnames(InputParams), pattern = '^v3_'))]), y = c(-10,130), lty = 2, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^v4_')[length(grep(colnames(InputParams), pattern = '^v4_'))], 0.5+grep(colnames(InputParams), pattern = '^v4_')[length(grep(colnames(InputParams), pattern = '^v4_'))]), y = c(-10,130), lty = 1, col = 'black')
-legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
-dev.off()
-
-png('EEot_mua_b.png', res = 300, units = 'in', height = 7, width = 7)
-barplot(height = EEsot_b_mua_m[1:nrow(ParamRanges)]/max(EEsot_b_mua_95[1:nrow(ParamRanges)]), ylab = 'Normalized Mean Abs. Val. of Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for 5th-95th Percentile Flows', col = ColPlots, border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,300))
-arrows(seq(0.5,nrow(ParamRanges)-0.5,1), EEsot_b_mua_05[1:nrow(ParamRanges)]/max(EEsot_b_mua_95[1:nrow(ParamRanges)]), seq(0.5,nrow(ParamRanges)-0.5,1), EEsot_b_mua_95[1:nrow(ParamRanges)]/max(EEsot_b_mua_95[1:nrow(ParamRanges)]), length=0.05, angle=90, code=3)
-lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(RanksMuaot_b[Top10ot,2]/max(EEsot_b_mua_95[1:nrow(ParamRanges)]),RanksMuaot_b[Top10ot,2]/max(EEsot_b_mua_95[1:nrow(ParamRanges)])), col = 'black', lwd = 2)
-legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
-dev.off()
-
-png('EEot_mua_b_Agg.png', res = 300, units = 'in', height = 7, width = 7)
-barplot(height = EEsot_b_mua_m[-which(names(EEsot_b_mua_m) %in% ColsAggregated)]/max(EEsot_b_mua_95[-which(names(EEsot_b_mua_m) %in% ColsAggregated)]), ylab = 'Normalized Mean Abs. Val. of Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for 5th-95th Percentile Flows', col = ColPlots_Agg, border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,300))
-arrows(seq(0.5,length(EEsot_b_mua_05[-which(names(EEsot_b_mua_m) %in% ColsAggregated)])-0.5,1), EEsot_b_mua_05[-which(names(EEsot_b_mua_m) %in% ColsAggregated)]/max(EEsot_b_mua_95[-which(names(EEsot_b_mua_m) %in% ColsAggregated)]), seq(0.5,length(EEsot_b_mua_05[-which(names(EEsot_b_mua_m) %in% ColsAggregated)])-0.5,1), EEsot_b_mua_95[-which(names(EEsot_b_mua_m) %in% ColsAggregated)]/max(EEsot_b_mua_95[-which(names(EEsot_b_mua_m) %in% ColsAggregated)]), length=0.05, angle=90, code=3)
-lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(as.numeric(sort(EEsot_b_mua_m[-which(names(EEsot_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10ot_Agg])/max(EEsot_b_mua_95[-which(names(EEsot_b_mua_m) %in% ColsAggregated)]), as.numeric(sort(EEsot_b_mua_m[-which(names(EEsot_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10ot_Agg])/max(EEsot_b_mua_95[-which(names(EEsot_b_mua_m) %in% ColsAggregated)])), col = 'black', lwd = 2)
-legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
-dev.off()
-
-png('EEot_mua_b_lines.png', res = 300, units = 'in', height = 7, width = 7)
-barplot(height = muaEEsot_b, ylab = 'Mean Absolute Value of the Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for 5th-95th Percentile Flows', col = ColPlots, border = NA, ylim = c(0,3000), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5)
-#Make lines separating the different classes of variables
-lines(x = c(-1,-1), y = c(-10,3100), lty = 1, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^h_')[length(grep(colnames(InputParams), pattern = '^h_'))], 0.5+grep(colnames(InputParams), pattern = '^h_')[length(grep(colnames(InputParams), pattern = '^h_'))]), y = c(-10,3100), lty = 1, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^z_')[length(grep(colnames(InputParams), pattern = '^z_'))], 0.5+grep(colnames(InputParams), pattern = '^z_')[length(grep(colnames(InputParams), pattern = '^z_'))]), y = c(-10,3100), lty = 1, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^s9_')[length(grep(colnames(InputParams), pattern = '^s9_'))], 0.5+grep(colnames(InputParams), pattern = '^s9_')[length(grep(colnames(InputParams), pattern = '^s9_'))]), y = c(-10,3100), lty = 2, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^s109_')[length(grep(colnames(InputParams), pattern = '^s109_'))], 0.5+grep(colnames(InputParams), pattern = '^s109_')[length(grep(colnames(InputParams), pattern = '^s109_'))]), y = c(-10,3100), lty = 2, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^s8_')[length(grep(colnames(InputParams), pattern = '^s8_'))], 0.5+grep(colnames(InputParams), pattern = '^s8_')[length(grep(colnames(InputParams), pattern = '^s8_'))]), y = c(-10,3100), lty = 2, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^s108_')[length(grep(colnames(InputParams), pattern = '^s108_'))], 0.5+grep(colnames(InputParams), pattern = '^s108_')[length(grep(colnames(InputParams), pattern = '^s108_'))]), y = c(-10,3100), lty = 1, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^l1_')[length(grep(colnames(InputParams), pattern = '^l1_'))], 0.5+grep(colnames(InputParams), pattern = '^l1_')[length(grep(colnames(InputParams), pattern = '^l1_'))]), y = c(-10,3100), lty = 2, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^l2_')[length(grep(colnames(InputParams), pattern = '^l2_'))], 0.5+grep(colnames(InputParams), pattern = '^l2_')[length(grep(colnames(InputParams), pattern = '^l2_'))]), y = c(-10,3100), lty = 2, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^l3_')[length(grep(colnames(InputParams), pattern = '^l3_'))], 0.5+grep(colnames(InputParams), pattern = '^l3_')[length(grep(colnames(InputParams), pattern = '^l3_'))]), y = c(-10,3100), lty = 2, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^l4_')[length(grep(colnames(InputParams), pattern = '^l4_'))], 0.5+grep(colnames(InputParams), pattern = '^l4_')[length(grep(colnames(InputParams), pattern = '^l4_'))]), y = c(-10,3100), lty = 1, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^v102_')[length(grep(colnames(InputParams), pattern = '^v102_'))], 0.5+grep(colnames(InputParams), pattern = '^v102_')[length(grep(colnames(InputParams), pattern = '^v102_'))]), y = c(-10,3100), lty = 2, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^v3_')[length(grep(colnames(InputParams), pattern = '^v3_'))], 0.5+grep(colnames(InputParams), pattern = '^v3_')[length(grep(colnames(InputParams), pattern = '^v3_'))]), y = c(-10,3100), lty = 2, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^v4_')[length(grep(colnames(InputParams), pattern = '^v4_'))], 0.5+grep(colnames(InputParams), pattern = '^v4_')[length(grep(colnames(InputParams), pattern = '^v4_'))]), y = c(-10,3100), lty = 1, col = 'black')
-legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
-dev.off()
-
-png('EETN05_mua_b.png', res = 300, units = 'in', height = 7, width = 7)
-barplot(height = EEsTN05_b_mua_m[1:nrow(ParamRanges)]/max(EEsTN05_b_mua_95[1:nrow(ParamRanges)]), ylab = 'Normalized Mean Abs. Val. of Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Lower 5th Quantile of TN', col = ColPlots, border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,300))
-arrows(seq(0.5,nrow(ParamRanges)-0.5,1), EEsTN05_b_mua_05[1:nrow(ParamRanges)]/max(EEsTN05_b_mua_95[1:nrow(ParamRanges)]), seq(0.5,nrow(ParamRanges)-0.5,1), EEsTN05_b_mua_95[1:nrow(ParamRanges)]/max(EEsTN05_b_mua_95[1:nrow(ParamRanges)]), length=0.05, angle=90, code=3)
-lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(RanksMuaTN05_b[Top10TN05,2]/max(EEsTN05_b_mua_95[1:nrow(ParamRanges)]),RanksMuaTN05_b[Top10TN05,2]/max(EEsTN05_b_mua_95[1:nrow(ParamRanges)])), col = 'black', lwd = 2)
-legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
-dev.off()
-
-png('EETN05_mua_b_Agg.png', res = 300, units = 'in', height = 7, width = 7)
-barplot(height = EEsTN05_b_mua_m[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)]/max(EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)]), ylab = 'Normalized Mean Abs. Val. of Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Lower 5th Quantile of TN', col = ColPlots_Agg, border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,300))
-arrows(seq(0.5,length(EEsTN05_b_mua_05[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)])-0.5,1), EEsTN05_b_mua_05[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)]/max(EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)]), seq(0.5,length(EEsTN05_b_mua_05[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)])-0.5,1), EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)]/max(EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)]), length=0.05, angle=90, code=3)
-lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(as.numeric(sort(EEsTN05_b_mua_m[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10TN05_Agg])/max(EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)]), as.numeric(sort(EEsTN05_b_mua_m[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10TN05_Agg])/max(EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)])), col = 'black', lwd = 2)
-legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
-dev.off()
-
-png('EETN05_mua_b_lines.png', res = 300, units = 'in', height = 7, width = 7)
-barplot(height = muaEEsTN05_b, ylab = 'Mean Absolute Value of the Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Lower 5th Quantile of TN', col = ColPlots, border = NA, ylim = c(0,40), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5)
-#Make lines separating the different classes of variables
-lines(x = c(-1,-1), y = c(-10,130), lty = 1, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^h_')[length(grep(colnames(InputParams), pattern = '^h_'))], 0.5+grep(colnames(InputParams), pattern = '^h_')[length(grep(colnames(InputParams), pattern = '^h_'))]), y = c(-10,130), lty = 1, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^z_')[length(grep(colnames(InputParams), pattern = '^z_'))], 0.5+grep(colnames(InputParams), pattern = '^z_')[length(grep(colnames(InputParams), pattern = '^z_'))]), y = c(-10,130), lty = 1, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^s9_')[length(grep(colnames(InputParams), pattern = '^s9_'))], 0.5+grep(colnames(InputParams), pattern = '^s9_')[length(grep(colnames(InputParams), pattern = '^s9_'))]), y = c(-10,130), lty = 2, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^s109_')[length(grep(colnames(InputParams), pattern = '^s109_'))], 0.5+grep(colnames(InputParams), pattern = '^s109_')[length(grep(colnames(InputParams), pattern = '^s109_'))]), y = c(-10,130), lty = 2, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^s8_')[length(grep(colnames(InputParams), pattern = '^s8_'))], 0.5+grep(colnames(InputParams), pattern = '^s8_')[length(grep(colnames(InputParams), pattern = '^s8_'))]), y = c(-10,130), lty = 2, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^s108_')[length(grep(colnames(InputParams), pattern = '^s108_'))], 0.5+grep(colnames(InputParams), pattern = '^s108_')[length(grep(colnames(InputParams), pattern = '^s108_'))]), y = c(-10,130), lty = 1, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^l1_')[length(grep(colnames(InputParams), pattern = '^l1_'))], 0.5+grep(colnames(InputParams), pattern = '^l1_')[length(grep(colnames(InputParams), pattern = '^l1_'))]), y = c(-10,130), lty = 2, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^l2_')[length(grep(colnames(InputParams), pattern = '^l2_'))], 0.5+grep(colnames(InputParams), pattern = '^l2_')[length(grep(colnames(InputParams), pattern = '^l2_'))]), y = c(-10,130), lty = 2, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^l3_')[length(grep(colnames(InputParams), pattern = '^l3_'))], 0.5+grep(colnames(InputParams), pattern = '^l3_')[length(grep(colnames(InputParams), pattern = '^l3_'))]), y = c(-10,130), lty = 2, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^l4_')[length(grep(colnames(InputParams), pattern = '^l4_'))], 0.5+grep(colnames(InputParams), pattern = '^l4_')[length(grep(colnames(InputParams), pattern = '^l4_'))]), y = c(-10,130), lty = 1, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^v102_')[length(grep(colnames(InputParams), pattern = '^v102_'))], 0.5+grep(colnames(InputParams), pattern = '^v102_')[length(grep(colnames(InputParams), pattern = '^v102_'))]), y = c(-10,130), lty = 2, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^v3_')[length(grep(colnames(InputParams), pattern = '^v3_'))], 0.5+grep(colnames(InputParams), pattern = '^v3_')[length(grep(colnames(InputParams), pattern = '^v3_'))]), y = c(-10,130), lty = 2, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^v4_')[length(grep(colnames(InputParams), pattern = '^v4_'))], 0.5+grep(colnames(InputParams), pattern = '^v4_')[length(grep(colnames(InputParams), pattern = '^v4_'))]), y = c(-10,130), lty = 1, col = 'black')
-legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
-dev.off()
-
-png('EETN95_mua_b.png', res = 300, units = 'in', height = 7, width = 7)
-barplot(height = EEsTN95_b_mua_m[1:nrow(ParamRanges)]/max(EEsTN95_b_mua_95[1:nrow(ParamRanges)]), ylab = 'Normalized Mean Abs. Val. of Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Upper 5th Quantile of TN', col = ColPlots, border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,300))
-arrows(seq(0.5,nrow(ParamRanges)-0.5,1), EEsTN95_b_mua_05[1:nrow(ParamRanges)]/max(EEsTN95_b_mua_95[1:nrow(ParamRanges)]), seq(0.5,nrow(ParamRanges)-0.5,1), EEsTN95_b_mua_95[1:nrow(ParamRanges)]/max(EEsTN95_b_mua_95[1:nrow(ParamRanges)]), length=0.05, angle=90, code=3)
-lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(RanksMuaTN95_b[Top10TN95,2]/max(EEsTN95_b_mua_95[1:nrow(ParamRanges)]),RanksMuaTN95_b[Top10TN95,2]/max(EEsTN95_b_mua_95[1:nrow(ParamRanges)])), col = 'black', lwd = 2)
-legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
-dev.off()
-
-png('EETN95_mua_b_Agg.png', res = 300, units = 'in', height = 7, width = 7)
-barplot(height = EEsTN95_b_mua_m[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)]/max(EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)]), ylab = 'Normalized Mean Abs. Val. of Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Upper 5th Quantile of TN', col = ColPlots_Agg, border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,300))
-arrows(seq(0.5,length(EEsTN95_b_mua_05[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)])-0.5,1), EEsTN95_b_mua_05[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)]/max(EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)]), seq(0.5,length(EEsTN95_b_mua_05[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)])-0.5,1), EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)]/max(EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)]), length=0.05, angle=90, code=3)
-lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(as.numeric(sort(EEsTN95_b_mua_m[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10TN95_Agg])/max(EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)]), as.numeric(sort(EEsTN95_b_mua_m[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10TN95_Agg])/max(EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)])), col = 'black', lwd = 2)
-legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
-dev.off()
-
-png('EETN95_mua_b_lines.png', res = 300, units = 'in', height = 7, width = 7)
-barplot(height = muaEEsTN95_b, ylab = 'Mean Absolute Value of the Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Upper 5th Quantile of TN', col = ColPlots, border = NA, ylim = c(0,20), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5)
-#Make lines separating the different classes of variables
-lines(x = c(-1,-1), y = c(-10,130), lty = 1, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^h_')[length(grep(colnames(InputParams), pattern = '^h_'))], 0.5+grep(colnames(InputParams), pattern = '^h_')[length(grep(colnames(InputParams), pattern = '^h_'))]), y = c(-10,130), lty = 1, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^z_')[length(grep(colnames(InputParams), pattern = '^z_'))], 0.5+grep(colnames(InputParams), pattern = '^z_')[length(grep(colnames(InputParams), pattern = '^z_'))]), y = c(-10,130), lty = 1, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^s9_')[length(grep(colnames(InputParams), pattern = '^s9_'))], 0.5+grep(colnames(InputParams), pattern = '^s9_')[length(grep(colnames(InputParams), pattern = '^s9_'))]), y = c(-10,130), lty = 2, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^s109_')[length(grep(colnames(InputParams), pattern = '^s109_'))], 0.5+grep(colnames(InputParams), pattern = '^s109_')[length(grep(colnames(InputParams), pattern = '^s109_'))]), y = c(-10,130), lty = 2, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^s8_')[length(grep(colnames(InputParams), pattern = '^s8_'))], 0.5+grep(colnames(InputParams), pattern = '^s8_')[length(grep(colnames(InputParams), pattern = '^s8_'))]), y = c(-10,130), lty = 2, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^s108_')[length(grep(colnames(InputParams), pattern = '^s108_'))], 0.5+grep(colnames(InputParams), pattern = '^s108_')[length(grep(colnames(InputParams), pattern = '^s108_'))]), y = c(-10,130), lty = 1, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^l1_')[length(grep(colnames(InputParams), pattern = '^l1_'))], 0.5+grep(colnames(InputParams), pattern = '^l1_')[length(grep(colnames(InputParams), pattern = '^l1_'))]), y = c(-10,130), lty = 2, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^l2_')[length(grep(colnames(InputParams), pattern = '^l2_'))], 0.5+grep(colnames(InputParams), pattern = '^l2_')[length(grep(colnames(InputParams), pattern = '^l2_'))]), y = c(-10,130), lty = 2, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^l3_')[length(grep(colnames(InputParams), pattern = '^l3_'))], 0.5+grep(colnames(InputParams), pattern = '^l3_')[length(grep(colnames(InputParams), pattern = '^l3_'))]), y = c(-10,130), lty = 2, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^l4_')[length(grep(colnames(InputParams), pattern = '^l4_'))], 0.5+grep(colnames(InputParams), pattern = '^l4_')[length(grep(colnames(InputParams), pattern = '^l4_'))]), y = c(-10,130), lty = 1, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^v102_')[length(grep(colnames(InputParams), pattern = '^v102_'))], 0.5+grep(colnames(InputParams), pattern = '^v102_')[length(grep(colnames(InputParams), pattern = '^v102_'))]), y = c(-10,130), lty = 2, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^v3_')[length(grep(colnames(InputParams), pattern = '^v3_'))], 0.5+grep(colnames(InputParams), pattern = '^v3_')[length(grep(colnames(InputParams), pattern = '^v3_'))]), y = c(-10,130), lty = 2, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^v4_')[length(grep(colnames(InputParams), pattern = '^v4_'))], 0.5+grep(colnames(InputParams), pattern = '^v4_')[length(grep(colnames(InputParams), pattern = '^v4_'))]), y = c(-10,130), lty = 1, col = 'black')
-legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
-dev.off()
-
-png('EETNMed_mua_b.png', res = 300, units = 'in', height = 7, width = 7)
-barplot(height = EEsTNMed_b_mua_m[1:nrow(ParamRanges)]/max(EEsTNMed_b_mua_95[1:nrow(ParamRanges)]), ylab = 'Normalized Mean Abs. Val. of Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Mean of TN', col = ColPlots, border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,300))
-arrows(seq(0.5,nrow(ParamRanges)-0.5,1), EEsTNMed_b_mua_05[1:nrow(ParamRanges)]/max(EEsTNMed_b_mua_95[1:nrow(ParamRanges)]), seq(0.5,nrow(ParamRanges)-0.5,1), EEsTNMed_b_mua_95[1:nrow(ParamRanges)]/max(EEsTNMed_b_mua_95[1:nrow(ParamRanges)]), length=0.05, angle=90, code=3)
-lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(RanksMuaTNMed_b[Top10TNMed,2]/max(EEsTNMed_b_mua_95[1:nrow(ParamRanges)]),RanksMuaTNMed_b[Top10TNMed,2]/max(EEsTNMed_b_mua_95[1:nrow(ParamRanges)])), col = 'black', lwd = 2)
-legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
-dev.off()
-
-png('EETNMed_mua_b_Agg.png', res = 300, units = 'in', height = 7, width = 7)
-barplot(height = EEsTNMed_b_mua_m[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)]/max(EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)]), ylab = 'Normalized Mean Abs. Val. of Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Mean of TN', col = ColPlots_Agg, border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,300))
-arrows(seq(0.5,length(EEsTNMed_b_mua_05[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)])-0.5,1), EEsTNMed_b_mua_05[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)]/max(EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)]), seq(0.5,length(EEsTNMed_b_mua_05[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)])-0.5,1), EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)]/max(EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)]), length=0.05, angle=90, code=3)
-lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(as.numeric(sort(EEsTNMed_b_mua_m[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10TNMed_Agg])/max(EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)]), as.numeric(sort(EEsTNMed_b_mua_m[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10TNMed_Agg])/max(EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)])), col = 'black', lwd = 2)
-legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
-dev.off()
-
-png('EETNMed_mua_b_lines.png', res = 300, units = 'in', height = 7, width = 7)
-barplot(height = muaEEsTNMed_b, ylab = 'Mean Absolute Value of the Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Mean of TN', col = ColPlots, border = NA, ylim = c(0,30), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5)
-#Make lines separating the different classes of variables
-lines(x = c(-1,-1), y = c(-10,3100), lty = 1, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^h_')[length(grep(colnames(InputParams), pattern = '^h_'))], 0.5+grep(colnames(InputParams), pattern = '^h_')[length(grep(colnames(InputParams), pattern = '^h_'))]), y = c(-10,3100), lty = 1, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^z_')[length(grep(colnames(InputParams), pattern = '^z_'))], 0.5+grep(colnames(InputParams), pattern = '^z_')[length(grep(colnames(InputParams), pattern = '^z_'))]), y = c(-10,3100), lty = 1, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^s9_')[length(grep(colnames(InputParams), pattern = '^s9_'))], 0.5+grep(colnames(InputParams), pattern = '^s9_')[length(grep(colnames(InputParams), pattern = '^s9_'))]), y = c(-10,3100), lty = 2, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^s109_')[length(grep(colnames(InputParams), pattern = '^s109_'))], 0.5+grep(colnames(InputParams), pattern = '^s109_')[length(grep(colnames(InputParams), pattern = '^s109_'))]), y = c(-10,3100), lty = 2, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^s8_')[length(grep(colnames(InputParams), pattern = '^s8_'))], 0.5+grep(colnames(InputParams), pattern = '^s8_')[length(grep(colnames(InputParams), pattern = '^s8_'))]), y = c(-10,3100), lty = 2, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^s108_')[length(grep(colnames(InputParams), pattern = '^s108_'))], 0.5+grep(colnames(InputParams), pattern = '^s108_')[length(grep(colnames(InputParams), pattern = '^s108_'))]), y = c(-10,3100), lty = 1, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^l1_')[length(grep(colnames(InputParams), pattern = '^l1_'))], 0.5+grep(colnames(InputParams), pattern = '^l1_')[length(grep(colnames(InputParams), pattern = '^l1_'))]), y = c(-10,3100), lty = 2, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^l2_')[length(grep(colnames(InputParams), pattern = '^l2_'))], 0.5+grep(colnames(InputParams), pattern = '^l2_')[length(grep(colnames(InputParams), pattern = '^l2_'))]), y = c(-10,3100), lty = 2, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^l3_')[length(grep(colnames(InputParams), pattern = '^l3_'))], 0.5+grep(colnames(InputParams), pattern = '^l3_')[length(grep(colnames(InputParams), pattern = '^l3_'))]), y = c(-10,3100), lty = 2, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^l4_')[length(grep(colnames(InputParams), pattern = '^l4_'))], 0.5+grep(colnames(InputParams), pattern = '^l4_')[length(grep(colnames(InputParams), pattern = '^l4_'))]), y = c(-10,3100), lty = 1, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^v102_')[length(grep(colnames(InputParams), pattern = '^v102_'))], 0.5+grep(colnames(InputParams), pattern = '^v102_')[length(grep(colnames(InputParams), pattern = '^v102_'))]), y = c(-10,3100), lty = 2, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^v3_')[length(grep(colnames(InputParams), pattern = '^v3_'))], 0.5+grep(colnames(InputParams), pattern = '^v3_')[length(grep(colnames(InputParams), pattern = '^v3_'))]), y = c(-10,3100), lty = 2, col = 'black')
-lines(x = c(0.5+grep(colnames(InputParams), pattern = '^v4_')[length(grep(colnames(InputParams), pattern = '^v4_'))], 0.5+grep(colnames(InputParams), pattern = '^v4_')[length(grep(colnames(InputParams), pattern = '^v4_'))]), y = c(-10,3100), lty = 1, col = 'black')
-legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
-dev.off()
+# png('EE05_mua_b.png', res = 300, units = 'in', height = 7, width = 7)
+# barplot(height = EEs05_b_mua_m[1:nrow(ParamRanges)]/max(EEs05_b_mua_95[1:nrow(ParamRanges)]), ylab = 'Normalized Mean Abs. Val. of Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Lower 5th Percentile of Flow', col = ColPlots, border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,300))
+# arrows(seq(0.5,nrow(ParamRanges)-0.5,1), EEs05_b_mua_05[1:nrow(ParamRanges)]/max(EEs05_b_mua_95[1:nrow(ParamRanges)]), seq(0.5,nrow(ParamRanges)-0.5,1), EEs05_b_mua_95[1:nrow(ParamRanges)]/max(EEs05_b_mua_95[1:nrow(ParamRanges)]), length=0.05, angle=90, code=3)
+# lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(RanksMua05_b[Top1005,2]/max(EEs05_b_mua_95[1:nrow(ParamRanges)]),RanksMua05_b[Top1005,2]/max(EEs05_b_mua_95[1:nrow(ParamRanges)])), col = 'black', lwd = 2)
+# legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
+# dev.off()
+# 
+# png('EE05_mua_b_Agg.png', res = 300, units = 'in', height = 7, width = 7)
+# barplot(height = EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]), ylab = 'Normalized Mean Abs. Val. of Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Lower 5th Percentile of Flow', col = ColPlots_Agg, border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,300))
+# arrows(seq(0.5,length(EEs05_b_mua_05[-which(names(EEs05_b_mua_m) %in% ColsAggregated)])-0.5,1), EEs05_b_mua_05[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]), seq(0.5,length(EEs05_b_mua_05[-which(names(EEs05_b_mua_m) %in% ColsAggregated)])-0.5,1), EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]), length=0.05, angle=90, code=3)
+# lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(as.numeric(sort(EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top1005_Agg])/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]), as.numeric(sort(EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top1005_Agg])/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)])), col = 'black', lwd = 2)
+# legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
+# dev.off()
+# 
+# png('EE05_mua_b_Agg_Paper.png', res = 300, units = 'in', height = 7, width = 7)
+# barplot(height = EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)][order(names(EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]), ylab = 'Normalized Mean Abs. Val. of Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Lower 5th Percentile of Flow', col = ColPlots_Agg_Paper[order(names(EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]))], border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,250))
+# arrows(seq(0.5,length(EEs05_b_mua_05[-which(names(EEs05_b_mua_m) %in% ColsAggregated)])-0.5,1), EEs05_b_mua_05[-which(names(EEs05_b_mua_m) %in% ColsAggregated)][order(names(EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]), seq(0.5,length(EEs05_b_mua_05[-which(names(EEs05_b_mua_m) %in% ColsAggregated)])-0.5,1), EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)][order(names(EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]), length=0.05, angle=90, code=3)
+# lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(as.numeric(sort(EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top1005_Agg])/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]), as.numeric(sort(EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top1005_Agg])/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)])), col = 'black', lwd = 2)
+# #legend('topright', legend = c('Hillslope: GW', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Soil: #8', 'Soil: Comp. #8', 'Soil: #9', 'Soil: Comp. #9', 'Veg: Trees', 'Veg: Grass', 'Buildings', 'Zone: Atm.'), col = colos_paper[c(1,3,3,3,3,2,2,2,2,4,4,6,5)], pch = c(16,16,17,18,15,16,17,18,15,16,17,16,16), cex = 1, ncol = 2)
+# legend('topright', legend = c('Hillslope: GW', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Soil: Riparian', 'Soil: Other', 'Veg: Trees', 'Veg: Grass', 'Buildings', 'Zone: Atm.'), col = colos_paper[c(1,3,3,3,3,2,2,4,4,6,5)], pch = c(16,16,17,18,15,16,17,16,17,16,16), cex = 1.2, ncol = 2)
+# 
+# #x-axis lines
+# par(xpd=TRUE)
+# SortNames = sort(names(EEs05_b_mua_m)[-which(names(EEs05_b_mua_m) %in% ColsAggregated)])
+# SortNames = SortNames[c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]
+# lines(x = c(-1,-1), y = c(-0.05,0), lty = 1, col = 'black')
+# lines(x = c(0.5+grep(SortNames, pattern = '^h_')[length(grep(SortNames, pattern = '^h_'))], 0.5+grep(SortNames, pattern = '^h_')[length(grep(SortNames, pattern = '^h_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+# lines(x = c(0.5+grep(SortNames, pattern = '^l1_')[length(grep(SortNames, pattern = '^l1_'))], 0.5+grep(SortNames, pattern = '^l1_')[length(grep(SortNames, pattern = '^l1_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+# lines(x = c(0.5+grep(SortNames, pattern = '^l2_')[length(grep(SortNames, pattern = '^l2_'))], 0.5+grep(SortNames, pattern = '^l2_')[length(grep(SortNames, pattern = '^l2_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+# lines(x = c(0.5+grep(SortNames, pattern = '^l3_')[length(grep(SortNames, pattern = '^l3_'))], 0.5+grep(SortNames, pattern = '^l3_')[length(grep(SortNames, pattern = '^l3_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+# lines(x = c(0.5+grep(SortNames, pattern = '^l4_')[length(grep(SortNames, pattern = '^l4_'))], 0.5+grep(SortNames, pattern = '^l4_')[length(grep(SortNames, pattern = '^l4_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+# #lines(x = c(0.5+grep(SortNames, pattern = '^s8_')[length(grep(SortNames, pattern = '^s8_'))], 0.5+grep(SortNames, pattern = '^s8_')[length(grep(SortNames, pattern = '^s8_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+# #lines(x = c(0.5+grep(SortNames, pattern = '^s108_')[length(grep(SortNames, pattern = '^s108_'))], 0.5+grep(SortNames, pattern = '^s108_')[length(grep(SortNames, pattern = '^s108_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+# lines(x = c(0.5+grep(SortNames, pattern = '^Soil8_')[length(grep(SortNames, pattern = '^Soil8_'))], 0.5+grep(SortNames, pattern = '^Soil8_')[length(grep(SortNames, pattern = '^Soil8_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+# #lines(x = c(0.5+grep(SortNames, pattern = '^s9_')[length(grep(SortNames, pattern = '^s9_'))], 0.5+grep(SortNames, pattern = '^s9_')[length(grep(SortNames, pattern = '^s9_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+# #lines(x = c(0.5+grep(SortNames, pattern = '^s109_')[length(grep(SortNames, pattern = '^s109_'))], 0.5+grep(SortNames, pattern = '^s109_')[length(grep(SortNames, pattern = '^s109_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+# lines(x = c(0.5+grep(SortNames, pattern = '^Soil9_')[length(grep(SortNames, pattern = '^Soil9_'))], 0.5+grep(SortNames, pattern = '^Soil9_')[length(grep(SortNames, pattern = '^Soil9_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+# lines(x = c(0.5+grep(SortNames, pattern = '^v102_')[length(grep(SortNames, pattern = '^v102_'))], 0.5+grep(SortNames, pattern = '^v102_')[length(grep(SortNames, pattern = '^v102_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+# lines(x = c(0.5+grep(SortNames, pattern = '^v3_')[length(grep(SortNames, pattern = '^v3_'))], 0.5+grep(SortNames, pattern = '^v3_')[length(grep(SortNames, pattern = '^v3_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+# lines(x = c(0.5+grep(SortNames, pattern = '^v4_')[length(grep(SortNames, pattern = '^v4_'))], 0.5+grep(SortNames, pattern = '^v4_')[length(grep(SortNames, pattern = '^v4_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+# lines(x = c(0.5+grep(SortNames, pattern = '^z_')[length(grep(SortNames, pattern = '^z_'))], 0.5+grep(SortNames, pattern = '^z_')[length(grep(SortNames, pattern = '^z_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+# 
+# #x-axis pch
+# par(new=TRUE)
+# #plot(x = c(1,3.5,5.5,8,11.5,24,46,67,89,135,193,222,232), y = c(-0.06, -0.08, -0.06, -0.08, -0.06, rep(-0.08,8)), col = colos_paper[c(1,3,3,3,3,2,2,2,2,4,4,6,5)], pch = c(16,16,17,18,15,16,17,18,15,16,17,16,16), xlim = c(0,250), ylim = c(0,1), axes = FALSE, xlab = '', ylab = '')
+# plot(x = c(1,3.5,5.5,8,11.5,35,78,135,193,222,232), y = c(-0.06, -0.08, -0.06, -0.08, -0.06, rep(-0.08,6)), col = colos_paper[c(1,3,3,3,3,2,2,4,4,6,5)], pch = c(16,16,17,18,15,16,17,16,17,16,16), xlim = c(0,250), ylim = c(0,1), axes = FALSE, xlab = '', ylab = '')
+# dev.off()
+# 
+# png('EE05_mua_b_lines.png', res = 300, units = 'in', height = 7, width = 7)
+# barplot(height = muaEEs05_b, ylab = 'Mean Absolute Value of the Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Lower 5th Percentile of Flow', col = ColPlots, border = NA, ylim = c(0,120), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5)
+# #Make lines separating the different classes of variables
+# lines(x = c(-1,-1), y = c(-10,130), lty = 1, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^h_')[length(grep(colnames(InputParams), pattern = '^h_'))], 0.5+grep(colnames(InputParams), pattern = '^h_')[length(grep(colnames(InputParams), pattern = '^h_'))]), y = c(-10,130), lty = 1, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^z_')[length(grep(colnames(InputParams), pattern = '^z_'))], 0.5+grep(colnames(InputParams), pattern = '^z_')[length(grep(colnames(InputParams), pattern = '^z_'))]), y = c(-10,130), lty = 1, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^s9_')[length(grep(colnames(InputParams), pattern = '^s9_'))], 0.5+grep(colnames(InputParams), pattern = '^s9_')[length(grep(colnames(InputParams), pattern = '^s9_'))]), y = c(-10,130), lty = 2, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^s109_')[length(grep(colnames(InputParams), pattern = '^s109_'))], 0.5+grep(colnames(InputParams), pattern = '^s109_')[length(grep(colnames(InputParams), pattern = '^s109_'))]), y = c(-10,130), lty = 2, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^s8_')[length(grep(colnames(InputParams), pattern = '^s8_'))], 0.5+grep(colnames(InputParams), pattern = '^s8_')[length(grep(colnames(InputParams), pattern = '^s8_'))]), y = c(-10,130), lty = 2, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^s108_')[length(grep(colnames(InputParams), pattern = '^s108_'))], 0.5+grep(colnames(InputParams), pattern = '^s108_')[length(grep(colnames(InputParams), pattern = '^s108_'))]), y = c(-10,130), lty = 1, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^l1_')[length(grep(colnames(InputParams), pattern = '^l1_'))], 0.5+grep(colnames(InputParams), pattern = '^l1_')[length(grep(colnames(InputParams), pattern = '^l1_'))]), y = c(-10,130), lty = 2, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^l2_')[length(grep(colnames(InputParams), pattern = '^l2_'))], 0.5+grep(colnames(InputParams), pattern = '^l2_')[length(grep(colnames(InputParams), pattern = '^l2_'))]), y = c(-10,130), lty = 2, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^l3_')[length(grep(colnames(InputParams), pattern = '^l3_'))], 0.5+grep(colnames(InputParams), pattern = '^l3_')[length(grep(colnames(InputParams), pattern = '^l3_'))]), y = c(-10,130), lty = 2, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^l4_')[length(grep(colnames(InputParams), pattern = '^l4_'))], 0.5+grep(colnames(InputParams), pattern = '^l4_')[length(grep(colnames(InputParams), pattern = '^l4_'))]), y = c(-10,130), lty = 1, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^v102_')[length(grep(colnames(InputParams), pattern = '^v102_'))], 0.5+grep(colnames(InputParams), pattern = '^v102_')[length(grep(colnames(InputParams), pattern = '^v102_'))]), y = c(-10,130), lty = 2, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^v3_')[length(grep(colnames(InputParams), pattern = '^v3_'))], 0.5+grep(colnames(InputParams), pattern = '^v3_')[length(grep(colnames(InputParams), pattern = '^v3_'))]), y = c(-10,130), lty = 2, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^v4_')[length(grep(colnames(InputParams), pattern = '^v4_'))], 0.5+grep(colnames(InputParams), pattern = '^v4_')[length(grep(colnames(InputParams), pattern = '^v4_'))]), y = c(-10,130), lty = 1, col = 'black')
+# legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
+# dev.off()
+# 
+# png('EE95_mua_b.png', res = 300, units = 'in', height = 7, width = 7)
+# barplot(height = EEs95_b_mua_m[1:nrow(ParamRanges)]/max(EEs95_b_mua_95[1:nrow(ParamRanges)]), ylab = 'Normalized Mean Abs. Val. of Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Upper 5th Percentile of Flow', col = ColPlots, border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,300))
+# arrows(seq(0.5,nrow(ParamRanges)-0.5,1), EEs95_b_mua_05[1:nrow(ParamRanges)]/max(EEs95_b_mua_95[1:nrow(ParamRanges)]), seq(0.5,nrow(ParamRanges)-0.5,1), EEs95_b_mua_95[1:nrow(ParamRanges)]/max(EEs95_b_mua_95[1:nrow(ParamRanges)]), length=0.05, angle=90, code=3)
+# lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(RanksMua95_b[Top1095,2]/max(EEs95_b_mua_95[1:nrow(ParamRanges)]),RanksMua95_b[Top1095,2]/max(EEs95_b_mua_95[1:nrow(ParamRanges)])), col = 'black', lwd = 2)
+# legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
+# dev.off()
+# 
+# png('EE95_mua_b_Agg.png', res = 300, units = 'in', height = 7, width = 7)
+# barplot(height = EEs95_b_mua_m[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]/max(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]), ylab = 'Normalized Mean Abs. Val. of Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Upper 5th Percentile of Flow', col = ColPlots_Agg, border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,300))
+# arrows(seq(0.5,length(EEs95_b_mua_05[-which(names(EEs95_b_mua_m) %in% ColsAggregated)])-0.5,1), EEs95_b_mua_05[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]/max(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]), seq(0.5,length(EEs95_b_mua_05[-which(names(EEs95_b_mua_m) %in% ColsAggregated)])-0.5,1), EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]/max(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]), length=0.05, angle=90, code=3)
+# lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(as.numeric(sort(EEs95_b_mua_m[-which(names(EEs95_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top1095_Agg])/max(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]), as.numeric(sort(EEs95_b_mua_m[-which(names(EEs95_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top1095_Agg])/max(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)])), col = 'black', lwd = 2)
+# legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
+# dev.off()
+# 
+# png('EE95_mua_b_lines.png', res = 300, units = 'in', height = 7, width = 7)
+# barplot(height = muaEEs95_b, ylab = 'Mean Absolute Value of the Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Upper 5th Percentile of Flow', col = ColPlots, border = NA, ylim = c(0,120), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5)
+# #Make lines separating the different classes of variables
+# lines(x = c(-1,-1), y = c(-10,130), lty = 1, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^h_')[length(grep(colnames(InputParams), pattern = '^h_'))], 0.5+grep(colnames(InputParams), pattern = '^h_')[length(grep(colnames(InputParams), pattern = '^h_'))]), y = c(-10,130), lty = 1, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^z_')[length(grep(colnames(InputParams), pattern = '^z_'))], 0.5+grep(colnames(InputParams), pattern = '^z_')[length(grep(colnames(InputParams), pattern = '^z_'))]), y = c(-10,130), lty = 1, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^s9_')[length(grep(colnames(InputParams), pattern = '^s9_'))], 0.5+grep(colnames(InputParams), pattern = '^s9_')[length(grep(colnames(InputParams), pattern = '^s9_'))]), y = c(-10,130), lty = 2, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^s109_')[length(grep(colnames(InputParams), pattern = '^s109_'))], 0.5+grep(colnames(InputParams), pattern = '^s109_')[length(grep(colnames(InputParams), pattern = '^s109_'))]), y = c(-10,130), lty = 2, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^s8_')[length(grep(colnames(InputParams), pattern = '^s8_'))], 0.5+grep(colnames(InputParams), pattern = '^s8_')[length(grep(colnames(InputParams), pattern = '^s8_'))]), y = c(-10,130), lty = 2, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^s108_')[length(grep(colnames(InputParams), pattern = '^s108_'))], 0.5+grep(colnames(InputParams), pattern = '^s108_')[length(grep(colnames(InputParams), pattern = '^s108_'))]), y = c(-10,130), lty = 1, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^l1_')[length(grep(colnames(InputParams), pattern = '^l1_'))], 0.5+grep(colnames(InputParams), pattern = '^l1_')[length(grep(colnames(InputParams), pattern = '^l1_'))]), y = c(-10,130), lty = 2, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^l2_')[length(grep(colnames(InputParams), pattern = '^l2_'))], 0.5+grep(colnames(InputParams), pattern = '^l2_')[length(grep(colnames(InputParams), pattern = '^l2_'))]), y = c(-10,130), lty = 2, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^l3_')[length(grep(colnames(InputParams), pattern = '^l3_'))], 0.5+grep(colnames(InputParams), pattern = '^l3_')[length(grep(colnames(InputParams), pattern = '^l3_'))]), y = c(-10,130), lty = 2, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^l4_')[length(grep(colnames(InputParams), pattern = '^l4_'))], 0.5+grep(colnames(InputParams), pattern = '^l4_')[length(grep(colnames(InputParams), pattern = '^l4_'))]), y = c(-10,130), lty = 1, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^v102_')[length(grep(colnames(InputParams), pattern = '^v102_'))], 0.5+grep(colnames(InputParams), pattern = '^v102_')[length(grep(colnames(InputParams), pattern = '^v102_'))]), y = c(-10,130), lty = 2, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^v3_')[length(grep(colnames(InputParams), pattern = '^v3_'))], 0.5+grep(colnames(InputParams), pattern = '^v3_')[length(grep(colnames(InputParams), pattern = '^v3_'))]), y = c(-10,130), lty = 2, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^v4_')[length(grep(colnames(InputParams), pattern = '^v4_'))], 0.5+grep(colnames(InputParams), pattern = '^v4_')[length(grep(colnames(InputParams), pattern = '^v4_'))]), y = c(-10,130), lty = 1, col = 'black')
+# legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
+# dev.off()
+# 
+# png('EEot_mua_b.png', res = 300, units = 'in', height = 7, width = 7)
+# barplot(height = EEsot_b_mua_m[1:nrow(ParamRanges)]/max(EEsot_b_mua_95[1:nrow(ParamRanges)]), ylab = 'Normalized Mean Abs. Val. of Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for 5th-95th Percentile Flows', col = ColPlots, border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,300))
+# arrows(seq(0.5,nrow(ParamRanges)-0.5,1), EEsot_b_mua_05[1:nrow(ParamRanges)]/max(EEsot_b_mua_95[1:nrow(ParamRanges)]), seq(0.5,nrow(ParamRanges)-0.5,1), EEsot_b_mua_95[1:nrow(ParamRanges)]/max(EEsot_b_mua_95[1:nrow(ParamRanges)]), length=0.05, angle=90, code=3)
+# lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(RanksMuaot_b[Top10ot,2]/max(EEsot_b_mua_95[1:nrow(ParamRanges)]),RanksMuaot_b[Top10ot,2]/max(EEsot_b_mua_95[1:nrow(ParamRanges)])), col = 'black', lwd = 2)
+# legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
+# dev.off()
+# 
+# png('EEot_mua_b_Agg.png', res = 300, units = 'in', height = 7, width = 7)
+# barplot(height = EEsot_b_mua_m[-which(names(EEsot_b_mua_m) %in% ColsAggregated)]/max(EEsot_b_mua_95[-which(names(EEsot_b_mua_m) %in% ColsAggregated)]), ylab = 'Normalized Mean Abs. Val. of Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for 5th-95th Percentile Flows', col = ColPlots_Agg, border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,300))
+# arrows(seq(0.5,length(EEsot_b_mua_05[-which(names(EEsot_b_mua_m) %in% ColsAggregated)])-0.5,1), EEsot_b_mua_05[-which(names(EEsot_b_mua_m) %in% ColsAggregated)]/max(EEsot_b_mua_95[-which(names(EEsot_b_mua_m) %in% ColsAggregated)]), seq(0.5,length(EEsot_b_mua_05[-which(names(EEsot_b_mua_m) %in% ColsAggregated)])-0.5,1), EEsot_b_mua_95[-which(names(EEsot_b_mua_m) %in% ColsAggregated)]/max(EEsot_b_mua_95[-which(names(EEsot_b_mua_m) %in% ColsAggregated)]), length=0.05, angle=90, code=3)
+# lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(as.numeric(sort(EEsot_b_mua_m[-which(names(EEsot_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10ot_Agg])/max(EEsot_b_mua_95[-which(names(EEsot_b_mua_m) %in% ColsAggregated)]), as.numeric(sort(EEsot_b_mua_m[-which(names(EEsot_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10ot_Agg])/max(EEsot_b_mua_95[-which(names(EEsot_b_mua_m) %in% ColsAggregated)])), col = 'black', lwd = 2)
+# legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
+# dev.off()
+# 
+# png('EEot_mua_b_lines.png', res = 300, units = 'in', height = 7, width = 7)
+# barplot(height = muaEEsot_b, ylab = 'Mean Absolute Value of the Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for 5th-95th Percentile Flows', col = ColPlots, border = NA, ylim = c(0,3000), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5)
+# #Make lines separating the different classes of variables
+# lines(x = c(-1,-1), y = c(-10,3100), lty = 1, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^h_')[length(grep(colnames(InputParams), pattern = '^h_'))], 0.5+grep(colnames(InputParams), pattern = '^h_')[length(grep(colnames(InputParams), pattern = '^h_'))]), y = c(-10,3100), lty = 1, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^z_')[length(grep(colnames(InputParams), pattern = '^z_'))], 0.5+grep(colnames(InputParams), pattern = '^z_')[length(grep(colnames(InputParams), pattern = '^z_'))]), y = c(-10,3100), lty = 1, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^s9_')[length(grep(colnames(InputParams), pattern = '^s9_'))], 0.5+grep(colnames(InputParams), pattern = '^s9_')[length(grep(colnames(InputParams), pattern = '^s9_'))]), y = c(-10,3100), lty = 2, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^s109_')[length(grep(colnames(InputParams), pattern = '^s109_'))], 0.5+grep(colnames(InputParams), pattern = '^s109_')[length(grep(colnames(InputParams), pattern = '^s109_'))]), y = c(-10,3100), lty = 2, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^s8_')[length(grep(colnames(InputParams), pattern = '^s8_'))], 0.5+grep(colnames(InputParams), pattern = '^s8_')[length(grep(colnames(InputParams), pattern = '^s8_'))]), y = c(-10,3100), lty = 2, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^s108_')[length(grep(colnames(InputParams), pattern = '^s108_'))], 0.5+grep(colnames(InputParams), pattern = '^s108_')[length(grep(colnames(InputParams), pattern = '^s108_'))]), y = c(-10,3100), lty = 1, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^l1_')[length(grep(colnames(InputParams), pattern = '^l1_'))], 0.5+grep(colnames(InputParams), pattern = '^l1_')[length(grep(colnames(InputParams), pattern = '^l1_'))]), y = c(-10,3100), lty = 2, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^l2_')[length(grep(colnames(InputParams), pattern = '^l2_'))], 0.5+grep(colnames(InputParams), pattern = '^l2_')[length(grep(colnames(InputParams), pattern = '^l2_'))]), y = c(-10,3100), lty = 2, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^l3_')[length(grep(colnames(InputParams), pattern = '^l3_'))], 0.5+grep(colnames(InputParams), pattern = '^l3_')[length(grep(colnames(InputParams), pattern = '^l3_'))]), y = c(-10,3100), lty = 2, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^l4_')[length(grep(colnames(InputParams), pattern = '^l4_'))], 0.5+grep(colnames(InputParams), pattern = '^l4_')[length(grep(colnames(InputParams), pattern = '^l4_'))]), y = c(-10,3100), lty = 1, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^v102_')[length(grep(colnames(InputParams), pattern = '^v102_'))], 0.5+grep(colnames(InputParams), pattern = '^v102_')[length(grep(colnames(InputParams), pattern = '^v102_'))]), y = c(-10,3100), lty = 2, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^v3_')[length(grep(colnames(InputParams), pattern = '^v3_'))], 0.5+grep(colnames(InputParams), pattern = '^v3_')[length(grep(colnames(InputParams), pattern = '^v3_'))]), y = c(-10,3100), lty = 2, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^v4_')[length(grep(colnames(InputParams), pattern = '^v4_'))], 0.5+grep(colnames(InputParams), pattern = '^v4_')[length(grep(colnames(InputParams), pattern = '^v4_'))]), y = c(-10,3100), lty = 1, col = 'black')
+# legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
+# dev.off()
+# 
+# png('EETN05_mua_b.png', res = 300, units = 'in', height = 7, width = 7)
+# barplot(height = EEsTN05_b_mua_m[1:nrow(ParamRanges)]/max(EEsTN05_b_mua_95[1:nrow(ParamRanges)]), ylab = 'Normalized Mean Abs. Val. of Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Lower 5th Quantile of TN', col = ColPlots, border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,300))
+# arrows(seq(0.5,nrow(ParamRanges)-0.5,1), EEsTN05_b_mua_05[1:nrow(ParamRanges)]/max(EEsTN05_b_mua_95[1:nrow(ParamRanges)]), seq(0.5,nrow(ParamRanges)-0.5,1), EEsTN05_b_mua_95[1:nrow(ParamRanges)]/max(EEsTN05_b_mua_95[1:nrow(ParamRanges)]), length=0.05, angle=90, code=3)
+# lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(RanksMuaTN05_b[Top10TN05,2]/max(EEsTN05_b_mua_95[1:nrow(ParamRanges)]),RanksMuaTN05_b[Top10TN05,2]/max(EEsTN05_b_mua_95[1:nrow(ParamRanges)])), col = 'black', lwd = 2)
+# legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
+# dev.off()
+# 
+# png('EETN05_mua_b_Agg.png', res = 300, units = 'in', height = 7, width = 7)
+# barplot(height = EEsTN05_b_mua_m[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)]/max(EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)]), ylab = 'Normalized Mean Abs. Val. of Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Lower 5th Quantile of TN', col = ColPlots_Agg, border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,300))
+# arrows(seq(0.5,length(EEsTN05_b_mua_05[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)])-0.5,1), EEsTN05_b_mua_05[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)]/max(EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)]), seq(0.5,length(EEsTN05_b_mua_05[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)])-0.5,1), EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)]/max(EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)]), length=0.05, angle=90, code=3)
+# lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(as.numeric(sort(EEsTN05_b_mua_m[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10TN05_Agg])/max(EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)]), as.numeric(sort(EEsTN05_b_mua_m[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10TN05_Agg])/max(EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)])), col = 'black', lwd = 2)
+# legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
+# dev.off()
+# 
+# png('EETN05_mua_b_lines.png', res = 300, units = 'in', height = 7, width = 7)
+# barplot(height = muaEEsTN05_b, ylab = 'Mean Absolute Value of the Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Lower 5th Quantile of TN', col = ColPlots, border = NA, ylim = c(0,40), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5)
+# #Make lines separating the different classes of variables
+# lines(x = c(-1,-1), y = c(-10,130), lty = 1, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^h_')[length(grep(colnames(InputParams), pattern = '^h_'))], 0.5+grep(colnames(InputParams), pattern = '^h_')[length(grep(colnames(InputParams), pattern = '^h_'))]), y = c(-10,130), lty = 1, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^z_')[length(grep(colnames(InputParams), pattern = '^z_'))], 0.5+grep(colnames(InputParams), pattern = '^z_')[length(grep(colnames(InputParams), pattern = '^z_'))]), y = c(-10,130), lty = 1, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^s9_')[length(grep(colnames(InputParams), pattern = '^s9_'))], 0.5+grep(colnames(InputParams), pattern = '^s9_')[length(grep(colnames(InputParams), pattern = '^s9_'))]), y = c(-10,130), lty = 2, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^s109_')[length(grep(colnames(InputParams), pattern = '^s109_'))], 0.5+grep(colnames(InputParams), pattern = '^s109_')[length(grep(colnames(InputParams), pattern = '^s109_'))]), y = c(-10,130), lty = 2, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^s8_')[length(grep(colnames(InputParams), pattern = '^s8_'))], 0.5+grep(colnames(InputParams), pattern = '^s8_')[length(grep(colnames(InputParams), pattern = '^s8_'))]), y = c(-10,130), lty = 2, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^s108_')[length(grep(colnames(InputParams), pattern = '^s108_'))], 0.5+grep(colnames(InputParams), pattern = '^s108_')[length(grep(colnames(InputParams), pattern = '^s108_'))]), y = c(-10,130), lty = 1, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^l1_')[length(grep(colnames(InputParams), pattern = '^l1_'))], 0.5+grep(colnames(InputParams), pattern = '^l1_')[length(grep(colnames(InputParams), pattern = '^l1_'))]), y = c(-10,130), lty = 2, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^l2_')[length(grep(colnames(InputParams), pattern = '^l2_'))], 0.5+grep(colnames(InputParams), pattern = '^l2_')[length(grep(colnames(InputParams), pattern = '^l2_'))]), y = c(-10,130), lty = 2, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^l3_')[length(grep(colnames(InputParams), pattern = '^l3_'))], 0.5+grep(colnames(InputParams), pattern = '^l3_')[length(grep(colnames(InputParams), pattern = '^l3_'))]), y = c(-10,130), lty = 2, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^l4_')[length(grep(colnames(InputParams), pattern = '^l4_'))], 0.5+grep(colnames(InputParams), pattern = '^l4_')[length(grep(colnames(InputParams), pattern = '^l4_'))]), y = c(-10,130), lty = 1, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^v102_')[length(grep(colnames(InputParams), pattern = '^v102_'))], 0.5+grep(colnames(InputParams), pattern = '^v102_')[length(grep(colnames(InputParams), pattern = '^v102_'))]), y = c(-10,130), lty = 2, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^v3_')[length(grep(colnames(InputParams), pattern = '^v3_'))], 0.5+grep(colnames(InputParams), pattern = '^v3_')[length(grep(colnames(InputParams), pattern = '^v3_'))]), y = c(-10,130), lty = 2, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^v4_')[length(grep(colnames(InputParams), pattern = '^v4_'))], 0.5+grep(colnames(InputParams), pattern = '^v4_')[length(grep(colnames(InputParams), pattern = '^v4_'))]), y = c(-10,130), lty = 1, col = 'black')
+# legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
+# dev.off()
+# 
+# png('EETN95_mua_b.png', res = 300, units = 'in', height = 7, width = 7)
+# barplot(height = EEsTN95_b_mua_m[1:nrow(ParamRanges)]/max(EEsTN95_b_mua_95[1:nrow(ParamRanges)]), ylab = 'Normalized Mean Abs. Val. of Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Upper 5th Quantile of TN', col = ColPlots, border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,300))
+# arrows(seq(0.5,nrow(ParamRanges)-0.5,1), EEsTN95_b_mua_05[1:nrow(ParamRanges)]/max(EEsTN95_b_mua_95[1:nrow(ParamRanges)]), seq(0.5,nrow(ParamRanges)-0.5,1), EEsTN95_b_mua_95[1:nrow(ParamRanges)]/max(EEsTN95_b_mua_95[1:nrow(ParamRanges)]), length=0.05, angle=90, code=3)
+# lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(RanksMuaTN95_b[Top10TN95,2]/max(EEsTN95_b_mua_95[1:nrow(ParamRanges)]),RanksMuaTN95_b[Top10TN95,2]/max(EEsTN95_b_mua_95[1:nrow(ParamRanges)])), col = 'black', lwd = 2)
+# legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
+# dev.off()
+# 
+# png('EETN95_mua_b_Agg.png', res = 300, units = 'in', height = 7, width = 7)
+# barplot(height = EEsTN95_b_mua_m[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)]/max(EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)]), ylab = 'Normalized Mean Abs. Val. of Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Upper 5th Quantile of TN', col = ColPlots_Agg, border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,300))
+# arrows(seq(0.5,length(EEsTN95_b_mua_05[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)])-0.5,1), EEsTN95_b_mua_05[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)]/max(EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)]), seq(0.5,length(EEsTN95_b_mua_05[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)])-0.5,1), EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)]/max(EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)]), length=0.05, angle=90, code=3)
+# lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(as.numeric(sort(EEsTN95_b_mua_m[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10TN95_Agg])/max(EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)]), as.numeric(sort(EEsTN95_b_mua_m[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10TN95_Agg])/max(EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)])), col = 'black', lwd = 2)
+# legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
+# dev.off()
+# 
+# png('EETN95_mua_b_lines.png', res = 300, units = 'in', height = 7, width = 7)
+# barplot(height = muaEEsTN95_b, ylab = 'Mean Absolute Value of the Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Upper 5th Quantile of TN', col = ColPlots, border = NA, ylim = c(0,20), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5)
+# #Make lines separating the different classes of variables
+# lines(x = c(-1,-1), y = c(-10,130), lty = 1, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^h_')[length(grep(colnames(InputParams), pattern = '^h_'))], 0.5+grep(colnames(InputParams), pattern = '^h_')[length(grep(colnames(InputParams), pattern = '^h_'))]), y = c(-10,130), lty = 1, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^z_')[length(grep(colnames(InputParams), pattern = '^z_'))], 0.5+grep(colnames(InputParams), pattern = '^z_')[length(grep(colnames(InputParams), pattern = '^z_'))]), y = c(-10,130), lty = 1, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^s9_')[length(grep(colnames(InputParams), pattern = '^s9_'))], 0.5+grep(colnames(InputParams), pattern = '^s9_')[length(grep(colnames(InputParams), pattern = '^s9_'))]), y = c(-10,130), lty = 2, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^s109_')[length(grep(colnames(InputParams), pattern = '^s109_'))], 0.5+grep(colnames(InputParams), pattern = '^s109_')[length(grep(colnames(InputParams), pattern = '^s109_'))]), y = c(-10,130), lty = 2, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^s8_')[length(grep(colnames(InputParams), pattern = '^s8_'))], 0.5+grep(colnames(InputParams), pattern = '^s8_')[length(grep(colnames(InputParams), pattern = '^s8_'))]), y = c(-10,130), lty = 2, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^s108_')[length(grep(colnames(InputParams), pattern = '^s108_'))], 0.5+grep(colnames(InputParams), pattern = '^s108_')[length(grep(colnames(InputParams), pattern = '^s108_'))]), y = c(-10,130), lty = 1, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^l1_')[length(grep(colnames(InputParams), pattern = '^l1_'))], 0.5+grep(colnames(InputParams), pattern = '^l1_')[length(grep(colnames(InputParams), pattern = '^l1_'))]), y = c(-10,130), lty = 2, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^l2_')[length(grep(colnames(InputParams), pattern = '^l2_'))], 0.5+grep(colnames(InputParams), pattern = '^l2_')[length(grep(colnames(InputParams), pattern = '^l2_'))]), y = c(-10,130), lty = 2, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^l3_')[length(grep(colnames(InputParams), pattern = '^l3_'))], 0.5+grep(colnames(InputParams), pattern = '^l3_')[length(grep(colnames(InputParams), pattern = '^l3_'))]), y = c(-10,130), lty = 2, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^l4_')[length(grep(colnames(InputParams), pattern = '^l4_'))], 0.5+grep(colnames(InputParams), pattern = '^l4_')[length(grep(colnames(InputParams), pattern = '^l4_'))]), y = c(-10,130), lty = 1, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^v102_')[length(grep(colnames(InputParams), pattern = '^v102_'))], 0.5+grep(colnames(InputParams), pattern = '^v102_')[length(grep(colnames(InputParams), pattern = '^v102_'))]), y = c(-10,130), lty = 2, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^v3_')[length(grep(colnames(InputParams), pattern = '^v3_'))], 0.5+grep(colnames(InputParams), pattern = '^v3_')[length(grep(colnames(InputParams), pattern = '^v3_'))]), y = c(-10,130), lty = 2, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^v4_')[length(grep(colnames(InputParams), pattern = '^v4_'))], 0.5+grep(colnames(InputParams), pattern = '^v4_')[length(grep(colnames(InputParams), pattern = '^v4_'))]), y = c(-10,130), lty = 1, col = 'black')
+# legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
+# dev.off()
+# 
+# png('EETNMed_mua_b.png', res = 300, units = 'in', height = 7, width = 7)
+# barplot(height = EEsTNMed_b_mua_m[1:nrow(ParamRanges)]/max(EEsTNMed_b_mua_95[1:nrow(ParamRanges)]), ylab = 'Normalized Mean Abs. Val. of Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Mean of TN', col = ColPlots, border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,300))
+# arrows(seq(0.5,nrow(ParamRanges)-0.5,1), EEsTNMed_b_mua_05[1:nrow(ParamRanges)]/max(EEsTNMed_b_mua_95[1:nrow(ParamRanges)]), seq(0.5,nrow(ParamRanges)-0.5,1), EEsTNMed_b_mua_95[1:nrow(ParamRanges)]/max(EEsTNMed_b_mua_95[1:nrow(ParamRanges)]), length=0.05, angle=90, code=3)
+# lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(RanksMuaTNMed_b[Top10TNMed,2]/max(EEsTNMed_b_mua_95[1:nrow(ParamRanges)]),RanksMuaTNMed_b[Top10TNMed,2]/max(EEsTNMed_b_mua_95[1:nrow(ParamRanges)])), col = 'black', lwd = 2)
+# legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
+# dev.off()
+# 
+# png('EETNMed_mua_b_Agg.png', res = 300, units = 'in', height = 7, width = 7)
+# barplot(height = EEsTNMed_b_mua_m[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)]/max(EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)]), ylab = 'Normalized Mean Abs. Val. of Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Mean of TN', col = ColPlots_Agg, border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,300))
+# arrows(seq(0.5,length(EEsTNMed_b_mua_05[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)])-0.5,1), EEsTNMed_b_mua_05[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)]/max(EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)]), seq(0.5,length(EEsTNMed_b_mua_05[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)])-0.5,1), EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)]/max(EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)]), length=0.05, angle=90, code=3)
+# lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(as.numeric(sort(EEsTNMed_b_mua_m[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10TNMed_Agg])/max(EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)]), as.numeric(sort(EEsTNMed_b_mua_m[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10TNMed_Agg])/max(EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)])), col = 'black', lwd = 2)
+# legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
+# dev.off()
+# 
+# png('EETNMed_mua_b_lines.png', res = 300, units = 'in', height = 7, width = 7)
+# barplot(height = muaEEsTNMed_b, ylab = 'Mean Absolute Value of the Elementary Effect', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Mean of TN', col = ColPlots, border = NA, ylim = c(0,30), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5)
+# #Make lines separating the different classes of variables
+# lines(x = c(-1,-1), y = c(-10,3100), lty = 1, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^h_')[length(grep(colnames(InputParams), pattern = '^h_'))], 0.5+grep(colnames(InputParams), pattern = '^h_')[length(grep(colnames(InputParams), pattern = '^h_'))]), y = c(-10,3100), lty = 1, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^z_')[length(grep(colnames(InputParams), pattern = '^z_'))], 0.5+grep(colnames(InputParams), pattern = '^z_')[length(grep(colnames(InputParams), pattern = '^z_'))]), y = c(-10,3100), lty = 1, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^s9_')[length(grep(colnames(InputParams), pattern = '^s9_'))], 0.5+grep(colnames(InputParams), pattern = '^s9_')[length(grep(colnames(InputParams), pattern = '^s9_'))]), y = c(-10,3100), lty = 2, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^s109_')[length(grep(colnames(InputParams), pattern = '^s109_'))], 0.5+grep(colnames(InputParams), pattern = '^s109_')[length(grep(colnames(InputParams), pattern = '^s109_'))]), y = c(-10,3100), lty = 2, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^s8_')[length(grep(colnames(InputParams), pattern = '^s8_'))], 0.5+grep(colnames(InputParams), pattern = '^s8_')[length(grep(colnames(InputParams), pattern = '^s8_'))]), y = c(-10,3100), lty = 2, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^s108_')[length(grep(colnames(InputParams), pattern = '^s108_'))], 0.5+grep(colnames(InputParams), pattern = '^s108_')[length(grep(colnames(InputParams), pattern = '^s108_'))]), y = c(-10,3100), lty = 1, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^l1_')[length(grep(colnames(InputParams), pattern = '^l1_'))], 0.5+grep(colnames(InputParams), pattern = '^l1_')[length(grep(colnames(InputParams), pattern = '^l1_'))]), y = c(-10,3100), lty = 2, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^l2_')[length(grep(colnames(InputParams), pattern = '^l2_'))], 0.5+grep(colnames(InputParams), pattern = '^l2_')[length(grep(colnames(InputParams), pattern = '^l2_'))]), y = c(-10,3100), lty = 2, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^l3_')[length(grep(colnames(InputParams), pattern = '^l3_'))], 0.5+grep(colnames(InputParams), pattern = '^l3_')[length(grep(colnames(InputParams), pattern = '^l3_'))]), y = c(-10,3100), lty = 2, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^l4_')[length(grep(colnames(InputParams), pattern = '^l4_'))], 0.5+grep(colnames(InputParams), pattern = '^l4_')[length(grep(colnames(InputParams), pattern = '^l4_'))]), y = c(-10,3100), lty = 1, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^v102_')[length(grep(colnames(InputParams), pattern = '^v102_'))], 0.5+grep(colnames(InputParams), pattern = '^v102_')[length(grep(colnames(InputParams), pattern = '^v102_'))]), y = c(-10,3100), lty = 2, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^v3_')[length(grep(colnames(InputParams), pattern = '^v3_'))], 0.5+grep(colnames(InputParams), pattern = '^v3_')[length(grep(colnames(InputParams), pattern = '^v3_'))]), y = c(-10,3100), lty = 2, col = 'black')
+# lines(x = c(0.5+grep(colnames(InputParams), pattern = '^v4_')[length(grep(colnames(InputParams), pattern = '^v4_'))], 0.5+grep(colnames(InputParams), pattern = '^v4_')[length(grep(colnames(InputParams), pattern = '^v4_'))]), y = c(-10,3100), lty = 1, col = 'black')
+# legend('topright', legend = c('Hillslope', 'Zone', 'Soil: #9', 'Soil: Comp. #9', 'Soil: #8', 'Soil: Comp. #8', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Veg: Trees', 'Veg: Grass', 'Buildings'), pch = 16, col = colos, cex = 1.3)
+# dev.off()
 
 # Paper figures----
 png('Panel_mua_b_Agg_Paper.png', res = 300, units = 'in', height = 8, width = 12)
@@ -4752,7 +4730,7 @@ for (i in 1:length(tmpnames)){
 dev.off()
 
 #   PDF ----
-pdf(file = 'Panel_mua_b_Agg_Paper_Cal.pdf', height = 8, width = 8, title = 'SAfig5')
+pdf(file = 'fig5a.pdf', height = 8, width = 8, title = 'SAfig5')
 layout(rbind(c(1,2), c(3,4)))
 #LNSE
 barplot(height = EEsLNSE_b_mua_m[-which(names(EEsLNSE_b_mua_m) %in% ColsAggregated)][order(names(EEsLNSE_b_mua_m[-which(names(EEsLNSE_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEsLNSE_b_mua_95[-which(names(EEsLNSE_b_mua_m) %in% ColsAggregated)]), ylab = 'Normalized Mean Abs. Val. of EE', xlab = 'Parameters', names.arg = NA, main = 'Metric: LNSE', col = ColPlots_Agg_Paper[order(names(EEsLNSE_b_mua_m[-which(names(EEsLNSE_b_mua_m) %in% ColsAggregated)]))], border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,250))
@@ -4915,6 +4893,8 @@ for (i in 1:length(tmpnames)){
 dev.off()
 
 #Hillslope Plots for mua----
+dir.create(dir_HillPanels, showWarnings = FALSE)
+setwd(dir_HillPanels)
 # Normalized EE value - not used----
 # colPal = colorRampPalette(colors = rev(c('red', 'orange', 'yellow', 'green', 'blue')))
 # scaleRange = c(0, 1)
@@ -5410,7 +5390,7 @@ par(xpd=FALSE)
 box(which = 'figure')
 dev.off()
 
-pdf('HillRankTop1295_All_AgghNoTN_paper_g.pdf', height = 7, width = 7, title = 'SAfig3d')
+pdf('fig3d.pdf', height = 7, width = 7, title = 'SAfig3d')
 par(mar = c(2,12.5,2,4.5), mgp = c(1,1,0))
 for (h in 0:length(uhills)){
   #Loop over the top 10% ranks
@@ -5603,7 +5583,8 @@ box(which = 'figure')
 dev.off()
 
 #   Compare selection with calibration metrics----
-pdf('HillRankTop1295_All_AgghCal_paper_g.pdf', height = 7, width = 7, title = 'SAfig2d')
+#HillRankTop1295_All_AgghCal_paper_g
+pdf('fig5b.pdf', height = 7, width = 7, title = 'SAfig5b')
 par(mar = c(4,12.5,2,4.5), mgp = c(1,1,0))
 for (h in 0:6){
   #Loop over the top 10% ranks
@@ -6123,7 +6104,7 @@ par(xpd=FALSE)
 box(which = 'figure')
 dev.off()
 
-pdf('HillRankTop1295_95s_Aggh_paper.pdf', height = 7, width = 7, title = 'SAfig2c')
+pdf('fig3c.pdf', height = 7, width = 7, title = 'SAfig2c')
 par(mar = c(2,12.5,2,4.5), mgp = c(1,1,0))
 for (h in 0:length(uhills)){
   #Loop over the top 10% ranks
@@ -6668,101 +6649,102 @@ dev.off()
 # legend('right', title = expression(bold('Rank')), legend = c('1 - 14', '15 - 29', '30 - 44', '45 - 60', '61 - 101'), pch = 15, col = colFun(seq(0,60,15)), inset = -0.3, xpd = TRUE)
 # dev.off()
 
-#Fixme: Show SA metrics for the basin and for each hillslope - ranks, and maps for hillslope----
-
 #Compare the parameters affected by multipliers after aggregating constrained parameters to see if they are different in sensitivity----
-#Streamflow 5%----
-png('BasinKsatDecayEEs.png', res = 300, width = 3, height = 5, units = 'in')
-barplot(height = EEs05_b_mua_m[c(grep(names(EEs05_b_mua_m), pattern = '9_m', fixed=TRUE, ignore.case = FALSE)[c(1,3,5)], grep(names(EEs05_b_mua_m), pattern = '8_m', fixed=TRUE, ignore.case = FALSE)[c(1,3,5)])][c(1,2,4,5,6,3)]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
-        names.arg = c('S9', 'S109', 'S8', 'S108', 'S8 and S108', 'S9 and S109'), ylab = 'Normalized Elementary Effect', ylim = c(0,1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'm: Decay of Ksat with increasing Sat. Def.', xlab = 'Soils')
-arrows(seq(0.5,6.5,1), 
-       EEs05_b_mua_05[c(grep(names(EEs05_b_mua_05), pattern = '9_m', fixed=TRUE, ignore.case = FALSE)[c(1,3,5)], grep(names(EEs05_b_mua_05), pattern = '8_m', fixed=TRUE, ignore.case = FALSE)[c(1,3,5)])][c(1,2,4,5,6,3)]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
-       seq(0.5,6.5,1), 
-       EEs05_b_mua_95[c(grep(names(EEs05_b_mua_95), pattern = '9_m', fixed=TRUE, ignore.case = FALSE)[c(1,3,5)], grep(names(EEs05_b_mua_95), pattern = '8_m', fixed=TRUE, ignore.case = FALSE)[c(1,3,5)])][c(1,2,4,5,6,3)]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
-       length=0.05, angle=90, code=3)
-dev.off()
-
-png('BasinKsatEEs.png', res = 300, width = 3, height = 5, units = 'in')
-par(mar=c(6,4,3,0.5))
-barplot(height = EEs05_b_mua_m[c(grep(names(EEs05_b_mua_m), pattern = 'Ksat', fixed=TRUE, ignore.case = FALSE))]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
-        names.arg = c('S9 Ksat', 'S9 vKsat', 'S109 Ksat', 'S109 vKsat', 'S8 Ksat', 'S8 vKsat', 'S108 Ksat', 'S108 vKsat', 'S8 and S108', 'S9 and S109'), ylab = 'Normalized Elementary Effect', ylim = c(0,1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Hydraulic Conductivity', xlab = '', las = 2)
-axis(side = 1, at = 5, labels = 'Soils', line = 4, cex.axis = 1.2, tick = FALSE)
-arrows(seq(0.5,9.5,1), 
-       EEs05_b_mua_05[grep(names(EEs05_b_mua_05), pattern = 'Ksat', fixed=TRUE, ignore.case = FALSE)]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
-       seq(0.5,9.5,1), 
-       EEs05_b_mua_95[grep(names(EEs05_b_mua_95), pattern = 'Ksat', fixed=TRUE, ignore.case = FALSE)]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
-       length=0.05, angle=90, code=3)
-dev.off()
-
-png('BasinSatToGWEEs.png', res = 300, width = 3, height = 5, units = 'in')
-barplot(height = EEs05_b_mua_m[c(grep(names(EEs05_b_mua_m), pattern = 'sat_to_gw', fixed=TRUE, ignore.case = FALSE))]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
-        names.arg = c('S9', 'S109', 'S8', 'S108'), ylab = 'Normalized Elementary Effect', ylim = c(0,1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Sat. to GW Coef.', xlab = 'Soils')
-arrows(seq(0.5,6.5,1), 
-       EEs05_b_mua_05[c(grep(names(EEs05_b_mua_m), pattern = 'sat_to_gw', fixed=TRUE, ignore.case = FALSE))]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
-       seq(0.5,6.5,1), 
-       EEs05_b_mua_95[c(grep(names(EEs05_b_mua_m), pattern = 'sat_to_gw', fixed=TRUE, ignore.case = FALSE))]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
-       length=0.05, angle=90, code=3)
-dev.off()
-
-png('BasinAirEntryPresEEs.png', res = 300, width = 3, height = 5, units = 'in')
-barplot(height = EEs05_b_mua_m[c(grep(names(EEs05_b_mua_m), pattern = 'psi_air', fixed=TRUE, ignore.case = FALSE))]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
-        names.arg = c('S9', 'S109', 'S8', 'S108'), ylab = 'Normalized Elementary Effect', ylim = c(0,1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Air Entry Pressure', xlab = 'Soils')
-arrows(seq(0.5,6.5,1), 
-       EEs05_b_mua_05[c(grep(names(EEs05_b_mua_m), pattern = 'psi_air', fixed=TRUE, ignore.case = FALSE))]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
-       seq(0.5,6.5,1), 
-       EEs05_b_mua_95[c(grep(names(EEs05_b_mua_m), pattern = 'psi_air', fixed=TRUE, ignore.case = FALSE))]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
-       length=0.05, angle=90, code=3)
-dev.off()
-
-png('BasinPoreSizeEEs.png', res = 300, width = 3, height = 5, units = 'in')
-barplot(height = EEs05_b_mua_m[c(grep(names(EEs05_b_mua_m), pattern = 'pore', fixed=TRUE, ignore.case = FALSE))]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
-        names.arg = c('S9', 'S109', 'S8', 'S108'), ylab = 'Normalized Elementary Effect', ylim = c(0,1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Pore Size', xlab = 'Soils')
-arrows(seq(0.5,6.5,1), 
-       EEs05_b_mua_05[c(grep(names(EEs05_b_mua_m), pattern = 'pore', fixed=TRUE, ignore.case = FALSE))]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
-       seq(0.5,6.5,1), 
-       EEs05_b_mua_95[c(grep(names(EEs05_b_mua_m), pattern = 'pore', fixed=TRUE, ignore.case = FALSE))]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
-       length=0.05, angle=90, code=3)
-dev.off()
-
-png('BasinSoilDepthEEs.png', res = 300, width = 3, height = 5, units = 'in')
-barplot(height = EEs05_b_mua_m[c(grep(names(EEs05_b_mua_m), pattern = 'active', fixed=TRUE, ignore.case = FALSE))]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
-        names.arg = c('S9', 'S109', 'S8', 'S108'), ylab = 'Normalized Elementary Effect', ylim = c(0,1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Soil Thickness', xlab = 'Soils', las = 1)
-arrows(seq(0.5,4.5,1), 
-       EEs05_b_mua_05[grep(names(EEs05_b_mua_05), pattern = 'active', fixed=TRUE, ignore.case = FALSE)]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
-       seq(0.5,4.5,1), 
-       EEs05_b_mua_95[grep(names(EEs05_b_mua_95), pattern = 'active', fixed=TRUE, ignore.case = FALSE)]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
-       length=0.05, angle=90, code=3)
-dev.off()
-
-png('BasinSnowMeltEEs.png', res = 300, width = 3, height = 5, units = 'in')
-barplot(height = EEs05_b_mua_m[c(grep(names(EEs05_b_mua_m), pattern = 'snow_melt', fixed=TRUE, ignore.case = FALSE))]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
-        names.arg = c('S9', 'S109', 'S8', 'S108'), ylab = 'Normalized Elementary Effect', ylim = c(0,0.001), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Snow Melt Temp. Coef.', xlab = 'Soils')
-arrows(seq(0.5,4.5,1), 
-       EEs05_b_mua_05[grep(names(EEs05_b_mua_05), pattern = 'snow_melt', fixed=TRUE, ignore.case = FALSE)]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
-       seq(0.5,4.5,1), 
-       EEs05_b_mua_95[grep(names(EEs05_b_mua_95), pattern = 'snow_melt', fixed=TRUE, ignore.case = FALSE)]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
-       length=0.05, angle=90, code=3)
-dev.off()
-
-png('BasinSnowEnergyEEs.png', res = 300, width = 3, height = 5, units = 'in')
-barplot(height = EEs05_b_mua_m[c(grep(names(EEs05_b_mua_m), pattern = 'snow_energy', fixed=TRUE, ignore.case = FALSE))]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
-        names.arg = c('S9', 'S109', 'S8', 'S108'), ylab = 'Normalized Elementary Effect', ylim = c(0,0.001), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Max Snow Energy Deficit', xlab = 'Soils')
-arrows(seq(0.5,4.5,1), 
-       EEs05_b_mua_05[grep(names(EEs05_b_mua_05), pattern = 'snow_energy', fixed=TRUE, ignore.case = FALSE)]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
-       seq(0.5,4.5,1), 
-       EEs05_b_mua_95[grep(names(EEs05_b_mua_95), pattern = 'snow_energy', fixed=TRUE, ignore.case = FALSE)]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
-       length=0.05, angle=90, code=3)
-dev.off()
-
-png('BasinVegSLAEEs.png', res = 300, width = 3, height = 5, units = 'in')
-barplot(height = EEs05_b_mua_m[c(grep(names(EEs05_b_mua_m), pattern = 'sla', fixed=TRUE, ignore.case = FALSE))]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
-        names.arg = c('Tree', 'Grass'), ylab = 'Normalized Elementary Effect', ylim = c(0,0.1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Specific Leaf Area', xlab = 'Vegetation')
-arrows(seq(0.5,4.5,1), 
-       EEs05_b_mua_05[grep(names(EEs05_b_mua_05), pattern = 'sla', fixed=TRUE, ignore.case = FALSE)]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
-       seq(0.5,4.5,1), 
-       EEs05_b_mua_95[grep(names(EEs05_b_mua_95), pattern = 'sla', fixed=TRUE, ignore.case = FALSE)]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
-       length=0.05, angle=90, code=3)
-dev.off()
+dir.create(dir_Mult, showWarnings = FALSE)
+setwd(dir_Mult)
+# Streamflow 5%----
+#  Individual plots----
+# png('BasinKsatDecayEEs.png', res = 300, width = 3, height = 5, units = 'in')
+# barplot(height = EEs05_b_mua_m[c(grep(names(EEs05_b_mua_m), pattern = '9_m', fixed=TRUE, ignore.case = FALSE)[c(1,3,5)], grep(names(EEs05_b_mua_m), pattern = '8_m', fixed=TRUE, ignore.case = FALSE)[c(1,3,5)])][c(1,2,4,5,6,3)]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
+#         names.arg = c('S9', 'S109', 'S8', 'S108', 'S8 and S108', 'S9 and S109'), ylab = 'Normalized Elementary Effect', ylim = c(0,1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'm: Decay of Ksat with increasing Sat. Def.', xlab = 'Soils')
+# arrows(seq(0.5,6.5,1), 
+#        EEs05_b_mua_05[c(grep(names(EEs05_b_mua_05), pattern = '9_m', fixed=TRUE, ignore.case = FALSE)[c(1,3,5)], grep(names(EEs05_b_mua_05), pattern = '8_m', fixed=TRUE, ignore.case = FALSE)[c(1,3,5)])][c(1,2,4,5,6,3)]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
+#        seq(0.5,6.5,1), 
+#        EEs05_b_mua_95[c(grep(names(EEs05_b_mua_95), pattern = '9_m', fixed=TRUE, ignore.case = FALSE)[c(1,3,5)], grep(names(EEs05_b_mua_95), pattern = '8_m', fixed=TRUE, ignore.case = FALSE)[c(1,3,5)])][c(1,2,4,5,6,3)]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
+#        length=0.05, angle=90, code=3)
+# dev.off()
+# 
+# png('BasinKsatEEs.png', res = 300, width = 3, height = 5, units = 'in')
+# par(mar=c(6,4,3,0.5))
+# barplot(height = EEs05_b_mua_m[c(grep(names(EEs05_b_mua_m), pattern = 'Ksat', fixed=TRUE, ignore.case = FALSE))]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
+#         names.arg = c('S9 Ksat', 'S9 vKsat', 'S109 Ksat', 'S109 vKsat', 'S8 Ksat', 'S8 vKsat', 'S108 Ksat', 'S108 vKsat', 'S8 and S108', 'S9 and S109'), ylab = 'Normalized Elementary Effect', ylim = c(0,1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Hydraulic Conductivity', xlab = '', las = 2)
+# axis(side = 1, at = 5, labels = 'Soils', line = 4, cex.axis = 1.2, tick = FALSE)
+# arrows(seq(0.5,9.5,1), 
+#        EEs05_b_mua_05[grep(names(EEs05_b_mua_05), pattern = 'Ksat', fixed=TRUE, ignore.case = FALSE)]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
+#        seq(0.5,9.5,1), 
+#        EEs05_b_mua_95[grep(names(EEs05_b_mua_95), pattern = 'Ksat', fixed=TRUE, ignore.case = FALSE)]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
+#        length=0.05, angle=90, code=3)
+# dev.off()
+# 
+# png('BasinSatToGWEEs.png', res = 300, width = 3, height = 5, units = 'in')
+# barplot(height = EEs05_b_mua_m[c(grep(names(EEs05_b_mua_m), pattern = 'sat_to_gw', fixed=TRUE, ignore.case = FALSE))]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
+#         names.arg = c('S9', 'S109', 'S8', 'S108'), ylab = 'Normalized Elementary Effect', ylim = c(0,1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Sat. to GW Coef.', xlab = 'Soils')
+# arrows(seq(0.5,6.5,1), 
+#        EEs05_b_mua_05[c(grep(names(EEs05_b_mua_m), pattern = 'sat_to_gw', fixed=TRUE, ignore.case = FALSE))]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
+#        seq(0.5,6.5,1), 
+#        EEs05_b_mua_95[c(grep(names(EEs05_b_mua_m), pattern = 'sat_to_gw', fixed=TRUE, ignore.case = FALSE))]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
+#        length=0.05, angle=90, code=3)
+# dev.off()
+# 
+# png('BasinAirEntryPresEEs.png', res = 300, width = 3, height = 5, units = 'in')
+# barplot(height = EEs05_b_mua_m[c(grep(names(EEs05_b_mua_m), pattern = 'psi_air', fixed=TRUE, ignore.case = FALSE))]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
+#         names.arg = c('S9', 'S109', 'S8', 'S108'), ylab = 'Normalized Elementary Effect', ylim = c(0,1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Air Entry Pressure', xlab = 'Soils')
+# arrows(seq(0.5,6.5,1), 
+#        EEs05_b_mua_05[c(grep(names(EEs05_b_mua_m), pattern = 'psi_air', fixed=TRUE, ignore.case = FALSE))]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
+#        seq(0.5,6.5,1), 
+#        EEs05_b_mua_95[c(grep(names(EEs05_b_mua_m), pattern = 'psi_air', fixed=TRUE, ignore.case = FALSE))]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
+#        length=0.05, angle=90, code=3)
+# dev.off()
+# 
+# png('BasinPoreSizeEEs.png', res = 300, width = 3, height = 5, units = 'in')
+# barplot(height = EEs05_b_mua_m[c(grep(names(EEs05_b_mua_m), pattern = 'pore', fixed=TRUE, ignore.case = FALSE))]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
+#         names.arg = c('S9', 'S109', 'S8', 'S108'), ylab = 'Normalized Elementary Effect', ylim = c(0,1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Pore Size', xlab = 'Soils')
+# arrows(seq(0.5,6.5,1), 
+#        EEs05_b_mua_05[c(grep(names(EEs05_b_mua_m), pattern = 'pore', fixed=TRUE, ignore.case = FALSE))]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
+#        seq(0.5,6.5,1), 
+#        EEs05_b_mua_95[c(grep(names(EEs05_b_mua_m), pattern = 'pore', fixed=TRUE, ignore.case = FALSE))]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
+#        length=0.05, angle=90, code=3)
+# dev.off()
+# 
+# png('BasinSoilDepthEEs.png', res = 300, width = 3, height = 5, units = 'in')
+# barplot(height = EEs05_b_mua_m[c(grep(names(EEs05_b_mua_m), pattern = 'active', fixed=TRUE, ignore.case = FALSE))]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
+#         names.arg = c('S9', 'S109', 'S8', 'S108'), ylab = 'Normalized Elementary Effect', ylim = c(0,1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Soil Thickness', xlab = 'Soils', las = 1)
+# arrows(seq(0.5,4.5,1), 
+#        EEs05_b_mua_05[grep(names(EEs05_b_mua_05), pattern = 'active', fixed=TRUE, ignore.case = FALSE)]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
+#        seq(0.5,4.5,1), 
+#        EEs05_b_mua_95[grep(names(EEs05_b_mua_95), pattern = 'active', fixed=TRUE, ignore.case = FALSE)]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
+#        length=0.05, angle=90, code=3)
+# dev.off()
+# 
+# png('BasinSnowMeltEEs.png', res = 300, width = 3, height = 5, units = 'in')
+# barplot(height = EEs05_b_mua_m[c(grep(names(EEs05_b_mua_m), pattern = 'snow_melt', fixed=TRUE, ignore.case = FALSE))]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
+#         names.arg = c('S9', 'S109', 'S8', 'S108'), ylab = 'Normalized Elementary Effect', ylim = c(0,0.001), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Snow Melt Temp. Coef.', xlab = 'Soils')
+# arrows(seq(0.5,4.5,1), 
+#        EEs05_b_mua_05[grep(names(EEs05_b_mua_05), pattern = 'snow_melt', fixed=TRUE, ignore.case = FALSE)]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
+#        seq(0.5,4.5,1), 
+#        EEs05_b_mua_95[grep(names(EEs05_b_mua_95), pattern = 'snow_melt', fixed=TRUE, ignore.case = FALSE)]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
+#        length=0.05, angle=90, code=3)
+# dev.off()
+# 
+# png('BasinSnowEnergyEEs.png', res = 300, width = 3, height = 5, units = 'in')
+# barplot(height = EEs05_b_mua_m[c(grep(names(EEs05_b_mua_m), pattern = 'snow_energy', fixed=TRUE, ignore.case = FALSE))]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
+#         names.arg = c('S9', 'S109', 'S8', 'S108'), ylab = 'Normalized Elementary Effect', ylim = c(0,0.001), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Max Snow Energy Deficit', xlab = 'Soils')
+# arrows(seq(0.5,4.5,1), 
+#        EEs05_b_mua_05[grep(names(EEs05_b_mua_05), pattern = 'snow_energy', fixed=TRUE, ignore.case = FALSE)]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
+#        seq(0.5,4.5,1), 
+#        EEs05_b_mua_95[grep(names(EEs05_b_mua_95), pattern = 'snow_energy', fixed=TRUE, ignore.case = FALSE)]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
+#        length=0.05, angle=90, code=3)
+# dev.off()
+# 
+# png('BasinVegSLAEEs.png', res = 300, width = 3, height = 5, units = 'in')
+# barplot(height = EEs05_b_mua_m[c(grep(names(EEs05_b_mua_m), pattern = 'sla', fixed=TRUE, ignore.case = FALSE))]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
+#         names.arg = c('Tree', 'Grass'), ylab = 'Normalized Elementary Effect', ylim = c(0,0.1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Specific Leaf Area', xlab = 'Vegetation')
+# arrows(seq(0.5,4.5,1), 
+#        EEs05_b_mua_05[grep(names(EEs05_b_mua_05), pattern = 'sla', fixed=TRUE, ignore.case = FALSE)]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
+#        seq(0.5,4.5,1), 
+#        EEs05_b_mua_95[grep(names(EEs05_b_mua_95), pattern = 'sla', fixed=TRUE, ignore.case = FALSE)]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_95) %in% ColsAggregated)]), 
+#        length=0.05, angle=90, code=3)
+# dev.off()
 
 #  panel----
 png('BasinAllMultEEs_05s.png', res = 300, width = 9, height = 9, units = 'in')
@@ -7088,7 +7070,7 @@ for (h in 1:length(uhills)){
   dev.off()
 }
 
-#Streamflow 5-95----
+# Streamflow 5-95----
 #  panel----
 png('BasinAllMultEEs_ots.png', res = 300, width = 9, height = 9, units = 'in')
 opar=par
@@ -7413,7 +7395,7 @@ for (h in 1:length(uhills)){
   dev.off()
 }
 
-#Streamflow 95%----
+# Streamflow 95%----
 #  panel----
 png('BasinAllMultEEs_95s.png', res = 300, width = 9, height = 9, units = 'in')
 opar=par
@@ -7691,7 +7673,7 @@ text(labels = 'I', x = -0.3, y = .112, cex = 2)
 par(xpd=FALSE)
 dev.off()
 
-#TN 5%----
+# TN 5%----
 #  panel----
 png('BasinAllMultEEs_TN05.png', res = 300, width = 9, height = 9, units = 'in')
 opar=par
@@ -7773,90 +7755,7 @@ arrows(seq(0.5,1.5,1),
        length=0.05, angle=90, code=3)
 dev.off()
 
-#  panel - hillslopes----
-for (h in 1:length(uhills)){
-  png(paste0('Hill', uhills[h],'AllMultEEs_TN05.png'), res = 300, width = 9, height = 9, units = 'in')
-  opar=par
-  layout(rbind(c(1,2,3), c(4,5,6), c(7,8,9)))
-  barplot(height = EEsTN05_h_mua_m[uhills[h], c(grep(names(EEsTN05_h_mua_m[uhills[h],]), pattern = '9_m', fixed=TRUE, ignore.case = FALSE)[c(1,3,5)], grep(names(EEsTN05_h_mua_m[uhills[h],]), pattern = '8_m', fixed=TRUE, ignore.case = FALSE)[c(1,3,5)])][c(1,2,4,5,6,3)]/max(EEsTN05_h_mua_95[uhills[h],]), 
-          names.arg = c('S9', 'S109', 'S8', 'S108', 'S8 and S108', 'S9 and S109'), ylab = 'Normalized Elementary Effect', ylim = c(0,1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'm: Ksat Decay with Sat. Def.', xlab = 'Soils', cex.main=1.5)
-  arrows(seq(0.5,5.5,1), 
-         EEsTN05_h_mua_05[uhills[h],c(grep(names(EEsTN05_h_mua_05[uhills[h],]), pattern = '9_m', fixed=TRUE, ignore.case = FALSE)[c(1,3,5)], grep(names(EEsTN05_h_mua_05[uhills[h],]), pattern = '8_m', fixed=TRUE, ignore.case = FALSE)[c(1,3,5)])][c(1,2,4,5,6,3)]/max(EEsTN05_h_mua_95[uhills[h],]), 
-         seq(0.5,5.5,1), 
-         EEsTN05_h_mua_95[uhills[h],c(grep(names(EEsTN05_h_mua_95[uhills[h],]), pattern = '9_m', fixed=TRUE, ignore.case = FALSE)[c(1,3,5)], grep(names(EEsTN05_h_mua_95[uhills[h],]), pattern = '8_m', fixed=TRUE, ignore.case = FALSE)[c(1,3,5)])][c(1,2,4,5,6,3)]/max(EEsTN05_h_mua_95[uhills[h],]), 
-         length=0.05, angle=90, code=3)
-  
-  barplot(height = EEsTN05_h_mua_m[uhills[h],c(grep(names(EEsTN05_h_mua_m[uhills[h],]), pattern = 'sat_to_gw', fixed=TRUE, ignore.case = FALSE))]/max(EEsTN05_h_mua_95[uhills[h],]), 
-          names.arg = c('S9', 'S109', 'S8', 'S108'), ylab = 'Normalized Elementary Effect', ylim = c(0,1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = paste0('Hillslope ', uhills[uhills[h]], '\nSat. to GW Coef.'), xlab = 'Soils', cex.main=1.5)
-  arrows(seq(0.5,3.5,1), 
-         EEsTN05_h_mua_05[uhills[h],c(grep(names(EEsTN05_h_mua_m[uhills[h],]), pattern = 'sat_to_gw', fixed=TRUE, ignore.case = FALSE))]/max(EEsTN05_h_mua_95[uhills[h],]), 
-         seq(0.5,3.5,1), 
-         EEsTN05_h_mua_95[uhills[h],c(grep(names(EEsTN05_h_mua_m[uhills[h],]), pattern = 'sat_to_gw', fixed=TRUE, ignore.case = FALSE))]/max(EEsTN05_h_mua_95[uhills[h],]), 
-         length=0.05, angle=90, code=3)
-  
-  par(mar=c(6,4,3,0.5))
-  barplot(height = EEsTN05_h_mua_m[uhills[h],c(grep(names(EEsTN05_h_mua_m[uhills[h],]), pattern = 'Ksat', fixed=TRUE, ignore.case = FALSE))]/max(EEsTN05_h_mua_95[uhills[h],]), 
-          names.arg = c('S9 Ksat', 'S9 vKsat', 'S109 Ksat', 'S109 vKsat', 'S8 Ksat', 'S8 vKsat', 'S108 Ksat', 'S108 vKsat', 'S8 and S108', 'S9 and S109'), 
-          ylab = 'Normalized Elementary Effect', ylim = c(0,1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Hydraulic Conductivity', xlab = '', las = 2, cex.main=1.5)
-  axis(side = 1, at = 5, labels = 'Soils', line = 4, cex.axis = 1.2, tick = FALSE)
-  arrows(seq(0.5,9.5,1), 
-         EEsTN05_h_mua_05[uhills[h],grep(names(EEsTN05_h_mua_05[uhills[h],]), pattern = 'Ksat', fixed=TRUE, ignore.case = FALSE)]/max(EEsTN05_h_mua_95[uhills[h],]), 
-         seq(0.5,9.5,1), 
-         EEsTN05_h_mua_95[uhills[h],grep(names(EEsTN05_h_mua_95[uhills[h],]), pattern = 'Ksat', fixed=TRUE, ignore.case = FALSE)]/max(EEsTN05_h_mua_95[uhills[h],]), 
-         length=0.05, angle=90, code=3)
-  
-  par(opar)
-  barplot(height = EEsTN05_h_mua_m[uhills[h],c(grep(names(EEsTN05_h_mua_m[uhills[h],]), pattern = 'psi_air', fixed=TRUE, ignore.case = FALSE))]/max(EEsTN05_h_mua_95[uhills[h],]), 
-          names.arg = c('S9', 'S109', 'S8', 'S108'), ylab = 'Normalized Elementary Effect', ylim = c(0,1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Air Entry Pressure', xlab = 'Soils', cex.main=1.5)
-  arrows(seq(0.5,3.5,1), 
-         EEsTN05_h_mua_05[uhills[h],c(grep(names(EEsTN05_h_mua_m[uhills[h],]), pattern = 'psi_air', fixed=TRUE, ignore.case = FALSE))]/max(EEsTN05_h_mua_95[uhills[h],]), 
-         seq(0.5,3.5,1), 
-         EEsTN05_h_mua_95[uhills[h],c(grep(names(EEsTN05_h_mua_m[uhills[h],]), pattern = 'psi_air', fixed=TRUE, ignore.case = FALSE))]/max(EEsTN05_h_mua_95[uhills[h],]), 
-         length=0.05, angle=90, code=3)
-  
-  barplot(height = EEsTN05_h_mua_m[uhills[h],c(grep(names(EEsTN05_h_mua_m[uhills[h],]), pattern = 'pore', fixed=TRUE, ignore.case = FALSE))]/max(EEsTN05_h_mua_95[uhills[h],]), 
-          names.arg = c('S9', 'S109', 'S8', 'S108'), ylab = 'Normalized Elementary Effect', ylim = c(0,1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Pore Size', xlab = 'Soils', cex.main=1.5)
-  arrows(seq(0.5,3.5,1), 
-         EEsTN05_h_mua_05[uhills[h],c(grep(names(EEsTN05_h_mua_m[uhills[h],]), pattern = 'pore', fixed=TRUE, ignore.case = FALSE))]/max(EEsTN05_h_mua_95[uhills[h],]), 
-         seq(0.5,3.5,1), 
-         EEsTN05_h_mua_95[uhills[h],c(grep(names(EEsTN05_h_mua_m[uhills[h],]), pattern = 'pore', fixed=TRUE, ignore.case = FALSE))]/max(EEsTN05_h_mua_95[uhills[h],]), 
-         length=0.05, angle=90, code=3)
-  
-  barplot(height = EEsTN05_h_mua_m[uhills[h],c(grep(names(EEsTN05_h_mua_m[uhills[h],]), pattern = 'active', fixed=TRUE, ignore.case = FALSE))]/max(EEsTN05_h_mua_95[uhills[h],]), 
-          names.arg = c('S9', 'S109', 'S8', 'S108'), ylab = 'Normalized Elementary Effect', ylim = c(0,1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Soil Thickness', xlab = 'Soils', cex.main=1.5)
-  arrows(seq(0.5,3.5,1), 
-         EEsTN05_h_mua_05[uhills[h],grep(names(EEsTN05_h_mua_05[uhills[h],]), pattern = 'active', fixed=TRUE, ignore.case = FALSE)]/max(EEsTN05_h_mua_95[uhills[h],]), 
-         seq(0.5,3.5,1), 
-         EEsTN05_h_mua_95[uhills[h],grep(names(EEsTN05_h_mua_95[uhills[h],]), pattern = 'active', fixed=TRUE, ignore.case = FALSE)]/max(EEsTN05_h_mua_95[uhills[h],]), 
-         length=0.05, angle=90, code=3)
-  
-  barplot(height = EEsTN05_h_mua_m[uhills[h],c(grep(names(EEsTN05_h_mua_m[uhills[h],]), pattern = 'snow_melt', fixed=TRUE, ignore.case = FALSE))]/max(EEsTN05_h_mua_95[uhills[h],]), 
-          names.arg = c('S9', 'S109', 'S8', 'S108'), ylab = 'Normalized Elementary Effect', ylim = c(0,0.001), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Snow Melt Temp. Coef.', xlab = 'Soils', cex.main=1.5)
-  arrows(seq(0.5,3.5,1), 
-         EEsTN05_h_mua_05[uhills[h],grep(names(EEsTN05_h_mua_05[uhills[h],]), pattern = 'snow_melt', fixed=TRUE, ignore.case = FALSE)]/max(EEsTN05_h_mua_95[uhills[h],]), 
-         seq(0.5,3.5,1), 
-         EEsTN05_h_mua_95[uhills[h],grep(names(EEsTN05_h_mua_95[uhills[h],]), pattern = 'snow_melt', fixed=TRUE, ignore.case = FALSE)]/max(EEsTN05_h_mua_95[uhills[h],]), 
-         length=0.05, angle=90, code=3)
-  
-  barplot(height = EEsTN05_h_mua_m[uhills[h],c(grep(names(EEsTN05_h_mua_m[uhills[h],]), pattern = 'snow_energy', fixed=TRUE, ignore.case = FALSE))]/max(EEsTN05_h_mua_95[uhills[h],]), 
-          names.arg = c('S9', 'S109', 'S8', 'S108'), ylab = 'Normalized Elementary Effect', ylim = c(0,0.001), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Max Snow Energy Deficit', xlab = 'Soils', cex.main=1.5)
-  arrows(seq(0.5,3.5,1), 
-         EEsTN05_h_mua_05[uhills[h],grep(names(EEsTN05_h_mua_05[uhills[h],]), pattern = 'snow_energy', fixed=TRUE, ignore.case = FALSE)]/max(EEsTN05_h_mua_95[uhills[h],]), 
-         seq(0.5,3.5,1), 
-         EEsTN05_h_mua_95[uhills[h],grep(names(EEsTN05_h_mua_95[uhills[h],]), pattern = 'snow_energy', fixed=TRUE, ignore.case = FALSE)]/max(EEsTN05_h_mua_95[uhills[h],]), 
-         length=0.05, angle=90, code=3)
-  
-  barplot(height = EEsTN05_h_mua_m[uhills[h],c(grep(names(EEsTN05_h_mua_m[uhills[h],]), pattern = 'sla', fixed=TRUE, ignore.case = FALSE))]/max(EEsTN05_h_mua_95[uhills[h],]), 
-          names.arg = c('Tree', 'Grass'), ylab = 'Normalized Elementary Effect', ylim = c(0,0.1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Specific Leaf Area', xlab = 'Vegetation', cex.main=1.5)
-  arrows(seq(0.5,1.5,1), 
-         EEsTN05_h_mua_05[uhills[h],grep(names(EEsTN05_h_mua_05[uhills[h],]), pattern = 'sla', fixed=TRUE, ignore.case = FALSE)]/max(EEsTN05_h_mua_95[uhills[h],]), 
-         seq(0.5,1.5,1), 
-         EEsTN05_h_mua_95[uhills[h],grep(names(EEsTN05_h_mua_95[uhills[h],]), pattern = 'sla', fixed=TRUE, ignore.case = FALSE)]/max(EEsTN05_h_mua_95[uhills[h],]), 
-         length=0.05, angle=90, code=3)
-  dev.off()
-}
-
-#TN Med----
+# TN Med----
 #  panel----
 png('BasinAllMultEEs_TNMed.png', res = 300, width = 9, height = 9, units = 'in')
 opar=par
@@ -7938,90 +7837,7 @@ arrows(seq(0.5,1.5,1),
        length=0.05, angle=90, code=3)
 dev.off()
 
-#  panel - hillslopes----
-for (h in 1:length(uhills)){
-  png(paste0('Hill', uhills[h],'AllMultEEs_TNMed.png'), res = 300, width = 9, height = 9, units = 'in')
-  opar=par
-  layout(rbind(c(1,2,3), c(4,5,6), c(7,8,9)))
-  barplot(height = EEsTNMed_h_mua_m[uhills[h], c(grep(names(EEsTNMed_h_mua_m[uhills[h],]), pattern = '9_m', fixed=TRUE, ignore.case = FALSE)[c(1,3,5)], grep(names(EEsTNMed_h_mua_m[uhills[h],]), pattern = '8_m', fixed=TRUE, ignore.case = FALSE)[c(1,3,5)])][c(1,2,4,5,6,3)]/max(EEsTNMed_h_mua_95[uhills[h],]), 
-          names.arg = c('S9', 'S109', 'S8', 'S108', 'S8 and S108', 'S9 and S109'), ylab = 'Normalized Elementary Effect', ylim = c(0,1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'm: Ksat Decay with Sat. Def.', xlab = 'Soils', cex.main=1.5)
-  arrows(seq(0.5,5.5,1), 
-         EEsTNMed_h_mua_05[uhills[h],c(grep(names(EEsTNMed_h_mua_05[uhills[h],]), pattern = '9_m', fixed=TRUE, ignore.case = FALSE)[c(1,3,5)], grep(names(EEsTNMed_h_mua_05[uhills[h],]), pattern = '8_m', fixed=TRUE, ignore.case = FALSE)[c(1,3,5)])][c(1,2,4,5,6,3)]/max(EEsTNMed_h_mua_95[uhills[h],]), 
-         seq(0.5,5.5,1), 
-         EEsTNMed_h_mua_95[uhills[h],c(grep(names(EEsTNMed_h_mua_95[uhills[h],]), pattern = '9_m', fixed=TRUE, ignore.case = FALSE)[c(1,3,5)], grep(names(EEsTNMed_h_mua_95[uhills[h],]), pattern = '8_m', fixed=TRUE, ignore.case = FALSE)[c(1,3,5)])][c(1,2,4,5,6,3)]/max(EEsTNMed_h_mua_95[uhills[h],]), 
-         length=0.05, angle=90, code=3)
-  
-  barplot(height = EEsTNMed_h_mua_m[uhills[h],c(grep(names(EEsTNMed_h_mua_m[uhills[h],]), pattern = 'sat_to_gw', fixed=TRUE, ignore.case = FALSE))]/max(EEsTNMed_h_mua_95[uhills[h],]), 
-          names.arg = c('S9', 'S109', 'S8', 'S108'), ylab = 'Normalized Elementary Effect', ylim = c(0,1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = paste0('Hillslope ', uhills[uhills[h]], '\nSat. to GW Coef.'), xlab = 'Soils', cex.main=1.5)
-  arrows(seq(0.5,3.5,1), 
-         EEsTNMed_h_mua_05[uhills[h],c(grep(names(EEsTNMed_h_mua_m[uhills[h],]), pattern = 'sat_to_gw', fixed=TRUE, ignore.case = FALSE))]/max(EEsTNMed_h_mua_95[uhills[h],]), 
-         seq(0.5,3.5,1), 
-         EEsTNMed_h_mua_95[uhills[h],c(grep(names(EEsTNMed_h_mua_m[uhills[h],]), pattern = 'sat_to_gw', fixed=TRUE, ignore.case = FALSE))]/max(EEsTNMed_h_mua_95[uhills[h],]), 
-         length=0.05, angle=90, code=3)
-  
-  par(mar=c(6,4,3,0.5))
-  barplot(height = EEsTNMed_h_mua_m[uhills[h],c(grep(names(EEsTNMed_h_mua_m[uhills[h],]), pattern = 'Ksat', fixed=TRUE, ignore.case = FALSE))]/max(EEsTNMed_h_mua_95[uhills[h],]), 
-          names.arg = c('S9 Ksat', 'S9 vKsat', 'S109 Ksat', 'S109 vKsat', 'S8 Ksat', 'S8 vKsat', 'S108 Ksat', 'S108 vKsat', 'S8 and S108', 'S9 and S109'), 
-          ylab = 'Normalized Elementary Effect', ylim = c(0,1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Hydraulic Conductivity', xlab = '', las = 2, cex.main=1.5)
-  axis(side = 1, at = 5, labels = 'Soils', line = 4, cex.axis = 1.2, tick = FALSE)
-  arrows(seq(0.5,9.5,1), 
-         EEsTNMed_h_mua_05[uhills[h],grep(names(EEsTNMed_h_mua_05[uhills[h],]), pattern = 'Ksat', fixed=TRUE, ignore.case = FALSE)]/max(EEsTNMed_h_mua_95[uhills[h],]), 
-         seq(0.5,9.5,1), 
-         EEsTNMed_h_mua_95[uhills[h],grep(names(EEsTNMed_h_mua_95[uhills[h],]), pattern = 'Ksat', fixed=TRUE, ignore.case = FALSE)]/max(EEsTNMed_h_mua_95[uhills[h],]), 
-         length=0.05, angle=90, code=3)
-  
-  par(opar)
-  barplot(height = EEsTNMed_h_mua_m[uhills[h],c(grep(names(EEsTNMed_h_mua_m[uhills[h],]), pattern = 'psi_air', fixed=TRUE, ignore.case = FALSE))]/max(EEsTNMed_h_mua_95[uhills[h],]), 
-          names.arg = c('S9', 'S109', 'S8', 'S108'), ylab = 'Normalized Elementary Effect', ylim = c(0,1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Air Entry Pressure', xlab = 'Soils', cex.main=1.5)
-  arrows(seq(0.5,3.5,1), 
-         EEsTNMed_h_mua_05[uhills[h],c(grep(names(EEsTNMed_h_mua_m[uhills[h],]), pattern = 'psi_air', fixed=TRUE, ignore.case = FALSE))]/max(EEsTNMed_h_mua_95[uhills[h],]), 
-         seq(0.5,3.5,1), 
-         EEsTNMed_h_mua_95[uhills[h],c(grep(names(EEsTNMed_h_mua_m[uhills[h],]), pattern = 'psi_air', fixed=TRUE, ignore.case = FALSE))]/max(EEsTNMed_h_mua_95[uhills[h],]), 
-         length=0.05, angle=90, code=3)
-  
-  barplot(height = EEsTNMed_h_mua_m[uhills[h],c(grep(names(EEsTNMed_h_mua_m[uhills[h],]), pattern = 'pore', fixed=TRUE, ignore.case = FALSE))]/max(EEsTNMed_h_mua_95[uhills[h],]), 
-          names.arg = c('S9', 'S109', 'S8', 'S108'), ylab = 'Normalized Elementary Effect', ylim = c(0,1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Pore Size', xlab = 'Soils', cex.main=1.5)
-  arrows(seq(0.5,3.5,1), 
-         EEsTNMed_h_mua_05[uhills[h],c(grep(names(EEsTNMed_h_mua_m[uhills[h],]), pattern = 'pore', fixed=TRUE, ignore.case = FALSE))]/max(EEsTNMed_h_mua_95[uhills[h],]), 
-         seq(0.5,3.5,1), 
-         EEsTNMed_h_mua_95[uhills[h],c(grep(names(EEsTNMed_h_mua_m[uhills[h],]), pattern = 'pore', fixed=TRUE, ignore.case = FALSE))]/max(EEsTNMed_h_mua_95[uhills[h],]), 
-         length=0.05, angle=90, code=3)
-  
-  barplot(height = EEsTNMed_h_mua_m[uhills[h],c(grep(names(EEsTNMed_h_mua_m[uhills[h],]), pattern = 'active', fixed=TRUE, ignore.case = FALSE))]/max(EEsTNMed_h_mua_95[uhills[h],]), 
-          names.arg = c('S9', 'S109', 'S8', 'S108'), ylab = 'Normalized Elementary Effect', ylim = c(0,1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Soil Thickness', xlab = 'Soils', cex.main=1.5)
-  arrows(seq(0.5,3.5,1), 
-         EEsTNMed_h_mua_05[uhills[h],grep(names(EEsTNMed_h_mua_05[uhills[h],]), pattern = 'active', fixed=TRUE, ignore.case = FALSE)]/max(EEsTNMed_h_mua_95[uhills[h],]), 
-         seq(0.5,3.5,1), 
-         EEsTNMed_h_mua_95[uhills[h],grep(names(EEsTNMed_h_mua_95[uhills[h],]), pattern = 'active', fixed=TRUE, ignore.case = FALSE)]/max(EEsTNMed_h_mua_95[uhills[h],]), 
-         length=0.05, angle=90, code=3)
-  
-  barplot(height = EEsTNMed_h_mua_m[uhills[h],c(grep(names(EEsTNMed_h_mua_m[uhills[h],]), pattern = 'snow_melt', fixed=TRUE, ignore.case = FALSE))]/max(EEsTNMed_h_mua_95[uhills[h],]), 
-          names.arg = c('S9', 'S109', 'S8', 'S108'), ylab = 'Normalized Elementary Effect', ylim = c(0,0.001), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Snow Melt Temp. Coef.', xlab = 'Soils', cex.main=1.5)
-  arrows(seq(0.5,3.5,1), 
-         EEsTNMed_h_mua_05[uhills[h],grep(names(EEsTNMed_h_mua_05[uhills[h],]), pattern = 'snow_melt', fixed=TRUE, ignore.case = FALSE)]/max(EEsTNMed_h_mua_95[uhills[h],]), 
-         seq(0.5,3.5,1), 
-         EEsTNMed_h_mua_95[uhills[h],grep(names(EEsTNMed_h_mua_95[uhills[h],]), pattern = 'snow_melt', fixed=TRUE, ignore.case = FALSE)]/max(EEsTNMed_h_mua_95[uhills[h],]), 
-         length=0.05, angle=90, code=3)
-  
-  barplot(height = EEsTNMed_h_mua_m[uhills[h],c(grep(names(EEsTNMed_h_mua_m[uhills[h],]), pattern = 'snow_energy', fixed=TRUE, ignore.case = FALSE))]/max(EEsTNMed_h_mua_95[uhills[h],]), 
-          names.arg = c('S9', 'S109', 'S8', 'S108'), ylab = 'Normalized Elementary Effect', ylim = c(0,0.001), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Max Snow Energy Deficit', xlab = 'Soils', cex.main=1.5)
-  arrows(seq(0.5,3.5,1), 
-         EEsTNMed_h_mua_05[uhills[h],grep(names(EEsTNMed_h_mua_05[uhills[h],]), pattern = 'snow_energy', fixed=TRUE, ignore.case = FALSE)]/max(EEsTNMed_h_mua_95[uhills[h],]), 
-         seq(0.5,3.5,1), 
-         EEsTNMed_h_mua_95[uhills[h],grep(names(EEsTNMed_h_mua_95[uhills[h],]), pattern = 'snow_energy', fixed=TRUE, ignore.case = FALSE)]/max(EEsTNMed_h_mua_95[uhills[h],]), 
-         length=0.05, angle=90, code=3)
-  
-  barplot(height = EEsTNMed_h_mua_m[uhills[h],c(grep(names(EEsTNMed_h_mua_m[uhills[h],]), pattern = 'sla', fixed=TRUE, ignore.case = FALSE))]/max(EEsTNMed_h_mua_95[uhills[h],]), 
-          names.arg = c('Tree', 'Grass'), ylab = 'Normalized Elementary Effect', ylim = c(0,0.1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Specific Leaf Area', xlab = 'Vegetation', cex.main=1.5)
-  arrows(seq(0.5,1.5,1), 
-         EEsTNMed_h_mua_05[uhills[h],grep(names(EEsTNMed_h_mua_05[uhills[h],]), pattern = 'sla', fixed=TRUE, ignore.case = FALSE)]/max(EEsTNMed_h_mua_95[uhills[h],]), 
-         seq(0.5,1.5,1), 
-         EEsTNMed_h_mua_95[uhills[h],grep(names(EEsTNMed_h_mua_95[uhills[h],]), pattern = 'sla', fixed=TRUE, ignore.case = FALSE)]/max(EEsTNMed_h_mua_95[uhills[h],]), 
-         length=0.05, angle=90, code=3)
-  dev.off()
-}
-
-#TN 95%----
+# TN 95%----
 #  panel----
 png('BasinAllMultEEs_TN95.png', res = 300, width = 9, height = 9, units = 'in')
 opar=par
@@ -8103,88 +7919,7 @@ arrows(seq(0.5,1.5,1),
        length=0.05, angle=90, code=3)
 dev.off()
 
-#  panel - hillslopes----
-for (h in 1:length(uhills)){
-  png(paste0('Hill', uhills[h],'AllMultEEs_TN95.png'), res = 300, width = 9, height = 9, units = 'in')
-  opar=par
-  layout(rbind(c(1,2,3), c(4,5,6), c(7,8,9)))
-  barplot(height = EEsTN95_h_mua_m[uhills[h], c(grep(names(EEsTN95_h_mua_m[uhills[h],]), pattern = '9_m', fixed=TRUE, ignore.case = FALSE)[c(1,3,5)], grep(names(EEsTN95_h_mua_m[uhills[h],]), pattern = '8_m', fixed=TRUE, ignore.case = FALSE)[c(1,3,5)])][c(1,2,4,5,6,3)]/max(EEsTN95_h_mua_95[uhills[h],]), 
-          names.arg = c('S9', 'S109', 'S8', 'S108', 'S8 and S108', 'S9 and S109'), ylab = 'Normalized Elementary Effect', ylim = c(0,1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'm: Ksat Decay with Sat. Def.', xlab = 'Soils', cex.main=1.5)
-  arrows(seq(0.5,5.5,1), 
-         EEsTN95_h_mua_05[uhills[h],c(grep(names(EEsTN95_h_mua_05[uhills[h],]), pattern = '9_m', fixed=TRUE, ignore.case = FALSE)[c(1,3,5)], grep(names(EEsTN95_h_mua_05[uhills[h],]), pattern = '8_m', fixed=TRUE, ignore.case = FALSE)[c(1,3,5)])][c(1,2,4,5,6,3)]/max(EEsTN95_h_mua_95[uhills[h],]), 
-         seq(0.5,5.5,1), 
-         EEsTN95_h_mua_95[uhills[h],c(grep(names(EEsTN95_h_mua_95[uhills[h],]), pattern = '9_m', fixed=TRUE, ignore.case = FALSE)[c(1,3,5)], grep(names(EEsTN95_h_mua_95[uhills[h],]), pattern = '8_m', fixed=TRUE, ignore.case = FALSE)[c(1,3,5)])][c(1,2,4,5,6,3)]/max(EEsTN95_h_mua_95[uhills[h],]), 
-         length=0.05, angle=90, code=3)
-  
-  barplot(height = EEsTN95_h_mua_m[uhills[h],c(grep(names(EEsTN95_h_mua_m[uhills[h],]), pattern = 'sat_to_gw', fixed=TRUE, ignore.case = FALSE))]/max(EEsTN95_h_mua_95[uhills[h],]), 
-          names.arg = c('S9', 'S109', 'S8', 'S108'), ylab = 'Normalized Elementary Effect', ylim = c(0,1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = paste0('Hillslope ', uhills[uhills[h]], '\nSat. to GW Coef.'), xlab = 'Soils', cex.main=1.5)
-  arrows(seq(0.5,3.5,1), 
-         EEsTN95_h_mua_05[uhills[h],c(grep(names(EEsTN95_h_mua_m[uhills[h],]), pattern = 'sat_to_gw', fixed=TRUE, ignore.case = FALSE))]/max(EEsTN95_h_mua_95[uhills[h],]), 
-         seq(0.5,3.5,1), 
-         EEsTN95_h_mua_95[uhills[h],c(grep(names(EEsTN95_h_mua_m[uhills[h],]), pattern = 'sat_to_gw', fixed=TRUE, ignore.case = FALSE))]/max(EEsTN95_h_mua_95[uhills[h],]), 
-         length=0.05, angle=90, code=3)
-  
-  par(mar=c(6,4,3,0.5))
-  barplot(height = EEsTN95_h_mua_m[uhills[h],c(grep(names(EEsTN95_h_mua_m[uhills[h],]), pattern = 'Ksat', fixed=TRUE, ignore.case = FALSE))]/max(EEsTN95_h_mua_95[uhills[h],]), 
-          names.arg = c('S9 Ksat', 'S9 vKsat', 'S109 Ksat', 'S109 vKsat', 'S8 Ksat', 'S8 vKsat', 'S108 Ksat', 'S108 vKsat', 'S8 and S108', 'S9 and S109'), 
-          ylab = 'Normalized Elementary Effect', ylim = c(0,1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Hydraulic Conductivity', xlab = '', las = 2, cex.main=1.5)
-  axis(side = 1, at = 5, labels = 'Soils', line = 4, cex.axis = 1.2, tick = FALSE)
-  arrows(seq(0.5,9.5,1), 
-         EEsTN95_h_mua_05[uhills[h],grep(names(EEsTN95_h_mua_05[uhills[h],]), pattern = 'Ksat', fixed=TRUE, ignore.case = FALSE)]/max(EEsTN95_h_mua_95[uhills[h],]), 
-         seq(0.5,9.5,1), 
-         EEsTN95_h_mua_95[uhills[h],grep(names(EEsTN95_h_mua_95[uhills[h],]), pattern = 'Ksat', fixed=TRUE, ignore.case = FALSE)]/max(EEsTN95_h_mua_95[uhills[h],]), 
-         length=0.05, angle=90, code=3)
-  
-  par(opar)
-  barplot(height = EEsTN95_h_mua_m[uhills[h],c(grep(names(EEsTN95_h_mua_m[uhills[h],]), pattern = 'psi_air', fixed=TRUE, ignore.case = FALSE))]/max(EEsTN95_h_mua_95[uhills[h],]), 
-          names.arg = c('S9', 'S109', 'S8', 'S108'), ylab = 'Normalized Elementary Effect', ylim = c(0,1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Air Entry Pressure', xlab = 'Soils', cex.main=1.5)
-  arrows(seq(0.5,3.5,1), 
-         EEsTN95_h_mua_05[uhills[h],c(grep(names(EEsTN95_h_mua_m[uhills[h],]), pattern = 'psi_air', fixed=TRUE, ignore.case = FALSE))]/max(EEsTN95_h_mua_95[uhills[h],]), 
-         seq(0.5,3.5,1), 
-         EEsTN95_h_mua_95[uhills[h],c(grep(names(EEsTN95_h_mua_m[uhills[h],]), pattern = 'psi_air', fixed=TRUE, ignore.case = FALSE))]/max(EEsTN95_h_mua_95[uhills[h],]), 
-         length=0.05, angle=90, code=3)
-  
-  barplot(height = EEsTN95_h_mua_m[uhills[h],c(grep(names(EEsTN95_h_mua_m[uhills[h],]), pattern = 'pore', fixed=TRUE, ignore.case = FALSE))]/max(EEsTN95_h_mua_95[uhills[h],]), 
-          names.arg = c('S9', 'S109', 'S8', 'S108'), ylab = 'Normalized Elementary Effect', ylim = c(0,1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Pore Size', xlab = 'Soils', cex.main=1.5)
-  arrows(seq(0.5,3.5,1), 
-         EEsTN95_h_mua_05[uhills[h],c(grep(names(EEsTN95_h_mua_m[uhills[h],]), pattern = 'pore', fixed=TRUE, ignore.case = FALSE))]/max(EEsTN95_h_mua_95[uhills[h],]), 
-         seq(0.5,3.5,1), 
-         EEsTN95_h_mua_95[uhills[h],c(grep(names(EEsTN95_h_mua_m[uhills[h],]), pattern = 'pore', fixed=TRUE, ignore.case = FALSE))]/max(EEsTN95_h_mua_95[uhills[h],]), 
-         length=0.05, angle=90, code=3)
-  
-  barplot(height = EEsTN95_h_mua_m[uhills[h],c(grep(names(EEsTN95_h_mua_m[uhills[h],]), pattern = 'active', fixed=TRUE, ignore.case = FALSE))]/max(EEsTN95_h_mua_95[uhills[h],]), 
-          names.arg = c('S9', 'S109', 'S8', 'S108'), ylab = 'Normalized Elementary Effect', ylim = c(0,1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Soil Thickness', xlab = 'Soils', cex.main=1.5)
-  arrows(seq(0.5,3.5,1), 
-         EEsTN95_h_mua_05[uhills[h],grep(names(EEsTN95_h_mua_05[uhills[h],]), pattern = 'active', fixed=TRUE, ignore.case = FALSE)]/max(EEsTN95_h_mua_95[uhills[h],]), 
-         seq(0.5,3.5,1), 
-         EEsTN95_h_mua_95[uhills[h],grep(names(EEsTN95_h_mua_95[uhills[h],]), pattern = 'active', fixed=TRUE, ignore.case = FALSE)]/max(EEsTN95_h_mua_95[uhills[h],]), 
-         length=0.05, angle=90, code=3)
-  
-  barplot(height = EEsTN95_h_mua_m[uhills[h],c(grep(names(EEsTN95_h_mua_m[uhills[h],]), pattern = 'snow_melt', fixed=TRUE, ignore.case = FALSE))]/max(EEsTN95_h_mua_95[uhills[h],]), 
-          names.arg = c('S9', 'S109', 'S8', 'S108'), ylab = 'Normalized Elementary Effect', ylim = c(0,0.001), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Snow Melt Temp. Coef.', xlab = 'Soils', cex.main=1.5)
-  arrows(seq(0.5,3.5,1), 
-         EEsTN95_h_mua_05[uhills[h],grep(names(EEsTN95_h_mua_05[uhills[h],]), pattern = 'snow_melt', fixed=TRUE, ignore.case = FALSE)]/max(EEsTN95_h_mua_95[uhills[h],]), 
-         seq(0.5,3.5,1), 
-         EEsTN95_h_mua_95[uhills[h],grep(names(EEsTN95_h_mua_95[uhills[h],]), pattern = 'snow_melt', fixed=TRUE, ignore.case = FALSE)]/max(EEsTN95_h_mua_95[uhills[h],]), 
-         length=0.05, angle=90, code=3)
-  
-  barplot(height = EEsTN95_h_mua_m[uhills[h],c(grep(names(EEsTN95_h_mua_m[uhills[h],]), pattern = 'snow_energy', fixed=TRUE, ignore.case = FALSE))]/max(EEsTN95_h_mua_95[uhills[h],]), 
-          names.arg = c('S9', 'S109', 'S8', 'S108'), ylab = 'Normalized Elementary Effect', ylim = c(0,0.001), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Max Snow Energy Deficit', xlab = 'Soils', cex.main=1.5)
-  arrows(seq(0.5,3.5,1), 
-         EEsTN95_h_mua_05[uhills[h],grep(names(EEsTN95_h_mua_05[uhills[h],]), pattern = 'snow_energy', fixed=TRUE, ignore.case = FALSE)]/max(EEsTN95_h_mua_95[uhills[h],]), 
-         seq(0.5,3.5,1), 
-         EEsTN95_h_mua_95[uhills[h],grep(names(EEsTN95_h_mua_95[uhills[h],]), pattern = 'snow_energy', fixed=TRUE, ignore.case = FALSE)]/max(EEsTN95_h_mua_95[uhills[h],]), 
-         length=0.05, angle=90, code=3)
-  
-  barplot(height = EEsTN95_h_mua_m[uhills[h],c(grep(names(EEsTN95_h_mua_m[uhills[h],]), pattern = 'sla', fixed=TRUE, ignore.case = FALSE))]/max(EEsTN95_h_mua_95[uhills[h],]), 
-          names.arg = c('Tree', 'Grass'), ylab = 'Normalized Elementary Effect', ylim = c(0,0.1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Specific Leaf Area', xlab = 'Vegetation', cex.main=1.5)
-  arrows(seq(0.5,1.5,1), 
-         EEsTN95_h_mua_05[uhills[h],grep(names(EEsTN95_h_mua_05[uhills[h],]), pattern = 'sla', fixed=TRUE, ignore.case = FALSE)]/max(EEsTN95_h_mua_95[uhills[h],]), 
-         seq(0.5,1.5,1), 
-         EEsTN95_h_mua_95[uhills[h],grep(names(EEsTN95_h_mua_95[uhills[h],]), pattern = 'sla', fixed=TRUE, ignore.case = FALSE)]/max(EEsTN95_h_mua_95[uhills[h],]), 
-         length=0.05, angle=90, code=3)
-  dev.off()
-}
+setwd(dir_Main)
 
 #Compute the correlation of parameters that have non-zero EEs----
 #Matrix for the similarity measure
@@ -8262,8 +7997,8 @@ png('ParamCorrelations_EEot_Agg.png', res = 300, height = 8, width = 8, units = 
 heatmap(x = CosPhiot_b_Agg[which(rownames(CosPhiot_b_Agg) %in% ParamsCluster),which(colnames(CosPhiot_b_Agg) %in% ParamsCluster)], symm = TRUE, revC = TRUE)
 dev.off()
 
-#Fixme: Evaluate total number of selected parameters as a function of correlation----
-#Fixme: Make a 3D plot of total parameters selected as function of threshold and correlation----
+#Evaluate total number of selected parameters as a function of correlation----
+#Make a 3D plot of total parameters selected as function of threshold and correlation----
 
 #Evaluate correlations for the selected parameters----
 RankSelParams_Agg = sort(unique(c(ParamSelect_b_Agg, ParamSelectTN_b_Agg)))
@@ -8574,7 +8309,6 @@ ParamRanges_Cal910$Upper[ParamRanges_Cal910$NumberedParams == 'h_gw_loss_coeff']
 ParamRanges_Cal910$Upper[ParamRanges_Cal910$NumberedParams == 's9_sat_to_gw_coeff'] = 0.3
 ParamRanges_Cal910$Upper[ParamRanges_Cal910$NumberedParams == 's109_sat_to_gw_coeff'] = 0.3
 
-
 #Add all of the parameters of the likelihood function as well
 # (kurotsis) beta=-1: uniform, beta=0: Gaussian, beta=1: double exponential
 # (skewness) xi=1: symmetric, xi<1: negatively skewed, xi>1: positively skewed
@@ -8638,91 +8372,91 @@ options(scipen = 0)
 # #5837
 # #set manually to 0.4 because both Ksat0 and Ksat0v needed adjustment from lower bound
 
-#Determine the practical significance of the largest EEs----
-#Get all of the indices for which a particular parameter changed.
-which((OrigParams[2:nrow(OrigParams),"h_gw_loss_coeff"] - OrigParams[1:(nrow(OrigParams)-1),"h_gw_loss_coeff"]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),"h_gw_loss_coeff"] - OrigParams[1:(nrow(OrigParams)-1),"h_gw_loss_coeff"]) != 0) %in% seq(272,10880,272))]
-
-#Check that EEs match (they do)
-#Basin
-max(abs((apply(X = abs(apply(X = BasinSF05[which((OrigParams[2:nrow(OrigParams),"h_gw_loss_coeff"] - OrigParams[1:(nrow(OrigParams)-1),"h_gw_loss_coeff"]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),"h_gw_loss_coeff"] - OrigParams[1:(nrow(OrigParams)-1),"h_gw_loss_coeff"]) != 0) %in% seq(272,10880,272))]+1,], MARGIN = 1, FUN = "-", obs05$Flow)), MARGIN = 2, FUN = sum) - apply(X = abs(apply(X = BasinSF05[which((OrigParams[2:nrow(OrigParams),"h_gw_loss_coeff"] - OrigParams[1:(nrow(OrigParams)-1),"h_gw_loss_coeff"]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),"h_gw_loss_coeff"] - OrigParams[1:(nrow(OrigParams)-1),"h_gw_loss_coeff"]) != 0) %in% seq(272,10880,272))],], MARGIN = 1, FUN = "-", obs05$Flow)), MARGIN = 2, FUN = sum))/Deltas[,"h_gw_loss_coeff"] - EEs05_b$h_gw_loss_coeff))
-#Hillslope
-max(abs((apply(X = abs(apply(X = HillSF05[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams),"h_gw_loss_coeff"] - OrigParams[1:(nrow(OrigParams)-1),"h_gw_loss_coeff"]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),"h_gw_loss_coeff"] - OrigParams[1:(nrow(OrigParams)-1),"h_gw_loss_coeff"]) != 0) %in% seq(272,10880,272))]+1,], MARGIN = 1, FUN = "-", as.numeric(MedHills05[which(MedHills05[,1] == 9),-1]))), MARGIN = 2, FUN = sum) - apply(X = abs(apply(X = HillSF05[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams),"h_gw_loss_coeff"] - OrigParams[1:(nrow(OrigParams)-1),"h_gw_loss_coeff"]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),"h_gw_loss_coeff"] - OrigParams[1:(nrow(OrigParams)-1),"h_gw_loss_coeff"]) != 0) %in% seq(272,10880,272))],], MARGIN = 1, FUN = "-", as.numeric(MedHills05[which(MedHills05[,1] == 9),-1]))), MARGIN = 2, FUN = sum))/Deltas[,"h_gw_loss_coeff"] - EEs05_h[EEs05_h$HillID == 9, "h_gw_loss_coeff"]))
-max(abs((apply(X = abs(apply(X = HillSF95[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams),"h_gw_loss_coeff"] - OrigParams[1:(nrow(OrigParams)-1),"h_gw_loss_coeff"]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),"h_gw_loss_coeff"] - OrigParams[1:(nrow(OrigParams)-1),"h_gw_loss_coeff"]) != 0) %in% seq(272,10880,272))]+1,], MARGIN = 1, FUN = "-", as.numeric(MedHills95[which(MedHills95[,1] == 9),-1]))), MARGIN = 2, FUN = sum) - apply(X = abs(apply(X = HillSF95[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams),"h_gw_loss_coeff"] - OrigParams[1:(nrow(OrigParams)-1),"h_gw_loss_coeff"]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),"h_gw_loss_coeff"] - OrigParams[1:(nrow(OrigParams)-1),"h_gw_loss_coeff"]) != 0) %in% seq(272,10880,272))],], MARGIN = 1, FUN = "-", as.numeric(MedHills95[which(MedHills95[,1] == 9),-1]))), MARGIN = 2, FUN = sum))/Deltas[,"h_gw_loss_coeff"] - EEs95_h[EEs95_h$HillID == 9, "h_gw_loss_coeff"]))
-max(abs((apply(X = abs(apply(X = HillSFot[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams),"h_gw_loss_coeff"] - OrigParams[1:(nrow(OrigParams)-1),"h_gw_loss_coeff"]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),"h_gw_loss_coeff"] - OrigParams[1:(nrow(OrigParams)-1),"h_gw_loss_coeff"]) != 0) %in% seq(272,10880,272))]+1,], MARGIN = 1, FUN = "-", as.numeric(MedHillsot[which(MedHillsot[,1] == 9),-1]))), MARGIN = 2, FUN = sum) - apply(X = abs(apply(X = HillSFot[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams),"h_gw_loss_coeff"] - OrigParams[1:(nrow(OrigParams)-1),"h_gw_loss_coeff"]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),"h_gw_loss_coeff"] - OrigParams[1:(nrow(OrigParams)-1),"h_gw_loss_coeff"]) != 0) %in% seq(272,10880,272))],], MARGIN = 1, FUN = "-", as.numeric(MedHillsot[which(MedHillsot[,1] == 9),-1]))), MARGIN = 2, FUN = sum))/Deltas[,"h_gw_loss_coeff"] - EEsot_h[EEsot_h$HillID == 9, "h_gw_loss_coeff"]))
-
-# Try metrics to plot practical significance - none seem useful and not using any----
-#abs(SAE2 - SAE1)/n(timeseries length)/(max-min flow in timeseries) = average daily difference/(max - min)
-#hist(abs((apply(X = abs(apply(X = HillSF05[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams),"h_gw_loss_coeff"] - OrigParams[1:(nrow(OrigParams)-1),"h_gw_loss_coeff"]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),"h_gw_loss_coeff"] - OrigParams[1:(nrow(OrigParams)-1),"h_gw_loss_coeff"]) != 0) %in% seq(272,10880,272))]+1,], MARGIN = 1, FUN = "-", as.numeric(MedHills05[which(MedHills05[,1] == 9),-1]))), MARGIN = 2, FUN = sum) - apply(X = abs(apply(X = HillSF05[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams),"h_gw_loss_coeff"] - OrigParams[1:(nrow(OrigParams)-1),"h_gw_loss_coeff"]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),"h_gw_loss_coeff"] - OrigParams[1:(nrow(OrigParams)-1),"h_gw_loss_coeff"]) != 0) %in% seq(272,10880,272))],], MARGIN = 1, FUN = "-", as.numeric(MedHills05[which(MedHills05[,1] == 9),-1]))), MARGIN = 2, FUN = sum)))/length(obs05$Date)/(max(obs05$Flow) - min(obs05$Flow)), breaks = 10)
-for (i in 1:length(ParamSelect_h_Agg910)){
-  if (!(i %in% c(10,11))){
-    #abs(SAE2 - SAE1)/n(timeseries length) = average daily difference
-    #hist(abs((apply(X = abs(apply(X = HillSF05[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))]+1,], MARGIN = 1, FUN = "-", as.numeric(MedHills05[which(MedHills05[,1] == 9),-1]))), MARGIN = 2, FUN = sum) - apply(X = abs(apply(X = HillSF05[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))],], MARGIN = 1, FUN = "-", as.numeric(MedHills05[which(MedHills05[,1] == 9),-1]))), MARGIN = 2, FUN = sum)))/length(obs05$Date), breaks = 10, xlab = 'average daily difference', main = ParamSelect_h_Agg910[i])
-    #hist(abs((apply(X = abs(apply(X = HillSFot[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))]+1,], MARGIN = 1, FUN = "-", as.numeric(MedHillsot[which(MedHillsot[,1] == 9),-1]))), MARGIN = 2, FUN = sum) - apply(X = abs(apply(X = HillSFot[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))],], MARGIN = 1, FUN = "-", as.numeric(MedHillsot[which(MedHillsot[,1] == 9),-1]))), MARGIN = 2, FUN = sum)))/length(obsot$Date), breaks = 10, xlab = 'average daily difference', main = ParamSelect_h_Agg910[i])
-    #hist(abs((apply(X = abs(apply(X = HillSF95[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))]+1,], MARGIN = 1, FUN = "-", as.numeric(MedHills95[which(MedHills95[,1] == 9),-1]))), MARGIN = 2, FUN = sum) - apply(X = abs(apply(X = HillSF95[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))],], MARGIN = 1, FUN = "-", as.numeric(MedHills95[which(MedHills95[,1] == 9),-1]))), MARGIN = 2, FUN = sum)))/length(obs95$Date), breaks = 10, xlab = 'average daily difference', main = ParamSelect_h_Agg910[i])
-    #abs(SAE2 - SAE1)/n(timeseries length)/(max-min flow in timeseries) = average daily difference/(max - min)
-    #hist(abs((apply(X = abs(apply(X = HillSF05[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))]+1,], MARGIN = 1, FUN = "-", as.numeric(MedHills05[which(MedHills05[,1] == 9),-1]))), MARGIN = 2, FUN = sum) - apply(X = abs(apply(X = HillSF05[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))],], MARGIN = 1, FUN = "-", as.numeric(MedHills05[which(MedHills05[,1] == 9),-1]))), MARGIN = 2, FUN = sum)))/length(obs05$Date)/(max(as.numeric(MedHills05[which(MedHills05[,1] == 9),-1])) - min(as.numeric(MedHills05[which(MedHills05[,1] == 9),-1]))), breaks = 10, xlab = 'average daily difference/(max - min flow)', main = ParamSelect_h_Agg910[i])
-    #hist(abs((apply(X = abs(apply(X = HillSFot[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))]+1,], MARGIN = 1, FUN = "-", as.numeric(MedHillsot[which(MedHillsot[,1] == 9),-1]))), MARGIN = 2, FUN = sum) - apply(X = abs(apply(X = HillSFot[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))],], MARGIN = 1, FUN = "-", as.numeric(MedHillsot[which(MedHillsot[,1] == 9),-1]))), MARGIN = 2, FUN = sum)))/length(obsot$Date)/(max(as.numeric(MedHillsot[which(MedHillsot[,1] == 9),-1])) - min(as.numeric(MedHillsot[which(MedHillsot[,1] == 9),-1]))), breaks = 10, xlab = 'average daily difference/(max - min flow)', main = ParamSelect_h_Agg910[i])
-    #hist(abs((apply(X = abs(apply(X = HillSF95[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))]+1,], MARGIN = 1, FUN = "-", as.numeric(MedHills95[which(MedHills95[,1] == 9),-1]))), MARGIN = 2, FUN = sum) - apply(X = abs(apply(X = HillSF95[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))],], MARGIN = 1, FUN = "-", as.numeric(MedHills95[which(MedHills95[,1] == 9),-1]))), MARGIN = 2, FUN = sum)))/length(obs95$Date)/(max(as.numeric(MedHills95[which(MedHills95[,1] == 9),-1])) - min(as.numeric(MedHills95[which(MedHills95[,1] == 9),-1]))), breaks = 10, xlab = 'average daily difference/(max - min flow)', main = ParamSelect_h_Agg910[i])
-    #abs(SAE2 - SAE1)/(median(SAE2, SAE1)) = 
-    hist(abs((apply(X = abs(apply(X = HillSF05[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
-                                                                          - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
-                                                                                                                                                                                            - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))]+1,], 
-                                  MARGIN = 1, FUN = "-", as.numeric(MedHills05[which(MedHills05[,1] == 9),-1]))), 
-                    MARGIN = 2, FUN = sum) 
-              - apply(X = abs(apply(X = HillSF05[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
-                                                                            - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
-                                                                                                                                                                                             - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))],], 
-                                    MARGIN = 1, FUN = "-", as.numeric(MedHills05[which(MedHills05[,1] == 9),-1]))), 
-                      MARGIN = 2, FUN = sum)))/
-           apply(X = rbind(apply(X = abs(apply(X = HillSF05[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
-                                                                              - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
-                                                                                                                                                                                                - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))]+1,], 
-                                      MARGIN = 1, FUN = "-", as.numeric(MedHills05[which(MedHills05[,1] == 9),-1]))), 
-                        MARGIN = 2, FUN = sum), apply(X = abs(apply(X = HillSF05[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
-                                                                                                            - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
-                                                                                                                                                                                                                             - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))],], 
-                                                                    MARGIN = 1, FUN = "-", as.numeric(MedHills05[which(MedHills05[,1] == 9),-1]))), 
-                                                      MARGIN = 2, FUN = sum)), MARGIN = 2, FUN = mean), 
-         breaks = 10, xlab = 'average daily difference', main = ParamSelect_h_Agg910[i])
-    hist(abs((apply(X = abs(apply(X = HillSF95[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
-                                                                          - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
-                                                                                                                                                                                            - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))]+1,], 
-                                  MARGIN = 1, FUN = "-", as.numeric(MedHills95[which(MedHills95[,1] == 9),-1]))), 
-                    MARGIN = 2, FUN = sum) 
-              - apply(X = abs(apply(X = HillSF95[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
-                                                                            - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
-                                                                                                                                                                                             - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))],], 
-                                    MARGIN = 1, FUN = "-", as.numeric(MedHills95[which(MedHills95[,1] == 9),-1]))), 
-                      MARGIN = 2, FUN = sum)))/
-           apply(X = rbind(apply(X = abs(apply(X = HillSF95[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
-                                                                                       - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
-                                                                                                                                                                                                         - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))]+1,], 
-                                               MARGIN = 1, FUN = "-", as.numeric(MedHills95[which(MedHills95[,1] == 9),-1]))), 
-                                 MARGIN = 2, FUN = sum), apply(X = abs(apply(X = HillSF95[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
-                                                                                                                     - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
-                                                                                                                                                                                                                                      - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))],], 
-                                                                             MARGIN = 1, FUN = "-", as.numeric(MedHills95[which(MedHills95[,1] == 9),-1]))), 
-                                                               MARGIN = 2, FUN = sum)), MARGIN = 2, FUN = mean), 
-         breaks = 10, xlab = 'average daily difference', main = ParamSelect_h_Agg910[i])
-    hist(abs((apply(X = abs(apply(X = HillSFot[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
-                                                                          - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
-                                                                                                                                                                                            - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))]+1,], 
-                                  MARGIN = 1, FUN = "-", as.numeric(MedHillsot[which(MedHillsot[,1] == 9),-1]))), 
-                    MARGIN = 2, FUN = sum) 
-              - apply(X = abs(apply(X = HillSFot[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
-                                                                            - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
-                                                                                                                                                                                             - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))],], 
-                                    MARGIN = 1, FUN = "-", as.numeric(MedHillsot[which(MedHillsot[,1] == 9),-1]))), 
-                      MARGIN = 2, FUN = sum)))/
-           apply(X = rbind(apply(X = abs(apply(X = HillSFot[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
-                                                                                       - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
-                                                                                                                                                                                                         - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))]+1,], 
-                                               MARGIN = 1, FUN = "-", as.numeric(MedHillsot[which(MedHillsot[,1] == 9),-1]))), 
-                                 MARGIN = 2, FUN = sum), apply(X = abs(apply(X = HillSFot[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
-                                                                                                                     - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
-                                                                                                                                                                                                                                      - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))],], 
-                                                                             MARGIN = 1, FUN = "-", as.numeric(MedHillsot[which(MedHillsot[,1] == 9),-1]))), 
-                                                               MARGIN = 2, FUN = sum)), MARGIN = 2, FUN = mean), 
-         breaks = 10, xlab = 'average daily difference', main = ParamSelect_h_Agg910[i])
-  }
-}
+# #Determine the practical significance of the largest EEs----
+# #Get all of the indices for which a particular parameter changed.
+# which((OrigParams[2:nrow(OrigParams),"h_gw_loss_coeff"] - OrigParams[1:(nrow(OrigParams)-1),"h_gw_loss_coeff"]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),"h_gw_loss_coeff"] - OrigParams[1:(nrow(OrigParams)-1),"h_gw_loss_coeff"]) != 0) %in% seq(272,10880,272))]
+# 
+# #Check that EEs match (they do)
+# #Basin
+# max(abs((apply(X = abs(apply(X = BasinSF05[which((OrigParams[2:nrow(OrigParams),"h_gw_loss_coeff"] - OrigParams[1:(nrow(OrigParams)-1),"h_gw_loss_coeff"]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),"h_gw_loss_coeff"] - OrigParams[1:(nrow(OrigParams)-1),"h_gw_loss_coeff"]) != 0) %in% seq(272,10880,272))]+1,], MARGIN = 1, FUN = "-", obs05$Flow)), MARGIN = 2, FUN = sum) - apply(X = abs(apply(X = BasinSF05[which((OrigParams[2:nrow(OrigParams),"h_gw_loss_coeff"] - OrigParams[1:(nrow(OrigParams)-1),"h_gw_loss_coeff"]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),"h_gw_loss_coeff"] - OrigParams[1:(nrow(OrigParams)-1),"h_gw_loss_coeff"]) != 0) %in% seq(272,10880,272))],], MARGIN = 1, FUN = "-", obs05$Flow)), MARGIN = 2, FUN = sum))/Deltas[,"h_gw_loss_coeff"] - EEs05_b$h_gw_loss_coeff))
+# #Hillslope
+# max(abs((apply(X = abs(apply(X = HillSF05[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams),"h_gw_loss_coeff"] - OrigParams[1:(nrow(OrigParams)-1),"h_gw_loss_coeff"]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),"h_gw_loss_coeff"] - OrigParams[1:(nrow(OrigParams)-1),"h_gw_loss_coeff"]) != 0) %in% seq(272,10880,272))]+1,], MARGIN = 1, FUN = "-", as.numeric(MedHills05[which(MedHills05[,1] == 9),-1]))), MARGIN = 2, FUN = sum) - apply(X = abs(apply(X = HillSF05[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams),"h_gw_loss_coeff"] - OrigParams[1:(nrow(OrigParams)-1),"h_gw_loss_coeff"]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),"h_gw_loss_coeff"] - OrigParams[1:(nrow(OrigParams)-1),"h_gw_loss_coeff"]) != 0) %in% seq(272,10880,272))],], MARGIN = 1, FUN = "-", as.numeric(MedHills05[which(MedHills05[,1] == 9),-1]))), MARGIN = 2, FUN = sum))/Deltas[,"h_gw_loss_coeff"] - EEs05_h[EEs05_h$HillID == 9, "h_gw_loss_coeff"]))
+# max(abs((apply(X = abs(apply(X = HillSF95[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams),"h_gw_loss_coeff"] - OrigParams[1:(nrow(OrigParams)-1),"h_gw_loss_coeff"]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),"h_gw_loss_coeff"] - OrigParams[1:(nrow(OrigParams)-1),"h_gw_loss_coeff"]) != 0) %in% seq(272,10880,272))]+1,], MARGIN = 1, FUN = "-", as.numeric(MedHills95[which(MedHills95[,1] == 9),-1]))), MARGIN = 2, FUN = sum) - apply(X = abs(apply(X = HillSF95[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams),"h_gw_loss_coeff"] - OrigParams[1:(nrow(OrigParams)-1),"h_gw_loss_coeff"]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),"h_gw_loss_coeff"] - OrigParams[1:(nrow(OrigParams)-1),"h_gw_loss_coeff"]) != 0) %in% seq(272,10880,272))],], MARGIN = 1, FUN = "-", as.numeric(MedHills95[which(MedHills95[,1] == 9),-1]))), MARGIN = 2, FUN = sum))/Deltas[,"h_gw_loss_coeff"] - EEs95_h[EEs95_h$HillID == 9, "h_gw_loss_coeff"]))
+# max(abs((apply(X = abs(apply(X = HillSFot[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams),"h_gw_loss_coeff"] - OrigParams[1:(nrow(OrigParams)-1),"h_gw_loss_coeff"]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),"h_gw_loss_coeff"] - OrigParams[1:(nrow(OrigParams)-1),"h_gw_loss_coeff"]) != 0) %in% seq(272,10880,272))]+1,], MARGIN = 1, FUN = "-", as.numeric(MedHillsot[which(MedHillsot[,1] == 9),-1]))), MARGIN = 2, FUN = sum) - apply(X = abs(apply(X = HillSFot[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams),"h_gw_loss_coeff"] - OrigParams[1:(nrow(OrigParams)-1),"h_gw_loss_coeff"]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),"h_gw_loss_coeff"] - OrigParams[1:(nrow(OrigParams)-1),"h_gw_loss_coeff"]) != 0) %in% seq(272,10880,272))],], MARGIN = 1, FUN = "-", as.numeric(MedHillsot[which(MedHillsot[,1] == 9),-1]))), MARGIN = 2, FUN = sum))/Deltas[,"h_gw_loss_coeff"] - EEsot_h[EEsot_h$HillID == 9, "h_gw_loss_coeff"]))
+# 
+# # Try metrics to plot practical significance - none seem useful and not using any----
+# #abs(SAE2 - SAE1)/n(timeseries length)/(max-min flow in timeseries) = average daily difference/(max - min)
+# #hist(abs((apply(X = abs(apply(X = HillSF05[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams),"h_gw_loss_coeff"] - OrigParams[1:(nrow(OrigParams)-1),"h_gw_loss_coeff"]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),"h_gw_loss_coeff"] - OrigParams[1:(nrow(OrigParams)-1),"h_gw_loss_coeff"]) != 0) %in% seq(272,10880,272))]+1,], MARGIN = 1, FUN = "-", as.numeric(MedHills05[which(MedHills05[,1] == 9),-1]))), MARGIN = 2, FUN = sum) - apply(X = abs(apply(X = HillSF05[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams),"h_gw_loss_coeff"] - OrigParams[1:(nrow(OrigParams)-1),"h_gw_loss_coeff"]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),"h_gw_loss_coeff"] - OrigParams[1:(nrow(OrigParams)-1),"h_gw_loss_coeff"]) != 0) %in% seq(272,10880,272))],], MARGIN = 1, FUN = "-", as.numeric(MedHills05[which(MedHills05[,1] == 9),-1]))), MARGIN = 2, FUN = sum)))/length(obs05$Date)/(max(obs05$Flow) - min(obs05$Flow)), breaks = 10)
+# for (i in 1:length(ParamSelect_h_Agg910)){
+#   if (!(i %in% c(10,11))){
+#     #abs(SAE2 - SAE1)/n(timeseries length) = average daily difference
+#     #hist(abs((apply(X = abs(apply(X = HillSF05[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))]+1,], MARGIN = 1, FUN = "-", as.numeric(MedHills05[which(MedHills05[,1] == 9),-1]))), MARGIN = 2, FUN = sum) - apply(X = abs(apply(X = HillSF05[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))],], MARGIN = 1, FUN = "-", as.numeric(MedHills05[which(MedHills05[,1] == 9),-1]))), MARGIN = 2, FUN = sum)))/length(obs05$Date), breaks = 10, xlab = 'average daily difference', main = ParamSelect_h_Agg910[i])
+#     #hist(abs((apply(X = abs(apply(X = HillSFot[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))]+1,], MARGIN = 1, FUN = "-", as.numeric(MedHillsot[which(MedHillsot[,1] == 9),-1]))), MARGIN = 2, FUN = sum) - apply(X = abs(apply(X = HillSFot[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))],], MARGIN = 1, FUN = "-", as.numeric(MedHillsot[which(MedHillsot[,1] == 9),-1]))), MARGIN = 2, FUN = sum)))/length(obsot$Date), breaks = 10, xlab = 'average daily difference', main = ParamSelect_h_Agg910[i])
+#     #hist(abs((apply(X = abs(apply(X = HillSF95[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))]+1,], MARGIN = 1, FUN = "-", as.numeric(MedHills95[which(MedHills95[,1] == 9),-1]))), MARGIN = 2, FUN = sum) - apply(X = abs(apply(X = HillSF95[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))],], MARGIN = 1, FUN = "-", as.numeric(MedHills95[which(MedHills95[,1] == 9),-1]))), MARGIN = 2, FUN = sum)))/length(obs95$Date), breaks = 10, xlab = 'average daily difference', main = ParamSelect_h_Agg910[i])
+#     #abs(SAE2 - SAE1)/n(timeseries length)/(max-min flow in timeseries) = average daily difference/(max - min)
+#     #hist(abs((apply(X = abs(apply(X = HillSF05[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))]+1,], MARGIN = 1, FUN = "-", as.numeric(MedHills05[which(MedHills05[,1] == 9),-1]))), MARGIN = 2, FUN = sum) - apply(X = abs(apply(X = HillSF05[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))],], MARGIN = 1, FUN = "-", as.numeric(MedHills05[which(MedHills05[,1] == 9),-1]))), MARGIN = 2, FUN = sum)))/length(obs05$Date)/(max(as.numeric(MedHills05[which(MedHills05[,1] == 9),-1])) - min(as.numeric(MedHills05[which(MedHills05[,1] == 9),-1]))), breaks = 10, xlab = 'average daily difference/(max - min flow)', main = ParamSelect_h_Agg910[i])
+#     #hist(abs((apply(X = abs(apply(X = HillSFot[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))]+1,], MARGIN = 1, FUN = "-", as.numeric(MedHillsot[which(MedHillsot[,1] == 9),-1]))), MARGIN = 2, FUN = sum) - apply(X = abs(apply(X = HillSFot[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))],], MARGIN = 1, FUN = "-", as.numeric(MedHillsot[which(MedHillsot[,1] == 9),-1]))), MARGIN = 2, FUN = sum)))/length(obsot$Date)/(max(as.numeric(MedHillsot[which(MedHillsot[,1] == 9),-1])) - min(as.numeric(MedHillsot[which(MedHillsot[,1] == 9),-1]))), breaks = 10, xlab = 'average daily difference/(max - min flow)', main = ParamSelect_h_Agg910[i])
+#     #hist(abs((apply(X = abs(apply(X = HillSF95[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))]+1,], MARGIN = 1, FUN = "-", as.numeric(MedHills95[which(MedHills95[,1] == 9),-1]))), MARGIN = 2, FUN = sum) - apply(X = abs(apply(X = HillSF95[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))],], MARGIN = 1, FUN = "-", as.numeric(MedHills95[which(MedHills95[,1] == 9),-1]))), MARGIN = 2, FUN = sum)))/length(obs95$Date)/(max(as.numeric(MedHills95[which(MedHills95[,1] == 9),-1])) - min(as.numeric(MedHills95[which(MedHills95[,1] == 9),-1]))), breaks = 10, xlab = 'average daily difference/(max - min flow)', main = ParamSelect_h_Agg910[i])
+#     #abs(SAE2 - SAE1)/(median(SAE2, SAE1)) = 
+#     hist(abs((apply(X = abs(apply(X = HillSF05[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
+#                                                                           - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
+#                                                                                                                                                                                             - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))]+1,], 
+#                                   MARGIN = 1, FUN = "-", as.numeric(MedHills05[which(MedHills05[,1] == 9),-1]))), 
+#                     MARGIN = 2, FUN = sum) 
+#               - apply(X = abs(apply(X = HillSF05[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
+#                                                                             - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
+#                                                                                                                                                                                              - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))],], 
+#                                     MARGIN = 1, FUN = "-", as.numeric(MedHills05[which(MedHills05[,1] == 9),-1]))), 
+#                       MARGIN = 2, FUN = sum)))/
+#            apply(X = rbind(apply(X = abs(apply(X = HillSF05[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
+#                                                                               - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
+#                                                                                                                                                                                                 - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))]+1,], 
+#                                       MARGIN = 1, FUN = "-", as.numeric(MedHills05[which(MedHills05[,1] == 9),-1]))), 
+#                         MARGIN = 2, FUN = sum), apply(X = abs(apply(X = HillSF05[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
+#                                                                                                             - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
+#                                                                                                                                                                                                                              - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))],], 
+#                                                                     MARGIN = 1, FUN = "-", as.numeric(MedHills05[which(MedHills05[,1] == 9),-1]))), 
+#                                                       MARGIN = 2, FUN = sum)), MARGIN = 2, FUN = mean), 
+#          breaks = 10, xlab = 'average daily difference', main = ParamSelect_h_Agg910[i])
+#     hist(abs((apply(X = abs(apply(X = HillSF95[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
+#                                                                           - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
+#                                                                                                                                                                                             - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))]+1,], 
+#                                   MARGIN = 1, FUN = "-", as.numeric(MedHills95[which(MedHills95[,1] == 9),-1]))), 
+#                     MARGIN = 2, FUN = sum) 
+#               - apply(X = abs(apply(X = HillSF95[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
+#                                                                             - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
+#                                                                                                                                                                                              - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))],], 
+#                                     MARGIN = 1, FUN = "-", as.numeric(MedHills95[which(MedHills95[,1] == 9),-1]))), 
+#                       MARGIN = 2, FUN = sum)))/
+#            apply(X = rbind(apply(X = abs(apply(X = HillSF95[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
+#                                                                                        - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
+#                                                                                                                                                                                                          - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))]+1,], 
+#                                                MARGIN = 1, FUN = "-", as.numeric(MedHills95[which(MedHills95[,1] == 9),-1]))), 
+#                                  MARGIN = 2, FUN = sum), apply(X = abs(apply(X = HillSF95[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
+#                                                                                                                      - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
+#                                                                                                                                                                                                                                       - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))],], 
+#                                                                              MARGIN = 1, FUN = "-", as.numeric(MedHills95[which(MedHills95[,1] == 9),-1]))), 
+#                                                                MARGIN = 2, FUN = sum)), MARGIN = 2, FUN = mean), 
+#          breaks = 10, xlab = 'average daily difference', main = ParamSelect_h_Agg910[i])
+#     hist(abs((apply(X = abs(apply(X = HillSFot[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
+#                                                                           - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
+#                                                                                                                                                                                             - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))]+1,], 
+#                                   MARGIN = 1, FUN = "-", as.numeric(MedHillsot[which(MedHillsot[,1] == 9),-1]))), 
+#                     MARGIN = 2, FUN = sum) 
+#               - apply(X = abs(apply(X = HillSFot[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
+#                                                                             - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
+#                                                                                                                                                                                              - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))],], 
+#                                     MARGIN = 1, FUN = "-", as.numeric(MedHillsot[which(MedHillsot[,1] == 9),-1]))), 
+#                       MARGIN = 2, FUN = sum)))/
+#            apply(X = rbind(apply(X = abs(apply(X = HillSFot[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
+#                                                                                        - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
+#                                                                                                                                                                                                          - OrigParams[1:(nrow(OrigParams)-1), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))]+1,], 
+#                                                MARGIN = 1, FUN = "-", as.numeric(MedHillsot[which(MedHillsot[,1] == 9),-1]))), 
+#                                  MARGIN = 2, FUN = sum), apply(X = abs(apply(X = HillSFot[(9-1)*nrow(BasinSF)+which((OrigParams[2:nrow(OrigParams), which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
+#                                                                                                                      - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0)[-which(which((OrigParams[2:nrow(OrigParams),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])] 
+#                                                                                                                                                                                                                                       - OrigParams[1:(nrow(OrigParams)-1),which(colnames(OrigParams) == ParamSelect_h_Agg910[i])]) != 0) %in% seq(272,10880,272))],], 
+#                                                                              MARGIN = 1, FUN = "-", as.numeric(MedHillsot[which(MedHillsot[,1] == 9),-1]))), 
+#                                                                MARGIN = 2, FUN = sum)), MARGIN = 2, FUN = mean), 
+#          breaks = 10, xlab = 'average daily difference', main = ParamSelect_h_Agg910[i])
+#   }
+# }
