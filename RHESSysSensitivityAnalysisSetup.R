@@ -1,26 +1,14 @@
-#Script for calculating Morris EEs from output streamflow and TN data
+#Script for setting up the calculation of Morris EEs from output streamflow and TN data
 
 #Set directories----
 #Color functions - from JDS github repo: Geothermal_ESDA
 dir_Main = "C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR"
-dir_ParamInCutoff = paste0(dir_Main, '/SelectedParamsTotals+Fig1')
-dir_EEpanels = paste0(dir_Main, '/EEpanels+Fig2+Fig5a')
-dir_HillPanels = paste0(dir_Main, '/Hillpanels+Fig3cd+Fig5b')
-dir_Mult = paste0(dir_Main, '/MultiplierEval+Fig4')
 dir_ColFuns = "C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\Hydrology\\USGSGauges"
-
-#Set file locations----
-f_HelpFuns = "C:\\Users\\js4yd\\OneDrive - University of Virginia\\RHESSys_ParameterSA\\SAScriptFunctions.R"
 
 #Load libraries----
 library(sp)
 library(rgdal)
 library(vroom)
-library(cluster)
-library(factoextra)
-library(dendextend)
-library(tidyverse)
-library(scico)
 
 #Load functions----
 source(paste0(dir_ColFuns, '\\ColorFunctions.R'))
