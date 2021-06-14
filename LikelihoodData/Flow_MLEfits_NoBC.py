@@ -87,7 +87,7 @@ else:
 	stop = start + count
 
 #Number of samples to take for the multi-start gradient descent algorithm
-numsamps = 1000
+numsamps = 200
 #numsamps = int(sys.argv[4])
 #Create dataframe to store successful parameter sets
 #Qdf_success = pd.DataFrame(columns=['beta','xi','sigma_0','sigma_1','phi_1','mu_h','logL'])
@@ -129,9 +129,9 @@ for i in range(start,stop):
     LNSEa = 1. - np.sum((np.log(aTrueQ) - np.log(aSimQ))**2)/np.sum((np.log(aTrueQ) - np.mean(np.log(aTrueQ)))**2)
     #Percent Bias
     pBias = 100. * (np.sum(cSimQ['Replicate' + str(i+1)] - cTrueQ['Flow']) / np.sum(cTrueQ['Flow']))
-
+    
     ObjFunc = lambda params: generalizedLikelihoodFunction(data,comparedata,tIndex,params)
-	#ObjFunc = lambda params: generalizedLikelihoodFunction(data,comparedata,tIndex,params,month)
+    #ObjFunc = lambda params: generalizedLikelihoodFunction(data,comparedata,tIndex,params,month)
     
     # find MLE fits for each simulation
     # params = [beta, xi, sigma_0, sigma_1, phi_1, mu_h]
@@ -139,9 +139,8 @@ for i in range(start,stop):
     # sigma_0 = 0.1, sigma_1 = 0.1, phi_1 = 0.7 (high auto-correlation), mu_h = 0.0 (unbiased)
     #Make an LHS sample of the initial parameters to try for each replicate. Random seed is the index
     np.random.seed(seed=i+518)
-	#np.random.seed(seed=i+int(sys.argv[1]))
-    #paramsInit = pyDOE.lhs(n=6, criterion='m', iterations=1000, samples=numsamps)
-	paramsInit = pyDOE.lhs(n=6, samples=numsamps)
+    #np.random.seed(seed=i+int(sys.argv[1]))
+    paramsInit = pyDOE.lhs(n=6, criterion='m', iterations=1000, samples=numsamps)
     
     #Get all of the parameters into their expected ranges
     #Initial bounds were [-1,10], [0,10], same, same, same, [0,100]
@@ -167,7 +166,7 @@ for i in range(start,stop):
             OptChoice = optParams
         elif (((optParams.fun < OptFailed.fun) & (optParams.success == False)) | (np.isnan(OptFailed.fun) & (np.isnan(optParams.fun) == False))):
             OptFailed = optParams
-
+        
         #Used to see the distribution of parameter values with different starting locations
         #if (optParams.success == True):
         #    #Save parameter vector
@@ -178,23 +177,11 @@ for i in range(start,stop):
     #Check if there are any successes
     if OptChoice.success == True:
         #Assign the best parameter values to this ith replicate
-        Qdf = Qdf.append({'Replicate': i+1, 'beta': OptChoice.x[0], 'xi': OptChoice.x[1], 'sigma_0': OptChoice.x[2],
-                          'sigma_1': OptChoice.x[3], 'phi_1': OptChoice.x[4], 'mu_h': OptChoice.x[5],
-                          'logL': -OptChoice.fun, 'SSEd': SSEd, 'SSEw': SSEw, 'SSEm': SSEm, 'SSEa': SSEa, 
-                          'NSEd': NSEd, 'NSEw': NSEw, 'NSEm': NSEm, 'NSEa': NSEa, 
-                          'LNSEd': LNSEd, 'LNSEw': LNSEw, 'LNSEm': LNSEm, 'LNSEa': LNSEa, 
-                          'pBias': pBias,
-                          'success': OptChoice.success, 'mess': OptChoice.message}, ignore_index=True)
+        Qdf = Qdf.append({'Replicate': i+1, 'beta': OptChoice.x[0], 'xi': OptChoice.x[1], 'sigma_0': OptChoice.x[2],'sigma_1': OptChoice.x[3], 'phi_1': OptChoice.x[4], 'mu_h': OptChoice.x[5],'logL': -OptChoice.fun, 'SSEd': SSEd, 'SSEw': SSEw, 'SSEm': SSEm, 'SSEa': SSEa, 'NSEd': NSEd, 'NSEw': NSEw, 'NSEm': NSEm, 'NSEa': NSEa, 'LNSEd': LNSEd, 'LNSEw': LNSEw, 'LNSEm': LNSEm, 'LNSEa': LNSEa, 'pBias': pBias,'success': OptChoice.success, 'mess': OptChoice.message}, ignore_index=True)
     else:
         #No successful convergence. Use the OptFailed
-        Qdf = Qdf.append({'Replicate': i+1, 'beta': OptFailed.x[0], 'xi': OptFailed.x[1], 'sigma_0': OptFailed.x[2],
-                          'sigma_1': OptFailed.x[3], 'phi_1': OptFailed.x[4], 'mu_h': OptFailed.x[5],
-                          'logL': -OptFailed.fun, 'SSEd': SSEd, 'SSEw': SSEw, 'SSEm': SSEm, 'SSEa': SSEa, 
-                          'NSEd': NSEd, 'NSEw': NSEw, 'NSEm': NSEm, 'NSEa': NSEa, 
-                          'LNSEd': LNSEd, 'LNSEw': LNSEw, 'LNSEm': LNSEm, 'LNSEa': LNSEa, 
-                          'pBias': pBias,
-                          'success': OptFailed.success, 'mess': OptFailed.message}, ignore_index=True)
+        Qdf = Qdf.append({'Replicate': i+1, 'beta': OptFailed.x[0], 'xi': OptFailed.x[1], 'sigma_0': OptFailed.x[2],'sigma_1': OptFailed.x[3], 'phi_1': OptFailed.x[4], 'mu_h': OptFailed.x[5],'logL': -OptFailed.fun, 'SSEd': SSEd, 'SSEw': SSEw, 'SSEm': SSEm, 'SSEa': SSEa, 'NSEd': NSEd, 'NSEw': NSEw, 'NSEm': NSEm, 'NSEa': NSEa, 'LNSEd': LNSEd, 'LNSEw': LNSEw, 'LNSEm': LNSEm, 'LNSEa': LNSEa, 'pBias': pBias,'success': OptFailed.success, 'mess': OptFailed.message}, ignore_index=True)
 
 # write data frame to file
-Qdf.to_csv('SA_Params_logLNoBC_Baisman_Flow_rank' + str(rank) + '.csv', index=False)
+Qdf.to_csv('SA_Params_logLNoBC500_Baisman_Flow_rank' + str(rank) + '.csv', index=False)
 #Qdf.to_csv(sys.argv[5] + '_Flow_rank' + str(rank) + '.csv', index=False)
