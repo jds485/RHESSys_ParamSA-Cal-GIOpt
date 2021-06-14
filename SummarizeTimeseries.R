@@ -8,13 +8,6 @@ library(stringr)
 library(rgdal)
 library(GISTools)
 library(vroom)
-#These libraries are not used, but are needed for commented out code for TN processing. That was moved to another script.
-#library(EGRET)
-#library(survival)
-#library(pracma)
-#library(parallel)
-#library(doParallel)
-#library(foreach)
 
 #Load functions to check the .out files for errors----
 setwd('C:\\Users\\js4yd\\OneDrive - University of Virginia\\RHESSys_ParameterSA')
