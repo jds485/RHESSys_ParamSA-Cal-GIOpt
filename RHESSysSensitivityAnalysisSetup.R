@@ -29,7 +29,7 @@ cols = ncol(InputParams)
 r = 40
 
 #Load RHESSys streamflow data----
-setwd("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR")
+setwd(dir_Main)
 BasinSF = vroom(file = 'SAResults_BasinStreamflow_p4_Reordered_Add5.txt', delim = '\t', col_names = TRUE, col_types = cols(.default=col_double()), progress = FALSE)
 HillSF = vroom(file = 'SAResults_HillStreamflow_p6_Reordered_Add5.txt', delim = '\t', col_names = TRUE, col_types = cols(.default=col_double()), progress = FALSE)
 
@@ -430,13 +430,13 @@ for (h in 1:length(uhills)){
 rm(h)
 
 #Load likelihood of each SA replicate----
-Likes20 = read.csv(file = "C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\Likelihood\\CorrectedLikelihood\\SA_Params_logLNoBC_Baisman_Flow_SQL_max1000_20samps.csv", check.names = FALSE, stringsAsFactors = FALSE)
-Likes40 = read.csv(file = "C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\Likelihood\\CorrectedLikelihood\\40InitialLHS\\SA_Params_logLNoBC40_Baisman_Flow_SQL_max1000_20samps.csv", check.names = FALSE, stringsAsFactors = FALSE)
+#Likes20 = read.csv(file = "C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\Likelihood\\CorrectedLikelihood\\SA_Params_logLNoBC_Baisman_Flow_SQL_max1000_20samps.csv", check.names = FALSE, stringsAsFactors = FALSE)
+#Likes40 = read.csv(file = "C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\Likelihood\\CorrectedLikelihood\\40InitialLHS\\SA_Params_logLNoBC40_Baisman_Flow_SQL_max1000_20samps.csv", check.names = FALSE, stringsAsFactors = FALSE)
 Likes200 = read.csv(file = "C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\Likelihood\\CorrectedLikelihood\\200InitialLHS\\SA_Params_logLNoBC_Baisman_Flow_SQL_max1000_200samps.csv", check.names = FALSE, stringsAsFactors = FALSE)
 Likes200_pre = read.csv(file = "C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\Likelihood\\CorrectedLikelihood\\200InitialLHS\\SA_Params_logLNoBC_Baisman_Flow_SQL_max1000_200samps_pre.csv", check.names = FALSE, stringsAsFactors = FALSE)
 
 #200 initial LHS better due to amount of unconverged points (< 0.5%).
-rm(Likes20, Likes40)
+#rm(Likes20, Likes40)
 
 #Plot of calibration metric correlations
 png('MetricScatterplot.png', res = 300, width = 7, height = 7, units = 'in')
