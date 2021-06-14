@@ -5,7 +5,6 @@
 #SBATCH -p standard           									# Queue partition name "standard"
 #SBATCH -A quinnlab       											# allocation name
 #SBATCH -t 01:00:00       											# Run time per serial job (hh:mm:ss) - up to 36 hours
-#SBATCH --mem-per-cpu=12288                     # Memory per cpu (Megabytes)
 #SBATCH --mail-user=js4yd@virginia.edu          # address for email notification
 #SBATCH --mail-type=ALL                  		    # email at Begin and End of job
 
@@ -16,6 +15,7 @@ module load singularity
 #Set directory variables
 SINGIMAGE='/share/resources/containers/singularity/rhessys'
 BASEDIR='/scratch/js4yd/MorrisSA'
+RLIBPATH='/home/js4yd/R/x86_64-pc-linux-gnu-library/3.5'
 
 #Set variables that don't change in loop
 EPSGCODE='EPSG:26918'
@@ -43,12 +43,12 @@ mkdir ./grass_dataset
 cp -r "$BASEDIR"/grass_dataset/"$LOCATION_NAME" ./grass_dataset
 
 mkdir ./GIS2RHESSys
-cp "$BASEDIR"/GIS2RHESSys/lulcCollectionEC.csv ./GIS2RHESSys
-cp "$BASEDIR"/GIS2RHESSys/soilCollection.csv ./GIS2RHESSys
-cp "$BASEDIR"/GIS2RHESSys/vegCollection_modified.csv ./GIS2RHESSys
+cp "$BASEDIR"/GIS2RHESSys/lulcCollectionEC_SA.csv ./GIS2RHESSys
+cp "$BASEDIR"/GIS2RHESSys/soilCollection_SA.csv ./GIS2RHESSys
+cp "$BASEDIR"/GIS2RHESSys/vegCollection_modified_SA.csv ./GIS2RHESSys
 #The vegetation file needs to be modified by the def file data
 #Run the vegetation modification script
-singularity exec "$SINGIMAGE"/rhessys_v3.img python "$BASEDIR"/RHESSysRuns/ModifyVeg.py "$BASEDIR"/RHESSysRuns/Run"$i"/GIS2RHESSys "$PROJDIR"/"$RHESSysNAME" "$PROJDIR"/"$RHESSysNAME"/defs 'vegCollection_modified.csv'
+singularity exec "$SINGIMAGE"/rhessys_v3.img python "$BASEDIR"/RHESSysRuns/ModifyVeg.py "$BASEDIR"/RHESSysRuns/Run"$i"/GIS2RHESSys "$PROJDIR"/"$RHESSysNAME" "$PROJDIR"/"$RHESSysNAME"/defs 'vegCollection_modified_SA.csv'
 
 cd "$PROJDIR"
 mkdir ./GIS2RHESSys/libraries
@@ -116,9 +116,14 @@ echo drivewayMAP drivewayFrac >> "$templateFile"
 echo pavedRoadFracMAP pavedroadFrac >> "$templateFile"
 # ... forest vegetations
 echo forestFracMAP forestFrac >> "$templateFile"
+echo forestBaseFracMAP forestBaseFrac >> "$templateFile"
+echo forestGIEvFracMAP forestGIEvFrac >> "$templateFile"
 echo tree1StratumID tree1StratumID >> "$templateFile"
 echo tree1FFrac tree1FFrac >> "$templateFile"
 echo tree1LAI tree1LAI >> "$templateFile"
+echo tree2StratumID tree2StratumID >> "$templateFile"
+echo tree2FFrac tree2FFrac >> "$templateFile"
+echo tree2LAI tree2LAI >> "$templateFile"
 # ... shrub vegetation
 echo shrubFracMAP shrubFrac >> "$templateFile"
 #echo shrub1StratumID shrub1StratumID >> "$templateFile"
@@ -151,9 +156,9 @@ echo additionalSurfaceDrainMAP addsurfdrain >> "$templateFile"
 # 2.2
 # assumes you have saved the modified vegCollection.csv file on Rivanna @ location "$PROJDIR"/"$RHESSysNAME"/
 cd "$PROJDIR"
-singularity exec "$SINGIMAGE"/rhessys_v3.img grass74 "$LOCATION"/$MAPSET --exec Rscript "$GITHUBLIBRARIES"/g2w_cf_RHESSysEC.R "$PROJDIR" "$PROJDIR"/"$RHESSysNAME"/vegCollection_modified.csv default default "$templateFile"
+singularity exec "$SINGIMAGE"/rhessys_v3.img grass74 "$LOCATION"/$MAPSET --exec Rscript "$GITHUBLIBRARIES"/g2w_cf_RHESSysEC.R "$PROJDIR" "$PROJDIR"/"$RHESSysNAME"/vegCollection_modified_SA.csv "$PROJDIR"/GIS2RHESSys/soilCollection_SA.csv "$PROJDIR"/GIS2RHESSys/lulcCollectionEC_SA.csv "$templateFile" "$RLIBPATH"
 
-singularity exec "$SINGIMAGE"/rhessys_v3.img Rscript "$GITHUBLIBRARIES"/LIB_RHESSys_writeTable2World.R NA "$PROJDIR"/"$RHESSysNAME"/worldfiles/worldfile.csv "$PROJDIR"/"$RHESSysNAME"/worldfiles/worldfile
+singularity exec "$SINGIMAGE"/rhessys_v3.img Rscript "$GITHUBLIBRARIES"/LIB_RHESSys_writeTable2World.R NA "$PROJDIR"/"$RHESSysNAME"/worldfiles/worldfile.csv "$PROJDIR"/"$RHESSysNAME"/worldfiles/worldfile "$RLIBPATH"
 
 #Delete the GRASS directory and code libraries for space concerns
 rm -r "$PROJDIR"/grass_dataset
@@ -161,7 +166,7 @@ rm -r "$PROJDIR"/Date_analysis
 rm -r "$PROJDIR"/GIS2RHESSys
 rm "$PROJDIR"/"$RHESSysNAME"/lulcFrac30m.csv
 rm "$PROJDIR"/"$RHESSysNAME"/soil_cat_mukey.csv
-rm "$PROJDIR"/"$RHESSysNAME"/vegCollection_modified.csv
+rm "$PROJDIR"/"$RHESSysNAME"/vegCollection_modified_SA.csv
 rm "$PROJDIR"/"$RHESSysNAME"/g2w_template.txt
 
 #Run RHESSys

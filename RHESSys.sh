@@ -5,7 +5,6 @@
 #SBATCH -p standard           									# Queue partition name "standard"
 #SBATCH -A quinnlab       											# allocation name
 #SBATCH -t 01:00:00       											# Run time per serial job (hh:mm:ss) - up to 36 hours
-#SBATCH --mem-per-cpu=12288                     # Memory per cpu (Megabytes)
 #SBATCH --mail-user=js4yd@virginia.edu          # address for email notification
 #SBATCH --mail-type=ALL                  		    # email at Begin and End of job
 
