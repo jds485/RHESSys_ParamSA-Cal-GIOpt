@@ -9,6 +9,8 @@ This code was used for the manuscript:
 
 Smith, J.D., L. Lin, J.D. Quinn, and L.E. Band. (in prep.). Guidance on evaluating parametric model uncertainty at decision-relevant scales. To be submitted to Hydrology and Earth System Sciences.
 
+Credit: The WRTDS_ModifiedFunctions.R were originally from USGS functions in the [EGRET](https://github.com/USGS-R/EGRET) package. They are modified according to [GitHub issue #251](https://github.com/USGS-R/EGRET/issues/251)
+
 
 ## LikelihoodData
 Contains code for the generalized normal distribution (skew exponential power) used for the sensitiivty analysis and calibration studies. 
