@@ -4,6 +4,8 @@
 
 0.2) The pareto.py script from the pareto.py repository is needed to run some of these scripts. It can be accessed here: https://github.com/matthewjwoodruff/pareto.py/blob/master/pareto.py
 
+0.3) Files of the format Run....sh were used to submit a job to run the corresponding shell script or python script on the University of Virginia's Rivanna HPC. You do not need to use these scripts to run the files. They are included for convenience.
+
 1) get_objs.sh
 - assumes your runtime files are in a subdirectory "runtime" and have the file ending ".runtime"
 - assumes you will write files to a subdirectory "objs/runtime"
