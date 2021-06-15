@@ -2,7 +2,7 @@
 This readme provides a step-by-step set of instructions that describe how to set up, run, and analyze results for a Morris sensitivity analysis of a Regional HydroEcological Simulation System (RHESSys) model. The instructions are intended to be general, such that any project may rely on this step-by-step process. That said, the instructions are based on the steps needed for the cited Smith et al. study, and modifications to code and/or to the steps may be needed for other studies. Guidelines are provided where code edits may be required.
 
 ## Data Repository for Smith et al.
-The code depends on a data repository located on [HydroShare](add link here). 
+The code depends on a data repository entitled "RHESSys Morris Sensitivity Analysis Data Repository for Smith et al." located on [HydroShare](http://www.hydroshare.org/resource/c63ddcb50ea84800a529c7e1b2a21f5e). 
 
 ## Running the Code
 A description of how to run the code is provided in the MorrisSA-Workflow PDF. For the Smith et al. study, data and code referenced in the workflow are in the data repository.
