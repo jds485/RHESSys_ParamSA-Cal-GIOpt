@@ -2,6 +2,8 @@
 
 0.1) Delete the second to last row of the .runtime files, which has a # in it. These files should have only a blank line at the end.
 
+0.2) The pareto.py script from the pareto.py repository is needed to run some of these scripts. It can be accessed here: https://github.com/matthewjwoodruff/pareto.py/blob/master/pareto.py
+
 1) get_objs.sh
 - assumes your runtime files are in a subdirectory "runtime" and have the file ending ".runtime"
 - assumes you will write files to a subdirectory "objs/runtime"
