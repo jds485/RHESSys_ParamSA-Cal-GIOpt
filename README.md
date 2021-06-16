@@ -7,7 +7,7 @@ Contains code for a Morris sensitivity analysis of RHESSys model parameters.
 
 This code was used for the manuscript:
 
-Smith, J.D., L. Lin, J.D. Quinn, and L.E. Band. (in prep.). Guidance on evaluating parametric model uncertainty at decision-relevant scales. To be submitted to Hydrology and Earth System Sciences.
+Smith, J.D., L. Lin, J.D. Quinn, and L.E. Band. Guidance on evaluating parametric model uncertainty at decision-relevant scales. Submitted to Hydrology and Earth System Sciences. Article number hess-2021-324.
 
 Credit: The WRTDS_ModifiedFunctions.R were originally from USGS functions in the [EGRET](https://github.com/USGS-R/EGRET) package. They are modified according to [GitHub issue #251](https://github.com/USGS-R/EGRET/issues/251)
 
