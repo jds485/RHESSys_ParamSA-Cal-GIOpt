@@ -14,4 +14,4 @@ module load gcc/7.1.0 openmpi/3.1.4 R/3.5.3
 #1. directory where ExtractSA.sh wrote data for each trajectory
 #2. full path to MorrisSA/SAmetrics/MorrisSamples_BeforeProcessing.csv file
 #3. directory where the joined files will be written.
-Rscript JoinSAtrajectories.R '/scratch/js4yd/MorrisSA/SAmetrics/SAdata/' "/scratch/js4yd/MorrisSA/SAmetrics/MorrisSamples_BeforeProcessing.csv" '/scratch/js4yd/MorrisSA/SAmetrics/'
+Rscript JoinSAtrajectories_AllMetrics.R '/scratch/js4yd/MorrisSA/SAmetrics/SAdata/' "/scratch/js4yd/MorrisSA/SAmetrics/MorrisSamples_BeforeProcessing.csv" '/scratch/js4yd/MorrisSA/SAmetrics/'
