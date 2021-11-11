@@ -37,8 +37,8 @@ The files used in the Smith et al. study are briefly described below. The reposi
 25.	**collectParams.py**: Script to gather the results of the likelihood parameter estimating into one file for flow, and one file for TN.
 26.	**Plot_logL_v_SSE.py**: Script to make figures of the log likelihood versus sum of squared errors.
 27.	**RHESSysSensitvityAnalysisSetup.R**: Used to set up datasets for elementary effect computations.
-28.	**ExtractSA_AllMetrics_[b, h1, or h2].sh**: shell script to run a job array over each of the Morris trajectories for basin or hillslopes. Hillslope data processing was split into 2 due to data size limitations.
-29.	**ExtractSAtrajectories_AllMetrics_[b, h1, or h2].R**: Computes elementary effects for all parameters for each trajectory.
-30.	**JoinSA_AllMetrics.sh**: shell script that runs the JoinSAtrajectories_AllMetrics.R script.
-31.	**JoinSAtrajectories_AllMetrics.R**: script to compile all of the elementary effects into one file for each of the SA metrics.
+28.	**ExtractSA_[AllMetrics, or Meds]\_[b, h1, or h2].sh**: shell script to run a job array over each of the Morris trajectories for basin or hillslopes. Hillslope data processing was split into 2 due to data size limitations. Meds was used for the SAMD metrics for the basin.
+29.	**ExtractSAtrajectories_[AllMetrics, or Meds]\_[b, h1, or h2].R**: Computes elementary effects for all parameters for each trajectory.
+30.	**JoinSA_[AllMetrics, or Meds_b].sh**: shell script that runs the following R script.
+31.	**JoinSAtrajectories_[AllMetrics, or Meds_b].R**: script to compile all of the elementary effects into one file for each of the SA metrics.
 32.	**RHESSysSensitvityAnalysis.R**: Used to process the results of the EE computation for each variable at the basin and hillslope scale.
