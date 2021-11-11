@@ -360,6 +360,14 @@ BasinSFotg_pre = BasinSF_pre[,-1][,which(as.Date(colnames(BasinSF_pre[1,-1])) %i
 HillSF05g_pre = HillSF_pre[,-c(1,2)][,which(as.Date(colnames(HillSF_pre[1,-c(1,2)])) %in% days05g)]
 HillSFotg_pre = HillSF_pre[,-c(1,2)][,which(as.Date(colnames(HillSF_pre[1,-c(1,2)])) %in% daysotg)]
 
+#Create the median basin streamflows that will be used as a reference point to compute Morris EEs----
+MedBasins = apply(X = BasinSF[,-1], MARGIN = 2, FUN = median)
+MedBasins95 = MedBasins[which(as.Date(colnames(BasinSF)[-1]) %in% as.Date(days95))]
+MedBasins05g = MedBasins[which(as.Date(colnames(BasinSF)[-1]) %in% as.Date(days05g))]
+MedBasinsotg = MedBasins[which(as.Date(colnames(BasinSF)[-1]) %in% as.Date(daysotg))]
+save(list = c('MedBasins95', 'MedBasins05g','MedBasinsotg'), file = "C:/Users/js4yd/OneDrive - University of Virginia/BES_Data/BES_Data/RHESSysFiles/BR&POBR/EEs_Meds_Setup_b.RData")
+rm(MedBasins, MedBasins05g, MedBasins95, MedBasinsotg)
+
 #Create the median hillslope streamflows that will be used as a reference point to compute Morris EEs----
 uhills = sort(unique(HillSF$HillID))
 MedHills = matrix(NA, nrow = length(uhills), ncol = ncol(BasinSF))

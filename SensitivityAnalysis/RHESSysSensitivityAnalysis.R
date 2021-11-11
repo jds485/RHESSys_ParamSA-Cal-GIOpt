@@ -8,7 +8,7 @@ dir_HillPanels = paste0(dir_Main, '/Hillpanels+Fig3cd+Fig5b')
 dir_Mult = paste0(dir_Main, '/MultiplierEval+Fig4')
 
 #Set file locations----
-f_HelpFuns = "C:\\Users\\js4yd\\OneDrive - University of Virginia\\RHESSys_ParameterSA\\SAScriptFunctions.R"
+f_HelpFuns = "C:\\Users\\js4yd\\OneDrive - University of Virginia\\RHESSys_ParameterSA\\SensitivityAnalysis\\SAScriptFunctions.R"
 
 #Load libraries----
 library(sp)
@@ -22,12 +22,16 @@ library(scico)
 #Input data load - loads all data that were saved in the save.image file in the RHESSysSensitivityAnalysisSetup.R script
 #load("C:/Users/js4yd/OneDrive - University of Virginia/BES_Data/BES_Data/RHESSysFiles/BR&POBR/EEs_All_Setup.RData")
 setwd(dir_Main)
+dir_Main1 = dir_Main
 load("EEs_All_Setup_paper.RData")
+load("EEs_Meds_Setup_b.RData")
+dir_Main = dir_Main1
+rm(dir_Main1, dir_ColFuns)
 
 #Load Helper Functions----
 source(f_HelpFuns)
 
-# Load EE and Deltas info----
+#Load EE and Deltas info----
 Deltas = read.table(file = paste0(getwd(), '/Deltas_AllMetrics.txt'), sep = '\t', header = TRUE, stringsAsFactors = FALSE)
 EEs05_b = read.table(file = paste0(getwd(), '/EEs05_b_AllMetrics.txt'), sep = '\t', header = TRUE, stringsAsFactors = FALSE)
 EEs95_b = read.table(file = paste0(getwd(), '/EEs95_b_AllMetrics.txt'), sep = '\t', header = TRUE, stringsAsFactors = FALSE) 
@@ -49,6 +53,9 @@ EEsTNMed_h = read.table(file = paste0(getwd(), '/EEsTNMed_h_AllMetrics.txt'), se
 EEsTN95_h = read.table(file = paste0(getwd(), '/EEsTN95_h_AllMetrics.txt'), sep = '\t', header = TRUE, stringsAsFactors = FALSE)
 EEs05g_h = read.table(file = paste0(getwd(), '/EEs05g_h_AllMetrics.txt'), sep = '\t', header = TRUE, stringsAsFactors = FALSE)
 EEsotg_h = read.table(file = paste0(getwd(), '/EEsotg_h_AllMetrics.txt'), sep = '\t', header = TRUE, stringsAsFactors = FALSE)
+EEs05gm_b = read.table(file = paste0(getwd(), '/EEs05gm_b_All.txt'), sep = '\t', header = TRUE, stringsAsFactors = FALSE)
+EEsotgm_b = read.table(file = paste0(getwd(), '/EEsotgm_b_All.txt'), sep = '\t', header = TRUE, stringsAsFactors = FALSE)
+EEs95m_b = read.table(file = paste0(getwd(), '/EEs95m_b_All.txt'), sep = '\t', header = TRUE, stringsAsFactors = FALSE) 
 
 #Check if EEs have NA values because of sampling scheme errors
 if (any(c(any(is.na(EEs05_b)),
@@ -70,7 +77,10 @@ any(is.na(EEs05g_h)),
 any(is.na(EEsotg_h)),
 any(is.na(EEsTN05_h)),
 any(is.na(EEsTN95_h)),
-any(is.na(EEsTNMed_h))))){
+any(is.na(EEsTNMed_h)),
+any(is.na(EEs05gm_b)),
+any(is.na(EEsotgm_b)),
+any(is.na(EEs95m_b))))){
   print('There are NA Values in EE tables. Please fix.')
 }
 
@@ -87,6 +97,9 @@ EEsLogL_b$v102_epc.frootlitr_fcel[c(13,19)] = 0
 EEsNSE_b$v102_epc.frootlitr_fcel[c(13,19)] = 0
 EEsLNSE_b$v102_epc.frootlitr_fcel[c(13,19)] = 0
 EEspBias_b$v102_epc.frootlitr_fcel[c(13,19)] = 0
+EEs05gm_b$v102_epc.frootlitr_fcel[c(13,19)] = 0
+EEsotgm_b$v102_epc.frootlitr_fcel[c(13,19)] = 0
+EEs95m_b$v102_epc.frootlitr_fcel[c(13,19)] = 0
 
 EEs05_h$v102_epc.frootlitr_fcel[c(12*14+seq(1,14,1),14*18+seq(1,14,1))] = 0
 EEsot_h$v102_epc.frootlitr_fcel[c(12*14+seq(1,14,1),14*18+seq(1,14,1))] = 0
@@ -164,6 +177,15 @@ colnames(EEsTN95_b)[(ncol(EEsTN95_b)-3):ncol(EEsTN95_b)] = c('s8_SoilTexture', '
 EEsTNMed_b[,seq(ncol(EEsTNMed_b)+1,ncol(EEsTNMed_b)+4,1)] = AggregateEEs(EEs = EEsTNMed_b, ColNames = as.matrix(rbind(c('s8_silt', 's8_sand', 's8_clay'), c('s108_silt', 's108_sand', 's108_clay'), c('s9_silt', 's9_sand', 's9_clay'), c('s109_silt', 's109_sand', 's109_clay'))), FUN = meanabs)
 colnames(EEsTNMed_b)[(ncol(EEsTNMed_b)-3):ncol(EEsTNMed_b)] = c('s8_SoilTexture', 's108_SoilTexture', 's9_SoilTexture', 's109_SoilTexture')
 
+EEs05gm_b[,seq(ncol(EEs05gm_b)+1,ncol(EEs05gm_b)+4,1)] = AggregateEEs(EEs = EEs05gm_b, ColNames = as.matrix(rbind(c('s8_silt', 's8_sand', 's8_clay'), c('s108_silt', 's108_sand', 's108_clay'), c('s9_silt', 's9_sand', 's9_clay'), c('s109_silt', 's109_sand', 's109_clay'))), FUN = meanabs)
+colnames(EEs05gm_b)[(ncol(EEs05gm_b)-3):ncol(EEs05gm_b)] = c('s8_SoilTexture', 's108_SoilTexture', 's9_SoilTexture', 's109_SoilTexture')
+
+EEs95m_b[,seq(ncol(EEs95m_b)+1,ncol(EEs95m_b)+4,1)] = AggregateEEs(EEs = EEs95m_b, ColNames = as.matrix(rbind(c('s8_silt', 's8_sand', 's8_clay'), c('s108_silt', 's108_sand', 's108_clay'), c('s9_silt', 's9_sand', 's9_clay'), c('s109_silt', 's109_sand', 's109_clay'))), FUN = meanabs)
+colnames(EEs95m_b)[(ncol(EEs95m_b)-3):ncol(EEs95m_b)] = c('s8_SoilTexture', 's108_SoilTexture', 's9_SoilTexture', 's109_SoilTexture')
+
+EEsotgm_b[,seq(ncol(EEsotgm_b)+1,ncol(EEsotgm_b)+4,1)] = AggregateEEs(EEs = EEsotgm_b, ColNames = as.matrix(rbind(c('s8_silt', 's8_sand', 's8_clay'), c('s108_silt', 's108_sand', 's108_clay'), c('s9_silt', 's9_sand', 's9_clay'), c('s109_silt', 's109_sand', 's109_clay'))), FUN = meanabs)
+colnames(EEsotgm_b)[(ncol(EEsotgm_b)-3):ncol(EEsotgm_b)] = c('s8_SoilTexture', 's108_SoilTexture', 's9_SoilTexture', 's109_SoilTexture')
+
 EEs05_h[,seq(ncol(EEs05_h)+1,ncol(EEs05_h)+4,1)] = AggregateEEs(EEs = EEs05_h, ColNames = as.matrix(rbind(c('s8_silt', 's8_sand', 's8_clay'), c('s108_silt', 's108_sand', 's108_clay'), c('s9_silt', 's9_sand', 's9_clay'), c('s109_silt', 's109_sand', 's109_clay'))), FUN = meanabs)
 colnames(EEs05_h)[(ncol(EEs05_h)-3):ncol(EEs05_h)] = c('s8_SoilTexture', 's108_SoilTexture', 's9_SoilTexture', 's109_SoilTexture')
 
@@ -226,6 +248,15 @@ colnames(EEsTN95_b)[(ncol(EEsTN95_b)-0):ncol(EEsTN95_b)] = 'v102_K_All'
 EEsTNMed_b[,seq(ncol(EEsTNMed_b)+1,ncol(EEsTNMed_b)+1,1)] = AggregateEEs(EEs = EEsTNMed_b, ColNames = as.matrix(rbind(c('v102_K_absorptance', 'v102_K_reflectance', 'v102_K_transmittance'))), FUN = meanabs)
 colnames(EEsTNMed_b)[(ncol(EEsTNMed_b)-0):ncol(EEsTNMed_b)] = 'v102_K_All'
 
+EEs05gm_b[,seq(ncol(EEs05gm_b)+1,ncol(EEs05gm_b)+1,1)] = AggregateEEs(EEs = EEs05gm_b, ColNames = as.matrix(rbind(c('v102_K_absorptance', 'v102_K_reflectance', 'v102_K_transmittance'))), FUN = meanabs)
+colnames(EEs05gm_b)[(ncol(EEs05gm_b)-0):ncol(EEs05gm_b)] = 'v102_K_All'
+
+EEs95m_b[,seq(ncol(EEs95m_b)+1,ncol(EEs95m_b)+1,1)] = AggregateEEs(EEs = EEs95m_b, ColNames = as.matrix(rbind(c('v102_K_absorptance', 'v102_K_reflectance', 'v102_K_transmittance'))), FUN = meanabs)
+colnames(EEs95m_b)[(ncol(EEs95m_b)-0):ncol(EEs95m_b)] = 'v102_K_All'
+
+EEsotgm_b[,seq(ncol(EEsotgm_b)+1,ncol(EEsotgm_b)+1,1)] = AggregateEEs(EEs = EEsotgm_b, ColNames = as.matrix(rbind(c('v102_K_absorptance', 'v102_K_reflectance', 'v102_K_transmittance'))), FUN = meanabs)
+colnames(EEsotgm_b)[(ncol(EEsotgm_b)-0):ncol(EEsotgm_b)] = 'v102_K_All'
+
 EEs05_h[,seq(ncol(EEs05_h)+1,ncol(EEs05_h)+1,1)] = AggregateEEs(EEs = EEs05_h, ColNames = as.matrix(rbind(c('v102_K_absorptance', 'v102_K_reflectance', 'v102_K_transmittance'))), FUN = meanabs)
 colnames(EEs05_h)[(ncol(EEs05_h)-0):ncol(EEs05_h)] = 'v102_K_All'
 
@@ -287,6 +318,15 @@ colnames(EEsTN95_b)[(ncol(EEsTN95_b)-0):ncol(EEsTN95_b)] = 'v102_PAR_All'
 
 EEsTNMed_b[,seq(ncol(EEsTNMed_b)+1,ncol(EEsTNMed_b)+1,1)] = AggregateEEs(EEs = EEsTNMed_b, ColNames = as.matrix(rbind(c('v102_PAR_absorptance', 'v102_PAR_reflectance', 'v102_PAR_transmittance'))), FUN = meanabs)
 colnames(EEsTNMed_b)[(ncol(EEsTNMed_b)-0):ncol(EEsTNMed_b)] = 'v102_PAR_All'
+
+EEs05gm_b[,seq(ncol(EEs05gm_b)+1,ncol(EEs05gm_b)+1,1)] = AggregateEEs(EEs = EEs05gm_b, ColNames = as.matrix(rbind(c('v102_PAR_absorptance', 'v102_PAR_reflectance', 'v102_PAR_transmittance'))), FUN = meanabs)
+colnames(EEs05gm_b)[(ncol(EEs05gm_b)-0):ncol(EEs05gm_b)] = 'v102_PAR_All'
+
+EEs95m_b[,seq(ncol(EEs95m_b)+1,ncol(EEs95m_b)+1,1)] = AggregateEEs(EEs = EEs95m_b, ColNames = as.matrix(rbind(c('v102_PAR_absorptance', 'v102_PAR_reflectance', 'v102_PAR_transmittance'))), FUN = meanabs)
+colnames(EEs95m_b)[(ncol(EEs95m_b)-0):ncol(EEs95m_b)] = 'v102_PAR_All'
+
+EEsotgm_b[,seq(ncol(EEsotgm_b)+1,ncol(EEsotgm_b)+1,1)] = AggregateEEs(EEs = EEsotgm_b, ColNames = as.matrix(rbind(c('v102_PAR_absorptance', 'v102_PAR_reflectance', 'v102_PAR_transmittance'))), FUN = meanabs)
+colnames(EEsotgm_b)[(ncol(EEsotgm_b)-0):ncol(EEsotgm_b)] = 'v102_PAR_All'
 
 EEs05_h[,seq(ncol(EEs05_h)+1,ncol(EEs05_h)+1,1)] = AggregateEEs(EEs = EEs05_h, ColNames = as.matrix(rbind(c('v102_PAR_absorptance', 'v102_PAR_reflectance', 'v102_PAR_transmittance'))), FUN = meanabs)
 colnames(EEs05_h)[(ncol(EEs05_h)-0):ncol(EEs05_h)] = 'v102_PAR_All'
@@ -351,6 +391,15 @@ colnames(EEsTN95_b)[(ncol(EEsTN95_b)-1):ncol(EEsTN95_b)] = c('v102_epc.frootlitr
 EEsTNMed_b[,seq(ncol(EEsTNMed_b)+1,ncol(EEsTNMed_b)+2,1)] = AggregateEEs(EEs = EEsTNMed_b, ColNames = as.matrix(rbind(c('v102_epc.frootlitr_fcel', 'v102_epc.frootlitr_flab', 'v102_epc.frootlitr_flig'), c('v3_epc.frootlitr_fcel', 'v3_epc.frootlitr_flab', 'v3_epc.frootlitr_flig'))), FUN = meanabs)
 colnames(EEsTNMed_b)[(ncol(EEsTNMed_b)-1):ncol(EEsTNMed_b)] = c('v102_epc.frootlitr_All', 'v3_epc.frootlitr_All')
 
+EEs05gm_b[,seq(ncol(EEs05gm_b)+1,ncol(EEs05gm_b)+2,1)] = AggregateEEs(EEs = EEs05gm_b, ColNames = as.matrix(rbind(c('v102_epc.frootlitr_fcel', 'v102_epc.frootlitr_flab', 'v102_epc.frootlitr_flig'), c('v3_epc.frootlitr_fcel', 'v3_epc.frootlitr_flab', 'v3_epc.frootlitr_flig'))), FUN = meanabs)
+colnames(EEs05gm_b)[(ncol(EEs05gm_b)-1):ncol(EEs05gm_b)] = c('v102_epc.frootlitr_All', 'v3_epc.frootlitr_All')
+
+EEs95m_b[,seq(ncol(EEs95m_b)+1,ncol(EEs95m_b)+2,1)] = AggregateEEs(EEs = EEs95m_b, ColNames = as.matrix(rbind(c('v102_epc.frootlitr_fcel', 'v102_epc.frootlitr_flab', 'v102_epc.frootlitr_flig'), c('v3_epc.frootlitr_fcel', 'v3_epc.frootlitr_flab', 'v3_epc.frootlitr_flig'))), FUN = meanabs)
+colnames(EEs95m_b)[(ncol(EEs95m_b)-1):ncol(EEs95m_b)] = c('v102_epc.frootlitr_All', 'v3_epc.frootlitr_All')
+
+EEsotgm_b[,seq(ncol(EEsotgm_b)+1,ncol(EEsotgm_b)+2,1)] = AggregateEEs(EEs = EEsotgm_b, ColNames = as.matrix(rbind(c('v102_epc.frootlitr_fcel', 'v102_epc.frootlitr_flab', 'v102_epc.frootlitr_flig'), c('v3_epc.frootlitr_fcel', 'v3_epc.frootlitr_flab', 'v3_epc.frootlitr_flig'))), FUN = meanabs)
+colnames(EEsotgm_b)[(ncol(EEsotgm_b)-1):ncol(EEsotgm_b)] = c('v102_epc.frootlitr_All', 'v3_epc.frootlitr_All')
+
 EEs05_h[,seq(ncol(EEs05_h)+1,ncol(EEs05_h)+2,1)] = AggregateEEs(EEs = EEs05_h, ColNames = as.matrix(rbind(c('v102_epc.frootlitr_fcel', 'v102_epc.frootlitr_flab', 'v102_epc.frootlitr_flig'), c('v3_epc.frootlitr_fcel', 'v3_epc.frootlitr_flab', 'v3_epc.frootlitr_flig'))), FUN = meanabs)
 colnames(EEs05_h)[(ncol(EEs05_h)-1):ncol(EEs05_h)] = c('v102_epc.frootlitr_All', 'v3_epc.frootlitr_All')
 
@@ -413,6 +462,15 @@ colnames(EEsTN95_b)[(ncol(EEsTN95_b)-1):ncol(EEsTN95_b)] = c('v102_epc.leaflitr_
 
 EEsTNMed_b[,seq(ncol(EEsTNMed_b)+1,ncol(EEsTNMed_b)+2,1)] = AggregateEEs(EEs = EEsTNMed_b, ColNames = as.matrix(rbind(c('v102_epc.leaflitr_fcel', 'v102_epc.leaflitr_flab', 'v102_epc.leaflitr_flig'), c('v3_epc.leaflitr_fcel', 'v3_epc.leaflitr_flab', 'v3_epc.leaflitr_flig'))), FUN = meanabs)
 colnames(EEsTNMed_b)[(ncol(EEsTNMed_b)-1):ncol(EEsTNMed_b)] = c('v102_epc.leaflitr_All', 'v3_epc.leaflitr_All')
+
+EEs05gm_b[,seq(ncol(EEs05gm_b)+1,ncol(EEs05gm_b)+2,1)] = AggregateEEs(EEs = EEs05gm_b, ColNames = as.matrix(rbind(c('v102_epc.leaflitr_fcel', 'v102_epc.leaflitr_flab', 'v102_epc.leaflitr_flig'), c('v3_epc.leaflitr_fcel', 'v3_epc.leaflitr_flab', 'v3_epc.leaflitr_flig'))), FUN = meanabs)
+colnames(EEs05gm_b)[(ncol(EEs05gm_b)-1):ncol(EEs05gm_b)] = c('v102_epc.leaflitr_All', 'v3_epc.leaflitr_All')
+
+EEs95m_b[,seq(ncol(EEs95m_b)+1,ncol(EEs95m_b)+2,1)] = AggregateEEs(EEs = EEs95m_b, ColNames = as.matrix(rbind(c('v102_epc.leaflitr_fcel', 'v102_epc.leaflitr_flab', 'v102_epc.leaflitr_flig'), c('v3_epc.leaflitr_fcel', 'v3_epc.leaflitr_flab', 'v3_epc.leaflitr_flig'))), FUN = meanabs)
+colnames(EEs95m_b)[(ncol(EEs95m_b)-1):ncol(EEs95m_b)] = c('v102_epc.leaflitr_All', 'v3_epc.leaflitr_All')
+
+EEsotgm_b[,seq(ncol(EEsotgm_b)+1,ncol(EEsotgm_b)+2,1)] = AggregateEEs(EEs = EEsotgm_b, ColNames = as.matrix(rbind(c('v102_epc.leaflitr_fcel', 'v102_epc.leaflitr_flab', 'v102_epc.leaflitr_flig'), c('v3_epc.leaflitr_fcel', 'v3_epc.leaflitr_flab', 'v3_epc.leaflitr_flig'))), FUN = meanabs)
+colnames(EEsotgm_b)[(ncol(EEsotgm_b)-1):ncol(EEsotgm_b)] = c('v102_epc.leaflitr_All', 'v3_epc.leaflitr_All')
 
 EEs05_h[,seq(ncol(EEs05_h)+1,ncol(EEs05_h)+2,1)] = AggregateEEs(EEs = EEs05_h, ColNames = as.matrix(rbind(c('v102_epc.leaflitr_fcel', 'v102_epc.leaflitr_flab', 'v102_epc.leaflitr_flig'), c('v3_epc.leaflitr_fcel', 'v3_epc.leaflitr_flab', 'v3_epc.leaflitr_flig'))), FUN = meanabs)
 colnames(EEs05_h)[(ncol(EEs05_h)-1):ncol(EEs05_h)] = c('v102_epc.leaflitr_All', 'v3_epc.leaflitr_All')
@@ -478,6 +536,15 @@ colnames(EEsTN95_b)[(ncol(EEsTN95_b)-1):ncol(EEsTN95_b)] = c('Soil8_Ksat', 'Soil
 EEsTNMed_b[,seq(ncol(EEsTNMed_b)+1,ncol(EEsTNMed_b)+2,1)] = AggregateEEs(EEs = EEsTNMed_b, ColNames = as.matrix(rbind(c('s108_Ksat_0', 's8_Ksat_0', 's108_Ksat_0_v', 's8_Ksat_0_v'), c('s109_Ksat_0', 's9_Ksat_0', 's109_Ksat_0_v', 's9_Ksat_0_v'))), FUN = meanabs)
 colnames(EEsTNMed_b)[(ncol(EEsTNMed_b)-1):ncol(EEsTNMed_b)] = c('Soil8_Ksat', 'Soil9_Ksat')
 
+EEs05gm_b[,seq(ncol(EEs05gm_b)+1,ncol(EEs05gm_b)+2,1)] = AggregateEEs(EEs = EEs05gm_b, ColNames = as.matrix(rbind(c('s108_Ksat_0', 's8_Ksat_0', 's108_Ksat_0_v', 's8_Ksat_0_v'), c('s109_Ksat_0', 's9_Ksat_0', 's109_Ksat_0_v', 's9_Ksat_0_v'))), FUN = meanabs)
+colnames(EEs05gm_b)[(ncol(EEs05gm_b)-1):ncol(EEs05gm_b)] = c('Soil8_Ksat', 'Soil9_Ksat')
+
+EEs95m_b[,seq(ncol(EEs95m_b)+1,ncol(EEs95m_b)+2,1)] = AggregateEEs(EEs = EEs95m_b, ColNames = as.matrix(rbind(c('s108_Ksat_0', 's8_Ksat_0', 's108_Ksat_0_v', 's8_Ksat_0_v'), c('s109_Ksat_0', 's9_Ksat_0', 's109_Ksat_0_v', 's9_Ksat_0_v'))), FUN = meanabs)
+colnames(EEs95m_b)[(ncol(EEs95m_b)-1):ncol(EEs95m_b)] = c('Soil8_Ksat', 'Soil9_Ksat')
+
+EEsotgm_b[,seq(ncol(EEsotgm_b)+1,ncol(EEsotgm_b)+2,1)] = AggregateEEs(EEs = EEsotgm_b, ColNames = as.matrix(rbind(c('s108_Ksat_0', 's8_Ksat_0', 's108_Ksat_0_v', 's8_Ksat_0_v'), c('s109_Ksat_0', 's9_Ksat_0', 's109_Ksat_0_v', 's9_Ksat_0_v'))), FUN = meanabs)
+colnames(EEsotgm_b)[(ncol(EEsotgm_b)-1):ncol(EEsotgm_b)] = c('Soil8_Ksat', 'Soil9_Ksat')
+
 EEs05_h[,seq(ncol(EEs05_h)+1,ncol(EEs05_h)+2,1)] = AggregateEEs(EEs = EEs05_h, ColNames = as.matrix(rbind(c('s108_Ksat_0', 's8_Ksat_0', 's108_Ksat_0_v', 's8_Ksat_0_v'), c('s109_Ksat_0', 's9_Ksat_0', 's109_Ksat_0_v', 's9_Ksat_0_v'))), FUN = meanabs)
 colnames(EEs05_h)[(ncol(EEs05_h)-1):ncol(EEs05_h)] = c('Soil8_Ksat', 'Soil9_Ksat')
 
@@ -540,6 +607,15 @@ colnames(EEsTN95_b)[(ncol(EEsTN95_b)-1):ncol(EEsTN95_b)] = c('Soil8_m', 'Soil9_m
 
 EEsTNMed_b[,seq(ncol(EEsTNMed_b)+1,ncol(EEsTNMed_b)+2,1)] = AggregateEEs(EEs = EEsTNMed_b, ColNames = as.matrix(rbind(c('s108_m', 's8_m'), c('s109_m', 's9_m'))), FUN = meanabs)
 colnames(EEsTNMed_b)[(ncol(EEsTNMed_b)-1):ncol(EEsTNMed_b)] = c('Soil8_m', 'Soil9_m')
+
+EEs05gm_b[,seq(ncol(EEs05gm_b)+1,ncol(EEs05gm_b)+2,1)] = AggregateEEs(EEs = EEs05gm_b, ColNames = as.matrix(rbind(c('s108_m', 's8_m'), c('s109_m', 's9_m'))), FUN = meanabs)
+colnames(EEs05gm_b)[(ncol(EEs05gm_b)-1):ncol(EEs05gm_b)] = c('Soil8_m', 'Soil9_m')
+
+EEs95m_b[,seq(ncol(EEs95m_b)+1,ncol(EEs95m_b)+2,1)] = AggregateEEs(EEs = EEs95m_b, ColNames = as.matrix(rbind(c('s108_m', 's8_m'), c('s109_m', 's9_m'))), FUN = meanabs)
+colnames(EEs95m_b)[(ncol(EEs95m_b)-1):ncol(EEs95m_b)] = c('Soil8_m', 'Soil9_m')
+
+EEsotgm_b[,seq(ncol(EEsotgm_b)+1,ncol(EEsotgm_b)+2,1)] = AggregateEEs(EEs = EEsotgm_b, ColNames = as.matrix(rbind(c('s108_m', 's8_m'), c('s109_m', 's9_m'))), FUN = meanabs)
+colnames(EEsotgm_b)[(ncol(EEsotgm_b)-1):ncol(EEsotgm_b)] = c('Soil8_m', 'Soil9_m')
 
 EEs05_h[,seq(ncol(EEs05_h)+1,ncol(EEs05_h)+2,1)] = AggregateEEs(EEs = EEs05_h, ColNames = as.matrix(rbind(c('s108_m', 's8_m'), c('s109_m', 's9_m'))), FUN = meanabs)
 colnames(EEs05_h)[(ncol(EEs05_h)-1):ncol(EEs05_h)] = c('Soil8_m', 'Soil9_m')
@@ -604,6 +680,15 @@ colnames(EEsTN95_b)[(ncol(EEsTN95_b)-1):ncol(EEsTN95_b)] = c('Soil8_porosity_0',
 EEsTNMed_b[,seq(ncol(EEsTNMed_b)+1,ncol(EEsTNMed_b)+2,1)] = AggregateEEs(EEs = EEsTNMed_b, ColNames = as.matrix(rbind(c('s108_porosity_0', 's8_porosity_0'), c('s109_porosity_0', 's9_porosity_0'))), FUN = meanabs)
 colnames(EEsTNMed_b)[(ncol(EEsTNMed_b)-1):ncol(EEsTNMed_b)] = c('Soil8_porosity_0', 'Soil9_porosity_0')
 
+EEs05gm_b[,seq(ncol(EEs05gm_b)+1,ncol(EEs05gm_b)+2,1)] = AggregateEEs(EEs = EEs05gm_b, ColNames = as.matrix(rbind(c('s108_porosity_0', 's8_porosity_0'), c('s109_porosity_0', 's9_porosity_0'))), FUN = meanabs)
+colnames(EEs05gm_b)[(ncol(EEs05gm_b)-1):ncol(EEs05gm_b)] = c('Soil8_porosity_0', 'Soil9_porosity_0')
+
+EEs95m_b[,seq(ncol(EEs95m_b)+1,ncol(EEs95m_b)+2,1)] = AggregateEEs(EEs = EEs95m_b, ColNames = as.matrix(rbind(c('s108_porosity_0', 's8_porosity_0'), c('s109_porosity_0', 's9_porosity_0'))), FUN = meanabs)
+colnames(EEs95m_b)[(ncol(EEs95m_b)-1):ncol(EEs95m_b)] = c('Soil8_porosity_0', 'Soil9_porosity_0')
+
+EEsotgm_b[,seq(ncol(EEsotgm_b)+1,ncol(EEsotgm_b)+2,1)] = AggregateEEs(EEs = EEsotgm_b, ColNames = as.matrix(rbind(c('s108_porosity_0', 's8_porosity_0'), c('s109_porosity_0', 's9_porosity_0'))), FUN = meanabs)
+colnames(EEsotgm_b)[(ncol(EEsotgm_b)-1):ncol(EEsotgm_b)] = c('Soil8_porosity_0', 'Soil9_porosity_0')
+
 EEs05_h[,seq(ncol(EEs05_h)+1,ncol(EEs05_h)+2,1)] = AggregateEEs(EEs = EEs05_h, ColNames = as.matrix(rbind(c('s108_porosity_0', 's8_porosity_0'), c('s109_porosity_0', 's9_porosity_0'))), FUN = meanabs)
 colnames(EEs05_h)[(ncol(EEs05_h)-1):ncol(EEs05_h)] = c('Soil8_porosity_0', 'Soil9_porosity_0')
 
@@ -666,6 +751,15 @@ colnames(EEsTN95_b)[(ncol(EEsTN95_b)-1):ncol(EEsTN95_b)] = c('v102_Temp', 'v3_Te
 
 EEsTNMed_b[,seq(ncol(EEsTNMed_b)+1,ncol(EEsTNMed_b)+2,1)] = AggregateEEs(EEs = EEsTNMed_b, ColNames = as.matrix(rbind(c('v102_epc.topt', 'v102_epc.tmax'), c('v3_epc.topt', 'v3_epc.tmax'))), FUN = meanabs)
 colnames(EEsTNMed_b)[(ncol(EEsTNMed_b)-1):ncol(EEsTNMed_b)] = c('v102_Temp', 'v3_Temp')
+
+EEs05gm_b[,seq(ncol(EEs05gm_b)+1,ncol(EEs05gm_b)+2,1)] = AggregateEEs(EEs = EEs05gm_b, ColNames = as.matrix(rbind(c('v102_epc.topt', 'v102_epc.tmax'), c('v3_epc.topt', 'v3_epc.tmax'))), FUN = meanabs)
+colnames(EEs05gm_b)[(ncol(EEs05gm_b)-1):ncol(EEs05gm_b)] = c('v102_Temp', 'v3_Temp')
+
+EEs95m_b[,seq(ncol(EEs95m_b)+1,ncol(EEs95m_b)+2,1)] = AggregateEEs(EEs = EEs95m_b, ColNames = as.matrix(rbind(c('v102_epc.topt', 'v102_epc.tmax'), c('v3_epc.topt', 'v3_epc.tmax'))), FUN = meanabs)
+colnames(EEs95m_b)[(ncol(EEs95m_b)-1):ncol(EEs95m_b)] = c('v102_Temp', 'v3_Temp')
+
+EEsotgm_b[,seq(ncol(EEsotgm_b)+1,ncol(EEsotgm_b)+2,1)] = AggregateEEs(EEs = EEsotgm_b, ColNames = as.matrix(rbind(c('v102_epc.topt', 'v102_epc.tmax'), c('v3_epc.topt', 'v3_epc.tmax'))), FUN = meanabs)
+colnames(EEsotgm_b)[(ncol(EEsotgm_b)-1):ncol(EEsotgm_b)] = c('v102_Temp', 'v3_Temp')
 
 EEs05_h[,seq(ncol(EEs05_h)+1,ncol(EEs05_h)+2,1)] = AggregateEEs(EEs = EEs05_h, ColNames = as.matrix(rbind(c('v102_epc.topt', 'v102_epc.tmax'), c('v3_epc.topt', 'v3_epc.tmax'))), FUN = meanabs)
 colnames(EEs05_h)[(ncol(EEs05_h)-1):ncol(EEs05_h)] = c('v102_Temp', 'v3_Temp')
@@ -730,6 +824,15 @@ colnames(EEsTN95_b)[(ncol(EEsTN95_b)-1):ncol(EEsTN95_b)] = c('v102_epc.LeafLitrC
 EEsTNMed_b[,seq(ncol(EEsTNMed_b)+1,ncol(EEsTNMed_b)+2,1)] = AggregateEEs(EEs = EEsTNMed_b, ColNames = as.matrix(rbind(c('v102_epc.leaf_cn', 'v102_epc.leaflitr_cn'), c('v3_epc.leaf_cn', 'v3_epc.leaflitr_cn'))), FUN = meanabs)
 colnames(EEsTNMed_b)[(ncol(EEsTNMed_b)-1):ncol(EEsTNMed_b)] = c('v102_epc.LeafLitrCN', 'v3_epc.LeafLitrCN')
 
+EEs05gm_b[,seq(ncol(EEs05gm_b)+1,ncol(EEs05gm_b)+2,1)] = AggregateEEs(EEs = EEs05gm_b, ColNames = as.matrix(rbind(c('v102_epc.leaf_cn', 'v102_epc.leaflitr_cn'), c('v3_epc.leaf_cn', 'v3_epc.leaflitr_cn'))), FUN = meanabs)
+colnames(EEs05gm_b)[(ncol(EEs05gm_b)-1):ncol(EEs05gm_b)] = c('v102_epc.LeafLitrCN', 'v3_epc.LeafLitrCN')
+
+EEs95m_b[,seq(ncol(EEs95m_b)+1,ncol(EEs95m_b)+2,1)] = AggregateEEs(EEs = EEs95m_b, ColNames = as.matrix(rbind(c('v102_epc.leaf_cn', 'v102_epc.leaflitr_cn'), c('v3_epc.leaf_cn', 'v3_epc.leaflitr_cn'))), FUN = meanabs)
+colnames(EEs95m_b)[(ncol(EEs95m_b)-1):ncol(EEs95m_b)] = c('v102_epc.LeafLitrCN', 'v3_epc.LeafLitrCN')
+
+EEsotgm_b[,seq(ncol(EEsotgm_b)+1,ncol(EEsotgm_b)+2,1)] = AggregateEEs(EEs = EEsotgm_b, ColNames = as.matrix(rbind(c('v102_epc.leaf_cn', 'v102_epc.leaflitr_cn'), c('v3_epc.leaf_cn', 'v3_epc.leaflitr_cn'))), FUN = meanabs)
+colnames(EEsotgm_b)[(ncol(EEsotgm_b)-1):ncol(EEsotgm_b)] = c('v102_epc.LeafLitrCN', 'v3_epc.LeafLitrCN')
+
 EEs05_h[,seq(ncol(EEs05_h)+1,ncol(EEs05_h)+2,1)] = AggregateEEs(EEs = EEs05_h, ColNames = as.matrix(rbind(c('v102_epc.leaf_cn', 'v102_epc.leaflitr_cn'), c('v3_epc.leaf_cn', 'v3_epc.leaflitr_cn'))), FUN = meanabs)
 colnames(EEs05_h)[(ncol(EEs05_h)-1):ncol(EEs05_h)] = c('v102_epc.LeafLitrCN', 'v3_epc.LeafLitrCN')
 
@@ -780,6 +883,9 @@ EEsotg_h_mua = matrix(NA, ncol = nrow(ParamRanges)+1, nrow = reps*length(uhills)
 EEsTN05_h_mua = matrix(NA, ncol = nrow(ParamRanges)+1, nrow = reps*length(uhills))
 EEsTN95_h_mua = matrix(NA, ncol = nrow(ParamRanges)+1, nrow = reps*length(uhills))
 EEsTNMed_h_mua = matrix(NA, ncol = nrow(ParamRanges)+1, nrow = reps*length(uhills))
+EEs05gm_b_mua = matrix(NA, ncol = nrow(ParamRanges), nrow = reps)
+EEs95m_b_mua = matrix(NA, ncol = nrow(ParamRanges), nrow = reps)
+EEsotgm_b_mua = matrix(NA, ncol = nrow(ParamRanges), nrow = reps)
 
 #Array to store the matrices of the bootstrapped samples for constrained variables. These will have to be aggregated afterwards.
 EEs05_b_mua_cons = array(NA, dim = c(reps,r,length(ColsAggregated)))
@@ -802,6 +908,9 @@ EEsotg_h_mua_cons = array(NA, dim = c(reps*length(uhills),r,length(ColsAggregate
 EEsTN05_h_mua_cons = array(NA, dim = c(reps*length(uhills),r,length(ColsAggregated)+1))
 EEsTN95_h_mua_cons = array(NA, dim = c(reps*length(uhills),r,length(ColsAggregated)+1))
 EEsTNMed_h_mua_cons = array(NA, dim = c(reps*length(uhills),r,length(ColsAggregated)+1))
+EEs05gm_b_mua_cons = array(NA, dim = c(reps,r,length(ColsAggregated)))
+EEs95m_b_mua_cons = array(NA, dim = c(reps,r,length(ColsAggregated)))
+EEsotgm_b_mua_cons = array(NA, dim = c(reps,r,length(ColsAggregated)))
 
 #Loop over all of the parameters
 for (p in 1:(nrow(ParamRanges))){
@@ -820,6 +929,9 @@ for (p in 1:(nrow(ParamRanges))){
   EEsTN05_b_mua[,p] = apply(matrix(EEsTN05_b[tReps,p], ncol = r, nrow = reps), MARGIN = 1, FUN = meanabs)
   EEsTN95_b_mua[,p] = apply(matrix(EEsTN95_b[tReps,p], ncol = r, nrow = reps), MARGIN = 1, FUN = meanabs)
   EEsTNMed_b_mua[,p] = apply(matrix(EEsTNMed_b[tReps,p], ncol = r, nrow = reps), MARGIN = 1, FUN = meanabs)
+  EEs05gm_b_mua[,p] = apply(matrix(EEs05gm_b[tReps,p], ncol = r, nrow = reps), MARGIN = 1, FUN = meanabs)
+  EEs95m_b_mua[,p] = apply(matrix(EEs95m_b[tReps,p], ncol = r, nrow = reps), MARGIN = 1, FUN = meanabs)
+  EEsotgm_b_mua[,p] = apply(matrix(EEsotgm_b[tReps,p], ncol = r, nrow = reps), MARGIN = 1, FUN = meanabs)
   for (h in 1:length(uhills)){
     indsh = seq(1+(uhills[h]-1)*reps,reps*uhills[h],1)
     EEs05_h_mua[indsh, p+1] = apply(matrix(EEs05_h[EEs05_h$HillID == uhills[h],p+1][tReps], ncol = r, nrow = reps), MARGIN = 1, FUN = meanabs)
@@ -862,6 +974,9 @@ for (p in 1:(nrow(ParamRanges))){
     EEsTN05_b_mua_cons[ , , indp] = matrix(EEsTN05_b[tReps,p], ncol = r, nrow = reps)
     EEsTN95_b_mua_cons[ , , indp] = matrix(EEsTN95_b[tReps,p], ncol = r, nrow = reps)
     EEsTNMed_b_mua_cons[ , , indp] = matrix(EEsTNMed_b[tReps,p], ncol = r, nrow = reps)
+    EEs05gm_b_mua_cons[ , , indp] = matrix(EEs05gm_b[tReps,p], ncol = r, nrow = reps)
+    EEs95m_b_mua_cons[ , , indp] = matrix(EEs95m_b[tReps,p], ncol = r, nrow = reps)
+    EEsotgm_b_mua_cons[ , , indp] = matrix(EEsotgm_b[tReps,p], ncol = r, nrow = reps)
     
     for (h in 1:length(uhills)){
       indsh = seq(1+(uhills[h]-1)*reps,reps*uhills[h],1)
@@ -887,11 +1002,12 @@ for (p in 1:(nrow(ParamRanges))){
   }
 }
 rm(p, tReps)
+
 #Assign column names
-colnames(EEs05_b_mua) = colnames(EEs95_b_mua) = colnames(EEsot_b_mua) = colnames(EEs05g_b_mua) = colnames(EEsotg_b_mua) = colnames(EEsLNSE_b_mua) = colnames(EEsNSE_b_mua) = colnames(EEspBias_b_mua) = colnames(EEsLogL_b_mua) = colnames(EEsTN05_b_mua) = colnames(EEsTN95_b_mua) = colnames(EEsTNMed_b_mua) = colnames(EEs05_b)[1:nrow(ParamRanges)]
+colnames(EEs05_b_mua) = colnames(EEs95_b_mua) = colnames(EEsot_b_mua) = colnames(EEs05g_b_mua) = colnames(EEsotg_b_mua) = colnames(EEs05gm_b_mua) = colnames(EEs95m_b_mua) = colnames(EEsotgm_b_mua) = colnames(EEsLNSE_b_mua) = colnames(EEsNSE_b_mua) = colnames(EEspBias_b_mua) = colnames(EEsLogL_b_mua) = colnames(EEsTN05_b_mua) = colnames(EEsTN95_b_mua) = colnames(EEsTNMed_b_mua) = colnames(EEs05_b)[1:nrow(ParamRanges)]
 colnames(EEs05_h_mua) = colnames(EEs95_h_mua) = colnames(EEsot_h_mua) = colnames(EEs05g_h_mua) = colnames(EEsotg_h_mua) = colnames(EEsTN05_h_mua) = colnames(EEsTN95_h_mua) = colnames(EEsTNMed_h_mua) = colnames(EEs05_h)[1:(nrow(ParamRanges)+1)]
 #Name the arrays
-dimnames(EEs05_b_mua_cons) = dimnames(EEs95_b_mua_cons) = dimnames(EEsot_b_mua_cons) = dimnames(EEs05g_b_mua_cons) = dimnames(EEsotg_b_mua_cons) = dimnames(EEsLNSE_b_mua_cons) = dimnames(EEsNSE_b_mua_cons) = dimnames(EEspBias_b_mua_cons) = dimnames(EEsLogL_b_mua_cons) = dimnames(EEsTN05_b_mua_cons) = dimnames(EEsTN95_b_mua_cons) = dimnames(EEsTNMed_b_mua_cons) = list(Reps = seq(1,reps,1), Traj = seq(1,r,1), Cols = c(ColsAggregated))
+dimnames(EEs05_b_mua_cons) = dimnames(EEs95_b_mua_cons) = dimnames(EEsot_b_mua_cons) = dimnames(EEs05g_b_mua_cons) = dimnames(EEsotg_b_mua_cons) = dimnames(EEs05gm_b_mua_cons) = dimnames(EEs95m_b_mua_cons) = dimnames(EEsotgm_b_mua_cons) = dimnames(EEsLNSE_b_mua_cons) = dimnames(EEsNSE_b_mua_cons) = dimnames(EEspBias_b_mua_cons) = dimnames(EEsLogL_b_mua_cons) = dimnames(EEsTN05_b_mua_cons) = dimnames(EEsTN95_b_mua_cons) = dimnames(EEsTNMed_b_mua_cons) = list(Reps = seq(1,reps,1), Traj = seq(1,r,1), Cols = c(ColsAggregated))
 dimnames(EEs05_h_mua_cons) = dimnames(EEs95_h_mua_cons) = dimnames(EEsot_h_mua_cons) = dimnames(EEs05g_h_mua_cons) = dimnames(EEsotg_h_mua_cons) = dimnames(EEsTN05_h_mua_cons) = dimnames(EEsTN95_h_mua_cons) = dimnames(EEsTNMed_h_mua_cons) = list(Reps = seq(1,reps*length(uhills),1), Traj = seq(1,r,1), Cols = c('HillID', ColsAggregated))
 
 # Aggregate the variables that are constrained----
@@ -1509,6 +1625,161 @@ colnames(EEsTNMed_b_mua)[ncol(EEsTNMed_b_mua)] = 'v102_epc.LeafLitrCN'
 EEsTNMed_b_mua = cbind(EEsTNMed_b_mua, apply(X = (abs(EEsTNMed_b_mua_cons[,,which(ColsAggregated == 'v3_epc.leaf_cn')])+abs(EEsTNMed_b_mua_cons[,,which(ColsAggregated == 'v3_epc.leaflitr_cn')]))/2, MARGIN = 1, FUN = mean))
 colnames(EEsTNMed_b_mua)[ncol(EEsTNMed_b_mua)] = 'v3_epc.LeafLitrCN'
 
+#  EEs05gm_b_mua----
+EEs05gm_b_mua = cbind(EEs05gm_b_mua, apply(X = (abs(EEs05gm_b_mua_cons[,,which(ColsAggregated == 's8_silt')])+abs(EEs05gm_b_mua_cons[,,which(ColsAggregated == 's8_sand')])+abs(EEs05gm_b_mua_cons[,,which(ColsAggregated == 's8_clay')]))/3, MARGIN = 1, FUN = mean))
+colnames(EEs05gm_b_mua)[ncol(EEs05gm_b_mua)] = 's8_SoilTexture'
+EEs05gm_b_mua = cbind(EEs05gm_b_mua, apply(X = (abs(EEs05gm_b_mua_cons[,,which(ColsAggregated == 's108_silt')])+abs(EEs05gm_b_mua_cons[,,which(ColsAggregated == 's108_sand')])+abs(EEs05gm_b_mua_cons[,,which(ColsAggregated == 's108_clay')]))/3, MARGIN = 1, FUN = mean))
+colnames(EEs05gm_b_mua)[ncol(EEs05gm_b_mua)] = 's108_SoilTexture'
+EEs05gm_b_mua = cbind(EEs05gm_b_mua, apply(X = (abs(EEs05gm_b_mua_cons[,,which(ColsAggregated == 's9_silt')])+abs(EEs05gm_b_mua_cons[,,which(ColsAggregated == 's9_sand')])+abs(EEs05gm_b_mua_cons[,,which(ColsAggregated == 's9_clay')]))/3, MARGIN = 1, FUN = mean))
+colnames(EEs05gm_b_mua)[ncol(EEs05gm_b_mua)] = 's9_SoilTexture'
+EEs05gm_b_mua = cbind(EEs05gm_b_mua, apply(X = (abs(EEs05gm_b_mua_cons[,,which(ColsAggregated == 's109_silt')])+abs(EEs05gm_b_mua_cons[,,which(ColsAggregated == 's109_sand')])+abs(EEs05gm_b_mua_cons[,,which(ColsAggregated == 's109_clay')]))/3, MARGIN = 1, FUN = mean))
+colnames(EEs05gm_b_mua)[ncol(EEs05gm_b_mua)] = 's109_SoilTexture'
+
+#these results are the same as this. Cannot make the ColNames have >1 row because the resulting matrix will have 40*rows to aggregate. 
+#apply(apply(X = EEs05gm_b_mua_cons, MARGIN = 1, FUN = AggregateEEs, ColNames = as.matrix(rbind(c('v102_K_absorptance', 'v102_K_reflectance', 'v102_K_transmittance'))), meanabs), 2, mean)
+EEs05gm_b_mua = cbind(EEs05gm_b_mua, apply(X = (abs(EEs05gm_b_mua_cons[,,which(ColsAggregated == 'v102_K_absorptance')])+abs(EEs05gm_b_mua_cons[,,which(ColsAggregated == 'v102_K_reflectance')])+abs(EEs05gm_b_mua_cons[,,which(ColsAggregated == 'v102_K_transmittance')]))/3, MARGIN = 1, FUN = mean))
+colnames(EEs05gm_b_mua)[ncol(EEs05gm_b_mua)] = 'v102_K_All'
+
+EEs05gm_b_mua = cbind(EEs05gm_b_mua, apply(X = (abs(EEs05gm_b_mua_cons[,,which(ColsAggregated == 'v102_PAR_absorptance')])+abs(EEs05gm_b_mua_cons[,,which(ColsAggregated == 'v102_PAR_reflectance')])+abs(EEs05gm_b_mua_cons[,,which(ColsAggregated == 'v102_PAR_transmittance')]))/3, MARGIN = 1, FUN = mean))
+colnames(EEs05gm_b_mua)[ncol(EEs05gm_b_mua)] = 'v102_PAR_All'
+
+EEs05gm_b_mua = cbind(EEs05gm_b_mua, apply(X = (abs(EEs05gm_b_mua_cons[,,which(ColsAggregated == 'v102_epc.frootlitr_fcel')])+abs(EEs05gm_b_mua_cons[,,which(ColsAggregated == 'v102_epc.frootlitr_flab')])+abs(EEs05gm_b_mua_cons[,,which(ColsAggregated == 'v102_epc.frootlitr_flig')]))/3, MARGIN = 1, FUN = mean))
+colnames(EEs05gm_b_mua)[ncol(EEs05gm_b_mua)] = 'v102_epc.frootlitr_All'
+EEs05gm_b_mua = cbind(EEs05gm_b_mua, apply(X = (abs(EEs05gm_b_mua_cons[,,which(ColsAggregated == 'v3_epc.frootlitr_fcel')])+abs(EEs05gm_b_mua_cons[,,which(ColsAggregated == 'v3_epc.frootlitr_flab')])+abs(EEs05gm_b_mua_cons[,,which(ColsAggregated == 'v3_epc.frootlitr_flig')]))/3, MARGIN = 1, FUN = mean))
+colnames(EEs05gm_b_mua)[ncol(EEs05gm_b_mua)] = 'v3_epc.frootlitr_All'
+
+EEs05gm_b_mua = cbind(EEs05gm_b_mua, apply(X = (abs(EEs05gm_b_mua_cons[,,which(ColsAggregated == 'v102_epc.leaflitr_fcel')])+abs(EEs05gm_b_mua_cons[,,which(ColsAggregated == 'v102_epc.leaflitr_flab')])+abs(EEs05gm_b_mua_cons[,,which(ColsAggregated == 'v102_epc.leaflitr_flig')]))/3, MARGIN = 1, FUN = mean))
+colnames(EEs05gm_b_mua)[ncol(EEs05gm_b_mua)] = 'v102_epc.leaflitr_All'
+EEs05gm_b_mua = cbind(EEs05gm_b_mua, apply(X = (abs(EEs05gm_b_mua_cons[,,which(ColsAggregated == 'v3_epc.leaflitr_fcel')])+abs(EEs05gm_b_mua_cons[,,which(ColsAggregated == 'v3_epc.leaflitr_flab')])+abs(EEs05gm_b_mua_cons[,,which(ColsAggregated == 'v3_epc.leaflitr_flig')]))/3, MARGIN = 1, FUN = mean))
+colnames(EEs05gm_b_mua)[ncol(EEs05gm_b_mua)] = 'v3_epc.leaflitr_All'
+
+EEs05gm_b_mua = cbind(EEs05gm_b_mua, apply(X = (abs(EEs05gm_b_mua_cons[,,which(ColsAggregated == 's108_Ksat_0')])+abs(EEs05gm_b_mua_cons[,,which(ColsAggregated == 's8_Ksat_0')])+abs(EEs05gm_b_mua_cons[,,which(ColsAggregated == 's108_Ksat_0_v')])+abs(EEs05gm_b_mua_cons[,,which(ColsAggregated == 's8_Ksat_0_v')]))/4, MARGIN = 1, FUN = mean))
+colnames(EEs05gm_b_mua)[ncol(EEs05gm_b_mua)] = 'Soil8_Ksat'
+EEs05gm_b_mua = cbind(EEs05gm_b_mua, apply(X = (abs(EEs05gm_b_mua_cons[,,which(ColsAggregated == 's109_Ksat_0')])+abs(EEs05gm_b_mua_cons[,,which(ColsAggregated == 's9_Ksat_0')])+abs(EEs05gm_b_mua_cons[,,which(ColsAggregated == 's109_Ksat_0_v')])+abs(EEs05gm_b_mua_cons[,,which(ColsAggregated == 's9_Ksat_0_v')]))/4, MARGIN = 1, FUN = mean))
+colnames(EEs05gm_b_mua)[ncol(EEs05gm_b_mua)] = 'Soil9_Ksat'
+
+EEs05gm_b_mua = cbind(EEs05gm_b_mua, apply(X = (abs(EEs05gm_b_mua_cons[,,which(ColsAggregated == 's108_m')])+abs(EEs05gm_b_mua_cons[,,which(ColsAggregated == 's8_m')]))/2, MARGIN = 1, FUN = mean))
+colnames(EEs05gm_b_mua)[ncol(EEs05gm_b_mua)] = 'Soil8_m'
+EEs05gm_b_mua = cbind(EEs05gm_b_mua, apply(X = (abs(EEs05gm_b_mua_cons[,,which(ColsAggregated == 's109_m')])+abs(EEs05gm_b_mua_cons[,,which(ColsAggregated == 's9_m')]))/2, MARGIN = 1, FUN = mean))
+colnames(EEs05gm_b_mua)[ncol(EEs05gm_b_mua)] = 'Soil9_m'
+
+EEs05gm_b_mua = cbind(EEs05gm_b_mua, apply(X = (abs(EEs05gm_b_mua_cons[,,which(ColsAggregated == 's108_porosity_0')])+abs(EEs05gm_b_mua_cons[,,which(ColsAggregated == 's8_porosity_0')]))/2, MARGIN = 1, FUN = mean))
+colnames(EEs05gm_b_mua)[ncol(EEs05gm_b_mua)] = 'Soil8_porosity_0'
+EEs05gm_b_mua = cbind(EEs05gm_b_mua, apply(X = (abs(EEs05gm_b_mua_cons[,,which(ColsAggregated == 's109_porosity_0')])+abs(EEs05gm_b_mua_cons[,,which(ColsAggregated == 's9_porosity_0')]))/2, MARGIN = 1, FUN = mean))
+colnames(EEs05gm_b_mua)[ncol(EEs05gm_b_mua)] = 'Soil9_porosity_0'
+
+EEs05gm_b_mua = cbind(EEs05gm_b_mua, apply(X = (abs(EEs05gm_b_mua_cons[,,which(ColsAggregated == 'v102_epc.topt')])+abs(EEs05gm_b_mua_cons[,,which(ColsAggregated == 'v102_epc.tmax')]))/2, MARGIN = 1, FUN = mean))
+colnames(EEs05gm_b_mua)[ncol(EEs05gm_b_mua)] = 'v102_Temp'
+EEs05gm_b_mua = cbind(EEs05gm_b_mua, apply(X = (abs(EEs05gm_b_mua_cons[,,which(ColsAggregated == 'v3_epc.topt')])+abs(EEs05gm_b_mua_cons[,,which(ColsAggregated == 'v3_epc.tmax')]))/2, MARGIN = 1, FUN = mean))
+colnames(EEs05gm_b_mua)[ncol(EEs05gm_b_mua)] = 'v3_Temp'
+
+EEs05gm_b_mua = cbind(EEs05gm_b_mua, apply(X = (abs(EEs05gm_b_mua_cons[,,which(ColsAggregated == 'v102_epc.leaf_cn')])+abs(EEs05gm_b_mua_cons[,,which(ColsAggregated == 'v102_epc.leaflitr_cn')]))/2, MARGIN = 1, FUN = mean))
+colnames(EEs05gm_b_mua)[ncol(EEs05gm_b_mua)] = 'v102_epc.LeafLitrCN'
+EEs05gm_b_mua = cbind(EEs05gm_b_mua, apply(X = (abs(EEs05gm_b_mua_cons[,,which(ColsAggregated == 'v3_epc.leaf_cn')])+abs(EEs05gm_b_mua_cons[,,which(ColsAggregated == 'v3_epc.leaflitr_cn')]))/2, MARGIN = 1, FUN = mean))
+colnames(EEs05gm_b_mua)[ncol(EEs05gm_b_mua)] = 'v3_epc.LeafLitrCN'
+
+#  EEs95m_b_mua----
+EEs95m_b_mua = cbind(EEs95m_b_mua, apply(X = (abs(EEs95m_b_mua_cons[,,which(ColsAggregated == 's8_silt')])+abs(EEs95m_b_mua_cons[,,which(ColsAggregated == 's8_sand')])+abs(EEs95m_b_mua_cons[,,which(ColsAggregated == 's8_clay')]))/3, MARGIN = 1, FUN = mean))
+colnames(EEs95m_b_mua)[ncol(EEs95m_b_mua)] = 's8_SoilTexture'
+EEs95m_b_mua = cbind(EEs95m_b_mua, apply(X = (abs(EEs95m_b_mua_cons[,,which(ColsAggregated == 's108_silt')])+abs(EEs95m_b_mua_cons[,,which(ColsAggregated == 's108_sand')])+abs(EEs95m_b_mua_cons[,,which(ColsAggregated == 's108_clay')]))/3, MARGIN = 1, FUN = mean))
+colnames(EEs95m_b_mua)[ncol(EEs95m_b_mua)] = 's108_SoilTexture'
+EEs95m_b_mua = cbind(EEs95m_b_mua, apply(X = (abs(EEs95m_b_mua_cons[,,which(ColsAggregated == 's9_silt')])+abs(EEs95m_b_mua_cons[,,which(ColsAggregated == 's9_sand')])+abs(EEs95m_b_mua_cons[,,which(ColsAggregated == 's9_clay')]))/3, MARGIN = 1, FUN = mean))
+colnames(EEs95m_b_mua)[ncol(EEs95m_b_mua)] = 's9_SoilTexture'
+EEs95m_b_mua = cbind(EEs95m_b_mua, apply(X = (abs(EEs95m_b_mua_cons[,,which(ColsAggregated == 's109_silt')])+abs(EEs95m_b_mua_cons[,,which(ColsAggregated == 's109_sand')])+abs(EEs95m_b_mua_cons[,,which(ColsAggregated == 's109_clay')]))/3, MARGIN = 1, FUN = mean))
+colnames(EEs95m_b_mua)[ncol(EEs95m_b_mua)] = 's109_SoilTexture'
+
+EEs95m_b_mua = cbind(EEs95m_b_mua, apply(X = (abs(EEs95m_b_mua_cons[,,which(ColsAggregated == 'v102_K_absorptance')])+abs(EEs95m_b_mua_cons[,,which(ColsAggregated == 'v102_K_reflectance')])+abs(EEs95m_b_mua_cons[,,which(ColsAggregated == 'v102_K_transmittance')]))/3, MARGIN = 1, FUN = mean))
+colnames(EEs95m_b_mua)[ncol(EEs95m_b_mua)] = 'v102_K_All'
+
+EEs95m_b_mua = cbind(EEs95m_b_mua, apply(X = (abs(EEs95m_b_mua_cons[,,which(ColsAggregated == 'v102_PAR_absorptance')])+abs(EEs95m_b_mua_cons[,,which(ColsAggregated == 'v102_PAR_reflectance')])+abs(EEs95m_b_mua_cons[,,which(ColsAggregated == 'v102_PAR_transmittance')]))/3, MARGIN = 1, FUN = mean))
+colnames(EEs95m_b_mua)[ncol(EEs95m_b_mua)] = 'v102_PAR_All'
+
+EEs95m_b_mua = cbind(EEs95m_b_mua, apply(X = (abs(EEs95m_b_mua_cons[,,which(ColsAggregated == 'v102_epc.frootlitr_fcel')])+abs(EEs95m_b_mua_cons[,,which(ColsAggregated == 'v102_epc.frootlitr_flab')])+abs(EEs95m_b_mua_cons[,,which(ColsAggregated == 'v102_epc.frootlitr_flig')]))/3, MARGIN = 1, FUN = mean))
+colnames(EEs95m_b_mua)[ncol(EEs95m_b_mua)] = 'v102_epc.frootlitr_All'
+EEs95m_b_mua = cbind(EEs95m_b_mua, apply(X = (abs(EEs95m_b_mua_cons[,,which(ColsAggregated == 'v3_epc.frootlitr_fcel')])+abs(EEs95m_b_mua_cons[,,which(ColsAggregated == 'v3_epc.frootlitr_flab')])+abs(EEs95m_b_mua_cons[,,which(ColsAggregated == 'v3_epc.frootlitr_flig')]))/3, MARGIN = 1, FUN = mean))
+colnames(EEs95m_b_mua)[ncol(EEs95m_b_mua)] = 'v3_epc.frootlitr_All'
+
+EEs95m_b_mua = cbind(EEs95m_b_mua, apply(X = (abs(EEs95m_b_mua_cons[,,which(ColsAggregated == 'v102_epc.leaflitr_fcel')])+abs(EEs95m_b_mua_cons[,,which(ColsAggregated == 'v102_epc.leaflitr_flab')])+abs(EEs95m_b_mua_cons[,,which(ColsAggregated == 'v102_epc.leaflitr_flig')]))/3, MARGIN = 1, FUN = mean))
+colnames(EEs95m_b_mua)[ncol(EEs95m_b_mua)] = 'v102_epc.leaflitr_All'
+EEs95m_b_mua = cbind(EEs95m_b_mua, apply(X = (abs(EEs95m_b_mua_cons[,,which(ColsAggregated == 'v3_epc.leaflitr_fcel')])+abs(EEs95m_b_mua_cons[,,which(ColsAggregated == 'v3_epc.leaflitr_flab')])+abs(EEs95m_b_mua_cons[,,which(ColsAggregated == 'v3_epc.leaflitr_flig')]))/3, MARGIN = 1, FUN = mean))
+colnames(EEs95m_b_mua)[ncol(EEs95m_b_mua)] = 'v3_epc.leaflitr_All'
+
+EEs95m_b_mua = cbind(EEs95m_b_mua, apply(X = (abs(EEs95m_b_mua_cons[,,which(ColsAggregated == 's108_Ksat_0')])+abs(EEs95m_b_mua_cons[,,which(ColsAggregated == 's8_Ksat_0')])+abs(EEs95m_b_mua_cons[,,which(ColsAggregated == 's108_Ksat_0_v')])+abs(EEs95m_b_mua_cons[,,which(ColsAggregated == 's8_Ksat_0_v')]))/4, MARGIN = 1, FUN = mean))
+colnames(EEs95m_b_mua)[ncol(EEs95m_b_mua)] = 'Soil8_Ksat'
+EEs95m_b_mua = cbind(EEs95m_b_mua, apply(X = (abs(EEs95m_b_mua_cons[,,which(ColsAggregated == 's109_Ksat_0')])+abs(EEs95m_b_mua_cons[,,which(ColsAggregated == 's9_Ksat_0')])+abs(EEs95m_b_mua_cons[,,which(ColsAggregated == 's109_Ksat_0_v')])+abs(EEs95m_b_mua_cons[,,which(ColsAggregated == 's9_Ksat_0_v')]))/4, MARGIN = 1, FUN = mean))
+colnames(EEs95m_b_mua)[ncol(EEs95m_b_mua)] = 'Soil9_Ksat'
+
+EEs95m_b_mua = cbind(EEs95m_b_mua, apply(X = (abs(EEs95m_b_mua_cons[,,which(ColsAggregated == 's108_m')])+abs(EEs95m_b_mua_cons[,,which(ColsAggregated == 's8_m')]))/2, MARGIN = 1, FUN = mean))
+colnames(EEs95m_b_mua)[ncol(EEs95m_b_mua)] = 'Soil8_m'
+EEs95m_b_mua = cbind(EEs95m_b_mua, apply(X = (abs(EEs95m_b_mua_cons[,,which(ColsAggregated == 's109_m')])+abs(EEs95m_b_mua_cons[,,which(ColsAggregated == 's9_m')]))/2, MARGIN = 1, FUN = mean))
+colnames(EEs95m_b_mua)[ncol(EEs95m_b_mua)] = 'Soil9_m'
+
+EEs95m_b_mua = cbind(EEs95m_b_mua, apply(X = (abs(EEs95m_b_mua_cons[,,which(ColsAggregated == 's108_porosity_0')])+abs(EEs95m_b_mua_cons[,,which(ColsAggregated == 's8_porosity_0')]))/2, MARGIN = 1, FUN = mean))
+colnames(EEs95m_b_mua)[ncol(EEs95m_b_mua)] = 'Soil8_porosity_0'
+EEs95m_b_mua = cbind(EEs95m_b_mua, apply(X = (abs(EEs95m_b_mua_cons[,,which(ColsAggregated == 's109_porosity_0')])+abs(EEs95m_b_mua_cons[,,which(ColsAggregated == 's9_porosity_0')]))/2, MARGIN = 1, FUN = mean))
+colnames(EEs95m_b_mua)[ncol(EEs95m_b_mua)] = 'Soil9_porosity_0'
+
+EEs95m_b_mua = cbind(EEs95m_b_mua, apply(X = (abs(EEs95m_b_mua_cons[,,which(ColsAggregated == 'v102_epc.topt')])+abs(EEs95m_b_mua_cons[,,which(ColsAggregated == 'v102_epc.tmax')]))/2, MARGIN = 1, FUN = mean))
+colnames(EEs95m_b_mua)[ncol(EEs95m_b_mua)] = 'v102_Temp'
+EEs95m_b_mua = cbind(EEs95m_b_mua, apply(X = (abs(EEs95m_b_mua_cons[,,which(ColsAggregated == 'v3_epc.topt')])+abs(EEs95m_b_mua_cons[,,which(ColsAggregated == 'v3_epc.tmax')]))/2, MARGIN = 1, FUN = mean))
+colnames(EEs95m_b_mua)[ncol(EEs95m_b_mua)] = 'v3_Temp'
+
+EEs95m_b_mua = cbind(EEs95m_b_mua, apply(X = (abs(EEs95m_b_mua_cons[,,which(ColsAggregated == 'v102_epc.leaf_cn')])+abs(EEs95m_b_mua_cons[,,which(ColsAggregated == 'v102_epc.leaflitr_cn')]))/2, MARGIN = 1, FUN = mean))
+colnames(EEs95m_b_mua)[ncol(EEs95m_b_mua)] = 'v102_epc.LeafLitrCN'
+EEs95m_b_mua = cbind(EEs95m_b_mua, apply(X = (abs(EEs95m_b_mua_cons[,,which(ColsAggregated == 'v3_epc.leaf_cn')])+abs(EEs95m_b_mua_cons[,,which(ColsAggregated == 'v3_epc.leaflitr_cn')]))/2, MARGIN = 1, FUN = mean))
+colnames(EEs95m_b_mua)[ncol(EEs95m_b_mua)] = 'v3_epc.LeafLitrCN'
+
+#  EEsotgm_b_mua----
+EEsotgm_b_mua = cbind(EEsotgm_b_mua, apply(X = (abs(EEsotgm_b_mua_cons[,,which(ColsAggregated == 's8_silt')])+abs(EEsotgm_b_mua_cons[,,which(ColsAggregated == 's8_sand')])+abs(EEsotgm_b_mua_cons[,,which(ColsAggregated == 's8_clay')]))/3, MARGIN = 1, FUN = mean))
+colnames(EEsotgm_b_mua)[ncol(EEsotgm_b_mua)] = 's8_SoilTexture'
+EEsotgm_b_mua = cbind(EEsotgm_b_mua, apply(X = (abs(EEsotgm_b_mua_cons[,,which(ColsAggregated == 's108_silt')])+abs(EEsotgm_b_mua_cons[,,which(ColsAggregated == 's108_sand')])+abs(EEsotgm_b_mua_cons[,,which(ColsAggregated == 's108_clay')]))/3, MARGIN = 1, FUN = mean))
+colnames(EEsotgm_b_mua)[ncol(EEsotgm_b_mua)] = 's108_SoilTexture'
+EEsotgm_b_mua = cbind(EEsotgm_b_mua, apply(X = (abs(EEsotgm_b_mua_cons[,,which(ColsAggregated == 's9_silt')])+abs(EEsotgm_b_mua_cons[,,which(ColsAggregated == 's9_sand')])+abs(EEsotgm_b_mua_cons[,,which(ColsAggregated == 's9_clay')]))/3, MARGIN = 1, FUN = mean))
+colnames(EEsotgm_b_mua)[ncol(EEsotgm_b_mua)] = 's9_SoilTexture'
+EEsotgm_b_mua = cbind(EEsotgm_b_mua, apply(X = (abs(EEsotgm_b_mua_cons[,,which(ColsAggregated == 's109_silt')])+abs(EEsotgm_b_mua_cons[,,which(ColsAggregated == 's109_sand')])+abs(EEsotgm_b_mua_cons[,,which(ColsAggregated == 's109_clay')]))/3, MARGIN = 1, FUN = mean))
+colnames(EEsotgm_b_mua)[ncol(EEsotgm_b_mua)] = 's109_SoilTexture'
+
+EEsotgm_b_mua = cbind(EEsotgm_b_mua, apply(X = (abs(EEsotgm_b_mua_cons[,,which(ColsAggregated == 'v102_K_absorptance')])+abs(EEsotgm_b_mua_cons[,,which(ColsAggregated == 'v102_K_reflectance')])+abs(EEsotgm_b_mua_cons[,,which(ColsAggregated == 'v102_K_transmittance')]))/3, MARGIN = 1, FUN = mean))
+colnames(EEsotgm_b_mua)[ncol(EEsotgm_b_mua)] = 'v102_K_All'
+
+EEsotgm_b_mua = cbind(EEsotgm_b_mua, apply(X = (abs(EEsotgm_b_mua_cons[,,which(ColsAggregated == 'v102_PAR_absorptance')])+abs(EEsotgm_b_mua_cons[,,which(ColsAggregated == 'v102_PAR_reflectance')])+abs(EEsotgm_b_mua_cons[,,which(ColsAggregated == 'v102_PAR_transmittance')]))/3, MARGIN = 1, FUN = mean))
+colnames(EEsotgm_b_mua)[ncol(EEsotgm_b_mua)] = 'v102_PAR_All'
+
+EEsotgm_b_mua = cbind(EEsotgm_b_mua, apply(X = (abs(EEsotgm_b_mua_cons[,,which(ColsAggregated == 'v102_epc.frootlitr_fcel')])+abs(EEsotgm_b_mua_cons[,,which(ColsAggregated == 'v102_epc.frootlitr_flab')])+abs(EEsotgm_b_mua_cons[,,which(ColsAggregated == 'v102_epc.frootlitr_flig')]))/3, MARGIN = 1, FUN = mean))
+colnames(EEsotgm_b_mua)[ncol(EEsotgm_b_mua)] = 'v102_epc.frootlitr_All'
+EEsotgm_b_mua = cbind(EEsotgm_b_mua, apply(X = (abs(EEsotgm_b_mua_cons[,,which(ColsAggregated == 'v3_epc.frootlitr_fcel')])+abs(EEsotgm_b_mua_cons[,,which(ColsAggregated == 'v3_epc.frootlitr_flab')])+abs(EEsotgm_b_mua_cons[,,which(ColsAggregated == 'v3_epc.frootlitr_flig')]))/3, MARGIN = 1, FUN = mean))
+colnames(EEsotgm_b_mua)[ncol(EEsotgm_b_mua)] = 'v3_epc.frootlitr_All'
+
+EEsotgm_b_mua = cbind(EEsotgm_b_mua, apply(X = (abs(EEsotgm_b_mua_cons[,,which(ColsAggregated == 'v102_epc.leaflitr_fcel')])+abs(EEsotgm_b_mua_cons[,,which(ColsAggregated == 'v102_epc.leaflitr_flab')])+abs(EEsotgm_b_mua_cons[,,which(ColsAggregated == 'v102_epc.leaflitr_flig')]))/3, MARGIN = 1, FUN = mean))
+colnames(EEsotgm_b_mua)[ncol(EEsotgm_b_mua)] = 'v102_epc.leaflitr_All'
+EEsotgm_b_mua = cbind(EEsotgm_b_mua, apply(X = (abs(EEsotgm_b_mua_cons[,,which(ColsAggregated == 'v3_epc.leaflitr_fcel')])+abs(EEsotgm_b_mua_cons[,,which(ColsAggregated == 'v3_epc.leaflitr_flab')])+abs(EEsotgm_b_mua_cons[,,which(ColsAggregated == 'v3_epc.leaflitr_flig')]))/3, MARGIN = 1, FUN = mean))
+colnames(EEsotgm_b_mua)[ncol(EEsotgm_b_mua)] = 'v3_epc.leaflitr_All'
+
+EEsotgm_b_mua = cbind(EEsotgm_b_mua, apply(X = (abs(EEsotgm_b_mua_cons[,,which(ColsAggregated == 's108_Ksat_0')])+abs(EEsotgm_b_mua_cons[,,which(ColsAggregated == 's8_Ksat_0')])+abs(EEsotgm_b_mua_cons[,,which(ColsAggregated == 's108_Ksat_0_v')])+abs(EEsotgm_b_mua_cons[,,which(ColsAggregated == 's8_Ksat_0_v')]))/4, MARGIN = 1, FUN = mean))
+colnames(EEsotgm_b_mua)[ncol(EEsotgm_b_mua)] = 'Soil8_Ksat'
+EEsotgm_b_mua = cbind(EEsotgm_b_mua, apply(X = (abs(EEsotgm_b_mua_cons[,,which(ColsAggregated == 's109_Ksat_0')])+abs(EEsotgm_b_mua_cons[,,which(ColsAggregated == 's9_Ksat_0')])+abs(EEsotgm_b_mua_cons[,,which(ColsAggregated == 's109_Ksat_0_v')])+abs(EEsotgm_b_mua_cons[,,which(ColsAggregated == 's9_Ksat_0_v')]))/4, MARGIN = 1, FUN = mean))
+colnames(EEsotgm_b_mua)[ncol(EEsotgm_b_mua)] = 'Soil9_Ksat'
+
+EEsotgm_b_mua = cbind(EEsotgm_b_mua, apply(X = (abs(EEsotgm_b_mua_cons[,,which(ColsAggregated == 's108_m')])+abs(EEsotgm_b_mua_cons[,,which(ColsAggregated == 's8_m')]))/2, MARGIN = 1, FUN = mean))
+colnames(EEsotgm_b_mua)[ncol(EEsotgm_b_mua)] = 'Soil8_m'
+EEsotgm_b_mua = cbind(EEsotgm_b_mua, apply(X = (abs(EEsotgm_b_mua_cons[,,which(ColsAggregated == 's109_m')])+abs(EEsotgm_b_mua_cons[,,which(ColsAggregated == 's9_m')]))/2, MARGIN = 1, FUN = mean))
+colnames(EEsotgm_b_mua)[ncol(EEsotgm_b_mua)] = 'Soil9_m'
+
+EEsotgm_b_mua = cbind(EEsotgm_b_mua, apply(X = (abs(EEsotgm_b_mua_cons[,,which(ColsAggregated == 's108_porosity_0')])+abs(EEsotgm_b_mua_cons[,,which(ColsAggregated == 's8_porosity_0')]))/2, MARGIN = 1, FUN = mean))
+colnames(EEsotgm_b_mua)[ncol(EEsotgm_b_mua)] = 'Soil8_porosity_0'
+EEsotgm_b_mua = cbind(EEsotgm_b_mua, apply(X = (abs(EEsotgm_b_mua_cons[,,which(ColsAggregated == 's109_porosity_0')])+abs(EEsotgm_b_mua_cons[,,which(ColsAggregated == 's9_porosity_0')]))/2, MARGIN = 1, FUN = mean))
+colnames(EEsotgm_b_mua)[ncol(EEsotgm_b_mua)] = 'Soil9_porosity_0'
+
+EEsotgm_b_mua = cbind(EEsotgm_b_mua, apply(X = (abs(EEsotgm_b_mua_cons[,,which(ColsAggregated == 'v102_epc.topt')])+abs(EEsotgm_b_mua_cons[,,which(ColsAggregated == 'v102_epc.tmax')]))/2, MARGIN = 1, FUN = mean))
+colnames(EEsotgm_b_mua)[ncol(EEsotgm_b_mua)] = 'v102_Temp'
+EEsotgm_b_mua = cbind(EEsotgm_b_mua, apply(X = (abs(EEsotgm_b_mua_cons[,,which(ColsAggregated == 'v3_epc.topt')])+abs(EEsotgm_b_mua_cons[,,which(ColsAggregated == 'v3_epc.tmax')]))/2, MARGIN = 1, FUN = mean))
+colnames(EEsotgm_b_mua)[ncol(EEsotgm_b_mua)] = 'v3_Temp'
+
+EEsotgm_b_mua = cbind(EEsotgm_b_mua, apply(X = (abs(EEsotgm_b_mua_cons[,,which(ColsAggregated == 'v102_epc.leaf_cn')])+abs(EEsotgm_b_mua_cons[,,which(ColsAggregated == 'v102_epc.leaflitr_cn')]))/2, MARGIN = 1, FUN = mean))
+colnames(EEsotgm_b_mua)[ncol(EEsotgm_b_mua)] = 'v102_epc.LeafLitrCN'
+EEsotgm_b_mua = cbind(EEsotgm_b_mua, apply(X = (abs(EEsotgm_b_mua_cons[,,which(ColsAggregated == 'v3_epc.leaf_cn')])+abs(EEsotgm_b_mua_cons[,,which(ColsAggregated == 'v3_epc.leaflitr_cn')]))/2, MARGIN = 1, FUN = mean))
+colnames(EEsotgm_b_mua)[ncol(EEsotgm_b_mua)] = 'v3_epc.LeafLitrCN'
+
 #  EEs05_h_mua----
 EEs05_h_mua = cbind(EEs05_h_mua, apply(X = (abs(EEs05_h_mua_cons[,,which(dimnames(EEs05_h_mua_cons)$Cols == 's8_silt')])+abs(EEs05_h_mua_cons[,,which(dimnames(EEs05_h_mua_cons)$Cols == 's8_sand')])+abs(EEs05_h_mua_cons[,,which(dimnames(EEs05_h_mua_cons)$Cols == 's8_clay')]))/3, MARGIN = 1, FUN = mean))
 colnames(EEs05_h_mua)[ncol(EEs05_h_mua)] = 's8_SoilTexture'
@@ -1934,6 +2205,18 @@ EEsotg_b_mua_m = apply(X = EEsotg_b_mua, MARGIN = 2, FUN = mean)
 EEsotg_b_mua_05 = apply(X = EEsotg_b_mua, MARGIN = 2, FUN = quantile, probs = 0.05)
 EEsotg_b_mua_95 = apply(X = EEsotg_b_mua, MARGIN = 2, FUN = quantile, probs = 0.95)
 
+EEs05gm_b_mua_m = apply(X = EEs05gm_b_mua, MARGIN = 2, FUN = mean)
+EEs05gm_b_mua_05 = apply(X = EEs05gm_b_mua, MARGIN = 2, FUN = quantile, probs = 0.05)
+EEs05gm_b_mua_95 = apply(X = EEs05gm_b_mua, MARGIN = 2, FUN = quantile, probs = 0.95)
+
+EEs95m_b_mua_m = apply(X = EEs95m_b_mua, MARGIN = 2, FUN = mean)
+EEs95m_b_mua_05 = apply(X = EEs95m_b_mua, MARGIN = 2, FUN = quantile, probs = 0.05)
+EEs95m_b_mua_95 = apply(X = EEs95m_b_mua, MARGIN = 2, FUN = quantile, probs = 0.95)
+
+EEsotgm_b_mua_m = apply(X = EEsotgm_b_mua, MARGIN = 2, FUN = mean)
+EEsotgm_b_mua_05 = apply(X = EEsotgm_b_mua, MARGIN = 2, FUN = quantile, probs = 0.05)
+EEsotgm_b_mua_95 = apply(X = EEsotgm_b_mua, MARGIN = 2, FUN = quantile, probs = 0.95)
+
 EEsLNSE_b_mua_m = apply(X = EEsLNSE_b_mua, MARGIN = 2, FUN = mean)
 EEsLNSE_b_mua_05 = apply(X = EEsLNSE_b_mua, MARGIN = 2, FUN = quantile, probs = 0.05)
 EEsLNSE_b_mua_95 = apply(X = EEsLNSE_b_mua, MARGIN = 2, FUN = quantile, probs = 0.95)
@@ -2027,6 +2310,9 @@ muEEsLogL_b = apply(X = EEsLogL_b[,1:nrow(ParamRanges)], MARGIN = 2, FUN = mean)
 muEEsTN05_b = apply(X = EEsTN05_b[,1:nrow(ParamRanges)], MARGIN = 2, FUN = mean)
 muEEsTN95_b = apply(X = EEsTN95_b[,1:nrow(ParamRanges)], MARGIN = 2, FUN = mean)
 muEEsTNMed_b = apply(X = EEsTNMed_b[,1:nrow(ParamRanges)], MARGIN = 2, FUN = mean)
+muEEs05gm_b = apply(X = EEs05gm_b[,1:nrow(ParamRanges)], MARGIN = 2, FUN = mean)
+muEEs95m_b = apply(X = EEs95m_b[,1:nrow(ParamRanges)], MARGIN = 2, FUN = mean)
+muEEsotgm_b = apply(X = EEsotgm_b[,1:nrow(ParamRanges)], MARGIN = 2, FUN = mean)
 
 sdEEs05_b = apply(X = EEs05_b[,1:nrow(ParamRanges)], MARGIN = 2, FUN = sd)
 sdEEs95_b = apply(X = EEs95_b[,1:nrow(ParamRanges)], MARGIN = 2, FUN = sd)
@@ -2040,6 +2326,9 @@ sdEEsLogL_b = apply(X = EEsLogL_b[,1:nrow(ParamRanges)], MARGIN = 2, FUN = sd)
 sdEEsTN05_b = apply(X = EEsTN05_b[,1:nrow(ParamRanges)], MARGIN = 2, FUN = sd)
 sdEEsTN95_b = apply(X = EEsTN95_b[,1:nrow(ParamRanges)], MARGIN = 2, FUN = sd)
 sdEEsTNMed_b = apply(X = EEsTNMed_b[,1:nrow(ParamRanges)], MARGIN = 2, FUN = sd)
+sdEEs05gm_b = apply(X = EEs05gm_b[,1:nrow(ParamRanges)], MARGIN = 2, FUN = sd)
+sdEEs95m_b = apply(X = EEs95m_b[,1:nrow(ParamRanges)], MARGIN = 2, FUN = sd)
+sdEEsotgm_b = apply(X = EEsotgm_b[,1:nrow(ParamRanges)], MARGIN = 2, FUN = sd)
 
 muaEEs05_b = apply(X = abs(EEs05_b[,1:nrow(ParamRanges)]), MARGIN = 2, FUN = mean)
 muaEEs95_b = apply(X = abs(EEs95_b[,1:nrow(ParamRanges)]), MARGIN = 2, FUN = mean)
@@ -2053,6 +2342,9 @@ muaEEsLogL_b = apply(X = abs(EEsLogL_b[,1:nrow(ParamRanges)]), MARGIN = 2, FUN =
 muaEEsTN05_b = apply(X = abs(EEsTN05_b[,1:nrow(ParamRanges)]), MARGIN = 2, FUN = mean)
 muaEEsTN95_b = apply(X = abs(EEsTN95_b[,1:nrow(ParamRanges)]), MARGIN = 2, FUN = mean)
 muaEEsTNMed_b = apply(X = abs(EEsTNMed_b[,1:nrow(ParamRanges)]), MARGIN = 2, FUN = mean)
+muaEEs05gm_b = apply(X = abs(EEs05gm_b[,1:nrow(ParamRanges)]), MARGIN = 2, FUN = mean)
+muaEEs95m_b = apply(X = abs(EEs95m_b[,1:nrow(ParamRanges)]), MARGIN = 2, FUN = mean)
+muaEEsotgm_b = apply(X = abs(EEsotgm_b[,1:nrow(ParamRanges)]), MARGIN = 2, FUN = mean)
 
 #Hillslopes will have one per hillslope
 muEEs05_h = muEEs95_h = muEEsot_h = muEEs05g_h = muEEsotg_h = muEEsTN05_h = muEEsTN95_h = muEEsTNMed_h = sdEEs05_h = sdEEs95_h = sdEEsot_h = sdEEs05g_h = sdEEsotg_h = sdEEsTN05_h = sdEEsTN95_h = sdEEsTNMed_h = muaEEs05_h = muaEEs95_h = muaEEsot_h = muaEEs05g_h = muaEEsotg_h = muaEEsTN05_h = muaEEsTN95_h = muaEEsTNMed_h = matrix(NA, nrow = length(uhills), ncol = as.numeric(cols))
@@ -2100,6 +2392,9 @@ RanksMuaLogL_b = data.frame(Param = colnames(InputParams)[rev(order(muaEEsLogL_b
 RanksMuaTN05_b = data.frame(Param = colnames(InputParams)[rev(order(muaEEsTN05_b))], EETN05_b = muaEEsTN05_b[rev(order(muaEEsTN05_b))], stringsAsFactors = FALSE)
 RanksMuaTN95_b = data.frame(Param = colnames(InputParams)[rev(order(muaEEsTN95_b))], EETN95_b = muaEEsTN95_b[rev(order(muaEEsTN95_b))], stringsAsFactors = FALSE)
 RanksMuaTNMed_b = data.frame(Param = colnames(InputParams)[rev(order(muaEEsTNMed_b))], EETNMed_b = muaEEsTNMed_b[rev(order(muaEEsTNMed_b))], stringsAsFactors = FALSE)
+RanksMua05gm_b = data.frame(Param = colnames(InputParams)[rev(order(muaEEs05gm_b))], EE05gm_b = muaEEs05gm_b[rev(order(muaEEs05gm_b))], stringsAsFactors = FALSE)
+RanksMua95m_b = data.frame(Param = colnames(InputParams)[rev(order(muaEEs95m_b))], EE95m_b = muaEEs95m_b[rev(order(muaEEs95m_b))], stringsAsFactors = FALSE)
+RanksMuaotgm_b = data.frame(Param = colnames(InputParams)[rev(order(muaEEsotgm_b))], EEotgm_b = muaEEsotgm_b[rev(order(muaEEsotgm_b))], stringsAsFactors = FALSE)
 
 RanksMua05_h = RanksMua95_h = RanksMuaot_h = RanksMua05g_h = RanksMuaotg_h = RanksMuaTN05_h = RanksMuaTN95_h = RanksMuaTNMed_h = list()
 for (h in 1:length(uhills)){
@@ -2128,6 +2423,9 @@ RanksMuaLogL_b_Agg = data.frame(Param = names(EEsLogL_b_mua_m[-which(names(EEsLo
 RanksMuaTN05_b_Agg = data.frame(Param = names(EEsTN05_b_mua_m[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)])[order(EEsTN05_b_mua_m[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)],decreasing = TRUE)], EETN05_b = as.numeric(EEsTN05_b_mua_m[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)][order(EEsTN05_b_mua_m[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)]), stringsAsFactors = FALSE)
 RanksMuaTN95_b_Agg = data.frame(Param = names(EEsTN95_b_mua_m[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)])[order(EEsTN95_b_mua_m[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)],decreasing = TRUE)], EETN95_b = as.numeric(EEsTN95_b_mua_m[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)][order(EEsTN95_b_mua_m[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)]), stringsAsFactors = FALSE)
 RanksMuaTNMed_b_Agg = data.frame(Param = names(EEsTNMed_b_mua_m[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)])[order(EEsTNMed_b_mua_m[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)],decreasing = TRUE)], EETNMed_b = as.numeric(EEsTNMed_b_mua_m[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)][order(EEsTNMed_b_mua_m[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)]), stringsAsFactors = FALSE)
+RanksMua05gm_b_Agg = data.frame(Param = names(EEs05gm_b_mua_m[-which(names(EEs05gm_b_mua_m) %in% ColsAggregated)])[order(EEs05gm_b_mua_m[-which(names(EEs05gm_b_mua_m) %in% ColsAggregated)],decreasing = TRUE)], EE05gm_b = as.numeric(EEs05gm_b_mua_m[-which(names(EEs05gm_b_mua_m) %in% ColsAggregated)][order(EEs05gm_b_mua_m[-which(names(EEs05gm_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)]), stringsAsFactors = FALSE)
+RanksMua95m_b_Agg = data.frame(Param = names(EEs95m_b_mua_m[-which(names(EEs95m_b_mua_m) %in% ColsAggregated)])[order(EEs95m_b_mua_m[-which(names(EEs95m_b_mua_m) %in% ColsAggregated)],decreasing = TRUE)], EE95m_b = as.numeric(EEs95m_b_mua_m[-which(names(EEs95m_b_mua_m) %in% ColsAggregated)][order(EEs95m_b_mua_m[-which(names(EEs95m_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)]), stringsAsFactors = FALSE)
+RanksMuaotgm_b_Agg = data.frame(Param = names(EEsotgm_b_mua_m[-which(names(EEsotgm_b_mua_m) %in% ColsAggregated)])[order(EEsotgm_b_mua_m[-which(names(EEsotgm_b_mua_m) %in% ColsAggregated)],decreasing = TRUE)], EEotgm_b = as.numeric(EEsotgm_b_mua_m[-which(names(EEsotgm_b_mua_m) %in% ColsAggregated)][order(EEsotgm_b_mua_m[-which(names(EEsotgm_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)]), stringsAsFactors = FALSE)
 
 RanksMua05_h_Agg = RanksMua95_h_Agg = RanksMuaot_h_Agg = RanksMua05g_h_Agg = RanksMuaotg_h_Agg = RanksMuaTN05_h_Agg = RanksMuaTN95_h_Agg = RanksMuaTNMed_h_Agg = list()
 for (h in 1:length(uhills)){
@@ -2156,6 +2454,9 @@ RanksMuaLogL_b_AggCI = cbind(RanksMuaLogL_b_Agg, data.frame(P05 = as.numeric(EEs
 RanksMuaTN05_b_AggCI = cbind(RanksMuaTN05_b_Agg, data.frame(P05 = as.numeric(EEsTN05_b_mua_05[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)][order(EEsTN05_b_mua_m[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)]), P95 = as.numeric(EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)][order(EEsTN05_b_mua_m[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)])))
 RanksMuaTNMed_b_AggCI = cbind(RanksMuaTNMed_b_Agg, data.frame(P05 = as.numeric(EEsTNMed_b_mua_05[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)][order(EEsTNMed_b_mua_m[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)]), P95 = as.numeric(EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)][order(EEsTNMed_b_mua_m[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)])))
 RanksMuaTN95_b_AggCI = cbind(RanksMuaTN95_b_Agg, data.frame(P05 = as.numeric(EEsTN95_b_mua_05[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)][order(EEsTN95_b_mua_m[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)]), P95 = as.numeric(EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)][order(EEsTN95_b_mua_m[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)])))
+RanksMua05gm_b_AggCI = cbind(RanksMua05gm_b_Agg, data.frame(P05 = as.numeric(EEs05gm_b_mua_05[-which(names(EEs05gm_b_mua_m) %in% ColsAggregated)][order(EEs05gm_b_mua_m[-which(names(EEs05gm_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)]), P95 = as.numeric(EEs05gm_b_mua_95[-which(names(EEs05gm_b_mua_m) %in% ColsAggregated)][order(EEs05gm_b_mua_m[-which(names(EEs05gm_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)])))
+RanksMuaotgm_b_AggCI = cbind(RanksMuaotgm_b_Agg, data.frame(P05 = as.numeric(EEsotgm_b_mua_05[-which(names(EEsotgm_b_mua_m) %in% ColsAggregated)][order(EEsotgm_b_mua_m[-which(names(EEsotgm_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)]), P95 = as.numeric(EEsotgm_b_mua_95[-which(names(EEsotgm_b_mua_m) %in% ColsAggregated)][order(EEsotgm_b_mua_m[-which(names(EEsotgm_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)])))
+RanksMua95m_b_AggCI = cbind(RanksMua95m_b_Agg, data.frame(P05 = as.numeric(EEs95m_b_mua_05[-which(names(EEs95m_b_mua_m) %in% ColsAggregated)][order(EEs95m_b_mua_m[-which(names(EEs95m_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)]), P95 = as.numeric(EEs95m_b_mua_95[-which(names(EEs95m_b_mua_m) %in% ColsAggregated)][order(EEs95m_b_mua_m[-which(names(EEs95m_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)])))
 
 RanksMua05_b_AggCI[,c(2,3,4)] = signif(RanksMua05_b_AggCI[,c(2,3,4)], 3)
 RanksMuaot_b_AggCI[,c(2,3,4)] = signif(RanksMuaot_b_AggCI[,c(2,3,4)], 3)
@@ -2169,6 +2470,9 @@ RanksMuaLogL_b_AggCI[,c(2,3,4)] = signif(RanksMuaLogL_b_AggCI[,c(2,3,4)], 3)
 RanksMuaTN05_b_AggCI[,c(2,3,4)] = signif(RanksMuaTN05_b_AggCI[,c(2,3,4)], 3)
 RanksMuaTNMed_b_AggCI[,c(2,3,4)] = signif(RanksMuaTNMed_b_AggCI[,c(2,3,4)], 3)
 RanksMuaTN95_b_AggCI[,c(2,3,4)] = signif(RanksMuaTN95_b_AggCI[,c(2,3,4)], 3)
+RanksMua05gm_b_AggCI[,c(2,3,4)] = signif(RanksMua05gm_b_AggCI[,c(2,3,4)], 3)
+RanksMuaotgm_b_AggCI[,c(2,3,4)] = signif(RanksMuaotgm_b_AggCI[,c(2,3,4)], 3)
+RanksMua95m_b_AggCI[,c(2,3,4)] = signif(RanksMua95m_b_AggCI[,c(2,3,4)], 3)
 
 #In order of parameters in Fig 1
 Fig1Order = names(EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)][order(names(EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)])
@@ -2184,6 +2488,9 @@ RanksMuaLogL_b_AggCI_FigOrder = RanksMuaLogL_b_AggCI[match(table = RanksMuaLogL_
 RanksMuaTN05_b_AggCI_FigOrder = RanksMuaTN05_b_AggCI[match(table = RanksMuaTN05_b_AggCI$Param, x = Fig1Order),]
 RanksMuaTNMed_b_AggCI_FigOrder = RanksMuaTNMed_b_AggCI[match(table = RanksMuaTNMed_b_AggCI$Param, x = Fig1Order),]
 RanksMuaTN95_b_AggCI_FigOrder = RanksMuaTN95_b_AggCI[match(table = RanksMuaTN95_b_AggCI$Param, x = Fig1Order),]
+RanksMua05gm_b_AggCI_FigOrder = RanksMua05gm_b_AggCI[match(table = RanksMua05gm_b_AggCI$Param, x = Fig1Order),] 
+RanksMuaotgm_b_AggCI_FigOrder = RanksMuaotgm_b_AggCI[match(table = RanksMuaotgm_b_AggCI$Param, x = Fig1Order),]
+RanksMua95m_b_AggCI_FigOrder = RanksMua95m_b_AggCI[match(table = RanksMua95m_b_AggCI$Param, x = Fig1Order),]
 
 # Hillslope Tables----
 RanksMua05_h_AggCI = RanksMua95_h_AggCI = RanksMuaot_h_AggCI = RanksMua05g_h_AggCI = RanksMuaotg_h_AggCI = RanksMuaTN05_h_AggCI = RanksMuaTN95_h_AggCI = RanksMuaTNMed_h_AggCI = list()
@@ -2276,6 +2583,9 @@ MaxDiffEEsLogLBoot = max(abs(muaEEsLogL_b/max(muaEEsLogL_b) - EEsLogL_b_mua_m[1:
 MaxDiffEEsTN05Boot = max(abs(muaEEsTN05_b/max(muaEEsTN05_b) - EEsTN05_b_mua_m[1:271]/max(EEsTN05_b_mua_m[1:271])))
 MaxDiffEEsTNMedBoot = max(abs(muaEEsTNMed_b/max(muaEEsTNMed_b) - EEsTNMed_b_mua_m[1:271]/max(EEsTNMed_b_mua_m[1:271])))
 MaxDiffEEsTN95Boot = max(abs(muaEEsTN95_b/max(muaEEsTN95_b) - EEsTN95_b_mua_m[1:271]/max(EEsTN95_b_mua_m[1:271])))
+MaxDiffEEs05gmBoot = max(abs(muaEEs05gm_b/max(muaEEs05gm_b) - EEs05gm_b_mua_m[1:271]/max(EEs05gm_b_mua_m[1:271])))
+MaxDiffEEsotgmBoot = max(abs(muaEEsotgm_b/max(muaEEsotgm_b) - EEsotgm_b_mua_m[1:271]/max(EEsotgm_b_mua_m[1:271])))
+MaxDiffEEs95mBoot = max(abs(muaEEs95m_b/max(muaEEs95m_b) - EEs95m_b_mua_m[1:271]/max(EEs95m_b_mua_m[1:271])))
 
 Top1005 = ceiling((length(muaEEs05_b) - length(which(muaEEs05_b == 0)))*0.1)
 Top10ot = ceiling((length(muaEEsot_b) - length(which(muaEEsot_b == 0)))*0.1)
@@ -2289,11 +2599,15 @@ Top10LogL = ceiling((length(muaEEsLogL_b) - length(which(muaEEsLogL_b == 0)))*0.
 Top10TN05 = ceiling((length(muaEEsTN05_b) - length(which(muaEEsTN05_b == 0)))*0.1)
 Top10TNMed = ceiling((length(muaEEsTNMed_b) - length(which(muaEEsTNMed_b == 0)))*0.1)
 Top10TN95 = ceiling((length(muaEEsTN95_b) - length(which(muaEEsTN95_b == 0)))*0.1)
+Top1005gm = ceiling((length(muaEEs05gm_b) - length(which(muaEEs05gm_b == 0)))*0.1)
+Top10otgm = ceiling((length(muaEEsotgm_b) - length(which(muaEEsotgm_b == 0)))*0.1)
+Top1095m = ceiling((length(muaEEs95m_b) - length(which(muaEEs95m_b == 0)))*0.1)
 #Forcing log L to have same selection as all other metrics. Non-zero EEs result from MLE equifinality.
 Top10LogL = Top1005
 
 RanksMua_b = unique(c(RanksMua05_b$Param[1:Top1005],RanksMuaot_b$Param[1:Top10ot],RanksMua95_b$Param[1:Top1095]))
 RanksMua_bg = unique(c(RanksMua05g_b$Param[1:Top1005g],RanksMuaotg_b$Param[1:Top10otg],RanksMua95_b$Param[1:Top1095]))
+RanksMua_bgm = unique(c(RanksMua05gm_b$Param[1:Top1005gm],RanksMuaotgm_b$Param[1:Top10otgm],RanksMua95m_b$Param[1:Top1095m]))
 RanksMuaTN_b = unique(c(RanksMuaTN05_b$Param[1:Top10TN05],RanksMuaTNMed_b$Param[1:Top10TNMed],RanksMuaTN95_b$Param[1:Top10TN95]))
 
 #Unique across basin and TN are same for top 10%
@@ -2306,6 +2620,9 @@ ParamSelect_b = unique(c(names(EEs05_b_mua_95[1:nrow(ParamRanges)][EEs05_b_mua_9
 ParamSelect_bg = unique(c(names(EEs05g_b_mua_95[1:nrow(ParamRanges)][EEs05g_b_mua_95[1:nrow(ParamRanges)] >= RanksMua05g_b$EE05g_b[Top1005g]]),
                          names(EEsotg_b_mua_95[1:nrow(ParamRanges)][EEsotg_b_mua_95[1:nrow(ParamRanges)] >= RanksMuaotg_b$EEotg_b[Top10otg]]),
                          names(EEs95_b_mua_95[1:nrow(ParamRanges)][EEs95_b_mua_95[1:nrow(ParamRanges)] >= RanksMua95_b$EE95_b[Top1095]])))
+ParamSelect_bgm = unique(c(names(EEs05gm_b_mua_95[1:nrow(ParamRanges)][EEs05gm_b_mua_95[1:nrow(ParamRanges)] >= RanksMua05gm_b$EE05gm_b[Top1005gm]]),
+                          names(EEsotgm_b_mua_95[1:nrow(ParamRanges)][EEsotgm_b_mua_95[1:nrow(ParamRanges)] >= RanksMuaotgm_b$EEotgm_b[Top10otgm]]),
+                          names(EEs95m_b_mua_95[1:nrow(ParamRanges)][EEs95m_b_mua_95[1:nrow(ParamRanges)] >= RanksMua95m_b$EE95m_b[Top1095m]])))
 ParamSelectTN_b = unique(c(names(EEsTN05_b_mua_95[1:nrow(ParamRanges)][EEsTN05_b_mua_95[1:nrow(ParamRanges)] >= RanksMuaTN05_b$EETN05_b[Top10TN05]]),
                          names(EEsTNMed_b_mua_95[1:nrow(ParamRanges)][EEsTNMed_b_mua_95[1:nrow(ParamRanges)] >= RanksMuaTNMed_b$EETNMed_b[Top10TNMed]]),
                          names(EEsTN95_b_mua_95[1:nrow(ParamRanges)][EEsTN95_b_mua_95[1:nrow(ParamRanges)] >= RanksMuaTN95_b$EETN95_b[Top10TN95]])))
@@ -2332,9 +2649,13 @@ Top10TN05_Agg = ceiling((length(EEsTN05_b_mua_m[-which(names(EEs05_b_mua_m) %in%
 Top10TNMed_Agg = ceiling((length(EEsTNMed_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]) - length(which(EEsTNMed_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)] == 0)))*0.1)
 Top10TN95_Agg = ceiling((length(EEsTN95_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]) - length(which(EEsTN95_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)] == 0)))*0.1)
 Top10LogL_Agg = Top1005_Agg
+Top1005gm_Agg = ceiling((length(EEs05gm_b_mua_m[-which(names(EEs05gm_b_mua_m) %in% ColsAggregated)]) - length(which(EEs05gm_b_mua_m[-which(names(EEs05gm_b_mua_m) %in% ColsAggregated)] == 0)))*0.1)
+Top10otgm_Agg = ceiling((length(EEsotgm_b_mua_m[-which(names(EEs05gm_b_mua_m) %in% ColsAggregated)]) - length(which(EEsotgm_b_mua_m[-which(names(EEs05gm_b_mua_m) %in% ColsAggregated)] == 0)))*0.1)
+Top1095m_Agg = ceiling((length(EEs95m_b_mua_m[-which(names(EEs05gm_b_mua_m) %in% ColsAggregated)]) - length(which(EEs95m_b_mua_m[-which(names(EEs05gm_b_mua_m) %in% ColsAggregated)] == 0)))*0.1)
 
 RanksMua_b_Agg = unique(c(RanksMua05_b_Agg$Param[1:Top1005_Agg],RanksMuaot_b_Agg$Param[1:Top10ot_Agg],RanksMua95_b_Agg$Param[1:Top1095_Agg]))
 RanksMua_bg_Agg = unique(c(RanksMua05g_b_Agg$Param[1:Top1005g_Agg],RanksMuaotg_b_Agg$Param[1:Top10otg_Agg],RanksMua95_b_Agg$Param[1:Top1095_Agg]))
+RanksMua_bgm_Agg = unique(c(RanksMua05gm_b_Agg$Param[1:Top1005gm_Agg],RanksMuaotgm_b_Agg$Param[1:Top10otgm_Agg],RanksMua95m_b_Agg$Param[1:Top1095m_Agg]))
 RanksMuaTN_b_Agg = unique(c(RanksMuaTN05_b_Agg$Param[1:Top10TN05_Agg],RanksMuaTNMed_b_Agg$Param[1:Top10TNMed_Agg],RanksMuaTN95_b_Agg$Param[1:Top10TN95_Agg]))
 
 # Select all parameters whose 95th quantile estimate of EE is greater than the selected threshold point
@@ -2344,6 +2665,9 @@ ParamSelect_b_Agg = unique(c(names(EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %i
 ParamSelect_bg_Agg = unique(c(names(EEs05g_b_mua_95[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)][EEs05g_b_mua_95[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)] >= RanksMua05g_b_Agg$EE05g_b[Top1005g_Agg]]),
                              names(EEsotg_b_mua_95[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)][EEsotg_b_mua_95[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)] >= RanksMuaotg_b_Agg$EEotg_b[Top10otg_Agg]]),
                              names(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)][EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)] >= RanksMua95_b_Agg$EE95_b[Top1095_Agg]])))
+ParamSelect_bgm_Agg = unique(c(names(EEs05gm_b_mua_95[-which(names(EEs05gm_b_mua_m) %in% ColsAggregated)][EEs05gm_b_mua_95[-which(names(EEs05gm_b_mua_m) %in% ColsAggregated)] >= RanksMua05gm_b_Agg$EE05gm_b[Top1005gm_Agg]]),
+                              names(EEsotgm_b_mua_95[-which(names(EEsotgm_b_mua_m) %in% ColsAggregated)][EEsotgm_b_mua_95[-which(names(EEsotgm_b_mua_m) %in% ColsAggregated)] >= RanksMuaotgm_b_Agg$EEotgm_b[Top10otgm_Agg]]),
+                              names(EEs95m_b_mua_95[-which(names(EEs95m_b_mua_m) %in% ColsAggregated)][EEs95m_b_mua_95[-which(names(EEs95m_b_mua_m) %in% ColsAggregated)] >= RanksMua95m_b_Agg$EE95m_b[Top1095m_Agg]])))
 ParamSelectTN_b_Agg = unique(c(names(EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)][EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)] >= RanksMuaTN05_b_Agg$EETN05_b[Top10TN05_Agg]]),
                            names(EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)][EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)] >= RanksMuaTNMed_b_Agg$EETNMed_b[Top10TNMed_Agg]]),
                            names(EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)][EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)] >= RanksMuaTN95_b_Agg$EETN95_b[Top10TN95_Agg]])))
@@ -2420,7 +2744,7 @@ rm(h)
 dir.create(dir_ParamInCutoff, showWarnings = FALSE)
 setwd(dir_ParamInCutoff)
 x = seq(0.01,1,0.01)
-ParamTotals_ThreshPercent = ParamTotals_ThreshPercent_g = vector('numeric', length(x))
+ParamTotals_ThreshPercent = ParamTotals_ThreshPercent_g = ParamTotals_ThreshPercent_gm = vector('numeric', length(x))
 for (i in 1:length(x)){
   Tops = ceiling((length(muaEEs05_b) - length(which(muaEEs05_b == 0)))*x[i])
   # Select all parameters whose 95th quantile estimate of EE is greater than the selected threshold point
@@ -2430,14 +2754,18 @@ for (i in 1:length(x)){
   pbg = unique(c(names(EEs05g_b_mua_95[1:nrow(ParamRanges)][EEs05g_b_mua_95[1:nrow(ParamRanges)] >= RanksMua05g_b$EE05g_b[Tops]]),
                 names(EEsotg_b_mua_95[1:nrow(ParamRanges)][EEsotg_b_mua_95[1:nrow(ParamRanges)] >= RanksMuaotg_b$EEotg_b[Tops]]),
                 names(EEs95_b_mua_95[1:nrow(ParamRanges)][EEs95_b_mua_95[1:nrow(ParamRanges)] >= RanksMua95_b$EE95_b[Tops]])))
+  pbgm = unique(c(names(EEs05gm_b_mua_95[1:nrow(ParamRanges)][EEs05gm_b_mua_95[1:nrow(ParamRanges)] >= RanksMua05gm_b$EE05gm_b[Tops]]),
+                 names(EEsotgm_b_mua_95[1:nrow(ParamRanges)][EEsotgm_b_mua_95[1:nrow(ParamRanges)] >= RanksMuaotgm_b$EEotgm_b[Tops]]),
+                 names(EEs95m_b_mua_95[1:nrow(ParamRanges)][EEs95m_b_mua_95[1:nrow(ParamRanges)] >= RanksMua95m_b$EE95m_b[Tops]])))
   pbTN = unique(c(names(EEsTN05_b_mua_95[1:nrow(ParamRanges)][EEsTN05_b_mua_95[1:nrow(ParamRanges)] >= RanksMuaTN05_b$EETN05_b[Tops]]),
                              names(EEsTNMed_b_mua_95[1:nrow(ParamRanges)][EEsTNMed_b_mua_95[1:nrow(ParamRanges)] >= RanksMuaTNMed_b$EETNMed_b[Tops]]),
                              names(EEsTN95_b_mua_95[1:nrow(ParamRanges)][EEsTN95_b_mua_95[1:nrow(ParamRanges)] >= RanksMuaTN95_b$EETN95_b[Tops]])))
   
   ParamTotals_ThreshPercent[i] = length(unique(c(pb, pbTN)))
   ParamTotals_ThreshPercent_g[i] = length(unique(c(pbg, pbTN)))
+  ParamTotals_ThreshPercent_gm[i] = length(unique(c(pbgm, pbTN)))
 }
-rm(pb, pbg, pbTN, Tops, i, x)
+rm(pb, pbg, pbTN, Tops, i, x, pbgm)
 
 png('ParamsInThresholdCutoff_b.png', res = 300, units = 'in', width = 5, height = 5)
 plot(x = seq(1,100,1), y = ParamTotals_ThreshPercent, type = 'l', xlab = 'Top X Percent Selected', ylab = 'Number of Parameters Selected', ylim = c(0,120), xlim = c(0,100))
@@ -2448,13 +2776,16 @@ dev.off()
 
 # Aggregated----
 x = seq(0.01,1,0.01)
-ParamTotals_ThreshPercent_Agg = ParamTotals_ThreshPercent_g_Agg = vector('numeric', length(x))
+ParamTotals_ThreshPercent_Agg = ParamTotals_ThreshPercent_g_Agg = ParamTotals_ThreshPercent_gm_Agg = vector('numeric', length(x))
 for (i in 1:length(x)){
   Tops05 = ceiling((length(EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]) - length(which(EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)] == 0)))*x[i])
   Topsot = ceiling((length(EEsot_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]) - length(which(EEsot_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)] == 0)))*x[i])
   Topsotg = ceiling((length(EEsotg_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]) - length(which(EEsotg_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)] == 0)))*x[i])
   Tops05g = ceiling((length(EEs05g_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]) - length(which(EEs05g_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)] == 0)))*x[i])
   Tops95 = ceiling((length(EEs95_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]) - length(which(EEs95_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)] == 0)))*x[i])
+  Topsotgm = ceiling((length(EEsotgm_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]) - length(which(EEsotgm_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)] == 0)))*x[i])
+  Tops05gm = ceiling((length(EEs05gm_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]) - length(which(EEs05gm_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)] == 0)))*x[i])
+  Tops95m = ceiling((length(EEs95m_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]) - length(which(EEs95m_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)] == 0)))*x[i])
   TopsTN05 = ceiling((length(EEsTN05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]) - length(which(EEsTN05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)] == 0)))*x[i])
   TopsTNMed = ceiling((length(EEsTNMed_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]) - length(which(EEsTNMed_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)] == 0)))*x[i])
   TopsTN95 = ceiling((length(EEsTN95_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]) - length(which(EEsTN95_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)] == 0)))*x[i])
@@ -2466,14 +2797,18 @@ for (i in 1:length(x)){
   pbg = unique(c(names(EEs05g_b_mua_95[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)][EEs05g_b_mua_95[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)] >= RanksMua05g_b_Agg$EE05g_b[Tops05g]]),
                 names(EEsotg_b_mua_95[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)][EEsotg_b_mua_95[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)] >= RanksMuaotg_b_Agg$EEotg_b[Topsotg]]),
                 names(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)][EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)] >= RanksMua95_b_Agg$EE95_b[Tops95]])))
+  pbgm = unique(c(names(EEs05gm_b_mua_95[-which(names(EEs05gm_b_mua_m) %in% ColsAggregated)][EEs05gm_b_mua_95[-which(names(EEs05gm_b_mua_m) %in% ColsAggregated)] >= RanksMua05gm_b_Agg$EE05gm_b[Tops05gm]]),
+                 names(EEsotgm_b_mua_95[-which(names(EEsotgm_b_mua_m) %in% ColsAggregated)][EEsotgm_b_mua_95[-which(names(EEsotgm_b_mua_m) %in% ColsAggregated)] >= RanksMuaotgm_b_Agg$EEotgm_b[Topsotgm]]),
+                 names(EEs95m_b_mua_95[-which(names(EEs95m_b_mua_m) %in% ColsAggregated)][EEs95m_b_mua_95[-which(names(EEs95m_b_mua_m) %in% ColsAggregated)] >= RanksMua95m_b_Agg$EE95m_b[Tops95m]])))
   pbTN = unique(c(names(EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)][EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)] >= RanksMuaTN05_b_Agg$EETN05_b[TopsTN05]]),
                                  names(EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)][EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)] >= RanksMuaTNMed_b_Agg$EETNMed_b[TopsTNMed]]),
                                  names(EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)][EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)] >= RanksMuaTN95_b_Agg$EETN95_b[TopsTN95]])))
   
   ParamTotals_ThreshPercent_Agg[i] = length(unique(c(pb, pbTN)))
   ParamTotals_ThreshPercent_g_Agg[i] = length(unique(c(pbg, pbTN)))
+  ParamTotals_ThreshPercent_gm_Agg[i] = length(unique(c(pbgm, pbTN)))
 }
-rm(pb, pbg, pbTN, Tops05, Topsot, Tops05g, Topsotg, Tops95, TopsTN05, TopsTNMed, TopsTN95, i, x)
+rm(pb, pbg, pbgm, pbTN, Tops05, Topsot, Tops05g, Topsotg, Tops95, Tops05gm, Topsotgm, Tops95m, TopsTN05, TopsTNMed, TopsTN95, i, x)
 
 png('ParamsInThresholdCutoff_b_Agg.png', res = 300, units = 'in', width = 5, height = 5)
 plot(x = seq(1,100,1), y = ParamTotals_ThreshPercent_Agg, type = 'l', xlab = 'Top X Percent Selected', ylab = 'Number of Parameters Selected', ylim = c(0,105), xlim = c(0,100))
@@ -2484,17 +2819,20 @@ dev.off()
 
 # Aggregated with hillslope variables----
 x = seq(0.01,1,0.01)
-ParamTotals_b_Agg = ParamTotals_bg_Agg = vector('numeric', length(x))
+ParamTotals_b_Agg = ParamTotals_bg_Agg = ParamTotals_bgm_Agg = vector('numeric', length(x))
 ParamTotals_h_Agg = ParamTotals_hg_Agg = vector('numeric', length(x))
-ParamTotals_ThreshPercent_h_Agg = ParamTotals_ThreshPercent_hg_Agg = vector('numeric', length(x))
+ParamTotals_ThreshPercent_h_Agg = ParamTotals_ThreshPercent_hg_Agg = ParamTotals_ThreshPercent_hgm_Agg = vector('numeric', length(x))
 ParamTotals_ThreshPercent_onlyh_Agg = ParamTotals_ThreshPercent_onlyhg_Agg = vector('numeric', length(x))
-ParamTotals_hg_Agg_NoTN = ParamTotals_ThreshPercent_hg_Agg_NoTN = ParamTotals_ThreshPercent_onlyhg_Agg_NoTN = vector('numeric', length(x))
+ParamTotals_hg_Agg_NoTN = ParamTotals_ThreshPercent_hg_Agg_NoTN = ParamTotals_ThreshPercent_hgm_Agg_NoTN = ParamTotals_ThreshPercent_onlyhg_Agg_NoTN = vector('numeric', length(x))
 for (i in 1:length(x)){
   Tops05 = ceiling((length(EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]) - length(which(EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)] == 0)))*x[i])
   Topsot = ceiling((length(EEsot_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]) - length(which(EEsot_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)] == 0)))*x[i])
   Tops05g = ceiling((length(EEs05g_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]) - length(which(EEs05g_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)] == 0)))*x[i])
   Topsotg = ceiling((length(EEsotg_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]) - length(which(EEsotg_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)] == 0)))*x[i])
   Tops95 = ceiling((length(EEs95_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]) - length(which(EEs95_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)] == 0)))*x[i])
+  Tops05gm = ceiling((length(EEs05gm_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]) - length(which(EEs05gm_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)] == 0)))*x[i])
+  Topsotgm = ceiling((length(EEsotgm_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]) - length(which(EEsotgm_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)] == 0)))*x[i])
+  Tops95m = ceiling((length(EEs95m_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]) - length(which(EEs95m_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)] == 0)))*x[i])
   TopsTN05 = ceiling((length(EEsTN05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]) - length(which(EEsTN05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)] == 0)))*x[i])
   TopsTNMed = ceiling((length(EEsTNMed_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]) - length(which(EEsTNMed_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)] == 0)))*x[i])
   TopsTN95 = ceiling((length(EEsTN95_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]) - length(which(EEsTN95_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)] == 0)))*x[i])
@@ -2512,6 +2850,12 @@ for (i in 1:length(x)){
                      names(EEsTN05_b_mua_m[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)][EEsTN05_b_mua_m[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)] >= RanksMuaTN05_b_Agg$EETN05_b[TopsTN05]]),
                      names(EEsTNMed_b_mua_m[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)][EEsTNMed_b_mua_m[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)] >= RanksMuaTNMed_b_Agg$EETNMed_b[TopsTNMed]]),
                      names(EEsTN95_b_mua_m[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)][EEsTN95_b_mua_m[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)] >= RanksMuaTN95_b_Agg$EETN95_b[TopsTN95]])))
+  pbgm_mean = unique(c(names(EEs05gm_b_mua_m[-which(names(EEs05gm_b_mua_m) %in% ColsAggregated)][EEs05gm_b_mua_m[-which(names(EEs05gm_b_mua_m) %in% ColsAggregated)] >= RanksMua05gm_b_Agg$EE05gm_b[Tops05gm]]),
+                      names(EEsotgm_b_mua_m[-which(names(EEsotgm_b_mua_m) %in% ColsAggregated)][EEsotgm_b_mua_m[-which(names(EEsotgm_b_mua_m) %in% ColsAggregated)] >= RanksMuaotgm_b_Agg$EEotgm_b[Topsotgm]]),
+                      names(EEs95m_b_mua_m[-which(names(EEs95m_b_mua_m) %in% ColsAggregated)][EEs95m_b_mua_m[-which(names(EEs95m_b_mua_m) %in% ColsAggregated)] >= RanksMua95m_b_Agg$EE95m_b[Tops95m]]), 
+                      names(EEsTN05_b_mua_m[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)][EEsTN05_b_mua_m[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)] >= RanksMuaTN05_b_Agg$EETN05_b[TopsTN05]]),
+                      names(EEsTNMed_b_mua_m[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)][EEsTNMed_b_mua_m[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)] >= RanksMuaTNMed_b_Agg$EETNMed_b[TopsTNMed]]),
+                      names(EEsTN95_b_mua_m[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)][EEsTN95_b_mua_m[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)] >= RanksMuaTN95_b_Agg$EETN95_b[TopsTN95]])))
   
   # Select all parameters whose 95th quantile estimate of EE is greater than the selected threshold point
   pb = unique(c(names(EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)][EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)] >= RanksMua05_b_Agg$EE05_b[Tops05]]),
@@ -2520,6 +2864,9 @@ for (i in 1:length(x)){
   pbg = unique(c(names(EEs05g_b_mua_95[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)][EEs05g_b_mua_95[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)] >= RanksMua05g_b_Agg$EE05g_b[Tops05g]]),
                 names(EEsotg_b_mua_95[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)][EEsotg_b_mua_95[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)] >= RanksMuaotg_b_Agg$EEotg_b[Topsotg]]),
                 names(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)][EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)] >= RanksMua95_b_Agg$EE95_b[Tops95]])))
+  pbgm = unique(c(names(EEs05gm_b_mua_95[-which(names(EEs05gm_b_mua_m) %in% ColsAggregated)][EEs05gm_b_mua_95[-which(names(EEs05gm_b_mua_m) %in% ColsAggregated)] >= RanksMua05gm_b_Agg$EE05gm_b[Tops05gm]]),
+                 names(EEsotgm_b_mua_95[-which(names(EEsotgm_b_mua_m) %in% ColsAggregated)][EEsotgm_b_mua_95[-which(names(EEsotgm_b_mua_m) %in% ColsAggregated)] >= RanksMuaotgm_b_Agg$EEotgm_b[Topsotgm]]),
+                 names(EEs95m_b_mua_95[-which(names(EEs95m_b_mua_m) %in% ColsAggregated)][EEs95m_b_mua_95[-which(names(EEs95m_b_mua_m) %in% ColsAggregated)] >= RanksMua95m_b_Agg$EE95m_b[Tops95m]])))
   pbTN = unique(c(names(EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)][EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)] >= RanksMuaTN05_b_Agg$EETN05_b[TopsTN05]]),
                   names(EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)][EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)] >= RanksMuaTNMed_b_Agg$EETNMed_b[TopsTNMed]]),
                   names(EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)][EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)] >= RanksMuaTN95_b_Agg$EETN95_b[TopsTN95]])))
@@ -2583,17 +2930,20 @@ for (i in 1:length(x)){
   
   ParamTotals_b_Agg[i] = length(unique(c(pb_mean)))
   ParamTotals_bg_Agg[i] = length(unique(c(pbg_mean)))
+  ParamTotals_bgm_Agg[i] = length(unique(c(pbgm_mean)))
   ParamTotals_h_Agg[i] = length(unique(c(ph_mean)))
   ParamTotals_hg_Agg[i] = length(unique(c(phg_mean)))
   ParamTotals_ThreshPercent_h_Agg[i] = length(unique(c(pb, pbTN, ph, phTN)))
   ParamTotals_ThreshPercent_hg_Agg[i] = length(unique(c(pbg, pbTN, phg, phTN)))
+  ParamTotals_ThreshPercent_hgm_Agg[i] = length(unique(c(pbgm, pbTN, phg, phTN)))
   ParamTotals_ThreshPercent_onlyh_Agg[i] = length(unique(c(ph, phTN)))
   ParamTotals_ThreshPercent_onlyhg_Agg[i] = length(unique(c(phg, phTN)))
   ParamTotals_ThreshPercent_onlyhg_Agg_NoTN[i] = length(unique(c(phg)))
   ParamTotals_ThreshPercent_hg_Agg_NoTN[i] = length(unique(c(pbg, pbTN, phg)))
+  ParamTotals_ThreshPercent_hgm_Agg_NoTN[i] = length(unique(c(pbgm, pbTN, phg)))
   ParamTotals_hg_Agg_NoTN[i] = length(unique(c(phg_mean_NoTN)))
 }
-rm(pb, pbg, pbTN, Tops05, Tops05g, Tops95, Topsot, Topsotg, Topsh05, Topsh95, Topshot, Topsh05g, Topshotg, TopsTN05, TopsTNMed, TopsTN95, TopshTN05, TopshTNMed, TopshTN95, i, x, h, ph, phg, phTN, pb_mean, pbg_mean, ph_mean, phg_mean, phg_mean_NoTN)
+rm(pb, pbg, pbgm, pbgm_mean, pbTN, Tops05, Tops05g, Tops95, Topsot, Topsotg, Tops05gm, Tops95m, Topsotgm, Topsh05, Topsh95, Topshot, Topsh05g, Topshotg, TopsTN05, TopsTNMed, TopsTN95, TopshTN05, TopshTNMed, TopshTN95, i, x, h, ph, phg, phTN, pb_mean, pbg_mean, ph_mean, phg_mean, phg_mean_NoTN)
 
 png('ParamsInThresholdCutoff_h_Agg.png', res = 300, units = 'in', width = 5, height = 5)
 plot(x = seq(1,100,1), y = ParamTotals_ThreshPercent_h_Agg, type = 'l', xlab = 'Top X Percent Selected', ylab = 'Number of Parameters Selected', ylim = c(0,105), xlim = c(0,100))
@@ -2654,65 +3004,6 @@ lines(c(10,10), c(-10,200), lty=2, col='gray')
 legend('bottomright', legend = c('95th: Hillslopes', 'Mean: Hillslopes', '95th: Basin', 'Mean: Basin', 'Selected Percentage'), lty = c(1,1,1,1,2), col = c('black', 'gray', 'blue', 'skyblue', 'gray'), pch = c(NA,NA,16,16,NA), pt.cex = 0.4)
 dev.off()
 
-# pdf(file = 'fig3.pdf', width = 5, height = 5, title = 'SAfig2')
-# par(mar=c(4,4,0.5,0.5))
-# plot(x = seq(1,100,1), y = ParamTotals_ThreshPercent_onlyh_Agg, type = 'l', xlab = 'Top X Percent of Parameters Selected', ylab = 'Number of Parameters Selected', ylim = c(0,105), xlim = c(0,100), col = 'gray')
-# par(new=TRUE)
-# plot(x = seq(1,100,1), y = ParamTotals_ThreshPercent_h_Agg, type = 'l', ylim = c(0,105), xlim = c(0,100), col = 'black', xlab = '', ylab = '', axes = FALSE)
-# par(new=TRUE)
-# plot(x = seq(1,100,1), y = ParamTotals_ThreshPercent_Agg, type = 'o', ylim = c(0,105), xlim = c(0,100), col = 'blue', xlab = '', ylab = '', axes = FALSE, pch = 15, cex = 0.3)
-# lines(c(10,10), c(-10,200), lty=2, col='gray')
-# legend('bottomright', legend = c('Hillslope + Basin Outlets', 'Hillslope Outlets Only', 'Basin Outlet Only', 'Selected Percentage'), lty = c(1,1,1,2), col = c('black', 'gray', 'blue', 'gray'), pch = c(NA,NA,15,NA), pt.cex = 0.3)
-# dev.off()
-
-#Annual 5th percentile low flows
-# pdf(file = 'fig3.pdf', width = 5, height = 5, title = 'SAfig2')
-# par(mar=c(4,4,0.5,0.5))
-# plot(x = seq(1,100,1), y = ParamTotals_ThreshPercent_onlyh_Agg, type = 'l', xlab = 'Top X Percent of Parameters Selected', ylab = 'Number of Parameters Selected', ylim = c(0,105), xlim = c(0,100), col = 'gray')
-# par(new=TRUE)
-# plot(x = seq(1,100,1), y = ParamTotals_h_Agg, type = 'l', ylim = c(0,105), xlim = c(0,100), col = 'gray', xlab = '', ylab = '', axes = FALSE, cex = 0.4)
-# par(new=TRUE)
-# plot(x = seq(1,100,1), y = ParamTotals_ThreshPercent_h_Agg, type = 'l', ylim = c(0,105), xlim = c(0,100), col = 'black', xlab = '', ylab = '', axes = FALSE)
-# par(new=TRUE)
-# plot(x = seq(1,100,1), y = ParamTotals_b_Agg, type = 'o', pch = 16, ylim = c(0,105), xlim = c(0,100), col = 'skyblue', xlab = '', ylab = '', axes = FALSE, cex = 0.4)
-# par(new=TRUE)
-# plot(x = seq(1,100,1), y = ParamTotals_ThreshPercent_Agg, type = 'o', ylim = c(0,105), xlim = c(0,100), col = 'blue', xlab = '', ylab = '', axes = FALSE, pch = 16, cex = 0.4)
-# lines(c(10,10), c(-10,200), lty=2, col='gray')
-# legend('bottomright', legend = c('95th: Hillslopes', 'Mean: Hillslopes', '95th: Basin', 'Mean: Basin', 'Selected Percentage'), lty = c(1,1,1,1,2), col = c('black', 'gray', 'blue', 'skyblue', 'gray'), pch = c(NA,NA,16,16,NA), pt.cex = 0.4)
-# dev.off()
-
-# pdf(file = 'fig1_old.pdf', width = 5, height = 5, title = 'SAfig2')
-# par(mar=c(4,4,0.5,0.5))
-# plot(x = seq(1,100,1), y = ParamTotals_ThreshPercent_onlyhg_Agg, type = 'l', xlab = 'Top X Percent of Parameters Selected', ylab = 'Number of Parameters Selected', ylim = c(0,105), xlim = c(0,100), col = 'gray')
-# par(new=TRUE)
-# plot(x = seq(1,100,1), y = ParamTotals_hg_Agg, type = 'l', ylim = c(0,105), xlim = c(0,100), col = 'gray', xlab = '', ylab = '', axes = FALSE, cex = 0.4)
-# par(new=TRUE)
-# plot(x = seq(1,100,1), y = ParamTotals_ThreshPercent_hg_Agg, type = 'l', ylim = c(0,105), xlim = c(0,100), col = 'black', xlab = '', ylab = '', axes = FALSE)
-# par(new=TRUE)
-# plot(x = seq(1,100,1), y = ParamTotals_bg_Agg, type = 'o', pch = 16, ylim = c(0,105), xlim = c(0,100), col = 'skyblue', xlab = '', ylab = '', axes = FALSE, cex = 0.4)
-# par(new=TRUE)
-# plot(x = seq(1,100,1), y = ParamTotals_ThreshPercent_g_Agg, type = 'o', ylim = c(0,105), xlim = c(0,100), col = 'blue', xlab = '', ylab = '', axes = FALSE, pch = 16, cex = 0.4)
-# lines(c(10,10), c(-10,200), lty=2, col='gray')
-# legend('bottomright', legend = c('95th: Hillslopes', 'Mean: Hillslopes', '95th: Basin', 'Mean: Basin', 'Selected Percentage'), lty = c(1,1,1,1,2), col = c('black', 'gray', 'blue', 'skyblue', 'gray'), pch = c(NA,NA,16,16,NA), pt.cex = 0.4)
-# dev.off()
-
-# png(file = 'fig1_NoHillTN_PrevRed.png', width = 5, height = 5, units = 'in', res = 300)
-# par(mar=c(4,4,0.5,0.5))
-# plot(x = seq(1,100,1), y = ParamTotals_ThreshPercent_onlyhg_Agg_NoTN, type = 'l', xlab = 'Top X Percent of Parameters Selected', ylab = 'Number of Parameters Selected', ylim = c(0,105), xlim = c(0,100), col = 'gray')
-# par(new=TRUE)
-# plot(x = seq(1,100,1), y = ParamTotals_hg_Agg_NoTN, type = 'l', ylim = c(0,105), xlim = c(0,100), col = 'gray', xlab = '', ylab = '', axes = FALSE, cex = 0.4)
-# par(new=TRUE)
-# plot(x = seq(1,100,1), y = ParamTotals_ThreshPercent_hg_Agg_NoTN, type = 'l', ylim = c(0,105), xlim = c(0,100), col = 'black', xlab = '', ylab = '', axes = FALSE)
-# par(new=TRUE)
-# plot(x = seq(1,100,1), y = ParamTotals_bg_Agg, type = 'o', pch = 16, ylim = c(0,105), xlim = c(0,100), col = 'skyblue', xlab = '', ylab = '', axes = FALSE, cex = 0.4)
-# par(new=TRUE)
-# plot(x = seq(1,100,1), y = ParamTotals_ThreshPercent_g_Agg, type = 'o', ylim = c(0,105), xlim = c(0,100), col = 'blue', xlab = '', ylab = '', axes = FALSE, pch = 16, cex = 0.4)
-# lines(c(10,10), c(-10,200), lty=2, col='gray')
-# par(new=TRUE)
-# plot(x = seq(1,100,1), y = ParamTotals_ThreshPercent_onlyhg_Agg, type = 'l', xlab = '', ylab = '', ylim = c(0,105), xlim = c(0,100), col = 'red', axes=FALSE)
-# legend('bottomright', legend = c('95th: Hillslopes (paper)', '95th: Hillslopes (No TN Metrics)', 'Mean: Hillslopes (No TN Metrics)', '95th: Basin', 'Mean: Basin', 'Selected Percentage'), lty = c(1,1,1,1,1,2), col = c('red', 'black', 'gray', 'blue', 'skyblue', 'gray'), pch = c(NA,NA,NA,16,16,NA), pt.cex = 0.4, cex=0.8)
-# dev.off()
-
 png(file = 'ParamsInThresholdCutoff_bhg_Agg_Mean_NoHillTN.png', width = 5, height = 5, units = 'in', res = 300)
 par(mar=c(4,4,0.5,0.5))
 plot(x = seq(1,100,1), y = ParamTotals_ThreshPercent_onlyhg_Agg_NoTN, type = 'l', xlab = 'Top X Percent of Parameters Selected', ylab = 'Number of Parameters Selected', ylim = c(0,105), xlim = c(0,100), col = 'gray')
@@ -2739,6 +3030,21 @@ par(new=TRUE)
 plot(x = seq(1,100,1), y = ParamTotals_bg_Agg, type = 'o', pch = 16, ylim = c(0,105), xlim = c(0,100), col = 'skyblue', xlab = '', ylab = '', axes = FALSE, cex = 0.4)
 par(new=TRUE)
 plot(x = seq(1,100,1), y = ParamTotals_ThreshPercent_g_Agg, type = 'o', ylim = c(0,105), xlim = c(0,100), col = 'blue', xlab = '', ylab = '', axes = FALSE, pch = 16, cex = 0.4)
+lines(c(10,10), c(-10,200), lty=2, col='gray')
+legend('bottomright', legend = c('95th: Hillslopes (No TN Metrics)', 'Mean: Hillslopes (No TN Metrics)', '95th: Basin', 'Mean: Basin', 'Selected Percentage'), lty = c(1,1,1,1,2), col = c('black', 'gray', 'blue', 'skyblue', 'gray'), pch = c(NA,NA,16,16,NA), pt.cex = 0.4, cex=0.8)
+dev.off()
+
+pdf(file = 'fig1m.pdf', width = 5, height = 5, title = 'SAfig1m')
+par(mar=c(4,4,0.5,0.5))
+plot(x = seq(1,100,1), y = ParamTotals_ThreshPercent_onlyhg_Agg_NoTN, type = 'l', xlab = 'Top X Percent of Parameters Selected', ylab = 'Number of Parameters Selected', ylim = c(0,105), xlim = c(0,100), col = 'gray')
+par(new=TRUE)
+plot(x = seq(1,100,1), y = ParamTotals_hg_Agg_NoTN, type = 'l', ylim = c(0,105), xlim = c(0,100), col = 'gray', xlab = '', ylab = '', axes = FALSE, cex = 0.4)
+par(new=TRUE)
+plot(x = seq(1,100,1), y = ParamTotals_ThreshPercent_hgm_Agg_NoTN, type = 'l', ylim = c(0,105), xlim = c(0,100), col = 'black', xlab = '', ylab = '', axes = FALSE)
+par(new=TRUE)
+plot(x = seq(1,100,1), y = ParamTotals_bgm_Agg, type = 'o', pch = 16, ylim = c(0,105), xlim = c(0,100), col = 'skyblue', xlab = '', ylab = '', axes = FALSE, cex = 0.4)
+par(new=TRUE)
+plot(x = seq(1,100,1), y = ParamTotals_ThreshPercent_gm_Agg, type = 'o', ylim = c(0,105), xlim = c(0,100), col = 'blue', xlab = '', ylab = '', axes = FALSE, pch = 16, cex = 0.4)
 lines(c(10,10), c(-10,200), lty=2, col='gray')
 legend('bottomright', legend = c('95th: Hillslopes (No TN Metrics)', 'Mean: Hillslopes (No TN Metrics)', '95th: Basin', 'Mean: Basin', 'Selected Percentage'), lty = c(1,1,1,1,2), col = c('black', 'gray', 'blue', 'skyblue', 'gray'), pch = c(NA,NA,16,16,NA), pt.cex = 0.4, cex=0.8)
 dev.off()
@@ -3596,254 +3902,12 @@ for (i in 1:length(tmpnames)){
 dev.off()
 
 #  PDF----
-#Annual 5th percentile low flows
-# pdf(file = 'fig1.pdf', height = 8, width = 12, title = 'SAfig1')
-# layout(rbind(c(1,2,3), c(4,5,6)))
-# #Streamflow 05
-# barplot(height = EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)][order(names(EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]), ylab = 'Normalized Mean Abs. Val. of EE', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Lower 5th Percentile of Flow', col = ColPlots_Agg_Paper[order(names(EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]))], border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,250))
-# arrows(seq(0.5,length(EEs05_b_mua_05[-which(names(EEs05_b_mua_m) %in% ColsAggregated)])-0.5,1), EEs05_b_mua_05[-which(names(EEs05_b_mua_m) %in% ColsAggregated)][order(names(EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]), seq(0.5,length(EEs05_b_mua_05[-which(names(EEs05_b_mua_m) %in% ColsAggregated)])-0.5,1), EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)][order(names(EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]), length=0.05, angle=90, code=3)
-# lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(as.numeric(sort(EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top1005_Agg])/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]), as.numeric(sort(EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top1005_Agg])/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)])), col = 'black', lwd = 2)
-# #legend('topright', legend = c('Hillslope: GW', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Soil: Riparian', 'Soil: Other', 'Veg: Trees', 'Veg: Grass', 'Buildings', 'Zone: Atm.'), col = colos_paper[c(1,3,3,3,3,2,2,4,4,6,5)], pch = c(16,16,17,18,15,16,17,16,17,16,16), cex = 1.1, ncol = 2)
-# 
-# #x-axis lines
-# par(xpd=TRUE)
-# SortNames = sort(names(EEs05_b_mua_m)[-which(names(EEs05_b_mua_m) %in% ColsAggregated)])
-# SortNames = SortNames[c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]
-# lines(x = c(-1,-1), y = c(-0.05,0), lty = 1, col = 'black')
-# lines(x = c(0.5+grep(SortNames, pattern = '^h_')[length(grep(SortNames, pattern = '^h_'))], 0.5+grep(SortNames, pattern = '^h_')[length(grep(SortNames, pattern = '^h_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# lines(x = c(0.5+grep(SortNames, pattern = '^l1_')[length(grep(SortNames, pattern = '^l1_'))], 0.5+grep(SortNames, pattern = '^l1_')[length(grep(SortNames, pattern = '^l1_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# lines(x = c(0.5+grep(SortNames, pattern = '^l2_')[length(grep(SortNames, pattern = '^l2_'))], 0.5+grep(SortNames, pattern = '^l2_')[length(grep(SortNames, pattern = '^l2_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# lines(x = c(0.5+grep(SortNames, pattern = '^l3_')[length(grep(SortNames, pattern = '^l3_'))], 0.5+grep(SortNames, pattern = '^l3_')[length(grep(SortNames, pattern = '^l3_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# lines(x = c(0.5+grep(SortNames, pattern = '^l4_')[length(grep(SortNames, pattern = '^l4_'))], 0.5+grep(SortNames, pattern = '^l4_')[length(grep(SortNames, pattern = '^l4_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# #lines(x = c(0.5+grep(SortNames, pattern = '^s8_')[length(grep(SortNames, pattern = '^s8_'))], 0.5+grep(SortNames, pattern = '^s8_')[length(grep(SortNames, pattern = '^s8_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# #lines(x = c(0.5+grep(SortNames, pattern = '^s108_')[length(grep(SortNames, pattern = '^s108_'))], 0.5+grep(SortNames, pattern = '^s108_')[length(grep(SortNames, pattern = '^s108_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# lines(x = c(0.5+grep(SortNames, pattern = '^Soil8_')[length(grep(SortNames, pattern = '^Soil8_'))], 0.5+grep(SortNames, pattern = '^Soil8_')[length(grep(SortNames, pattern = '^Soil8_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# #lines(x = c(0.5+grep(SortNames, pattern = '^s9_')[length(grep(SortNames, pattern = '^s9_'))], 0.5+grep(SortNames, pattern = '^s9_')[length(grep(SortNames, pattern = '^s9_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# #lines(x = c(0.5+grep(SortNames, pattern = '^s109_')[length(grep(SortNames, pattern = '^s109_'))], 0.5+grep(SortNames, pattern = '^s109_')[length(grep(SortNames, pattern = '^s109_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# lines(x = c(0.5+grep(SortNames, pattern = '^Soil9_')[length(grep(SortNames, pattern = '^Soil9_'))], 0.5+grep(SortNames, pattern = '^Soil9_')[length(grep(SortNames, pattern = '^Soil9_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# lines(x = c(0.5+grep(SortNames, pattern = '^v102_')[length(grep(SortNames, pattern = '^v102_'))], 0.5+grep(SortNames, pattern = '^v102_')[length(grep(SortNames, pattern = '^v102_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# lines(x = c(0.5+grep(SortNames, pattern = '^v3_')[length(grep(SortNames, pattern = '^v3_'))], 0.5+grep(SortNames, pattern = '^v3_')[length(grep(SortNames, pattern = '^v3_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# lines(x = c(0.5+grep(SortNames, pattern = '^v4_')[length(grep(SortNames, pattern = '^v4_'))], 0.5+grep(SortNames, pattern = '^v4_')[length(grep(SortNames, pattern = '^v4_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# lines(x = c(0.5+grep(SortNames, pattern = '^z_')[length(grep(SortNames, pattern = '^z_'))], 0.5+grep(SortNames, pattern = '^z_')[length(grep(SortNames, pattern = '^z_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# 
-# #x-axis pch
-# par(new=TRUE)
-# #plot(x = c(1,3.5,5.5,8,11.5,24,46,67,89,135,193,222,232), y = c(-0.06, -0.08, -0.06, -0.08, -0.06, rep(-0.08,8)), col = colos_paper[c(1,3,3,3,3,2,2,2,2,4,4,6,5)], pch = c(16,16,17,18,15,16,17,18,15,16,17,16,16), xlim = c(0,250), ylim = c(0,1), axes = FALSE, xlab = '', ylab = '')
-# plot(x = c(1,3.5,5.5,8,11.5,35,78,135,193,222,232), y = c(-0.06, -0.08, -0.06, -0.08, -0.06, rep(-0.08,6)), col = colos_paper[c(1,3,3,3,3,2,2,4,4,6,5)], pch = c(16,16,17,18,15,16,17,16,17,16,16), xlim = c(0,250), ylim = c(0,1), axes = FALSE, xlab = '', ylab = '')
-# 
-# #Labels for parameters above threshold
-# tmpnames = names(EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)][order(names(EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)][EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)][order(names(EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)] >= RanksMua05_b_Agg$EE05_b[Top1005_Agg]]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]))
-# for (i in 1:length(tmpnames)){
-#   text(x = which(names(EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)][order(names(EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]) == tmpnames[i]),
-#        y = offset(EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)][order(names(EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)][which(names(EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)][order(names(EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]) == tmpnames[i])]/max(EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)])),
-#        labels = as.character(which(names(EEs05_b_mua_95[-which(names(EEs05_b_mua_m) %in% ColsAggregated)][order(names(EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]) == tmpnames[i])))
-# }
-# #Streamflow mid
-# par(xpd=FALSE)
-# barplot(height = EEsot_b_mua_m[-which(names(EEsot_b_mua_m) %in% ColsAggregated)][order(names(EEsot_b_mua_m[-which(names(EEsot_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEsot_b_mua_95[-which(names(EEsot_b_mua_m) %in% ColsAggregated)]), ylab = 'Normalized Mean Abs. Val. of EE', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for 5th - 95th Percentile of Flow', col = ColPlots_Agg_Paper[order(names(EEsot_b_mua_m[-which(names(EEsot_b_mua_m) %in% ColsAggregated)]))], border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,250))
-# arrows(seq(0.5,length(EEsot_b_mua_05[-which(names(EEsot_b_mua_m) %in% ColsAggregated)])-0.5,1), EEsot_b_mua_05[-which(names(EEsot_b_mua_m) %in% ColsAggregated)][order(names(EEsot_b_mua_m[-which(names(EEsot_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEsot_b_mua_95[-which(names(EEsot_b_mua_m) %in% ColsAggregated)]), seq(0.5,length(EEsot_b_mua_05[-which(names(EEsot_b_mua_m) %in% ColsAggregated)])-0.5,1), EEsot_b_mua_95[-which(names(EEsot_b_mua_m) %in% ColsAggregated)][order(names(EEsot_b_mua_m[-which(names(EEsot_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEsot_b_mua_95[-which(names(EEsot_b_mua_m) %in% ColsAggregated)]), length=0.05, angle=90, code=3)
-# lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(as.numeric(sort(EEsot_b_mua_m[-which(names(EEsot_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10ot_Agg])/max(EEsot_b_mua_95[-which(names(EEsot_b_mua_m) %in% ColsAggregated)]), as.numeric(sort(EEsot_b_mua_m[-which(names(EEsot_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10ot_Agg])/max(EEsot_b_mua_95[-which(names(EEsot_b_mua_m) %in% ColsAggregated)])), col = 'black', lwd = 2)
-# legend('topright', legend = c('Hillslope: GW', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Soil: Riparian', 'Soil: Other', 'Veg: Trees', 'Veg: Grass', 'Buildings', 'Zone: Atm.'), col = colos_paper[c(1,3,3,3,3,2,2,4,4,6,5)], pch = c(16,16,17,18,15,16,17,16,17,16,16), cex = 1.1, ncol = 2)
-# 
-# #x-axis lines
-# par(xpd=TRUE)
-# SortNames = sort(names(EEsot_b_mua_m)[-which(names(EEsot_b_mua_m) %in% ColsAggregated)])
-# SortNames = SortNames[c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]
-# lines(x = c(-1,-1), y = c(-0.05,0), lty = 1, col = 'black')
-# lines(x = c(0.5+grep(SortNames, pattern = '^h_')[length(grep(SortNames, pattern = '^h_'))], 0.5+grep(SortNames, pattern = '^h_')[length(grep(SortNames, pattern = '^h_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# lines(x = c(0.5+grep(SortNames, pattern = '^l1_')[length(grep(SortNames, pattern = '^l1_'))], 0.5+grep(SortNames, pattern = '^l1_')[length(grep(SortNames, pattern = '^l1_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# lines(x = c(0.5+grep(SortNames, pattern = '^l2_')[length(grep(SortNames, pattern = '^l2_'))], 0.5+grep(SortNames, pattern = '^l2_')[length(grep(SortNames, pattern = '^l2_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# lines(x = c(0.5+grep(SortNames, pattern = '^l3_')[length(grep(SortNames, pattern = '^l3_'))], 0.5+grep(SortNames, pattern = '^l3_')[length(grep(SortNames, pattern = '^l3_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# lines(x = c(0.5+grep(SortNames, pattern = '^l4_')[length(grep(SortNames, pattern = '^l4_'))], 0.5+grep(SortNames, pattern = '^l4_')[length(grep(SortNames, pattern = '^l4_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# #lines(x = c(0.5+grep(SortNames, pattern = '^s8_')[length(grep(SortNames, pattern = '^s8_'))], 0.5+grep(SortNames, pattern = '^s8_')[length(grep(SortNames, pattern = '^s8_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# #lines(x = c(0.5+grep(SortNames, pattern = '^s108_')[length(grep(SortNames, pattern = '^s108_'))], 0.5+grep(SortNames, pattern = '^s108_')[length(grep(SortNames, pattern = '^s108_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# lines(x = c(0.5+grep(SortNames, pattern = '^Soil8_')[length(grep(SortNames, pattern = '^Soil8_'))], 0.5+grep(SortNames, pattern = '^Soil8_')[length(grep(SortNames, pattern = '^Soil8_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# #lines(x = c(0.5+grep(SortNames, pattern = '^s9_')[length(grep(SortNames, pattern = '^s9_'))], 0.5+grep(SortNames, pattern = '^s9_')[length(grep(SortNames, pattern = '^s9_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# #lines(x = c(0.5+grep(SortNames, pattern = '^s109_')[length(grep(SortNames, pattern = '^s109_'))], 0.5+grep(SortNames, pattern = '^s109_')[length(grep(SortNames, pattern = '^s109_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# lines(x = c(0.5+grep(SortNames, pattern = '^Soil9_')[length(grep(SortNames, pattern = '^Soil9_'))], 0.5+grep(SortNames, pattern = '^Soil9_')[length(grep(SortNames, pattern = '^Soil9_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# lines(x = c(0.5+grep(SortNames, pattern = '^v102_')[length(grep(SortNames, pattern = '^v102_'))], 0.5+grep(SortNames, pattern = '^v102_')[length(grep(SortNames, pattern = '^v102_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# lines(x = c(0.5+grep(SortNames, pattern = '^v3_')[length(grep(SortNames, pattern = '^v3_'))], 0.5+grep(SortNames, pattern = '^v3_')[length(grep(SortNames, pattern = '^v3_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# lines(x = c(0.5+grep(SortNames, pattern = '^v4_')[length(grep(SortNames, pattern = '^v4_'))], 0.5+grep(SortNames, pattern = '^v4_')[length(grep(SortNames, pattern = '^v4_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# lines(x = c(0.5+grep(SortNames, pattern = '^z_')[length(grep(SortNames, pattern = '^z_'))], 0.5+grep(SortNames, pattern = '^z_')[length(grep(SortNames, pattern = '^z_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# 
-# #x-axis pch
-# par(new=TRUE)
-# #plot(x = c(1,3.5,5.5,8,11.5,24,46,67,89,135,193,222,232), y = c(-0.06, -0.08, -0.06, -0.08, -0.06, rep(-0.08,8)), col = colos_paper[c(1,3,3,3,3,2,2,2,2,4,4,6,5)], pch = c(16,16,17,18,15,16,17,18,15,16,17,16,16), xlim = c(0,250), ylim = c(0,1), axes = FALSE, xlab = '', ylab = '')
-# plot(x = c(1,3.5,5.5,8,11.5,35,78,135,193,222,232), y = c(-0.06, -0.08, -0.06, -0.08, -0.06, rep(-0.08,6)), col = colos_paper[c(1,3,3,3,3,2,2,4,4,6,5)], pch = c(16,16,17,18,15,16,17,16,17,16,16), xlim = c(0,250), ylim = c(0,1), axes = FALSE, xlab = '', ylab = '')
-# 
-# #Labels for parameters above threshold
-# tmpnames = names(EEsot_b_mua_95[-which(names(EEsot_b_mua_m) %in% ColsAggregated)][order(names(EEsot_b_mua_m[-which(names(EEsot_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)][EEsot_b_mua_95[-which(names(EEsot_b_mua_m) %in% ColsAggregated)][order(names(EEsot_b_mua_m[-which(names(EEsot_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)] >= RanksMuaot_b_Agg$EEot_b[Top10ot_Agg]]/max(EEsot_b_mua_95[-which(names(EEsot_b_mua_m) %in% ColsAggregated)]))
-# for (i in 1:length(tmpnames)){
-#   text(x = which(names(EEsot_b_mua_95[-which(names(EEsot_b_mua_m) %in% ColsAggregated)][order(names(EEsot_b_mua_m[-which(names(EEsot_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]) == tmpnames[i]),
-#        y = offset(EEsot_b_mua_95[-which(names(EEsot_b_mua_m) %in% ColsAggregated)][order(names(EEsot_b_mua_m[-which(names(EEsot_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)][which(names(EEsot_b_mua_95[-which(names(EEsot_b_mua_m) %in% ColsAggregated)][order(names(EEsot_b_mua_m[-which(names(EEsot_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]) == tmpnames[i])]/max(EEsot_b_mua_95[-which(names(EEsot_b_mua_m) %in% ColsAggregated)])),
-#        labels = as.character(which(names(EEsot_b_mua_95[-which(names(EEsot_b_mua_m) %in% ColsAggregated)][order(names(EEsot_b_mua_m[-which(names(EEsot_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]) == tmpnames[i])))
-# }
-# 
-# #Streamflow 95
-# par(xpd=FALSE)
-# barplot(height = EEs95_b_mua_m[-which(names(EEs95_b_mua_m) %in% ColsAggregated)][order(names(EEs95_b_mua_m[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]), ylab = 'Normalized Mean Abs. Val. of EE', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Upper 95th Percentile of Flow', col = ColPlots_Agg_Paper[order(names(EEs95_b_mua_m[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]))], border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,250))
-# arrows(seq(0.5,length(EEs95_b_mua_05[-which(names(EEs95_b_mua_m) %in% ColsAggregated)])-0.5,1), EEs95_b_mua_05[-which(names(EEs95_b_mua_m) %in% ColsAggregated)][order(names(EEs95_b_mua_m[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]), seq(0.5,length(EEs95_b_mua_05[-which(names(EEs95_b_mua_m) %in% ColsAggregated)])-0.5,1), EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)][order(names(EEs95_b_mua_m[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]), length=0.05, angle=90, code=3)
-# lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(as.numeric(sort(EEs95_b_mua_m[-which(names(EEs95_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top1095_Agg])/max(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]), as.numeric(sort(EEs95_b_mua_m[-which(names(EEs95_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top1095_Agg])/max(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)])), col = 'black', lwd = 2)
-# 
-# #x-axis lines
-# par(xpd=TRUE)
-# SortNames = sort(names(EEs95_b_mua_m)[-which(names(EEs95_b_mua_m) %in% ColsAggregated)])
-# SortNames = SortNames[c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]
-# lines(x = c(-1,-1), y = c(-0.05,0), lty = 1, col = 'black')
-# lines(x = c(0.5+grep(SortNames, pattern = '^h_')[length(grep(SortNames, pattern = '^h_'))], 0.5+grep(SortNames, pattern = '^h_')[length(grep(SortNames, pattern = '^h_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# lines(x = c(0.5+grep(SortNames, pattern = '^l1_')[length(grep(SortNames, pattern = '^l1_'))], 0.5+grep(SortNames, pattern = '^l1_')[length(grep(SortNames, pattern = '^l1_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# lines(x = c(0.5+grep(SortNames, pattern = '^l2_')[length(grep(SortNames, pattern = '^l2_'))], 0.5+grep(SortNames, pattern = '^l2_')[length(grep(SortNames, pattern = '^l2_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# lines(x = c(0.5+grep(SortNames, pattern = '^l3_')[length(grep(SortNames, pattern = '^l3_'))], 0.5+grep(SortNames, pattern = '^l3_')[length(grep(SortNames, pattern = '^l3_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# lines(x = c(0.5+grep(SortNames, pattern = '^l4_')[length(grep(SortNames, pattern = '^l4_'))], 0.5+grep(SortNames, pattern = '^l4_')[length(grep(SortNames, pattern = '^l4_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# #lines(x = c(0.5+grep(SortNames, pattern = '^s8_')[length(grep(SortNames, pattern = '^s8_'))], 0.5+grep(SortNames, pattern = '^s8_')[length(grep(SortNames, pattern = '^s8_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# #lines(x = c(0.5+grep(SortNames, pattern = '^s108_')[length(grep(SortNames, pattern = '^s108_'))], 0.5+grep(SortNames, pattern = '^s108_')[length(grep(SortNames, pattern = '^s108_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# lines(x = c(0.5+grep(SortNames, pattern = '^Soil8_')[length(grep(SortNames, pattern = '^Soil8_'))], 0.5+grep(SortNames, pattern = '^Soil8_')[length(grep(SortNames, pattern = '^Soil8_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# #lines(x = c(0.5+grep(SortNames, pattern = '^s9_')[length(grep(SortNames, pattern = '^s9_'))], 0.5+grep(SortNames, pattern = '^s9_')[length(grep(SortNames, pattern = '^s9_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# #lines(x = c(0.5+grep(SortNames, pattern = '^s109_')[length(grep(SortNames, pattern = '^s109_'))], 0.5+grep(SortNames, pattern = '^s109_')[length(grep(SortNames, pattern = '^s109_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# lines(x = c(0.5+grep(SortNames, pattern = '^Soil9_')[length(grep(SortNames, pattern = '^Soil9_'))], 0.5+grep(SortNames, pattern = '^Soil9_')[length(grep(SortNames, pattern = '^Soil9_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# lines(x = c(0.5+grep(SortNames, pattern = '^v102_')[length(grep(SortNames, pattern = '^v102_'))], 0.5+grep(SortNames, pattern = '^v102_')[length(grep(SortNames, pattern = '^v102_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# lines(x = c(0.5+grep(SortNames, pattern = '^v3_')[length(grep(SortNames, pattern = '^v3_'))], 0.5+grep(SortNames, pattern = '^v3_')[length(grep(SortNames, pattern = '^v3_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# lines(x = c(0.5+grep(SortNames, pattern = '^v4_')[length(grep(SortNames, pattern = '^v4_'))], 0.5+grep(SortNames, pattern = '^v4_')[length(grep(SortNames, pattern = '^v4_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# lines(x = c(0.5+grep(SortNames, pattern = '^z_')[length(grep(SortNames, pattern = '^z_'))], 0.5+grep(SortNames, pattern = '^z_')[length(grep(SortNames, pattern = '^z_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# 
-# #x-axis pch
-# par(new=TRUE)
-# #plot(x = c(1,3.5,5.5,8,11.5,24,46,67,89,135,193,222,232), y = c(-0.06, -0.08, -0.06, -0.08, -0.06, rep(-0.08,8)), col = colos_paper[c(1,3,3,3,3,2,2,2,2,4,4,6,5)], pch = c(16,16,17,18,15,16,17,18,15,16,17,16,16), xlim = c(0,250), ylim = c(0,1), axes = FALSE, xlab = '', ylab = '')
-# plot(x = c(1,3.5,5.5,8,11.5,35,78,135,193,222,232), y = c(-0.06, -0.08, -0.06, -0.08, -0.06, rep(-0.08,6)), col = colos_paper[c(1,3,3,3,3,2,2,4,4,6,5)], pch = c(16,16,17,18,15,16,17,16,17,16,16), xlim = c(0,250), ylim = c(0,1), axes = FALSE, xlab = '', ylab = '')
-# 
-# #Labels for parameters above threshold
-# tmpnames = names(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)][order(names(EEs95_b_mua_m[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)][EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)][order(names(EEs95_b_mua_m[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)] >= RanksMua95_b_Agg$EE95_b[Top1095_Agg]]/max(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]))
-# for (i in 1:length(tmpnames)){
-#   text(x = which(names(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)][order(names(EEs95_b_mua_m[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]) == tmpnames[i]),
-#        y = offset(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)][order(names(EEs95_b_mua_m[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)][which(names(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)][order(names(EEs95_b_mua_m[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]) == tmpnames[i])]/max(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)])),
-#        labels = as.character(which(names(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)][order(names(EEs95_b_mua_m[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]) == tmpnames[i])))
-# }
-# 
-# #TN 05
-# par(xpd=FALSE)
-# barplot(height = EEsTN05_b_mua_m[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)][order(names(EEsTN05_b_mua_m[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)]), ylab = 'Normalized Mean Abs. Val. of EE', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Lower 5th Percentile of TN', col = ColPlots_Agg_Paper[order(names(EEsTN05_b_mua_m[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)]))], border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,250))
-# arrows(seq(0.5,length(EEsTN05_b_mua_05[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)])-0.5,1), EEsTN05_b_mua_05[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)][order(names(EEsTN05_b_mua_m[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)]), seq(0.5,length(EEsTN05_b_mua_05[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)])-0.5,1), EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)][order(names(EEsTN05_b_mua_m[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)]), length=0.05, angle=90, code=3)
-# lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(as.numeric(sort(EEsTN05_b_mua_m[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10TN05_Agg])/max(EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)]), as.numeric(sort(EEsTN05_b_mua_m[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10TN05_Agg])/max(EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)])), col = 'black', lwd = 2)
-# 
-# #x-axis lines
-# par(xpd=TRUE)
-# SortNames = sort(names(EEsTN05_b_mua_m)[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)])
-# SortNames = SortNames[c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]
-# lines(x = c(-1,-1), y = c(-0.05,0), lty = 1, col = 'black')
-# lines(x = c(0.5+grep(SortNames, pattern = '^h_')[length(grep(SortNames, pattern = '^h_'))], 0.5+grep(SortNames, pattern = '^h_')[length(grep(SortNames, pattern = '^h_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# lines(x = c(0.5+grep(SortNames, pattern = '^l1_')[length(grep(SortNames, pattern = '^l1_'))], 0.5+grep(SortNames, pattern = '^l1_')[length(grep(SortNames, pattern = '^l1_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# lines(x = c(0.5+grep(SortNames, pattern = '^l2_')[length(grep(SortNames, pattern = '^l2_'))], 0.5+grep(SortNames, pattern = '^l2_')[length(grep(SortNames, pattern = '^l2_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# lines(x = c(0.5+grep(SortNames, pattern = '^l3_')[length(grep(SortNames, pattern = '^l3_'))], 0.5+grep(SortNames, pattern = '^l3_')[length(grep(SortNames, pattern = '^l3_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# lines(x = c(0.5+grep(SortNames, pattern = '^l4_')[length(grep(SortNames, pattern = '^l4_'))], 0.5+grep(SortNames, pattern = '^l4_')[length(grep(SortNames, pattern = '^l4_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# #lines(x = c(0.5+grep(SortNames, pattern = '^s8_')[length(grep(SortNames, pattern = '^s8_'))], 0.5+grep(SortNames, pattern = '^s8_')[length(grep(SortNames, pattern = '^s8_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# #lines(x = c(0.5+grep(SortNames, pattern = '^s108_')[length(grep(SortNames, pattern = '^s108_'))], 0.5+grep(SortNames, pattern = '^s108_')[length(grep(SortNames, pattern = '^s108_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# lines(x = c(0.5+grep(SortNames, pattern = '^Soil8_')[length(grep(SortNames, pattern = '^Soil8_'))], 0.5+grep(SortNames, pattern = '^Soil8_')[length(grep(SortNames, pattern = '^Soil8_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# #lines(x = c(0.5+grep(SortNames, pattern = '^s9_')[length(grep(SortNames, pattern = '^s9_'))], 0.5+grep(SortNames, pattern = '^s9_')[length(grep(SortNames, pattern = '^s9_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# #lines(x = c(0.5+grep(SortNames, pattern = '^s109_')[length(grep(SortNames, pattern = '^s109_'))], 0.5+grep(SortNames, pattern = '^s109_')[length(grep(SortNames, pattern = '^s109_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# lines(x = c(0.5+grep(SortNames, pattern = '^Soil9_')[length(grep(SortNames, pattern = '^Soil9_'))], 0.5+grep(SortNames, pattern = '^Soil9_')[length(grep(SortNames, pattern = '^Soil9_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# lines(x = c(0.5+grep(SortNames, pattern = '^v102_')[length(grep(SortNames, pattern = '^v102_'))], 0.5+grep(SortNames, pattern = '^v102_')[length(grep(SortNames, pattern = '^v102_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# lines(x = c(0.5+grep(SortNames, pattern = '^v3_')[length(grep(SortNames, pattern = '^v3_'))], 0.5+grep(SortNames, pattern = '^v3_')[length(grep(SortNames, pattern = '^v3_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# lines(x = c(0.5+grep(SortNames, pattern = '^v4_')[length(grep(SortNames, pattern = '^v4_'))], 0.5+grep(SortNames, pattern = '^v4_')[length(grep(SortNames, pattern = '^v4_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# lines(x = c(0.5+grep(SortNames, pattern = '^z_')[length(grep(SortNames, pattern = '^z_'))], 0.5+grep(SortNames, pattern = '^z_')[length(grep(SortNames, pattern = '^z_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# 
-# #x-axis pch
-# par(new=TRUE)
-# #plot(x = c(1,3.5,5.5,8,11.5,24,46,67,89,135,193,222,232), y = c(-0.06, -0.08, -0.06, -0.08, -0.06, rep(-0.08,8)), col = colos_paper[c(1,3,3,3,3,2,2,2,2,4,4,6,5)], pch = c(16,16,17,18,15,16,17,18,15,16,17,16,16), xlim = c(0,250), ylim = c(0,1), axes = FALSE, xlab = '', ylab = '')
-# plot(x = c(1,3.5,5.5,8,11.5,35,78,135,193,222,232), y = c(-0.06, -0.08, -0.06, -0.08, -0.06, rep(-0.08,6)), col = colos_paper[c(1,3,3,3,3,2,2,4,4,6,5)], pch = c(16,16,17,18,15,16,17,16,17,16,16), xlim = c(0,250), ylim = c(0,1), axes = FALSE, xlab = '', ylab = '')
-# 
-# #Labels for parameters above threshold
-# tmpnames = names(EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)][order(names(EEsTN05_b_mua_m[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)][EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)][order(names(EEsTN05_b_mua_m[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)] >= RanksMuaTN05_b_Agg$EETN05_b[Top10TN05_Agg]]/max(EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)]))
-# for (i in 1:length(tmpnames)){
-#   text(x = which(names(EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)][order(names(EEsTN05_b_mua_m[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]) == tmpnames[i]),
-#        y = offset(EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)][order(names(EEsTN05_b_mua_m[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)][which(names(EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)][order(names(EEsTN05_b_mua_m[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]) == tmpnames[i])]/max(EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)])),
-#        labels = as.character(which(names(EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)][order(names(EEsTN05_b_mua_m[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]) == tmpnames[i])))
-# }
-# 
-# #TN mid
-# par(xpd=FALSE)
-# barplot(height = EEsTNMed_b_mua_m[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)][order(names(EEsTNMed_b_mua_m[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)]), ylab = 'Normalized Mean Abs. Val. of EE', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Mean of TN', col = ColPlots_Agg_Paper[order(names(EEsTNMed_b_mua_m[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)]))], border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,250))
-# arrows(seq(0.5,length(EEsTNMed_b_mua_05[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)])-0.5,1), EEsTNMed_b_mua_05[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)][order(names(EEsTNMed_b_mua_m[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)]), seq(0.5,length(EEsTNMed_b_mua_05[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)])-0.5,1), EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)][order(names(EEsTNMed_b_mua_m[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)]), length=0.05, angle=90, code=3)
-# lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(as.numeric(sort(EEsTNMed_b_mua_m[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10TNMed_Agg])/max(EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)]), as.numeric(sort(EEsTNMed_b_mua_m[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10TNMed_Agg])/max(EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)])), col = 'black', lwd = 2)
-# 
-# #x-axis lines
-# par(xpd=TRUE)
-# SortNames = sort(names(EEsTNMed_b_mua_m)[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)])
-# SortNames = SortNames[c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]
-# lines(x = c(-1,-1), y = c(-0.05,0), lty = 1, col = 'black')
-# lines(x = c(0.5+grep(SortNames, pattern = '^h_')[length(grep(SortNames, pattern = '^h_'))], 0.5+grep(SortNames, pattern = '^h_')[length(grep(SortNames, pattern = '^h_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# lines(x = c(0.5+grep(SortNames, pattern = '^l1_')[length(grep(SortNames, pattern = '^l1_'))], 0.5+grep(SortNames, pattern = '^l1_')[length(grep(SortNames, pattern = '^l1_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# lines(x = c(0.5+grep(SortNames, pattern = '^l2_')[length(grep(SortNames, pattern = '^l2_'))], 0.5+grep(SortNames, pattern = '^l2_')[length(grep(SortNames, pattern = '^l2_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# lines(x = c(0.5+grep(SortNames, pattern = '^l3_')[length(grep(SortNames, pattern = '^l3_'))], 0.5+grep(SortNames, pattern = '^l3_')[length(grep(SortNames, pattern = '^l3_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# lines(x = c(0.5+grep(SortNames, pattern = '^l4_')[length(grep(SortNames, pattern = '^l4_'))], 0.5+grep(SortNames, pattern = '^l4_')[length(grep(SortNames, pattern = '^l4_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# #lines(x = c(0.5+grep(SortNames, pattern = '^s8_')[length(grep(SortNames, pattern = '^s8_'))], 0.5+grep(SortNames, pattern = '^s8_')[length(grep(SortNames, pattern = '^s8_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# #lines(x = c(0.5+grep(SortNames, pattern = '^s108_')[length(grep(SortNames, pattern = '^s108_'))], 0.5+grep(SortNames, pattern = '^s108_')[length(grep(SortNames, pattern = '^s108_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# lines(x = c(0.5+grep(SortNames, pattern = '^Soil8_')[length(grep(SortNames, pattern = '^Soil8_'))], 0.5+grep(SortNames, pattern = '^Soil8_')[length(grep(SortNames, pattern = '^Soil8_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# #lines(x = c(0.5+grep(SortNames, pattern = '^s9_')[length(grep(SortNames, pattern = '^s9_'))], 0.5+grep(SortNames, pattern = '^s9_')[length(grep(SortNames, pattern = '^s9_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# #lines(x = c(0.5+grep(SortNames, pattern = '^s109_')[length(grep(SortNames, pattern = '^s109_'))], 0.5+grep(SortNames, pattern = '^s109_')[length(grep(SortNames, pattern = '^s109_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# lines(x = c(0.5+grep(SortNames, pattern = '^Soil9_')[length(grep(SortNames, pattern = '^Soil9_'))], 0.5+grep(SortNames, pattern = '^Soil9_')[length(grep(SortNames, pattern = '^Soil9_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# lines(x = c(0.5+grep(SortNames, pattern = '^v102_')[length(grep(SortNames, pattern = '^v102_'))], 0.5+grep(SortNames, pattern = '^v102_')[length(grep(SortNames, pattern = '^v102_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# lines(x = c(0.5+grep(SortNames, pattern = '^v3_')[length(grep(SortNames, pattern = '^v3_'))], 0.5+grep(SortNames, pattern = '^v3_')[length(grep(SortNames, pattern = '^v3_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# lines(x = c(0.5+grep(SortNames, pattern = '^v4_')[length(grep(SortNames, pattern = '^v4_'))], 0.5+grep(SortNames, pattern = '^v4_')[length(grep(SortNames, pattern = '^v4_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# lines(x = c(0.5+grep(SortNames, pattern = '^z_')[length(grep(SortNames, pattern = '^z_'))], 0.5+grep(SortNames, pattern = '^z_')[length(grep(SortNames, pattern = '^z_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# 
-# #x-axis pch
-# par(new=TRUE)
-# #plot(x = c(1,3.5,5.5,8,11.5,24,46,67,89,135,193,222,232), y = c(-0.06, -0.08, -0.06, -0.08, -0.06, rep(-0.08,8)), col = colos_paper[c(1,3,3,3,3,2,2,2,2,4,4,6,5)], pch = c(16,16,17,18,15,16,17,18,15,16,17,16,16), xlim = c(0,250), ylim = c(0,1), axes = FALSE, xlab = '', ylab = '')
-# plot(x = c(1,3.5,5.5,8,11.5,35,78,135,193,222,232), y = c(-0.06, -0.08, -0.06, -0.08, -0.06, rep(-0.08,6)), col = colos_paper[c(1,3,3,3,3,2,2,4,4,6,5)], pch = c(16,16,17,18,15,16,17,16,17,16,16), xlim = c(0,250), ylim = c(0,1), axes = FALSE, xlab = '', ylab = '')
-# 
-# #Labels for parameters above threshold
-# tmpnames = names(EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)][order(names(EEsTNMed_b_mua_m[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)][EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)][order(names(EEsTNMed_b_mua_m[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)] >= RanksMuaTNMed_b_Agg$EETNMed_b[Top10TNMed_Agg]]/max(EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)]))
-# for (i in 1:length(tmpnames)){
-#   text(x = which(names(EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)][order(names(EEsTNMed_b_mua_m[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]) == tmpnames[i]),
-#        y = offset(EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)][order(names(EEsTNMed_b_mua_m[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)][which(names(EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)][order(names(EEsTNMed_b_mua_m[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]) == tmpnames[i])]/max(EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)])),
-#        labels = as.character(which(names(EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)][order(names(EEsTNMed_b_mua_m[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]) == tmpnames[i])))
-# }
-# 
-# #TN 95
-# par(xpd=FALSE)
-# barplot(height = EEsTN95_b_mua_m[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)][order(names(EEsTN95_b_mua_m[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)]), ylab = 'Normalized Mean Abs. Val. of EE', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Upper 95th Percentile of TN', col = ColPlots_Agg_Paper[order(names(EEsTN95_b_mua_m[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)]))], border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,250))
-# arrows(seq(0.5,length(EEsTN95_b_mua_05[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)])-0.5,1), EEsTN95_b_mua_05[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)][order(names(EEsTN95_b_mua_m[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)]), seq(0.5,length(EEsTN95_b_mua_05[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)])-0.5,1), EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)][order(names(EEsTN95_b_mua_m[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)]), length=0.05, angle=90, code=3)
-# lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(as.numeric(sort(EEsTN95_b_mua_m[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10TN95_Agg])/max(EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)]), as.numeric(sort(EEsTN95_b_mua_m[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10TN95_Agg])/max(EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)])), col = 'black', lwd = 2)
-# 
-# #x-axis lines
-# par(xpd=TRUE)
-# SortNames = sort(names(EEsTN95_b_mua_m)[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)])
-# SortNames = SortNames[c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]
-# lines(x = c(-1,-1), y = c(-0.05,0), lty = 1, col = 'black')
-# lines(x = c(0.5+grep(SortNames, pattern = '^h_')[length(grep(SortNames, pattern = '^h_'))], 0.5+grep(SortNames, pattern = '^h_')[length(grep(SortNames, pattern = '^h_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# lines(x = c(0.5+grep(SortNames, pattern = '^l1_')[length(grep(SortNames, pattern = '^l1_'))], 0.5+grep(SortNames, pattern = '^l1_')[length(grep(SortNames, pattern = '^l1_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# lines(x = c(0.5+grep(SortNames, pattern = '^l2_')[length(grep(SortNames, pattern = '^l2_'))], 0.5+grep(SortNames, pattern = '^l2_')[length(grep(SortNames, pattern = '^l2_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# lines(x = c(0.5+grep(SortNames, pattern = '^l3_')[length(grep(SortNames, pattern = '^l3_'))], 0.5+grep(SortNames, pattern = '^l3_')[length(grep(SortNames, pattern = '^l3_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# lines(x = c(0.5+grep(SortNames, pattern = '^l4_')[length(grep(SortNames, pattern = '^l4_'))], 0.5+grep(SortNames, pattern = '^l4_')[length(grep(SortNames, pattern = '^l4_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# #lines(x = c(0.5+grep(SortNames, pattern = '^s8_')[length(grep(SortNames, pattern = '^s8_'))], 0.5+grep(SortNames, pattern = '^s8_')[length(grep(SortNames, pattern = '^s8_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# #lines(x = c(0.5+grep(SortNames, pattern = '^s108_')[length(grep(SortNames, pattern = '^s108_'))], 0.5+grep(SortNames, pattern = '^s108_')[length(grep(SortNames, pattern = '^s108_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# lines(x = c(0.5+grep(SortNames, pattern = '^Soil8_')[length(grep(SortNames, pattern = '^Soil8_'))], 0.5+grep(SortNames, pattern = '^Soil8_')[length(grep(SortNames, pattern = '^Soil8_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# #lines(x = c(0.5+grep(SortNames, pattern = '^s9_')[length(grep(SortNames, pattern = '^s9_'))], 0.5+grep(SortNames, pattern = '^s9_')[length(grep(SortNames, pattern = '^s9_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# #lines(x = c(0.5+grep(SortNames, pattern = '^s109_')[length(grep(SortNames, pattern = '^s109_'))], 0.5+grep(SortNames, pattern = '^s109_')[length(grep(SortNames, pattern = '^s109_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# lines(x = c(0.5+grep(SortNames, pattern = '^Soil9_')[length(grep(SortNames, pattern = '^Soil9_'))], 0.5+grep(SortNames, pattern = '^Soil9_')[length(grep(SortNames, pattern = '^Soil9_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# lines(x = c(0.5+grep(SortNames, pattern = '^v102_')[length(grep(SortNames, pattern = '^v102_'))], 0.5+grep(SortNames, pattern = '^v102_')[length(grep(SortNames, pattern = '^v102_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# lines(x = c(0.5+grep(SortNames, pattern = '^v3_')[length(grep(SortNames, pattern = '^v3_'))], 0.5+grep(SortNames, pattern = '^v3_')[length(grep(SortNames, pattern = '^v3_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# lines(x = c(0.5+grep(SortNames, pattern = '^v4_')[length(grep(SortNames, pattern = '^v4_'))], 0.5+grep(SortNames, pattern = '^v4_')[length(grep(SortNames, pattern = '^v4_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# lines(x = c(0.5+grep(SortNames, pattern = '^z_')[length(grep(SortNames, pattern = '^z_'))], 0.5+grep(SortNames, pattern = '^z_')[length(grep(SortNames, pattern = '^z_'))]), y = c(-0.05,0), lty = 1, col = 'black')
-# 
-# #x-axis pch
-# par(new=TRUE)
-# #plot(x = c(1,3.5,5.5,8,11.5,24,46,67,89,135,193,222,232), y = c(-0.06, -0.08, -0.06, -0.08, -0.06, rep(-0.08,8)), col = colos_paper[c(1,3,3,3,3,2,2,2,2,4,4,6,5)], pch = c(16,16,17,18,15,16,17,18,15,16,17,16,16), xlim = c(0,250), ylim = c(0,1), axes = FALSE, xlab = '', ylab = '')
-# plot(x = c(1,3.5,5.5,8,11.5,35,78,135,193,222,232), y = c(-0.06, -0.08, -0.06, -0.08, -0.06, rep(-0.08,6)), col = colos_paper[c(1,3,3,3,3,2,2,4,4,6,5)], pch = c(16,16,17,18,15,16,17,16,17,16,16), xlim = c(0,250), ylim = c(0,1), axes = FALSE, xlab = '', ylab = '')
-# 
-# #Labels for parameters above threshold
-# tmpnames = names(EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)][order(names(EEsTN95_b_mua_m[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)][EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)][order(names(EEsTN95_b_mua_m[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)] >= RanksMuaTN95_b_Agg$EETN95_b[Top10TN95_Agg]]/max(EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)]))
-# for (i in 1:length(tmpnames)){
-#   text(x = which(names(EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)][order(names(EEsTN95_b_mua_m[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]) == tmpnames[i]),
-#        y = offset(EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)][order(names(EEsTN95_b_mua_m[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)][which(names(EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)][order(names(EEsTN95_b_mua_m[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]) == tmpnames[i])]/max(EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)])),
-#        labels = as.character(which(names(EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)][order(names(EEsTN95_b_mua_m[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]) == tmpnames[i])))
-# }
-# dev.off()
-
-pdf(file = 'fig2.pdf', height = 8, width = 12, title = 'SAfig1')
-layout(rbind(c(1,2,3), c(4,5,6)))
+#   Figure 2----
+pdf(file = 'fig2.pdf', height = 12, width = 8, title = 'SAfig2')
+layout(rbind(c(1,4), c(2,5), c(3,6)))
+par(mar=c(1.1, 4.1, 4.1, 2.1))
 #Streamflow 05g
-barplot(height = EEs05g_b_mua_m[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)][order(names(EEs05g_b_mua_m[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEs05g_b_mua_95[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)]), ylab = 'Normalized Mean Abs. Val. of EE', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Lower 5th Percentile of Flow', col = ColPlots_Agg_Paper[order(names(EEs05g_b_mua_m[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)]))], border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,250))
+barplot(height = EEs05g_b_mua_m[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)][order(names(EEs05g_b_mua_m[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEs05g_b_mua_95[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)]), ylab = '', xlab = '', names.arg = NA, main = 'Metric: SAE for Lower 5th Percentile of Flow', col = ColPlots_Agg_Paper[order(names(EEs05g_b_mua_m[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)]))], border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,250))
 arrows(seq(0.5,length(EEs05g_b_mua_05[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)])-0.5,1), EEs05g_b_mua_05[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)][order(names(EEs05g_b_mua_m[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEs05g_b_mua_95[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)]), seq(0.5,length(EEs05g_b_mua_05[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)])-0.5,1), EEs05g_b_mua_95[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)][order(names(EEs05g_b_mua_m[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEs05g_b_mua_95[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)]), length=0.05, angle=90, code=3)
 lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(as.numeric(sort(EEs05g_b_mua_m[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top1005g_Agg])/max(EEs05g_b_mua_95[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)]), as.numeric(sort(EEs05g_b_mua_m[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top1005g_Agg])/max(EEs05g_b_mua_95[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)])), col = 'black', lwd = 2)
 #legend('topright', legend = c('Hillslope: GW', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Soil: Riparian', 'Soil: Other', 'Veg: Trees', 'Veg: Grass', 'Buildings', 'Zone: Atm.'), col = colos_paper[c(1,3,3,3,3,2,2,4,4,6,5)], pch = c(16,16,17,18,15,16,17,16,17,16,16), cex = 1.1, ncol = 2)
@@ -3872,21 +3936,24 @@ lines(x = c(0.5+grep(SortNames, pattern = '^z_')[length(grep(SortNames, pattern 
 #x-axis pch
 par(new=TRUE)
 #plot(x = c(1,3.5,5.5,8,11.5,24,46,67,89,135,193,222,232), y = c(-0.06, -0.08, -0.06, -0.08, -0.06, rep(-0.08,8)), col = colos_paper[c(1,3,3,3,3,2,2,2,2,4,4,6,5)], pch = c(16,16,17,18,15,16,17,18,15,16,17,16,16), xlim = c(0,250), ylim = c(0,1), axes = FALSE, xlab = '', ylab = '')
-plot(x = c(1,3.5,5.5,8,11.5,35,78,135,193,222,232), y = c(-0.06, -0.08, -0.06, -0.08, -0.06, rep(-0.08,6)), col = colos_paper[c(1,3,3,3,3,2,2,4,4,6,5)], pch = c(16,16,17,18,15,16,17,16,17,16,16), xlim = c(0,250), ylim = c(0,1), axes = FALSE, xlab = '', ylab = '')
+plot(x = c(1,3.5,5.5,8,11.5,35,78,135,193,222,232), y = c(-0.06, -0.08, -0.06, -0.08, -0.06, rep(-0.07,6)), col = colos_paper[c(1,3,3,3,3,2,2,4,4,6,5)], pch = c(16,16,17,18,15,16,17,16,17,16,16), xlim = c(0,250), ylim = c(0,1), axes = FALSE, xlab = '', ylab = '', cex = c(1,1,1,1,1,rep(1.5,6)))
 
 #Labels for parameters above threshold
 tmpnames = names(EEs05g_b_mua_95[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)][order(names(EEs05g_b_mua_m[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)][EEs05g_b_mua_95[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)][order(names(EEs05g_b_mua_m[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)] >= RanksMua05g_b_Agg$EE05g_b[Top1005g_Agg]]/max(EEs05g_b_mua_95[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)]))
 for (i in 1:length(tmpnames)){
   text(x = which(names(EEs05g_b_mua_95[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)][order(names(EEs05g_b_mua_m[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]) == tmpnames[i]),
        y = offset(EEs05g_b_mua_95[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)][order(names(EEs05g_b_mua_m[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)][which(names(EEs05g_b_mua_95[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)][order(names(EEs05g_b_mua_m[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]) == tmpnames[i])]/max(EEs05g_b_mua_95[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)])),
-       labels = as.character(which(names(EEs05g_b_mua_95[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)][order(names(EEs05g_b_mua_m[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]) == tmpnames[i])))
+       labels = as.character(which(names(EEs05g_b_mua_95[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)][order(names(EEs05g_b_mua_m[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]) == tmpnames[i])), cex = 1.5)
 }
 #Streamflow mid
 par(xpd=FALSE)
-barplot(height = EEsotg_b_mua_m[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)][order(names(EEsotg_b_mua_m[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEsotg_b_mua_95[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)]), ylab = 'Normalized Mean Abs. Val. of EE', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for 5th - 95th Percentile of Flow', col = ColPlots_Agg_Paper[order(names(EEsotg_b_mua_m[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)]))], border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,250))
+barplot(height = EEsotg_b_mua_m[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)][order(names(EEsotg_b_mua_m[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEsotg_b_mua_95[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)]), ylab = 'Normalized Mean Abs. Val. of EE', xlab = '', names.arg = NA, main = 'Metric: SAE for 5th - 95th Percentile of Flow', col = ColPlots_Agg_Paper[order(names(EEsotg_b_mua_m[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)]))], border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,250))
 arrows(seq(0.5,length(EEsotg_b_mua_05[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)])-0.5,1), EEsotg_b_mua_05[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)][order(names(EEsotg_b_mua_m[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEsotg_b_mua_95[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)]), seq(0.5,length(EEsotg_b_mua_05[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)])-0.5,1), EEsotg_b_mua_95[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)][order(names(EEsotg_b_mua_m[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEsotg_b_mua_95[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)]), length=0.05, angle=90, code=3)
 lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(as.numeric(sort(EEsotg_b_mua_m[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10otg_Agg])/max(EEsotg_b_mua_95[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)]), as.numeric(sort(EEsotg_b_mua_m[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10otg_Agg])/max(EEsotg_b_mua_95[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)])), col = 'black', lwd = 2)
-legend('topright', legend = c('Hillslope: GW', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Soil: Riparian', 'Soil: Other', 'Veg: Trees', 'Veg: Grass', 'Buildings', 'Zone: Atm.'), col = colos_paper[c(1,3,3,3,3,2,2,4,4,6,5)], pch = c(16,16,17,18,15,16,17,16,17,16,16), cex = 1.1, ncol = 2)
+legend('topright', legend = c('Hillslope: GW', 'Land: Grass', 'Land: Forest', 'Land: Urban', 
+                              'Land: Septic', 'Soil: Riparian', 'Soil: Other', 'Veg: Trees', 
+                              'Veg: Grass', 'Buildings', 'Zone: Atm.'), 
+       col = colos_paper[c(1,3,3,3,3,2,2,4,4,6,5)], pch = c(16,16,17,18,15,16,17,16,17,16,16), cex = 1.5, ncol = 1)
 
 #x-axis lines
 par(xpd=TRUE)
@@ -3912,19 +3979,20 @@ lines(x = c(0.5+grep(SortNames, pattern = '^z_')[length(grep(SortNames, pattern 
 #x-axis pch
 par(new=TRUE)
 #plot(x = c(1,3.5,5.5,8,11.5,24,46,67,89,135,193,222,232), y = c(-0.06, -0.08, -0.06, -0.08, -0.06, rep(-0.08,8)), col = colos_paper[c(1,3,3,3,3,2,2,2,2,4,4,6,5)], pch = c(16,16,17,18,15,16,17,18,15,16,17,16,16), xlim = c(0,250), ylim = c(0,1), axes = FALSE, xlab = '', ylab = '')
-plot(x = c(1,3.5,5.5,8,11.5,35,78,135,193,222,232), y = c(-0.06, -0.08, -0.06, -0.08, -0.06, rep(-0.08,6)), col = colos_paper[c(1,3,3,3,3,2,2,4,4,6,5)], pch = c(16,16,17,18,15,16,17,16,17,16,16), xlim = c(0,250), ylim = c(0,1), axes = FALSE, xlab = '', ylab = '')
+plot(x = c(1,3.5,5.5,8,11.5,35,78,135,193,222,232), y = c(-0.06, -0.08, -0.06, -0.08, -0.06, rep(-0.07,6)), col = colos_paper[c(1,3,3,3,3,2,2,4,4,6,5)], pch = c(16,16,17,18,15,16,17,16,17,16,16), xlim = c(0,250), ylim = c(0,1), axes = FALSE, xlab = '', ylab = '', cex = c(1,1,1,1,1,rep(1.5,6)))
 
 #Labels for parameters above threshold
 tmpnames = names(EEsotg_b_mua_95[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)][order(names(EEsotg_b_mua_m[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)][EEsotg_b_mua_95[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)][order(names(EEsotg_b_mua_m[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)] >= RanksMuaotg_b_Agg$EEotg_b[Top10otg_Agg]]/max(EEsotg_b_mua_95[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)]))
 for (i in 1:length(tmpnames)){
   text(x = which(names(EEsotg_b_mua_95[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)][order(names(EEsotg_b_mua_m[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]) == tmpnames[i]),
        y = offset(EEsotg_b_mua_95[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)][order(names(EEsotg_b_mua_m[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)][which(names(EEsotg_b_mua_95[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)][order(names(EEsotg_b_mua_m[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]) == tmpnames[i])]/max(EEsotg_b_mua_95[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)])),
-       labels = as.character(which(names(EEsotg_b_mua_95[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)][order(names(EEsotg_b_mua_m[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]) == tmpnames[i])))
+       labels = as.character(which(names(EEsotg_b_mua_95[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)][order(names(EEsotg_b_mua_m[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]) == tmpnames[i])), cex = 1.5)
 }
 
 #Streamflow 95
 par(xpd=FALSE)
-barplot(height = EEs95_b_mua_m[-which(names(EEs95_b_mua_m) %in% ColsAggregated)][order(names(EEs95_b_mua_m[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]), ylab = 'Normalized Mean Abs. Val. of EE', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Upper 95th Percentile of Flow', col = ColPlots_Agg_Paper[order(names(EEs95_b_mua_m[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]))], border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,250))
+par(mar=c(4.1, 4.1, 4.1, 2.1))
+barplot(height = EEs95_b_mua_m[-which(names(EEs95_b_mua_m) %in% ColsAggregated)][order(names(EEs95_b_mua_m[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]), ylab = '', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Upper 95th Percentile of Flow', col = ColPlots_Agg_Paper[order(names(EEs95_b_mua_m[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]))], border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,250))
 arrows(seq(0.5,length(EEs95_b_mua_05[-which(names(EEs95_b_mua_m) %in% ColsAggregated)])-0.5,1), EEs95_b_mua_05[-which(names(EEs95_b_mua_m) %in% ColsAggregated)][order(names(EEs95_b_mua_m[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]), seq(0.5,length(EEs95_b_mua_05[-which(names(EEs95_b_mua_m) %in% ColsAggregated)])-0.5,1), EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)][order(names(EEs95_b_mua_m[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]), length=0.05, angle=90, code=3)
 lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(as.numeric(sort(EEs95_b_mua_m[-which(names(EEs95_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top1095_Agg])/max(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]), as.numeric(sort(EEs95_b_mua_m[-which(names(EEs95_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top1095_Agg])/max(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)])), col = 'black', lwd = 2)
 
@@ -3952,19 +4020,20 @@ lines(x = c(0.5+grep(SortNames, pattern = '^z_')[length(grep(SortNames, pattern 
 #x-axis pch
 par(new=TRUE)
 #plot(x = c(1,3.5,5.5,8,11.5,24,46,67,89,135,193,222,232), y = c(-0.06, -0.08, -0.06, -0.08, -0.06, rep(-0.08,8)), col = colos_paper[c(1,3,3,3,3,2,2,2,2,4,4,6,5)], pch = c(16,16,17,18,15,16,17,18,15,16,17,16,16), xlim = c(0,250), ylim = c(0,1), axes = FALSE, xlab = '', ylab = '')
-plot(x = c(1,3.5,5.5,8,11.5,35,78,135,193,222,232), y = c(-0.06, -0.08, -0.06, -0.08, -0.06, rep(-0.08,6)), col = colos_paper[c(1,3,3,3,3,2,2,4,4,6,5)], pch = c(16,16,17,18,15,16,17,16,17,16,16), xlim = c(0,250), ylim = c(0,1), axes = FALSE, xlab = '', ylab = '')
+plot(x = c(1,3.5,5.5,8,11.5,35,78,135,193,222,232), y = c(-0.06, -0.08, -0.06, -0.08, -0.06, rep(-0.07,6)), col = colos_paper[c(1,3,3,3,3,2,2,4,4,6,5)], pch = c(16,16,17,18,15,16,17,16,17,16,16), xlim = c(0,250), ylim = c(0,1), axes = FALSE, xlab = '', ylab = '', cex = c(1,1,1,1,1,rep(1.5,6)))
 
 #Labels for parameters above threshold
 tmpnames = names(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)][order(names(EEs95_b_mua_m[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)][EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)][order(names(EEs95_b_mua_m[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)] >= RanksMua95_b_Agg$EE95_b[Top1095_Agg]]/max(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]))
 for (i in 1:length(tmpnames)){
   text(x = which(names(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)][order(names(EEs95_b_mua_m[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]) == tmpnames[i]),
        y = offset(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)][order(names(EEs95_b_mua_m[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)][which(names(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)][order(names(EEs95_b_mua_m[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]) == tmpnames[i])]/max(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)])),
-       labels = as.character(which(names(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)][order(names(EEs95_b_mua_m[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]) == tmpnames[i])))
+       labels = as.character(which(names(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)][order(names(EEs95_b_mua_m[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]) == tmpnames[i])), cex = 1.5)
 }
 
 #TN 05
 par(xpd=FALSE)
-barplot(height = EEsTN05_b_mua_m[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)][order(names(EEsTN05_b_mua_m[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)]), ylab = 'Normalized Mean Abs. Val. of EE', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Lower 5th Percentile of TN', col = ColPlots_Agg_Paper[order(names(EEsTN05_b_mua_m[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)]))], border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,250))
+par(mar=c(1.1, 4.1, 4.1, 2.1))
+barplot(height = EEsTN05_b_mua_m[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)][order(names(EEsTN05_b_mua_m[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)]), ylab = '', xlab = '', names.arg = NA, main = 'Metric: SAE for Lower 5th Percentile of TN', col = ColPlots_Agg_Paper[order(names(EEsTN05_b_mua_m[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)]))], border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,250))
 arrows(seq(0.5,length(EEsTN05_b_mua_05[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)])-0.5,1), EEsTN05_b_mua_05[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)][order(names(EEsTN05_b_mua_m[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)]), seq(0.5,length(EEsTN05_b_mua_05[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)])-0.5,1), EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)][order(names(EEsTN05_b_mua_m[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)]), length=0.05, angle=90, code=3)
 lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(as.numeric(sort(EEsTN05_b_mua_m[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10TN05_Agg])/max(EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)]), as.numeric(sort(EEsTN05_b_mua_m[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10TN05_Agg])/max(EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)])), col = 'black', lwd = 2)
 
@@ -3992,19 +4061,19 @@ lines(x = c(0.5+grep(SortNames, pattern = '^z_')[length(grep(SortNames, pattern 
 #x-axis pch
 par(new=TRUE)
 #plot(x = c(1,3.5,5.5,8,11.5,24,46,67,89,135,193,222,232), y = c(-0.06, -0.08, -0.06, -0.08, -0.06, rep(-0.08,8)), col = colos_paper[c(1,3,3,3,3,2,2,2,2,4,4,6,5)], pch = c(16,16,17,18,15,16,17,18,15,16,17,16,16), xlim = c(0,250), ylim = c(0,1), axes = FALSE, xlab = '', ylab = '')
-plot(x = c(1,3.5,5.5,8,11.5,35,78,135,193,222,232), y = c(-0.06, -0.08, -0.06, -0.08, -0.06, rep(-0.08,6)), col = colos_paper[c(1,3,3,3,3,2,2,4,4,6,5)], pch = c(16,16,17,18,15,16,17,16,17,16,16), xlim = c(0,250), ylim = c(0,1), axes = FALSE, xlab = '', ylab = '')
+plot(x = c(1,3.5,5.5,8,11.5,35,78,135,193,222,232), y = c(-0.06, -0.08, -0.06, -0.08, -0.06, rep(-0.07,6)), col = colos_paper[c(1,3,3,3,3,2,2,4,4,6,5)], pch = c(16,16,17,18,15,16,17,16,17,16,16), xlim = c(0,250), ylim = c(0,1), axes = FALSE, xlab = '', ylab = '', cex = c(1,1,1,1,1,rep(1.5,6)))
 
 #Labels for parameters above threshold
 tmpnames = names(EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)][order(names(EEsTN05_b_mua_m[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)][EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)][order(names(EEsTN05_b_mua_m[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)] >= RanksMuaTN05_b_Agg$EETN05_b[Top10TN05_Agg]]/max(EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)]))
 for (i in 1:length(tmpnames)){
   text(x = which(names(EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)][order(names(EEsTN05_b_mua_m[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]) == tmpnames[i]),
        y = offset(EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)][order(names(EEsTN05_b_mua_m[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)][which(names(EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)][order(names(EEsTN05_b_mua_m[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]) == tmpnames[i])]/max(EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)])),
-       labels = as.character(which(names(EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)][order(names(EEsTN05_b_mua_m[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]) == tmpnames[i])))
+       labels = as.character(which(names(EEsTN05_b_mua_95[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)][order(names(EEsTN05_b_mua_m[-which(names(EEsTN05_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]) == tmpnames[i])), cex = 1.5)
 }
 
 #TN mid
 par(xpd=FALSE)
-barplot(height = EEsTNMed_b_mua_m[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)][order(names(EEsTNMed_b_mua_m[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)]), ylab = 'Normalized Mean Abs. Val. of EE', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Mean of TN', col = ColPlots_Agg_Paper[order(names(EEsTNMed_b_mua_m[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)]))], border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,250))
+barplot(height = EEsTNMed_b_mua_m[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)][order(names(EEsTNMed_b_mua_m[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)]), ylab = '', xlab = '', names.arg = NA, main = 'Metric: SAE for Mean of TN', col = ColPlots_Agg_Paper[order(names(EEsTNMed_b_mua_m[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)]))], border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,250))
 arrows(seq(0.5,length(EEsTNMed_b_mua_05[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)])-0.5,1), EEsTNMed_b_mua_05[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)][order(names(EEsTNMed_b_mua_m[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)]), seq(0.5,length(EEsTNMed_b_mua_05[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)])-0.5,1), EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)][order(names(EEsTNMed_b_mua_m[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)]), length=0.05, angle=90, code=3)
 lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(as.numeric(sort(EEsTNMed_b_mua_m[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10TNMed_Agg])/max(EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)]), as.numeric(sort(EEsTNMed_b_mua_m[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10TNMed_Agg])/max(EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)])), col = 'black', lwd = 2)
 
@@ -4032,19 +4101,20 @@ lines(x = c(0.5+grep(SortNames, pattern = '^z_')[length(grep(SortNames, pattern 
 #x-axis pch
 par(new=TRUE)
 #plot(x = c(1,3.5,5.5,8,11.5,24,46,67,89,135,193,222,232), y = c(-0.06, -0.08, -0.06, -0.08, -0.06, rep(-0.08,8)), col = colos_paper[c(1,3,3,3,3,2,2,2,2,4,4,6,5)], pch = c(16,16,17,18,15,16,17,18,15,16,17,16,16), xlim = c(0,250), ylim = c(0,1), axes = FALSE, xlab = '', ylab = '')
-plot(x = c(1,3.5,5.5,8,11.5,35,78,135,193,222,232), y = c(-0.06, -0.08, -0.06, -0.08, -0.06, rep(-0.08,6)), col = colos_paper[c(1,3,3,3,3,2,2,4,4,6,5)], pch = c(16,16,17,18,15,16,17,16,17,16,16), xlim = c(0,250), ylim = c(0,1), axes = FALSE, xlab = '', ylab = '')
+plot(x = c(1,3.5,5.5,8,11.5,35,78,135,193,222,232), y = c(-0.06, -0.08, -0.06, -0.08, -0.06, rep(-0.07,6)), col = colos_paper[c(1,3,3,3,3,2,2,4,4,6,5)], pch = c(16,16,17,18,15,16,17,16,17,16,16), xlim = c(0,250), ylim = c(0,1), axes = FALSE, xlab = '', ylab = '', cex = c(1,1,1,1,1,rep(1.5,6)))
 
 #Labels for parameters above threshold
 tmpnames = names(EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)][order(names(EEsTNMed_b_mua_m[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)][EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)][order(names(EEsTNMed_b_mua_m[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)] >= RanksMuaTNMed_b_Agg$EETNMed_b[Top10TNMed_Agg]]/max(EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)]))
 for (i in 1:length(tmpnames)){
   text(x = which(names(EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)][order(names(EEsTNMed_b_mua_m[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]) == tmpnames[i]),
        y = offset(EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)][order(names(EEsTNMed_b_mua_m[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)][which(names(EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)][order(names(EEsTNMed_b_mua_m[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]) == tmpnames[i])]/max(EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)])),
-       labels = as.character(which(names(EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)][order(names(EEsTNMed_b_mua_m[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]) == tmpnames[i])))
+       labels = as.character(which(names(EEsTNMed_b_mua_95[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)][order(names(EEsTNMed_b_mua_m[-which(names(EEsTNMed_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]) == tmpnames[i])), cex = 1.5)
 }
 
 #TN 95
 par(xpd=FALSE)
-barplot(height = EEsTN95_b_mua_m[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)][order(names(EEsTN95_b_mua_m[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)]), ylab = 'Normalized Mean Abs. Val. of EE', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Upper 95th Percentile of TN', col = ColPlots_Agg_Paper[order(names(EEsTN95_b_mua_m[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)]))], border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,250))
+par(mar=c(4.1, 4.1, 4.1, 2.1))
+barplot(height = EEsTN95_b_mua_m[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)][order(names(EEsTN95_b_mua_m[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)]), ylab = '', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Upper 95th Percentile of TN', col = ColPlots_Agg_Paper[order(names(EEsTN95_b_mua_m[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)]))], border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,250))
 arrows(seq(0.5,length(EEsTN95_b_mua_05[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)])-0.5,1), EEsTN95_b_mua_05[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)][order(names(EEsTN95_b_mua_m[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)]), seq(0.5,length(EEsTN95_b_mua_05[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)])-0.5,1), EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)][order(names(EEsTN95_b_mua_m[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)]), length=0.05, angle=90, code=3)
 lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(as.numeric(sort(EEsTN95_b_mua_m[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10TN95_Agg])/max(EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)]), as.numeric(sort(EEsTN95_b_mua_m[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10TN95_Agg])/max(EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)])), col = 'black', lwd = 2)
 
@@ -4072,15 +4142,287 @@ lines(x = c(0.5+grep(SortNames, pattern = '^z_')[length(grep(SortNames, pattern 
 #x-axis pch
 par(new=TRUE)
 #plot(x = c(1,3.5,5.5,8,11.5,24,46,67,89,135,193,222,232), y = c(-0.06, -0.08, -0.06, -0.08, -0.06, rep(-0.08,8)), col = colos_paper[c(1,3,3,3,3,2,2,2,2,4,4,6,5)], pch = c(16,16,17,18,15,16,17,18,15,16,17,16,16), xlim = c(0,250), ylim = c(0,1), axes = FALSE, xlab = '', ylab = '')
-plot(x = c(1,3.5,5.5,8,11.5,35,78,135,193,222,232), y = c(-0.06, -0.08, -0.06, -0.08, -0.06, rep(-0.08,6)), col = colos_paper[c(1,3,3,3,3,2,2,4,4,6,5)], pch = c(16,16,17,18,15,16,17,16,17,16,16), xlim = c(0,250), ylim = c(0,1), axes = FALSE, xlab = '', ylab = '')
+plot(x = c(1,3.5,5.5,8,11.5,35,78,135,193,222,232), y = c(-0.06, -0.08, -0.06, -0.08, -0.06, rep(-0.07,6)), col = colos_paper[c(1,3,3,3,3,2,2,4,4,6,5)], pch = c(16,16,17,18,15,16,17,16,17,16,16), xlim = c(0,250), ylim = c(0,1), axes = FALSE, xlab = '', ylab = '', cex = c(1,1,1,1,1,rep(1.5,6)))
 
 #Labels for parameters above threshold
 tmpnames = names(EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)][order(names(EEsTN95_b_mua_m[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)][EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)][order(names(EEsTN95_b_mua_m[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)] >= RanksMuaTN95_b_Agg$EETN95_b[Top10TN95_Agg]]/max(EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)]))
 for (i in 1:length(tmpnames)){
   text(x = which(names(EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)][order(names(EEsTN95_b_mua_m[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]) == tmpnames[i]),
        y = offset(EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)][order(names(EEsTN95_b_mua_m[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)][which(names(EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)][order(names(EEsTN95_b_mua_m[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]) == tmpnames[i])]/max(EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)])),
-       labels = as.character(which(names(EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)][order(names(EEsTN95_b_mua_m[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]) == tmpnames[i])))
+       labels = as.character(which(names(EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)][order(names(EEsTN95_b_mua_m[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]) == tmpnames[i])), cex = 1.5)
 }
+dev.off()
+
+#   S9 For basin median streamflow deviation SAE and SAMD comparison----
+pdf(file = 'SAE_SAMD.pdf', height = 12, width = 8, title = 'SAfigS9')
+layout(rbind(c(1,4), c(2,5), c(3,6)))
+par(mar=c(1.1, 4.1, 4.1, 2.1))
+#Streamflow 05g
+barplot(height = EEs05g_b_mua_m[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)][order(names(EEs05g_b_mua_m[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEs05g_b_mua_95[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)]), ylab = '', xlab = '', names.arg = NA, main = 'Metric: SAE for Lower 5th Percentile of Flow', col = ColPlots_Agg_Paper[order(names(EEs05g_b_mua_m[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)]))], border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,250))
+arrows(seq(0.5,length(EEs05g_b_mua_05[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)])-0.5,1), EEs05g_b_mua_05[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)][order(names(EEs05g_b_mua_m[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEs05g_b_mua_95[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)]), seq(0.5,length(EEs05g_b_mua_05[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)])-0.5,1), EEs05g_b_mua_95[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)][order(names(EEs05g_b_mua_m[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEs05g_b_mua_95[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)]), length=0.05, angle=90, code=3)
+lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(as.numeric(sort(EEs05g_b_mua_m[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top1005g_Agg])/max(EEs05g_b_mua_95[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)]), as.numeric(sort(EEs05g_b_mua_m[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top1005g_Agg])/max(EEs05g_b_mua_95[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)])), col = 'black', lwd = 2)
+#legend('topright', legend = c('Hillslope: GW', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Soil: Riparian', 'Soil: Other', 'Veg: Trees', 'Veg: Grass', 'Buildings', 'Zone: Atm.'), col = colos_paper[c(1,3,3,3,3,2,2,4,4,6,5)], pch = c(16,16,17,18,15,16,17,16,17,16,16), cex = 1.1, ncol = 2)
+
+#x-axis lines
+par(xpd=TRUE)
+SortNames = sort(names(EEs05g_b_mua_m)[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)])
+SortNames = SortNames[c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]
+lines(x = c(-1,-1), y = c(-0.05,0), lty = 1, col = 'black')
+lines(x = c(0.5+grep(SortNames, pattern = '^h_')[length(grep(SortNames, pattern = '^h_'))], 0.5+grep(SortNames, pattern = '^h_')[length(grep(SortNames, pattern = '^h_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+lines(x = c(0.5+grep(SortNames, pattern = '^l1_')[length(grep(SortNames, pattern = '^l1_'))], 0.5+grep(SortNames, pattern = '^l1_')[length(grep(SortNames, pattern = '^l1_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+lines(x = c(0.5+grep(SortNames, pattern = '^l2_')[length(grep(SortNames, pattern = '^l2_'))], 0.5+grep(SortNames, pattern = '^l2_')[length(grep(SortNames, pattern = '^l2_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+lines(x = c(0.5+grep(SortNames, pattern = '^l3_')[length(grep(SortNames, pattern = '^l3_'))], 0.5+grep(SortNames, pattern = '^l3_')[length(grep(SortNames, pattern = '^l3_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+lines(x = c(0.5+grep(SortNames, pattern = '^l4_')[length(grep(SortNames, pattern = '^l4_'))], 0.5+grep(SortNames, pattern = '^l4_')[length(grep(SortNames, pattern = '^l4_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+#lines(x = c(0.5+grep(SortNames, pattern = '^s8_')[length(grep(SortNames, pattern = '^s8_'))], 0.5+grep(SortNames, pattern = '^s8_')[length(grep(SortNames, pattern = '^s8_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+#lines(x = c(0.5+grep(SortNames, pattern = '^s108_')[length(grep(SortNames, pattern = '^s108_'))], 0.5+grep(SortNames, pattern = '^s108_')[length(grep(SortNames, pattern = '^s108_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+lines(x = c(0.5+grep(SortNames, pattern = '^Soil8_')[length(grep(SortNames, pattern = '^Soil8_'))], 0.5+grep(SortNames, pattern = '^Soil8_')[length(grep(SortNames, pattern = '^Soil8_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+#lines(x = c(0.5+grep(SortNames, pattern = '^s9_')[length(grep(SortNames, pattern = '^s9_'))], 0.5+grep(SortNames, pattern = '^s9_')[length(grep(SortNames, pattern = '^s9_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+#lines(x = c(0.5+grep(SortNames, pattern = '^s109_')[length(grep(SortNames, pattern = '^s109_'))], 0.5+grep(SortNames, pattern = '^s109_')[length(grep(SortNames, pattern = '^s109_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+lines(x = c(0.5+grep(SortNames, pattern = '^Soil9_')[length(grep(SortNames, pattern = '^Soil9_'))], 0.5+grep(SortNames, pattern = '^Soil9_')[length(grep(SortNames, pattern = '^Soil9_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+lines(x = c(0.5+grep(SortNames, pattern = '^v102_')[length(grep(SortNames, pattern = '^v102_'))], 0.5+grep(SortNames, pattern = '^v102_')[length(grep(SortNames, pattern = '^v102_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+lines(x = c(0.5+grep(SortNames, pattern = '^v3_')[length(grep(SortNames, pattern = '^v3_'))], 0.5+grep(SortNames, pattern = '^v3_')[length(grep(SortNames, pattern = '^v3_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+lines(x = c(0.5+grep(SortNames, pattern = '^v4_')[length(grep(SortNames, pattern = '^v4_'))], 0.5+grep(SortNames, pattern = '^v4_')[length(grep(SortNames, pattern = '^v4_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+lines(x = c(0.5+grep(SortNames, pattern = '^z_')[length(grep(SortNames, pattern = '^z_'))], 0.5+grep(SortNames, pattern = '^z_')[length(grep(SortNames, pattern = '^z_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+
+#x-axis pch
+par(new=TRUE)
+#plot(x = c(1,3.5,5.5,8,11.5,24,46,67,89,135,193,222,232), y = c(-0.06, -0.08, -0.06, -0.08, -0.06, rep(-0.08,8)), col = colos_paper[c(1,3,3,3,3,2,2,2,2,4,4,6,5)], pch = c(16,16,17,18,15,16,17,18,15,16,17,16,16), xlim = c(0,250), ylim = c(0,1), axes = FALSE, xlab = '', ylab = '')
+plot(x = c(1,3.5,5.5,8,11.5,35,78,135,193,222,232), y = c(-0.06, -0.08, -0.06, -0.08, -0.06, rep(-0.07,6)), col = colos_paper[c(1,3,3,3,3,2,2,4,4,6,5)], pch = c(16,16,17,18,15,16,17,16,17,16,16), xlim = c(0,250), ylim = c(0,1), axes = FALSE, xlab = '', ylab = '', cex = c(1,1,1,1,1,rep(1.5,6)))
+
+#Labels for parameters above threshold
+tmpnames = names(EEs05g_b_mua_95[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)][order(names(EEs05g_b_mua_m[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)][EEs05g_b_mua_95[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)][order(names(EEs05g_b_mua_m[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)] >= RanksMua05g_b_Agg$EE05g_b[Top1005g_Agg]]/max(EEs05g_b_mua_95[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)]))
+for (i in 1:length(tmpnames)){
+  text(x = which(names(EEs05g_b_mua_95[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)][order(names(EEs05g_b_mua_m[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]) == tmpnames[i]),
+       y = offset(EEs05g_b_mua_95[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)][order(names(EEs05g_b_mua_m[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)][which(names(EEs05g_b_mua_95[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)][order(names(EEs05g_b_mua_m[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]) == tmpnames[i])]/max(EEs05g_b_mua_95[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)])),
+       labels = as.character(which(names(EEs05g_b_mua_95[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)][order(names(EEs05g_b_mua_m[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]) == tmpnames[i])), cex = 1.5)
+}
+#Streamflow mid
+par(xpd=FALSE)
+barplot(height = EEsotg_b_mua_m[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)][order(names(EEsotg_b_mua_m[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEsotg_b_mua_95[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)]), ylab = 'Normalized Mean Abs. Val. of EE', xlab = '', names.arg = NA, main = 'Metric: SAE for 5th - 95th Percentile of Flow', col = ColPlots_Agg_Paper[order(names(EEsotg_b_mua_m[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)]))], border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,250))
+arrows(seq(0.5,length(EEsotg_b_mua_05[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)])-0.5,1), EEsotg_b_mua_05[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)][order(names(EEsotg_b_mua_m[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEsotg_b_mua_95[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)]), seq(0.5,length(EEsotg_b_mua_05[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)])-0.5,1), EEsotg_b_mua_95[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)][order(names(EEsotg_b_mua_m[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEsotg_b_mua_95[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)]), length=0.05, angle=90, code=3)
+lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(as.numeric(sort(EEsotg_b_mua_m[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10otg_Agg])/max(EEsotg_b_mua_95[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)]), as.numeric(sort(EEsotg_b_mua_m[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10otg_Agg])/max(EEsotg_b_mua_95[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)])), col = 'black', lwd = 2)
+legend('topright', legend = c('Hillslope: GW', 'Land: Grass', 'Land: Forest', 'Land: Urban', 
+                              'Land: Septic', 'Soil: Riparian', 'Soil: Other', 'Veg: Trees', 
+                              'Veg: Grass', 'Buildings', 'Zone: Atm.'), 
+       col = colos_paper[c(1,3,3,3,3,2,2,4,4,6,5)], pch = c(16,16,17,18,15,16,17,16,17,16,16), cex = 1.5, ncol = 1)
+
+#x-axis lines
+par(xpd=TRUE)
+SortNames = sort(names(EEsotg_b_mua_m)[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)])
+SortNames = SortNames[c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]
+lines(x = c(-1,-1), y = c(-0.05,0), lty = 1, col = 'black')
+lines(x = c(0.5+grep(SortNames, pattern = '^h_')[length(grep(SortNames, pattern = '^h_'))], 0.5+grep(SortNames, pattern = '^h_')[length(grep(SortNames, pattern = '^h_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+lines(x = c(0.5+grep(SortNames, pattern = '^l1_')[length(grep(SortNames, pattern = '^l1_'))], 0.5+grep(SortNames, pattern = '^l1_')[length(grep(SortNames, pattern = '^l1_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+lines(x = c(0.5+grep(SortNames, pattern = '^l2_')[length(grep(SortNames, pattern = '^l2_'))], 0.5+grep(SortNames, pattern = '^l2_')[length(grep(SortNames, pattern = '^l2_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+lines(x = c(0.5+grep(SortNames, pattern = '^l3_')[length(grep(SortNames, pattern = '^l3_'))], 0.5+grep(SortNames, pattern = '^l3_')[length(grep(SortNames, pattern = '^l3_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+lines(x = c(0.5+grep(SortNames, pattern = '^l4_')[length(grep(SortNames, pattern = '^l4_'))], 0.5+grep(SortNames, pattern = '^l4_')[length(grep(SortNames, pattern = '^l4_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+#lines(x = c(0.5+grep(SortNames, pattern = '^s8_')[length(grep(SortNames, pattern = '^s8_'))], 0.5+grep(SortNames, pattern = '^s8_')[length(grep(SortNames, pattern = '^s8_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+#lines(x = c(0.5+grep(SortNames, pattern = '^s108_')[length(grep(SortNames, pattern = '^s108_'))], 0.5+grep(SortNames, pattern = '^s108_')[length(grep(SortNames, pattern = '^s108_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+lines(x = c(0.5+grep(SortNames, pattern = '^Soil8_')[length(grep(SortNames, pattern = '^Soil8_'))], 0.5+grep(SortNames, pattern = '^Soil8_')[length(grep(SortNames, pattern = '^Soil8_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+#lines(x = c(0.5+grep(SortNames, pattern = '^s9_')[length(grep(SortNames, pattern = '^s9_'))], 0.5+grep(SortNames, pattern = '^s9_')[length(grep(SortNames, pattern = '^s9_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+#lines(x = c(0.5+grep(SortNames, pattern = '^s109_')[length(grep(SortNames, pattern = '^s109_'))], 0.5+grep(SortNames, pattern = '^s109_')[length(grep(SortNames, pattern = '^s109_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+lines(x = c(0.5+grep(SortNames, pattern = '^Soil9_')[length(grep(SortNames, pattern = '^Soil9_'))], 0.5+grep(SortNames, pattern = '^Soil9_')[length(grep(SortNames, pattern = '^Soil9_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+lines(x = c(0.5+grep(SortNames, pattern = '^v102_')[length(grep(SortNames, pattern = '^v102_'))], 0.5+grep(SortNames, pattern = '^v102_')[length(grep(SortNames, pattern = '^v102_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+lines(x = c(0.5+grep(SortNames, pattern = '^v3_')[length(grep(SortNames, pattern = '^v3_'))], 0.5+grep(SortNames, pattern = '^v3_')[length(grep(SortNames, pattern = '^v3_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+lines(x = c(0.5+grep(SortNames, pattern = '^v4_')[length(grep(SortNames, pattern = '^v4_'))], 0.5+grep(SortNames, pattern = '^v4_')[length(grep(SortNames, pattern = '^v4_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+lines(x = c(0.5+grep(SortNames, pattern = '^z_')[length(grep(SortNames, pattern = '^z_'))], 0.5+grep(SortNames, pattern = '^z_')[length(grep(SortNames, pattern = '^z_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+
+#x-axis pch
+par(new=TRUE)
+#plot(x = c(1,3.5,5.5,8,11.5,24,46,67,89,135,193,222,232), y = c(-0.06, -0.08, -0.06, -0.08, -0.06, rep(-0.08,8)), col = colos_paper[c(1,3,3,3,3,2,2,2,2,4,4,6,5)], pch = c(16,16,17,18,15,16,17,18,15,16,17,16,16), xlim = c(0,250), ylim = c(0,1), axes = FALSE, xlab = '', ylab = '')
+plot(x = c(1,3.5,5.5,8,11.5,35,78,135,193,222,232), y = c(-0.06, -0.08, -0.06, -0.08, -0.06, rep(-0.07,6)), col = colos_paper[c(1,3,3,3,3,2,2,4,4,6,5)], pch = c(16,16,17,18,15,16,17,16,17,16,16), xlim = c(0,250), ylim = c(0,1), axes = FALSE, xlab = '', ylab = '', cex = c(1,1,1,1,1,rep(1.5,6)))
+
+#Labels for parameters above threshold
+tmpnames = names(EEsotg_b_mua_95[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)][order(names(EEsotg_b_mua_m[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)][EEsotg_b_mua_95[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)][order(names(EEsotg_b_mua_m[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)] >= RanksMuaotg_b_Agg$EEotg_b[Top10otg_Agg]]/max(EEsotg_b_mua_95[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)]))
+for (i in 1:length(tmpnames)){
+  text(x = which(names(EEsotg_b_mua_95[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)][order(names(EEsotg_b_mua_m[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]) == tmpnames[i]),
+       y = offset(EEsotg_b_mua_95[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)][order(names(EEsotg_b_mua_m[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)][which(names(EEsotg_b_mua_95[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)][order(names(EEsotg_b_mua_m[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]) == tmpnames[i])]/max(EEsotg_b_mua_95[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)])),
+       labels = as.character(which(names(EEsotg_b_mua_95[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)][order(names(EEsotg_b_mua_m[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]) == tmpnames[i])), cex = 1.5)
+}
+
+#Streamflow 95
+par(xpd=FALSE)
+par(mar=c(4.1, 4.1, 4.1, 2.1))
+barplot(height = EEs95_b_mua_m[-which(names(EEs95_b_mua_m) %in% ColsAggregated)][order(names(EEs95_b_mua_m[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]), ylab = '', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAE for Upper 95th Percentile of Flow', col = ColPlots_Agg_Paper[order(names(EEs95_b_mua_m[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]))], border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,250))
+arrows(seq(0.5,length(EEs95_b_mua_05[-which(names(EEs95_b_mua_m) %in% ColsAggregated)])-0.5,1), EEs95_b_mua_05[-which(names(EEs95_b_mua_m) %in% ColsAggregated)][order(names(EEs95_b_mua_m[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]), seq(0.5,length(EEs95_b_mua_05[-which(names(EEs95_b_mua_m) %in% ColsAggregated)])-0.5,1), EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)][order(names(EEs95_b_mua_m[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]), length=0.05, angle=90, code=3)
+lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(as.numeric(sort(EEs95_b_mua_m[-which(names(EEs95_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top1095_Agg])/max(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]), as.numeric(sort(EEs95_b_mua_m[-which(names(EEs95_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top1095_Agg])/max(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)])), col = 'black', lwd = 2)
+
+#x-axis lines
+par(xpd=TRUE)
+SortNames = sort(names(EEs95_b_mua_m)[-which(names(EEs95_b_mua_m) %in% ColsAggregated)])
+SortNames = SortNames[c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]
+lines(x = c(-1,-1), y = c(-0.05,0), lty = 1, col = 'black')
+lines(x = c(0.5+grep(SortNames, pattern = '^h_')[length(grep(SortNames, pattern = '^h_'))], 0.5+grep(SortNames, pattern = '^h_')[length(grep(SortNames, pattern = '^h_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+lines(x = c(0.5+grep(SortNames, pattern = '^l1_')[length(grep(SortNames, pattern = '^l1_'))], 0.5+grep(SortNames, pattern = '^l1_')[length(grep(SortNames, pattern = '^l1_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+lines(x = c(0.5+grep(SortNames, pattern = '^l2_')[length(grep(SortNames, pattern = '^l2_'))], 0.5+grep(SortNames, pattern = '^l2_')[length(grep(SortNames, pattern = '^l2_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+lines(x = c(0.5+grep(SortNames, pattern = '^l3_')[length(grep(SortNames, pattern = '^l3_'))], 0.5+grep(SortNames, pattern = '^l3_')[length(grep(SortNames, pattern = '^l3_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+lines(x = c(0.5+grep(SortNames, pattern = '^l4_')[length(grep(SortNames, pattern = '^l4_'))], 0.5+grep(SortNames, pattern = '^l4_')[length(grep(SortNames, pattern = '^l4_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+#lines(x = c(0.5+grep(SortNames, pattern = '^s8_')[length(grep(SortNames, pattern = '^s8_'))], 0.5+grep(SortNames, pattern = '^s8_')[length(grep(SortNames, pattern = '^s8_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+#lines(x = c(0.5+grep(SortNames, pattern = '^s108_')[length(grep(SortNames, pattern = '^s108_'))], 0.5+grep(SortNames, pattern = '^s108_')[length(grep(SortNames, pattern = '^s108_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+lines(x = c(0.5+grep(SortNames, pattern = '^Soil8_')[length(grep(SortNames, pattern = '^Soil8_'))], 0.5+grep(SortNames, pattern = '^Soil8_')[length(grep(SortNames, pattern = '^Soil8_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+#lines(x = c(0.5+grep(SortNames, pattern = '^s9_')[length(grep(SortNames, pattern = '^s9_'))], 0.5+grep(SortNames, pattern = '^s9_')[length(grep(SortNames, pattern = '^s9_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+#lines(x = c(0.5+grep(SortNames, pattern = '^s109_')[length(grep(SortNames, pattern = '^s109_'))], 0.5+grep(SortNames, pattern = '^s109_')[length(grep(SortNames, pattern = '^s109_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+lines(x = c(0.5+grep(SortNames, pattern = '^Soil9_')[length(grep(SortNames, pattern = '^Soil9_'))], 0.5+grep(SortNames, pattern = '^Soil9_')[length(grep(SortNames, pattern = '^Soil9_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+lines(x = c(0.5+grep(SortNames, pattern = '^v102_')[length(grep(SortNames, pattern = '^v102_'))], 0.5+grep(SortNames, pattern = '^v102_')[length(grep(SortNames, pattern = '^v102_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+lines(x = c(0.5+grep(SortNames, pattern = '^v3_')[length(grep(SortNames, pattern = '^v3_'))], 0.5+grep(SortNames, pattern = '^v3_')[length(grep(SortNames, pattern = '^v3_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+lines(x = c(0.5+grep(SortNames, pattern = '^v4_')[length(grep(SortNames, pattern = '^v4_'))], 0.5+grep(SortNames, pattern = '^v4_')[length(grep(SortNames, pattern = '^v4_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+lines(x = c(0.5+grep(SortNames, pattern = '^z_')[length(grep(SortNames, pattern = '^z_'))], 0.5+grep(SortNames, pattern = '^z_')[length(grep(SortNames, pattern = '^z_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+
+#x-axis pch
+par(new=TRUE)
+#plot(x = c(1,3.5,5.5,8,11.5,24,46,67,89,135,193,222,232), y = c(-0.06, -0.08, -0.06, -0.08, -0.06, rep(-0.08,8)), col = colos_paper[c(1,3,3,3,3,2,2,2,2,4,4,6,5)], pch = c(16,16,17,18,15,16,17,18,15,16,17,16,16), xlim = c(0,250), ylim = c(0,1), axes = FALSE, xlab = '', ylab = '')
+plot(x = c(1,3.5,5.5,8,11.5,35,78,135,193,222,232), y = c(-0.06, -0.08, -0.06, -0.08, -0.06, rep(-0.07,6)), col = colos_paper[c(1,3,3,3,3,2,2,4,4,6,5)], pch = c(16,16,17,18,15,16,17,16,17,16,16), xlim = c(0,250), ylim = c(0,1), axes = FALSE, xlab = '', ylab = '', cex = c(1,1,1,1,1,rep(1.5,6)))
+
+#Labels for parameters above threshold
+tmpnames = names(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)][order(names(EEs95_b_mua_m[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)][EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)][order(names(EEs95_b_mua_m[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)] >= RanksMua95_b_Agg$EE95_b[Top1095_Agg]]/max(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]))
+for (i in 1:length(tmpnames)){
+  text(x = which(names(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)][order(names(EEs95_b_mua_m[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]) == tmpnames[i]),
+       y = offset(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)][order(names(EEs95_b_mua_m[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)][which(names(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)][order(names(EEs95_b_mua_m[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]) == tmpnames[i])]/max(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)])),
+       labels = as.character(which(names(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)][order(names(EEs95_b_mua_m[-which(names(EEs95_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]) == tmpnames[i])), cex = 1.5)
+}
+
+#Streamflow 05gm
+par(mar=c(1.1, 4.1, 4.1, 2.1))
+barplot(height = EEs05gm_b_mua_m[-which(names(EEs05gm_b_mua_m) %in% ColsAggregated)][order(names(EEs05gm_b_mua_m[-which(names(EEs05gm_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEs05gm_b_mua_95[-which(names(EEs05gm_b_mua_m) %in% ColsAggregated)]), ylab = '', xlab = '', names.arg = NA, main = 'Metric: SAMD for Lower 5th Percentile of Flow', col = ColPlots_Agg_Paper[order(names(EEs05gm_b_mua_m[-which(names(EEs05gm_b_mua_m) %in% ColsAggregated)]))], border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,250))
+arrows(seq(0.5,length(EEs05gm_b_mua_05[-which(names(EEs05gm_b_mua_m) %in% ColsAggregated)])-0.5,1), EEs05gm_b_mua_05[-which(names(EEs05gm_b_mua_m) %in% ColsAggregated)][order(names(EEs05gm_b_mua_m[-which(names(EEs05gm_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEs05gm_b_mua_95[-which(names(EEs05gm_b_mua_m) %in% ColsAggregated)]), seq(0.5,length(EEs05gm_b_mua_05[-which(names(EEs05gm_b_mua_m) %in% ColsAggregated)])-0.5,1), EEs05gm_b_mua_95[-which(names(EEs05gm_b_mua_m) %in% ColsAggregated)][order(names(EEs05gm_b_mua_m[-which(names(EEs05gm_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEs05gm_b_mua_95[-which(names(EEs05gm_b_mua_m) %in% ColsAggregated)]), length=0.05, angle=90, code=3)
+lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(as.numeric(sort(EEs05gm_b_mua_m[-which(names(EEs05gm_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top1005gm_Agg])/max(EEs05gm_b_mua_95[-which(names(EEs05gm_b_mua_m) %in% ColsAggregated)]), as.numeric(sort(EEs05gm_b_mua_m[-which(names(EEs05gm_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top1005gm_Agg])/max(EEs05gm_b_mua_95[-which(names(EEs05gm_b_mua_m) %in% ColsAggregated)])), col = 'black', lwd = 2)
+#legend('topright', legend = c('Hillslope: GW', 'Land: Grass', 'Land: Forest', 'Land: Urban', 'Land: Septic', 'Soil: Riparian', 'Soil: Other', 'Veg: Trees', 'Veg: Grass', 'Buildings', 'Zone: Atm.'), col = colos_paper[c(1,3,3,3,3,2,2,4,4,6,5)], pch = c(16,16,17,18,15,16,17,16,17,16,16), cex = 1.1, ncol = 2)
+
+#x-axis lines
+par(xpd=TRUE)
+SortNames = sort(names(EEs05gm_b_mua_m)[-which(names(EEs05gm_b_mua_m) %in% ColsAggregated)])
+SortNames = SortNames[c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]
+lines(x = c(-1,-1), y = c(-0.05,0), lty = 1, col = 'black')
+lines(x = c(0.5+grep(SortNames, pattern = '^h_')[length(grep(SortNames, pattern = '^h_'))], 0.5+grep(SortNames, pattern = '^h_')[length(grep(SortNames, pattern = '^h_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+lines(x = c(0.5+grep(SortNames, pattern = '^l1_')[length(grep(SortNames, pattern = '^l1_'))], 0.5+grep(SortNames, pattern = '^l1_')[length(grep(SortNames, pattern = '^l1_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+lines(x = c(0.5+grep(SortNames, pattern = '^l2_')[length(grep(SortNames, pattern = '^l2_'))], 0.5+grep(SortNames, pattern = '^l2_')[length(grep(SortNames, pattern = '^l2_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+lines(x = c(0.5+grep(SortNames, pattern = '^l3_')[length(grep(SortNames, pattern = '^l3_'))], 0.5+grep(SortNames, pattern = '^l3_')[length(grep(SortNames, pattern = '^l3_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+lines(x = c(0.5+grep(SortNames, pattern = '^l4_')[length(grep(SortNames, pattern = '^l4_'))], 0.5+grep(SortNames, pattern = '^l4_')[length(grep(SortNames, pattern = '^l4_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+#lines(x = c(0.5+grep(SortNames, pattern = '^s8_')[length(grep(SortNames, pattern = '^s8_'))], 0.5+grep(SortNames, pattern = '^s8_')[length(grep(SortNames, pattern = '^s8_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+#lines(x = c(0.5+grep(SortNames, pattern = '^s108_')[length(grep(SortNames, pattern = '^s108_'))], 0.5+grep(SortNames, pattern = '^s108_')[length(grep(SortNames, pattern = '^s108_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+lines(x = c(0.5+grep(SortNames, pattern = '^Soil8_')[length(grep(SortNames, pattern = '^Soil8_'))], 0.5+grep(SortNames, pattern = '^Soil8_')[length(grep(SortNames, pattern = '^Soil8_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+#lines(x = c(0.5+grep(SortNames, pattern = '^s9_')[length(grep(SortNames, pattern = '^s9_'))], 0.5+grep(SortNames, pattern = '^s9_')[length(grep(SortNames, pattern = '^s9_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+#lines(x = c(0.5+grep(SortNames, pattern = '^s109_')[length(grep(SortNames, pattern = '^s109_'))], 0.5+grep(SortNames, pattern = '^s109_')[length(grep(SortNames, pattern = '^s109_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+lines(x = c(0.5+grep(SortNames, pattern = '^Soil9_')[length(grep(SortNames, pattern = '^Soil9_'))], 0.5+grep(SortNames, pattern = '^Soil9_')[length(grep(SortNames, pattern = '^Soil9_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+lines(x = c(0.5+grep(SortNames, pattern = '^v102_')[length(grep(SortNames, pattern = '^v102_'))], 0.5+grep(SortNames, pattern = '^v102_')[length(grep(SortNames, pattern = '^v102_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+lines(x = c(0.5+grep(SortNames, pattern = '^v3_')[length(grep(SortNames, pattern = '^v3_'))], 0.5+grep(SortNames, pattern = '^v3_')[length(grep(SortNames, pattern = '^v3_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+lines(x = c(0.5+grep(SortNames, pattern = '^v4_')[length(grep(SortNames, pattern = '^v4_'))], 0.5+grep(SortNames, pattern = '^v4_')[length(grep(SortNames, pattern = '^v4_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+lines(x = c(0.5+grep(SortNames, pattern = '^z_')[length(grep(SortNames, pattern = '^z_'))], 0.5+grep(SortNames, pattern = '^z_')[length(grep(SortNames, pattern = '^z_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+
+#x-axis pch
+par(new=TRUE)
+#plot(x = c(1,3.5,5.5,8,11.5,24,46,67,89,135,193,222,232), y = c(-0.06, -0.08, -0.06, -0.08, -0.06, rep(-0.08,8)), col = colos_paper[c(1,3,3,3,3,2,2,2,2,4,4,6,5)], pch = c(16,16,17,18,15,16,17,18,15,16,17,16,16), xlim = c(0,250), ylim = c(0,1), axes = FALSE, xlab = '', ylab = '')
+plot(x = c(1,3.5,5.5,8,11.5,35,78,135,193,222,232), y = c(-0.06, -0.08, -0.06, -0.08, -0.06, rep(-0.07,6)), col = colos_paper[c(1,3,3,3,3,2,2,4,4,6,5)], pch = c(16,16,17,18,15,16,17,16,17,16,16), xlim = c(0,250), ylim = c(0,1), axes = FALSE, xlab = '', ylab = '', cex = c(1,1,1,1,1,rep(1.5,6)))
+
+#Labels for parameters above threshold
+tmpnames = names(EEs05gm_b_mua_95[-which(names(EEs05gm_b_mua_m) %in% ColsAggregated)][order(names(EEs05gm_b_mua_m[-which(names(EEs05gm_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)][EEs05gm_b_mua_95[-which(names(EEs05gm_b_mua_m) %in% ColsAggregated)][order(names(EEs05gm_b_mua_m[-which(names(EEs05gm_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)] >= RanksMua05gm_b_Agg$EE05gm_b[Top1005gm_Agg]]/max(EEs05gm_b_mua_95[-which(names(EEs05gm_b_mua_m) %in% ColsAggregated)]))
+for (i in 1:length(tmpnames)){
+  text(x = which(names(EEs05gm_b_mua_95[-which(names(EEs05gm_b_mua_m) %in% ColsAggregated)][order(names(EEs05gm_b_mua_m[-which(names(EEs05gm_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]) == tmpnames[i]),
+       y = offset(EEs05gm_b_mua_95[-which(names(EEs05gm_b_mua_m) %in% ColsAggregated)][order(names(EEs05gm_b_mua_m[-which(names(EEs05gm_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)][which(names(EEs05gm_b_mua_95[-which(names(EEs05gm_b_mua_m) %in% ColsAggregated)][order(names(EEs05gm_b_mua_m[-which(names(EEs05gm_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]) == tmpnames[i])]/max(EEs05gm_b_mua_95[-which(names(EEs05gm_b_mua_m) %in% ColsAggregated)])),
+       labels = as.character(which(names(EEs05gm_b_mua_95[-which(names(EEs05gm_b_mua_m) %in% ColsAggregated)][order(names(EEs05gm_b_mua_m[-which(names(EEs05gm_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]) == tmpnames[i])), cex = 1.5)
+}
+#Streamflow mid
+par(xpd=FALSE)
+barplot(height = EEsotgm_b_mua_m[-which(names(EEsotgm_b_mua_m) %in% ColsAggregated)][order(names(EEsotgm_b_mua_m[-which(names(EEsotgm_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEsotgm_b_mua_95[-which(names(EEsotgm_b_mua_m) %in% ColsAggregated)]), ylab = 'Normalized Mean Abs. Val. of EE', xlab = '', names.arg = NA, main = 'Metric: SAMD for 5th - 95th Percentile of Flow', col = ColPlots_Agg_Paper[order(names(EEsotgm_b_mua_m[-which(names(EEsotgm_b_mua_m) %in% ColsAggregated)]))], border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,250))
+arrows(seq(0.5,length(EEsotgm_b_mua_05[-which(names(EEsotgm_b_mua_m) %in% ColsAggregated)])-0.5,1), EEsotgm_b_mua_05[-which(names(EEsotgm_b_mua_m) %in% ColsAggregated)][order(names(EEsotgm_b_mua_m[-which(names(EEsotgm_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEsotgm_b_mua_95[-which(names(EEsotgm_b_mua_m) %in% ColsAggregated)]), seq(0.5,length(EEsotgm_b_mua_05[-which(names(EEsotgm_b_mua_m) %in% ColsAggregated)])-0.5,1), EEsotgm_b_mua_95[-which(names(EEsotgm_b_mua_m) %in% ColsAggregated)][order(names(EEsotgm_b_mua_m[-which(names(EEsotgm_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEsotgm_b_mua_95[-which(names(EEsotgm_b_mua_m) %in% ColsAggregated)]), length=0.05, angle=90, code=3)
+lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(as.numeric(sort(EEsotgm_b_mua_m[-which(names(EEsotgm_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10otgm_Agg])/max(EEsotgm_b_mua_95[-which(names(EEsotgm_b_mua_m) %in% ColsAggregated)]), as.numeric(sort(EEsotgm_b_mua_m[-which(names(EEsotgm_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10otgm_Agg])/max(EEsotgm_b_mua_95[-which(names(EEsotgm_b_mua_m) %in% ColsAggregated)])), col = 'black', lwd = 2)
+legend('topright', legend = c('Hillslope: GW', 'Land: Grass', 'Land: Forest', 'Land: Urban', 
+                              'Land: Septic', 'Soil: Riparian', 'Soil: Other', 'Veg: Trees', 
+                              'Veg: Grass', 'Buildings', 'Zone: Atm.'), 
+       col = colos_paper[c(1,3,3,3,3,2,2,4,4,6,5)], pch = c(16,16,17,18,15,16,17,16,17,16,16), cex = 1.5, ncol = 1)
+
+#x-axis lines
+par(xpd=TRUE)
+SortNames = sort(names(EEsotgm_b_mua_m)[-which(names(EEsotgm_b_mua_m) %in% ColsAggregated)])
+SortNames = SortNames[c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]
+lines(x = c(-1,-1), y = c(-0.05,0), lty = 1, col = 'black')
+lines(x = c(0.5+grep(SortNames, pattern = '^h_')[length(grep(SortNames, pattern = '^h_'))], 0.5+grep(SortNames, pattern = '^h_')[length(grep(SortNames, pattern = '^h_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+lines(x = c(0.5+grep(SortNames, pattern = '^l1_')[length(grep(SortNames, pattern = '^l1_'))], 0.5+grep(SortNames, pattern = '^l1_')[length(grep(SortNames, pattern = '^l1_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+lines(x = c(0.5+grep(SortNames, pattern = '^l2_')[length(grep(SortNames, pattern = '^l2_'))], 0.5+grep(SortNames, pattern = '^l2_')[length(grep(SortNames, pattern = '^l2_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+lines(x = c(0.5+grep(SortNames, pattern = '^l3_')[length(grep(SortNames, pattern = '^l3_'))], 0.5+grep(SortNames, pattern = '^l3_')[length(grep(SortNames, pattern = '^l3_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+lines(x = c(0.5+grep(SortNames, pattern = '^l4_')[length(grep(SortNames, pattern = '^l4_'))], 0.5+grep(SortNames, pattern = '^l4_')[length(grep(SortNames, pattern = '^l4_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+#lines(x = c(0.5+grep(SortNames, pattern = '^s8_')[length(grep(SortNames, pattern = '^s8_'))], 0.5+grep(SortNames, pattern = '^s8_')[length(grep(SortNames, pattern = '^s8_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+#lines(x = c(0.5+grep(SortNames, pattern = '^s108_')[length(grep(SortNames, pattern = '^s108_'))], 0.5+grep(SortNames, pattern = '^s108_')[length(grep(SortNames, pattern = '^s108_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+lines(x = c(0.5+grep(SortNames, pattern = '^Soil8_')[length(grep(SortNames, pattern = '^Soil8_'))], 0.5+grep(SortNames, pattern = '^Soil8_')[length(grep(SortNames, pattern = '^Soil8_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+#lines(x = c(0.5+grep(SortNames, pattern = '^s9_')[length(grep(SortNames, pattern = '^s9_'))], 0.5+grep(SortNames, pattern = '^s9_')[length(grep(SortNames, pattern = '^s9_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+#lines(x = c(0.5+grep(SortNames, pattern = '^s109_')[length(grep(SortNames, pattern = '^s109_'))], 0.5+grep(SortNames, pattern = '^s109_')[length(grep(SortNames, pattern = '^s109_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+lines(x = c(0.5+grep(SortNames, pattern = '^Soil9_')[length(grep(SortNames, pattern = '^Soil9_'))], 0.5+grep(SortNames, pattern = '^Soil9_')[length(grep(SortNames, pattern = '^Soil9_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+lines(x = c(0.5+grep(SortNames, pattern = '^v102_')[length(grep(SortNames, pattern = '^v102_'))], 0.5+grep(SortNames, pattern = '^v102_')[length(grep(SortNames, pattern = '^v102_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+lines(x = c(0.5+grep(SortNames, pattern = '^v3_')[length(grep(SortNames, pattern = '^v3_'))], 0.5+grep(SortNames, pattern = '^v3_')[length(grep(SortNames, pattern = '^v3_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+lines(x = c(0.5+grep(SortNames, pattern = '^v4_')[length(grep(SortNames, pattern = '^v4_'))], 0.5+grep(SortNames, pattern = '^v4_')[length(grep(SortNames, pattern = '^v4_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+lines(x = c(0.5+grep(SortNames, pattern = '^z_')[length(grep(SortNames, pattern = '^z_'))], 0.5+grep(SortNames, pattern = '^z_')[length(grep(SortNames, pattern = '^z_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+
+#x-axis pch
+par(new=TRUE)
+#plot(x = c(1,3.5,5.5,8,11.5,24,46,67,89,135,193,222,232), y = c(-0.06, -0.08, -0.06, -0.08, -0.06, rep(-0.08,8)), col = colos_paper[c(1,3,3,3,3,2,2,2,2,4,4,6,5)], pch = c(16,16,17,18,15,16,17,18,15,16,17,16,16), xlim = c(0,250), ylim = c(0,1), axes = FALSE, xlab = '', ylab = '')
+plot(x = c(1,3.5,5.5,8,11.5,35,78,135,193,222,232), y = c(-0.06, -0.08, -0.06, -0.08, -0.06, rep(-0.07,6)), col = colos_paper[c(1,3,3,3,3,2,2,4,4,6,5)], pch = c(16,16,17,18,15,16,17,16,17,16,16), xlim = c(0,250), ylim = c(0,1), axes = FALSE, xlab = '', ylab = '', cex = c(1,1,1,1,1,rep(1.5,6)))
+
+#Labels for parameters above threshold
+tmpnames = names(EEsotgm_b_mua_95[-which(names(EEsotgm_b_mua_m) %in% ColsAggregated)][order(names(EEsotgm_b_mua_m[-which(names(EEsotgm_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)][EEsotgm_b_mua_95[-which(names(EEsotgm_b_mua_m) %in% ColsAggregated)][order(names(EEsotgm_b_mua_m[-which(names(EEsotgm_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)] >= RanksMuaotgm_b_Agg$EEotgm_b[Top10otgm_Agg]]/max(EEsotgm_b_mua_95[-which(names(EEsotgm_b_mua_m) %in% ColsAggregated)]))
+for (i in 1:length(tmpnames)){
+  text(x = which(names(EEsotgm_b_mua_95[-which(names(EEsotgm_b_mua_m) %in% ColsAggregated)][order(names(EEsotgm_b_mua_m[-which(names(EEsotgm_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]) == tmpnames[i]),
+       y = offset(EEsotgm_b_mua_95[-which(names(EEsotgm_b_mua_m) %in% ColsAggregated)][order(names(EEsotgm_b_mua_m[-which(names(EEsotgm_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)][which(names(EEsotgm_b_mua_95[-which(names(EEsotgm_b_mua_m) %in% ColsAggregated)][order(names(EEsotgm_b_mua_m[-which(names(EEsotgm_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]) == tmpnames[i])]/max(EEsotgm_b_mua_95[-which(names(EEsotgm_b_mua_m) %in% ColsAggregated)])),
+       labels = as.character(which(names(EEsotgm_b_mua_95[-which(names(EEsotgm_b_mua_m) %in% ColsAggregated)][order(names(EEsotgm_b_mua_m[-which(names(EEsotgm_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]) == tmpnames[i])), cex = 1.5)
+}
+
+#Streamflow 95
+par(xpd=FALSE)
+par(mar=c(4.1, 4.1, 4.1, 2.1))
+barplot(height = EEs95m_b_mua_m[-which(names(EEs95m_b_mua_m) %in% ColsAggregated)][order(names(EEs95m_b_mua_m[-which(names(EEs95m_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEs95m_b_mua_95[-which(names(EEs95m_b_mua_m) %in% ColsAggregated)]), ylab = '', xlab = 'Parameters', names.arg = NA, main = 'Metric: SAMD for Upper 95th Percentile of Flow', col = ColPlots_Agg_Paper[order(names(EEs95m_b_mua_m[-which(names(EEs95m_b_mua_m) %in% ColsAggregated)]))], border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,250))
+arrows(seq(0.5,length(EEs95m_b_mua_05[-which(names(EEs95m_b_mua_m) %in% ColsAggregated)])-0.5,1), EEs95m_b_mua_05[-which(names(EEs95m_b_mua_m) %in% ColsAggregated)][order(names(EEs95m_b_mua_m[-which(names(EEs95m_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEs95m_b_mua_95[-which(names(EEs95m_b_mua_m) %in% ColsAggregated)]), seq(0.5,length(EEs95m_b_mua_05[-which(names(EEs95m_b_mua_m) %in% ColsAggregated)])-0.5,1), EEs95m_b_mua_95[-which(names(EEs95m_b_mua_m) %in% ColsAggregated)][order(names(EEs95m_b_mua_m[-which(names(EEs95m_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEs95m_b_mua_95[-which(names(EEs95m_b_mua_m) %in% ColsAggregated)]), length=0.05, angle=90, code=3)
+lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(as.numeric(sort(EEs95m_b_mua_m[-which(names(EEs95m_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top1095m_Agg])/max(EEs95m_b_mua_95[-which(names(EEs95m_b_mua_m) %in% ColsAggregated)]), as.numeric(sort(EEs95m_b_mua_m[-which(names(EEs95m_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top1095m_Agg])/max(EEs95m_b_mua_95[-which(names(EEs95m_b_mua_m) %in% ColsAggregated)])), col = 'black', lwd = 2)
+
+#x-axis lines
+par(xpd=TRUE)
+SortNames = sort(names(EEs95m_b_mua_m)[-which(names(EEs95m_b_mua_m) %in% ColsAggregated)])
+SortNames = SortNames[c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]
+lines(x = c(-1,-1), y = c(-0.05,0), lty = 1, col = 'black')
+lines(x = c(0.5+grep(SortNames, pattern = '^h_')[length(grep(SortNames, pattern = '^h_'))], 0.5+grep(SortNames, pattern = '^h_')[length(grep(SortNames, pattern = '^h_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+lines(x = c(0.5+grep(SortNames, pattern = '^l1_')[length(grep(SortNames, pattern = '^l1_'))], 0.5+grep(SortNames, pattern = '^l1_')[length(grep(SortNames, pattern = '^l1_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+lines(x = c(0.5+grep(SortNames, pattern = '^l2_')[length(grep(SortNames, pattern = '^l2_'))], 0.5+grep(SortNames, pattern = '^l2_')[length(grep(SortNames, pattern = '^l2_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+lines(x = c(0.5+grep(SortNames, pattern = '^l3_')[length(grep(SortNames, pattern = '^l3_'))], 0.5+grep(SortNames, pattern = '^l3_')[length(grep(SortNames, pattern = '^l3_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+lines(x = c(0.5+grep(SortNames, pattern = '^l4_')[length(grep(SortNames, pattern = '^l4_'))], 0.5+grep(SortNames, pattern = '^l4_')[length(grep(SortNames, pattern = '^l4_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+#lines(x = c(0.5+grep(SortNames, pattern = '^s8_')[length(grep(SortNames, pattern = '^s8_'))], 0.5+grep(SortNames, pattern = '^s8_')[length(grep(SortNames, pattern = '^s8_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+#lines(x = c(0.5+grep(SortNames, pattern = '^s108_')[length(grep(SortNames, pattern = '^s108_'))], 0.5+grep(SortNames, pattern = '^s108_')[length(grep(SortNames, pattern = '^s108_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+lines(x = c(0.5+grep(SortNames, pattern = '^Soil8_')[length(grep(SortNames, pattern = '^Soil8_'))], 0.5+grep(SortNames, pattern = '^Soil8_')[length(grep(SortNames, pattern = '^Soil8_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+#lines(x = c(0.5+grep(SortNames, pattern = '^s9_')[length(grep(SortNames, pattern = '^s9_'))], 0.5+grep(SortNames, pattern = '^s9_')[length(grep(SortNames, pattern = '^s9_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+#lines(x = c(0.5+grep(SortNames, pattern = '^s109_')[length(grep(SortNames, pattern = '^s109_'))], 0.5+grep(SortNames, pattern = '^s109_')[length(grep(SortNames, pattern = '^s109_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+lines(x = c(0.5+grep(SortNames, pattern = '^Soil9_')[length(grep(SortNames, pattern = '^Soil9_'))], 0.5+grep(SortNames, pattern = '^Soil9_')[length(grep(SortNames, pattern = '^Soil9_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+lines(x = c(0.5+grep(SortNames, pattern = '^v102_')[length(grep(SortNames, pattern = '^v102_'))], 0.5+grep(SortNames, pattern = '^v102_')[length(grep(SortNames, pattern = '^v102_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+lines(x = c(0.5+grep(SortNames, pattern = '^v3_')[length(grep(SortNames, pattern = '^v3_'))], 0.5+grep(SortNames, pattern = '^v3_')[length(grep(SortNames, pattern = '^v3_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+lines(x = c(0.5+grep(SortNames, pattern = '^v4_')[length(grep(SortNames, pattern = '^v4_'))], 0.5+grep(SortNames, pattern = '^v4_')[length(grep(SortNames, pattern = '^v4_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+lines(x = c(0.5+grep(SortNames, pattern = '^z_')[length(grep(SortNames, pattern = '^z_'))], 0.5+grep(SortNames, pattern = '^z_')[length(grep(SortNames, pattern = '^z_'))]), y = c(-0.05,0), lty = 1, col = 'black')
+
+#x-axis pch
+par(new=TRUE)
+#plot(x = c(1,3.5,5.5,8,11.5,24,46,67,89,135,193,222,232), y = c(-0.06, -0.08, -0.06, -0.08, -0.06, rep(-0.08,8)), col = colos_paper[c(1,3,3,3,3,2,2,2,2,4,4,6,5)], pch = c(16,16,17,18,15,16,17,18,15,16,17,16,16), xlim = c(0,250), ylim = c(0,1), axes = FALSE, xlab = '', ylab = '')
+plot(x = c(1,3.5,5.5,8,11.5,35,78,135,193,222,232), y = c(-0.06, -0.08, -0.06, -0.08, -0.06, rep(-0.07,6)), col = colos_paper[c(1,3,3,3,3,2,2,4,4,6,5)], pch = c(16,16,17,18,15,16,17,16,17,16,16), xlim = c(0,250), ylim = c(0,1), axes = FALSE, xlab = '', ylab = '', cex = c(1,1,1,1,1,rep(1.5,6)))
+
+#Labels for parameters above threshold
+tmpnames = names(EEs95m_b_mua_95[-which(names(EEs95m_b_mua_m) %in% ColsAggregated)][order(names(EEs95m_b_mua_m[-which(names(EEs95m_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)][EEs95m_b_mua_95[-which(names(EEs95m_b_mua_m) %in% ColsAggregated)][order(names(EEs95m_b_mua_m[-which(names(EEs95m_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)] >= RanksMua95m_b_Agg$EE95m_b[Top1095m_Agg]]/max(EEs95m_b_mua_95[-which(names(EEs95m_b_mua_m) %in% ColsAggregated)]))
+for (i in 1:length(tmpnames)){
+  text(x = which(names(EEs95m_b_mua_95[-which(names(EEs95m_b_mua_m) %in% ColsAggregated)][order(names(EEs95m_b_mua_m[-which(names(EEs95m_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]) == tmpnames[i]),
+       y = offset(EEs95m_b_mua_95[-which(names(EEs95m_b_mua_m) %in% ColsAggregated)][order(names(EEs95m_b_mua_m[-which(names(EEs95m_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)][which(names(EEs95m_b_mua_95[-which(names(EEs95m_b_mua_m) %in% ColsAggregated)][order(names(EEs95m_b_mua_m[-which(names(EEs95m_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]) == tmpnames[i])]/max(EEs95m_b_mua_95[-which(names(EEs95m_b_mua_m) %in% ColsAggregated)])),
+       labels = as.character(which(names(EEs95m_b_mua_95[-which(names(EEs95m_b_mua_m) %in% ColsAggregated)][order(names(EEs95m_b_mua_m[-which(names(EEs95m_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]) == tmpnames[i])), cex = 1.5)
+}
+dev.off()
+
+
+# Plot Median vs. Observed Timeseries----
+png('MedObsFlows.png', res=300, units = 'in', width = 4, height = 9)
+layout(rbind(1,2,3))
+plot(obs05g$Flow, type='l',ylim=c(0,25),xlim=c(0,120), main='Lower 5th Percentile Flows', ylab='Flow (cfs)')
+par(new=TRUE)
+plot(MedBasins05g, type='l',ylim=c(0,25),xlim=c(0,120), col='red', ylab='')
+legend('topright', legend = c('Observed', 'Median Simulated'), col = c('black', 'red'), lty=1)
+
+plot(obsotg$Flow, type='l',ylim=c(0,25), main='5th - 95th Percentile Flows', ylab='Flow (cfs)')
+par(new=TRUE)
+plot(MedBasinsotg, type='l',ylim=c(0,25), col='red', ylab='')
+
+plot(obs95$Flow, type='l',ylim=c(0,25),xlim=c(0,120), main='Upper 5th Percentile Flows', ylab='Flow (cfs)')
+par(new=TRUE)
+plot(MedBasins95, type='l',ylim=c(0,25),xlim=c(0,120), col='red', ylab='')
 dev.off()
 
 #  Calibration Metrics----
@@ -4247,10 +4589,11 @@ for (i in 1:length(tmpnames)){
 dev.off()
 
 #   PDF ----
-pdf(file = 'fig5a.pdf', height = 8, width = 8, title = 'SAfig5')
+pdf(file = 'fig5.pdf', height = 8, width = 8, title = 'SAfig5')
 layout(rbind(c(1,2), c(3,4)))
+par(mar = c(2.1,4.5,4.1,2.1))
 #LNSE
-barplot(height = EEsLNSE_b_mua_m[-which(names(EEsLNSE_b_mua_m) %in% ColsAggregated)][order(names(EEsLNSE_b_mua_m[-which(names(EEsLNSE_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEsLNSE_b_mua_95[-which(names(EEsLNSE_b_mua_m) %in% ColsAggregated)]), ylab = 'Normalized Mean Abs. Val. of EE', xlab = 'Parameters', names.arg = NA, main = 'Metric: LNSE', col = ColPlots_Agg_Paper[order(names(EEsLNSE_b_mua_m[-which(names(EEsLNSE_b_mua_m) %in% ColsAggregated)]))], border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,250))
+barplot(height = EEsLNSE_b_mua_m[-which(names(EEsLNSE_b_mua_m) %in% ColsAggregated)][order(names(EEsLNSE_b_mua_m[-which(names(EEsLNSE_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEsLNSE_b_mua_95[-which(names(EEsLNSE_b_mua_m) %in% ColsAggregated)]), ylab = '', xlab = '', names.arg = NA, main = 'Metric: LNSE', col = ColPlots_Agg_Paper[order(names(EEsLNSE_b_mua_m[-which(names(EEsLNSE_b_mua_m) %in% ColsAggregated)]))], border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,250))
 arrows(seq(0.5,length(EEsLNSE_b_mua_05[-which(names(EEsLNSE_b_mua_m) %in% ColsAggregated)])-0.5,1), EEsLNSE_b_mua_05[-which(names(EEsLNSE_b_mua_m) %in% ColsAggregated)][order(names(EEsLNSE_b_mua_m[-which(names(EEsLNSE_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEsLNSE_b_mua_95[-which(names(EEsLNSE_b_mua_m) %in% ColsAggregated)]), seq(0.5,length(EEsLNSE_b_mua_05[-which(names(EEsLNSE_b_mua_m) %in% ColsAggregated)])-0.5,1), EEsLNSE_b_mua_95[-which(names(EEsLNSE_b_mua_m) %in% ColsAggregated)][order(names(EEsLNSE_b_mua_m[-which(names(EEsLNSE_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEsLNSE_b_mua_95[-which(names(EEsLNSE_b_mua_m) %in% ColsAggregated)]), length=0.05, angle=90, code=3)
 lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(as.numeric(sort(EEsLNSE_b_mua_m[-which(names(EEsLNSE_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10LNSE_Agg])/max(EEsLNSE_b_mua_95[-which(names(EEsLNSE_b_mua_m) %in% ColsAggregated)]), as.numeric(sort(EEsLNSE_b_mua_m[-which(names(EEsLNSE_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10LNSE_Agg])/max(EEsLNSE_b_mua_95[-which(names(EEsLNSE_b_mua_m) %in% ColsAggregated)])), col = 'black', lwd = 2)
 
@@ -4289,8 +4632,9 @@ for (i in 1:length(tmpnames)){
 }
 par(xpd=FALSE)
 
+par(mar = c(2.1,2.1,4.1,2.1))
 #NSE
-barplot(height = EEsNSE_b_mua_m[-which(names(EEsNSE_b_mua_m) %in% ColsAggregated)][order(names(EEsNSE_b_mua_m[-which(names(EEsNSE_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEsNSE_b_mua_95[-which(names(EEsNSE_b_mua_m) %in% ColsAggregated)]), ylab = 'Normalized Mean Abs. Val. of EE', xlab = 'Parameters', names.arg = NA, main = 'Metric: NSE', col = ColPlots_Agg_Paper[order(names(EEsNSE_b_mua_m[-which(names(EEsNSE_b_mua_m) %in% ColsAggregated)]))], border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,250))
+barplot(height = EEsNSE_b_mua_m[-which(names(EEsNSE_b_mua_m) %in% ColsAggregated)][order(names(EEsNSE_b_mua_m[-which(names(EEsNSE_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEsNSE_b_mua_95[-which(names(EEsNSE_b_mua_m) %in% ColsAggregated)]), ylab = '', xlab = '', names.arg = NA, main = 'Metric: NSE', col = ColPlots_Agg_Paper[order(names(EEsNSE_b_mua_m[-which(names(EEsNSE_b_mua_m) %in% ColsAggregated)]))], border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,250))
 arrows(seq(0.5,length(EEsNSE_b_mua_05[-which(names(EEsNSE_b_mua_m) %in% ColsAggregated)])-0.5,1), EEsNSE_b_mua_05[-which(names(EEsNSE_b_mua_m) %in% ColsAggregated)][order(names(EEsNSE_b_mua_m[-which(names(EEsNSE_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEsNSE_b_mua_95[-which(names(EEsNSE_b_mua_m) %in% ColsAggregated)]), seq(0.5,length(EEsNSE_b_mua_05[-which(names(EEsNSE_b_mua_m) %in% ColsAggregated)])-0.5,1), EEsNSE_b_mua_95[-which(names(EEsNSE_b_mua_m) %in% ColsAggregated)][order(names(EEsNSE_b_mua_m[-which(names(EEsNSE_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEsNSE_b_mua_95[-which(names(EEsNSE_b_mua_m) %in% ColsAggregated)]), length=0.05, angle=90, code=3)
 lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(as.numeric(sort(EEsNSE_b_mua_m[-which(names(EEsNSE_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10NSE_Agg])/max(EEsNSE_b_mua_95[-which(names(EEsNSE_b_mua_m) %in% ColsAggregated)]), as.numeric(sort(EEsNSE_b_mua_m[-which(names(EEsNSE_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10NSE_Agg])/max(EEsNSE_b_mua_95[-which(names(EEsNSE_b_mua_m) %in% ColsAggregated)])), col = 'black', lwd = 2)
 
@@ -4329,8 +4673,9 @@ for (i in 1:length(tmpnames)){
 }
 par(xpd=FALSE)
 
+par(mar = c(3.1,4.5,4.1,2.1))
 #pBias
-barplot(height = EEspBias_b_mua_m[-which(names(EEspBias_b_mua_m) %in% ColsAggregated)][order(names(EEspBias_b_mua_m[-which(names(EEspBias_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEspBias_b_mua_95[-which(names(EEspBias_b_mua_m) %in% ColsAggregated)]), ylab = 'Normalized Mean Abs. Val. of EE', xlab = 'Parameters', names.arg = NA, main = 'Metric: pBias', col = ColPlots_Agg_Paper[order(names(EEspBias_b_mua_m[-which(names(EEspBias_b_mua_m) %in% ColsAggregated)]))], border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,250))
+barplot(height = EEspBias_b_mua_m[-which(names(EEspBias_b_mua_m) %in% ColsAggregated)][order(names(EEspBias_b_mua_m[-which(names(EEspBias_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEspBias_b_mua_95[-which(names(EEspBias_b_mua_m) %in% ColsAggregated)]), ylab = '', xlab = '', names.arg = NA, main = 'Metric: pBias', col = ColPlots_Agg_Paper[order(names(EEspBias_b_mua_m[-which(names(EEspBias_b_mua_m) %in% ColsAggregated)]))], border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,250))
 arrows(seq(0.5,length(EEspBias_b_mua_05[-which(names(EEspBias_b_mua_m) %in% ColsAggregated)])-0.5,1), EEspBias_b_mua_05[-which(names(EEspBias_b_mua_m) %in% ColsAggregated)][order(names(EEspBias_b_mua_m[-which(names(EEspBias_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEspBias_b_mua_95[-which(names(EEspBias_b_mua_m) %in% ColsAggregated)]), seq(0.5,length(EEspBias_b_mua_05[-which(names(EEspBias_b_mua_m) %in% ColsAggregated)])-0.5,1), EEspBias_b_mua_95[-which(names(EEspBias_b_mua_m) %in% ColsAggregated)][order(names(EEspBias_b_mua_m[-which(names(EEspBias_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEspBias_b_mua_95[-which(names(EEspBias_b_mua_m) %in% ColsAggregated)]), length=0.05, angle=90, code=3)
 lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(as.numeric(sort(EEspBias_b_mua_m[-which(names(EEspBias_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10pBias_Agg])/max(EEspBias_b_mua_95[-which(names(EEspBias_b_mua_m) %in% ColsAggregated)]), as.numeric(sort(EEspBias_b_mua_m[-which(names(EEspBias_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10pBias_Agg])/max(EEspBias_b_mua_95[-which(names(EEspBias_b_mua_m) %in% ColsAggregated)])), col = 'black', lwd = 2)
 
@@ -4367,10 +4712,12 @@ for (i in 1:length(tmpnames)){
        y = offset(EEspBias_b_mua_95[-which(names(EEspBias_b_mua_m) %in% ColsAggregated)][order(names(EEspBias_b_mua_m[-which(names(EEspBias_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)][which(names(EEspBias_b_mua_95[-which(names(EEspBias_b_mua_m) %in% ColsAggregated)][order(names(EEspBias_b_mua_m[-which(names(EEspBias_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]) == tmpnames[i])]/max(EEspBias_b_mua_95[-which(names(EEspBias_b_mua_m) %in% ColsAggregated)])),
        labels = as.character(which(names(EEspBias_b_mua_95[-which(names(EEspBias_b_mua_m) %in% ColsAggregated)][order(names(EEspBias_b_mua_m[-which(names(EEspBias_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]) == tmpnames[i])))
 }
+axis(side = 1, labels = 'Parameters', tick = FALSE, at = 280, line = 1, cex.axis = 1.5)
 par(xpd=FALSE)
 
+par(mar = c(3.1,2.1,4.1,2.1))
 #LogL
-barplot(height = EEsLogL_b_mua_m[-which(names(EEsLogL_b_mua_m) %in% ColsAggregated)][order(names(EEsLogL_b_mua_m[-which(names(EEsLogL_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEsLogL_b_mua_95[-which(names(EEsLogL_b_mua_m) %in% ColsAggregated)]), ylab = 'Normalized Mean Abs. Val. of EE', xlab = 'Parameters', names.arg = NA, main = 'Metric: LogL', col = ColPlots_Agg_Paper[order(names(EEsLogL_b_mua_m[-which(names(EEsLogL_b_mua_m) %in% ColsAggregated)]))], border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,250))
+barplot(height = EEsLogL_b_mua_m[-which(names(EEsLogL_b_mua_m) %in% ColsAggregated)][order(names(EEsLogL_b_mua_m[-which(names(EEsLogL_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEsLogL_b_mua_95[-which(names(EEsLogL_b_mua_m) %in% ColsAggregated)]), ylab = '', xlab = '', names.arg = NA, main = 'Metric: LogL', col = ColPlots_Agg_Paper[order(names(EEsLogL_b_mua_m[-which(names(EEsLogL_b_mua_m) %in% ColsAggregated)]))], border = NA, ylim = c(0,1), space = 0, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, xlim = c(0,250))
 arrows(seq(0.5,length(EEsLogL_b_mua_05[-which(names(EEsLogL_b_mua_m) %in% ColsAggregated)])-0.5,1), EEsLogL_b_mua_05[-which(names(EEsLogL_b_mua_m) %in% ColsAggregated)][order(names(EEsLogL_b_mua_m[-which(names(EEsLogL_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEsLogL_b_mua_95[-which(names(EEsLogL_b_mua_m) %in% ColsAggregated)]), seq(0.5,length(EEsLogL_b_mua_05[-which(names(EEsLogL_b_mua_m) %in% ColsAggregated)])-0.5,1), EEsLogL_b_mua_95[-which(names(EEsLogL_b_mua_m) %in% ColsAggregated)][order(names(EEsLogL_b_mua_m[-which(names(EEsLogL_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]/max(EEsLogL_b_mua_95[-which(names(EEsLogL_b_mua_m) %in% ColsAggregated)]), length=0.05, angle=90, code=3)
 lines(x = c(-100,round(nrow(ParamRanges), -2)), y = c(as.numeric(sort(EEsLogL_b_mua_m[-which(names(EEsLogL_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10LogL_Agg])/max(EEsLogL_b_mua_95[-which(names(EEsLogL_b_mua_m) %in% ColsAggregated)]), as.numeric(sort(EEsLogL_b_mua_m[-which(names(EEsLogL_b_mua_m) %in% ColsAggregated)], decreasing = TRUE)[Top10LogL_Agg])/max(EEsLogL_b_mua_95[-which(names(EEsLogL_b_mua_m) %in% ColsAggregated)])), col = 'black', lwd = 2)
 
@@ -4407,6 +4754,11 @@ for (i in 1:length(tmpnames)){
        y = offset(EEsLogL_b_mua_95[-which(names(EEsLogL_b_mua_m) %in% ColsAggregated)][order(names(EEsLogL_b_mua_m[-which(names(EEsLogL_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)][which(names(EEsLogL_b_mua_95[-which(names(EEsLogL_b_mua_m) %in% ColsAggregated)][order(names(EEsLogL_b_mua_m[-which(names(EEsLogL_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]) == tmpnames[i])]/max(EEsLogL_b_mua_95[-which(names(EEsLogL_b_mua_m) %in% ColsAggregated)])),
        labels = as.character(which(names(EEsLogL_b_mua_95[-which(names(EEsLogL_b_mua_m) %in% ColsAggregated)][order(names(EEsLogL_b_mua_m[-which(names(EEsLogL_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]) == tmpnames[i])))
 }
+
+#axis labels
+par(xpd = FALSE)
+axis(side = 2, labels = 'Normalized Mean Abs. Val. of EE', tick = FALSE, at = 1.02, line = 24, cex.axis = 1.5)
+
 dev.off()
 
 #Hillslope Plots for mua----
@@ -4537,6 +4889,9 @@ LabelNames_paper = rev(LabelNames[c(1,21,5:10,12,11,15,13,14,16:20,2:4)])
 
 SortRanksMua_bg_Agg = unique(c(ParamSelect_bg_Agg, ParamSelectTN_b_Agg))[c(1,2,17,18,14,15,13,19,5,3,20,4,6,7,8,10,11,12,16,21,9)]
 SortRanksMua_bg_Agg_paper = rev(SortRanksMua_bg_Agg[c(1,21,5:10,12,11,15,13,14,16:20,2:4)])
+
+SortRanksMua_bgm_Agg = unique(c(ParamSelect_bgm_Agg, ParamSelectTN_b_Agg))[c(1,2,17,18,14,15,13,19,5,3,20,4,6,7,8,10,11,12,16,21,9)]
+SortRanksMua_bgm_Agg_paper = rev(SortRanksMua_bgm_Agg[c(1,21,5:10,12,11,15,13,14,16:20,2:4)])
 
 SortRanksMua_h_Agg = unique(c(ParamSelect_b_Agg, ParamSelectTN_b_Agg, ParamSelect_h_Agg, ParamSelectTN_h_Agg))[c(1,2,16,17,26,30,31,13,25,22,23,24,36,14,12,18,3,4,19,20,5,6,7,32,9,10,11,15,21,27,28,29,37,34,33,35,8)]
 LabelNames_h = c('H: GW Loss Coef.', 'Z: Wind Speed', 'Z: Avg. Temp. Coef.', 'Z: Atm. Trans. Coef. 2', 'Z: Atm. Trans. Coef. 1', 'Z: Clear Sky Trans.', 
@@ -4955,153 +5310,9 @@ par(xpd=FALSE)
 box(which = 'figure')
 dev.off()
 
-# pdf('HillRankTop1295_All_AgghbNoTN_paper_g.pdf', height = 7, width = 7, title = 'SAfig3d')
-# par(mar = c(2,12.5,2,4.5), mgp = c(1,1,0))
-# for (h in 0:length(uhills)){
-#   #Loop over the top 10% ranks
-#   for (j in 1:length(SortRanksMua_hg_Agg_paper)){
-#     if (h == 0){
-#       #Basin
-#       if (j == 1){
-#         plot(x = h, y = j, xlim = c(-1, 15), ylim = c(0,length(SortRanksMua_hg_Agg_paper)), pch = 15, xlab = 'Hillslope ID', ylab = '', col = colFun(ifelse(SortRanksMua_hg_Agg_paper[j] %in% unique(c(ParamSelect_bg_Agg)), 1, 0)), axes = FALSE, cex.lab = 1.5)
-#         polygon(x = c(-0.5,-0.5,14.5,14.5), y = c(0.5,37.5,37.5,0.5), col='black')
-#         par(new=TRUE)
-#         plot(x = h, y = j, xlim = c(-1, 15), ylim = c(0,length(SortRanksMua_hg_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(ifelse(SortRanksMua_hg_Agg_paper[j] %in% unique(c(ParamSelect_bg_Agg)), 1, 0)), axes = FALSE, cex.lab = 1.5)
-#       }else{
-#         plot(x = h, y = j, xlim = c(-1, 15), ylim = c(0,length(SortRanksMua_hg_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(ifelse(SortRanksMua_hg_Agg_paper[j] %in% unique(c(ParamSelect_bg_Agg)), 1, 0)), axes = FALSE)
-#       }
-#     }else{
-#       #Hillslopes
-#       plot(x = h, y = j, xlim = c(-1, 15), ylim = c(0,length(SortRanksMua_hg_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(ifelse(SortRanksMua_hg_Agg_paper[j] %in% unique(c(ph10g[[h]])), 1, 0)), axes = FALSE)
-#     }
-#     par(new=TRUE)
-#   }
-# }
-# rm(h,j)
-# par(new=FALSE, mgp = c(3,1,0))
-# axis(side = 1, at = 0, labels = 'B', pos = 0.5)
-# axis(side = 1, at = seq(1,14,1), labels = TRUE, pos = 0.5)
-# axis(side = 2, at = seq(1,length(SortRanksMua_hg_Agg_paper),1), labels = LabelNames_h_paper, las = 1)
-# legend('right', title = expression(bold('Selected for\nCalibration?')), legend = c('Yes', 'No'), pch = 15, col = colFun(c(1,0)), inset = -0.23, xpd = TRUE, bty = 'n')
-# lines(c(-0.5,15), c(36.5,36.5), col = 'white')
-# lines(c(-0.5,15), c(35.5,35.5), col = 'white')
-# lines(c(-0.5,15), c(33.5,33.5), col = 'white')
-# lines(c(-0.5,15), c(26.5,26.5), col = 'white')
-# lines(c(-0.5,15), c(15.5,15.5), col = 'white')
-# lines(c(-0.5,15), c(7.5,7.5), col = 'white')
-# lines(c(-0.5,15), c(5.5,5.5), col = 'white')
-# lines(c(8.5,8.5), c(0,40), col = 'white')
-# lines(c(0.5,0.5), c(0,40), col = 'white')
-# #Category symbol from EE plot
-# par(new=TRUE, xpd = TRUE)
-# plot(x = rep(-1,8),y = c(3,6.5,11.5,21,30,34.5,36,37), col = colos_paper[c(5,4,4,2,2,3,3,1)], pch = c(16,17,16,17,16,15,18,16), axes=FALSE, xlab = '', ylab = '', xlim = c(-1,15), ylim = c(0,length(SortRanksMua_hg_Agg_paper)))
-# text(x = 4.5, y = 38.5, expression(bold('   More\nForested')))
-# text(x = 11.5, y = 38.5, expression(bold('     More\nImpervious')))
-# text(x = 0, y = 39, expression(bold('Basin')), srt = 90)
-# text(x = -12, y = 39, 'D', cex = 1.5)
-# par(xpd=FALSE)
-# box(which = 'figure')
-# dev.off()
-
-# pdf('HillRankTop1295_All_Aggh_paper.pdf', height = 7, width = 7, title = 'SAfig2d')
-# par(mar = c(2,12.5,2,4.5), mgp = c(1,1,0))
-# for (h in 0:length(uhills)){
-#   #Loop over the top 10% ranks
-#   for (j in 1:length(SortRanksMua_h_Agg_paper)){
-#     if (h == 0){
-#       #Basin
-#       if (j == 1){
-#         plot(x = h, y = j, xlim = c(-1, 15), ylim = c(0,length(SortRanksMua_h_Agg_paper)), pch = 15, xlab = 'Hillslope ID', ylab = '', col = colFun(ifelse(SortRanksMua_h_Agg_paper[j] %in% unique(c(ParamSelect_b_Agg, ParamSelectTN_b_Agg)), 1, 0)), axes = FALSE, cex.lab = 1.5)
-#         polygon(x = c(-0.5,-0.5,14.5,14.5), y = c(0.5,37.5,37.5,0.5), col='black')
-#         par(new=TRUE)
-#         plot(x = h, y = j, xlim = c(-1, 15), ylim = c(0,length(SortRanksMua_h_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(ifelse(SortRanksMua_h_Agg_paper[j] %in% unique(c(ParamSelect_b_Agg, ParamSelectTN_b_Agg)), 1, 0)), axes = FALSE, cex.lab = 1.5)
-#       }else{
-#         plot(x = h, y = j, xlim = c(-1, 15), ylim = c(0,length(SortRanksMua_h_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(ifelse(SortRanksMua_h_Agg_paper[j] %in% unique(c(ParamSelect_b_Agg, ParamSelectTN_b_Agg)), 1, 0)), axes = FALSE)
-#       }
-#     }else{
-#       #Hillslopes
-#       plot(x = h, y = j, xlim = c(-1, 15), ylim = c(0,length(SortRanksMua_h_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(ifelse(SortRanksMua_h_Agg_paper[j] %in% unique(c(ph10[[h]], phTN10[[h]])), 1, 0)), axes = FALSE)
-#     }
-#     par(new=TRUE)
-#   }
-# }
-# rm(h,j)
-# par(new=FALSE, mgp = c(3,1,0))
-# axis(side = 1, at = 0, labels = 'B', pos = 0.5)
-# axis(side = 1, at = seq(1,14,1), labels = TRUE, pos = 0.5)
-# axis(side = 2, at = seq(1,length(SortRanksMua_h_Agg_paper),1), labels = LabelNames_h_paper, las = 1)
-# legend('right', title = expression(bold('Selected for\nCalibration?')), legend = c('Yes', 'No'), pch = 15, col = colFun(c(1,0)), inset = -0.23, xpd = TRUE, bty = 'n')
-# lines(c(-0.5,15), c(36.5,36.5), col = 'white')
-# lines(c(-0.5,15), c(35.5,35.5), col = 'white')
-# lines(c(-0.5,15), c(33.5,33.5), col = 'white')
-# lines(c(-0.5,15), c(26.5,26.5), col = 'white')
-# lines(c(-0.5,15), c(15.5,15.5), col = 'white')
-# lines(c(-0.5,15), c(7.5,7.5), col = 'white')
-# lines(c(-0.5,15), c(5.5,5.5), col = 'white')
-# lines(c(8.5,8.5), c(0,40), col = 'white')
-# lines(c(0.5,0.5), c(0,40), col = 'white')
-# #Category symbol from EE plot
-# par(new=TRUE, xpd = TRUE)
-# plot(x = rep(-1,8),y = c(3,6.5,11.5,21,30,34.5,36,37), col = colos_paper[c(5,4,4,2,2,3,3,1)], pch = c(16,17,16,17,16,15,18,16), axes=FALSE, xlab = '', ylab = '', xlim = c(-1,15), ylim = c(0,length(SortRanksMua_h_Agg_paper)))
-# text(x = 4.5, y = 38.5, expression(bold('   More\nForested')))
-# text(x = 11.5, y = 38.5, expression(bold('     More\nImpervious')))
-# text(x = 0, y = 39, expression(bold('Basin')), srt = 90)
-# text(x = -12, y = 39, 'D', cex = 1.5)
-# par(xpd=FALSE)
-# box(which = 'figure')
-# dev.off()
-
-# pdf('HillRankTop1295_All_Aggh_paper_g.pdf', height = 7, width = 7, title = 'SAfig2d')
-# par(mar = c(2,12.5,2,4.5), mgp = c(1,1,0))
-# for (h in 0:length(uhills)){
-#   #Loop over the top 10% ranks
-#   for (j in 1:length(SortRanksMua_hg_Agg_paper)){
-#     if (h == 0){
-#       #Basin
-#       if (j == 1){
-#         plot(x = h, y = j, xlim = c(-1, 15), ylim = c(0,length(SortRanksMua_hg_Agg_paper)), pch = 15, xlab = 'Hillslope ID', ylab = '', col = colFun(ifelse(SortRanksMua_hg_Agg_paper[j] %in% unique(c(ParamSelect_bg_Agg, ParamSelectTN_b_Agg)), 1, 0)), axes = FALSE, cex.lab = 1.5)
-#         polygon(x = c(-0.5,-0.5,14.5,14.5), y = c(0.5,37.5,37.5,0.5), col='black')
-#         par(new=TRUE)
-#         plot(x = h, y = j, xlim = c(-1, 15), ylim = c(0,length(SortRanksMua_hg_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(ifelse(SortRanksMua_hg_Agg_paper[j] %in% unique(c(ParamSelect_bg_Agg, ParamSelectTN_b_Agg)), 1, 0)), axes = FALSE, cex.lab = 1.5)
-#       }else{
-#         plot(x = h, y = j, xlim = c(-1, 15), ylim = c(0,length(SortRanksMua_hg_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(ifelse(SortRanksMua_hg_Agg_paper[j] %in% unique(c(ParamSelect_bg_Agg, ParamSelectTN_b_Agg)), 1, 0)), axes = FALSE)
-#       }
-#     }else{
-#       #Hillslopes
-#       plot(x = h, y = j, xlim = c(-1, 15), ylim = c(0,length(SortRanksMua_hg_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(ifelse(SortRanksMua_hg_Agg_paper[j] %in% unique(c(ph10g[[h]], phTN10[[h]])), 1, 0)), axes = FALSE)
-#     }
-#     par(new=TRUE)
-#   }
-# }
-# rm(h,j)
-# par(new=FALSE, mgp = c(3,1,0))
-# axis(side = 1, at = 0, labels = 'B', pos = 0.5)
-# axis(side = 1, at = seq(1,14,1), labels = TRUE, pos = 0.5)
-# axis(side = 2, at = seq(1,length(SortRanksMua_hg_Agg_paper),1), labels = LabelNames_h_paper, las = 1)
-# legend('right', title = expression(bold('Selected for\nCalibration?')), legend = c('Yes', 'No'), pch = 15, col = colFun(c(1,0)), inset = -0.23, xpd = TRUE, bty = 'n')
-# lines(c(-0.5,15), c(36.5,36.5), col = 'white')
-# lines(c(-0.5,15), c(35.5,35.5), col = 'white')
-# lines(c(-0.5,15), c(33.5,33.5), col = 'white')
-# lines(c(-0.5,15), c(26.5,26.5), col = 'white')
-# lines(c(-0.5,15), c(15.5,15.5), col = 'white')
-# lines(c(-0.5,15), c(7.5,7.5), col = 'white')
-# lines(c(-0.5,15), c(5.5,5.5), col = 'white')
-# lines(c(8.5,8.5), c(0,40), col = 'white')
-# lines(c(0.5,0.5), c(0,40), col = 'white')
-# #Category symbol from EE plot
-# par(new=TRUE, xpd = TRUE)
-# plot(x = rep(-1,8),y = c(3,6.5,11.5,21,30,34.5,36,37), col = colos_paper[c(5,4,4,2,2,3,3,1)], pch = c(16,17,16,17,16,15,18,16), axes=FALSE, xlab = '', ylab = '', xlim = c(-1,15), ylim = c(0,length(SortRanksMua_hg_Agg_paper)))
-# text(x = 4.5, y = 38.5, expression(bold('   More\nForested')))
-# text(x = 11.5, y = 38.5, expression(bold('     More\nImpervious')))
-# text(x = 0, y = 39, expression(bold('Basin')), srt = 90)
-# text(x = -12, y = 39, 'D', cex = 1.5)
-# par(xpd=FALSE)
-# box(which = 'figure')
-# dev.off()
-
 #   Compare selection with calibration metrics----
 #HillRankTop1295_All_AgghCal_paper_g
-pdf('fig5b.pdf', height = 7, width = 7, title = 'SAfig5b')
+pdf('fig6.pdf', height = 7, width = 7, title = 'SAfig6')
 par(mar = c(4,12.5,2,4.5), mgp = c(1,1,0))
 for (h in 0:6){
   #Loop over the top 10% ranks
@@ -5621,7 +5832,7 @@ par(xpd=FALSE)
 box(which = 'figure')
 dev.off()
 
-pdf('fig3c.pdf', height = 7, width = 7, title = 'SAfig2c')
+pdf('fig3c.pdf', height = 7, width = 7, title = 'SAfig3c')
 par(mar = c(2,12.5,2,4.5), mgp = c(1,1,0))
 for (h in 0:length(uhills)){
   #Loop over the top 10% ranks
@@ -7083,7 +7294,7 @@ par(mar=c(5.1, 4.5, 4.1, 2.1))
 opar=par
 layout(rbind(c(1,2,3), c(4,5,6), c(7,8,9)))
 barplot(height = EEs95_b_mua_m[c(grep(names(EEs95_b_mua_m), pattern = '9_m', fixed=TRUE, ignore.case = FALSE)[c(1,3,5)], grep(names(EEs95_b_mua_m), pattern = '8_m', fixed=TRUE, ignore.case = FALSE)[c(1,3,5)])][c(1,2,4,5,6,3)]/max(EEs95_b_mua_95), 
-        names.arg = NA, ylab = 'Normalized Elementary Effect', ylim = c(0,1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'm: Ksat Decay with Sat. Def.', xlab = 'Soils', cex.main=1.5, axes=FALSE)
+        names.arg = NA, ylab = '', ylim = c(0,1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'm: Ksat Decay with Sat. Def.', xlab = 'Soils', cex.main=1.5, axes=FALSE)
 arrows(seq(0.5,5.5,1), 
        EEs95_b_mua_05[c(grep(names(EEs95_b_mua_05), pattern = '9_m', fixed=TRUE, ignore.case = FALSE)[c(1,3,5)], grep(names(EEs95_b_mua_05), pattern = '8_m', fixed=TRUE, ignore.case = FALSE)[c(1,3,5)])][c(1,2,4,5,6,3)]/max(EEs95_b_mua_95), 
        seq(0.5,5.5,1), 
@@ -7096,7 +7307,7 @@ text(labels = 'A', x = -1.2, y = 1.2, cex = 2)
 par(xpd=FALSE)
 
 barplot(height = EEs95_b_mua_m[c(grep(names(EEs95_b_mua_m), pattern = 'sat_to_gw', fixed=TRUE, ignore.case = FALSE))]/max(EEs95_b_mua_95), 
-        names.arg = c('S9', 'S109', 'S8', 'S108'), ylab = 'Normalized Elementary Effect', ylim = c(0,1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Sat. to GW Coef.', xlab = 'Soils', cex.main=1.5)
+        names.arg = c('S9', 'S109', 'S8', 'S108'), ylab = '', ylim = c(0,1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Sat. to GW Coef.', xlab = 'Soils', cex.main=1.5)
 arrows(seq(0.5,3.5,1), 
        EEs95_b_mua_05[c(grep(names(EEs95_b_mua_m), pattern = 'sat_to_gw', fixed=TRUE, ignore.case = FALSE))]/max(EEs95_b_mua_95), 
        seq(0.5,3.5,1), 
@@ -7109,7 +7320,7 @@ par(xpd=FALSE)
 par(mar=c(6,4.5,3,0.5))
 barplot(height = EEs95_b_mua_m[c(grep(names(EEs95_b_mua_m), pattern = 'Ksat', fixed=TRUE, ignore.case = FALSE))]/max(EEs95_b_mua_95), 
         names.arg = NA, 
-        ylab = 'Normalized Elementary Effect', ylim = c(0,1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Hydraulic Conductivity', xlab = '', las = 2, cex.main=1.5, axes=FALSE)
+        ylab = '', ylim = c(0,1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Hydraulic Conductivity', xlab = '', las = 2, cex.main=1.5, axes=FALSE)
 axis(side = 2, at = seq(0,1,0.2), labels = TRUE, cex.axis=1.5)
 axis(side = 1, at = seq(0.5,9.5,1), labels = c('S9 Ksat', 'S9 vKsat', 'S109 Ksat', 'S109 vKsat', 'S8 Ksat', 'S8 vKsat', 'S108 Ksat', 'S108 vKsat', 'S8 and S108', 'S9 and S109'), cex.axis=1, las = 2)
 axis(side = 1, at = 5, labels = 'Soils', line = 4, cex.axis = 1.2, tick = FALSE)
@@ -7124,7 +7335,7 @@ par(xpd=FALSE)
 
 par(opar)
 barplot(height = EEs95_b_mua_m[c(grep(names(EEs95_b_mua_m), pattern = 'psi_air', fixed=TRUE, ignore.case = FALSE))]/max(EEs95_b_mua_95), 
-        names.arg = c('S9', 'S109', 'S8', 'S108'), ylab = 'Normalized Elementary Effect', ylim = c(0,1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Air Entry Pressure', xlab = 'Soils', cex.main=1.5)
+        names.arg = c('S9', 'S109', 'S8', 'S108'), ylab = 'Normalized Mean Abs. Val. of EE', ylim = c(0,1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Air Entry Pressure', xlab = 'Soils', cex.main=1.5)
 arrows(seq(0.5,3.5,1), 
        EEs95_b_mua_05[c(grep(names(EEs95_b_mua_m), pattern = 'psi_air', fixed=TRUE, ignore.case = FALSE))]/max(EEs95_b_mua_95), 
        seq(0.5,3.5,1), 
@@ -7135,7 +7346,7 @@ text(labels = 'D', x = -.7, y = 1.1, cex = 2)
 par(xpd=FALSE)
 
 barplot(height = EEs95_b_mua_m[c(grep(names(EEs95_b_mua_m), pattern = 'pore', fixed=TRUE, ignore.case = FALSE))]/max(EEs95_b_mua_95), 
-        names.arg = c('S9', 'S109', 'S8', 'S108'), ylab = 'Normalized Elementary Effect', ylim = c(0,1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Pore Size', xlab = 'Soils', cex.main=1.5)
+        names.arg = c('S9', 'S109', 'S8', 'S108'), ylab = '', ylim = c(0,1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Pore Size', xlab = 'Soils', cex.main=1.5)
 arrows(seq(0.5,3.5,1), 
        EEs95_b_mua_05[grep(names(EEs95_b_mua_05), pattern = 'pore', fixed=TRUE, ignore.case = FALSE)]/max(EEs95_b_mua_95), 
        seq(0.5,3.5,1), 
@@ -7146,7 +7357,7 @@ text(labels = 'E', x = -0.7, y = 1.1, cex = 2)
 par(xpd=FALSE)
 
 barplot(height = EEs95_b_mua_m[c(grep(names(EEs95_b_mua_m), pattern = 'active', fixed=TRUE, ignore.case = FALSE))]/max(EEs95_b_mua_95), 
-        names.arg = c('S9', 'S109', 'S8', 'S108'), ylab = 'Normalized Elementary Effect', ylim = c(0,1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Soil Thickness', xlab = 'Soils', cex.main=1.5)
+        names.arg = c('S9', 'S109', 'S8', 'S108'), ylab = '', ylim = c(0,1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Soil Thickness', xlab = 'Soils', cex.main=1.5)
 arrows(seq(0.5,3.5,1), 
        EEs95_b_mua_05[grep(names(EEs95_b_mua_05), pattern = 'active', fixed=TRUE, ignore.case = FALSE)]/max(EEs95_b_mua_95), 
        seq(0.5,3.5,1), 
@@ -7157,7 +7368,7 @@ text(labels = 'F', x = -0.7, y = 1.1, cex = 2)
 par(xpd=FALSE)
 
 barplot(height = EEs95_b_mua_m[c(grep(names(EEs95_b_mua_m), pattern = 'snow_melt', fixed=TRUE, ignore.case = FALSE))]/max(EEs95_b_mua_95), 
-        names.arg = c('S9', 'S109', 'S8', 'S108'), ylab = 'Normalized Elementary Effect', ylim = c(0,0.005), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Snow Melt Temp. Coef.', xlab = 'Soils', cex.main=1.5)
+        names.arg = c('S9', 'S109', 'S8', 'S108'), ylab = '', ylim = c(0,0.005), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Snow Melt Temp. Coef.', xlab = 'Soils', cex.main=1.5)
 arrows(seq(0.5,3.5,1), 
        EEs95_b_mua_05[grep(names(EEs95_b_mua_05), pattern = 'snow_melt', fixed=TRUE, ignore.case = FALSE)]/max(EEs95_b_mua_95), 
        seq(0.5,3.5,1), 
@@ -7168,7 +7379,7 @@ text(labels = 'G', x = -0.7, y = 0.0055, cex = 2)
 par(xpd=FALSE)
 
 barplot(height = EEs95_b_mua_m[c(grep(names(EEs95_b_mua_m), pattern = 'snow_energy', fixed=TRUE, ignore.case = FALSE))]/max(EEs95_b_mua_95), 
-        names.arg = c('S9', 'S109', 'S8', 'S108'), ylab = 'Normalized Elementary Effect', ylim = c(0,0.005), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Max Snow Energy Deficit', xlab = 'Soils', cex.main=1.5)
+        names.arg = c('S9', 'S109', 'S8', 'S108'), ylab = '', ylim = c(0,0.005), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Max Snow Energy Deficit', xlab = 'Soils', cex.main=1.5)
 arrows(seq(0.5,3.5,1), 
        EEs95_b_mua_05[grep(names(EEs95_b_mua_05), pattern = 'snow_energy', fixed=TRUE, ignore.case = FALSE)]/max(EEs95_b_mua_95), 
        seq(0.5,3.5,1), 
@@ -7179,7 +7390,7 @@ text(labels = 'H', x = -0.7, y = 0.0055, cex = 2)
 par(xpd=FALSE)
 
 barplot(height = EEs95_b_mua_m[c(grep(names(EEs95_b_mua_m), pattern = 'sla', fixed=TRUE, ignore.case = FALSE))]/max(EEs95_b_mua_95), 
-        names.arg = c('Tree', 'Grass'), ylab = 'Normalized Elementary Effect', ylim = c(0,0.1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Specific Leaf Area', xlab = 'Vegetation', cex.main=1.5)
+        names.arg = c('Tree', 'Grass'), ylab = '', ylim = c(0,0.1), cex.axis = 1.5, cex.lab = 1.5, space = 0, main = 'Specific Leaf Area', xlab = 'Vegetation', cex.main=1.5)
 arrows(seq(0.5,1.5,1), 
        EEs95_b_mua_05[grep(names(EEs95_b_mua_05), pattern = 'sla', fixed=TRUE, ignore.case = FALSE)]/max(EEs95_b_mua_95), 
        seq(0.5,1.5,1), 
