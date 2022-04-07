@@ -2,10 +2,10 @@
 
 #Set directories----
 dir_Main = "C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR"
-dir_ParamInCutoff = paste0(dir_Main, '/SelectedParamsTotals+Fig1')
-dir_EEpanels = paste0(dir_Main, '/EEpanels+Fig2+Fig5')
-dir_HillPanels = paste0(dir_Main, '/Hillpanels+Fig3cd+Fig6')
-dir_Mult = paste0(dir_Main, '/MultiplierEval+Fig4')
+dir_ParamInCutoff = paste0(dir_Main, '/SelectedParamsTotals+Fig2')
+dir_EEpanels = paste0(dir_Main, '/EEpanels+Fig3+Fig6')
+dir_HillPanels = paste0(dir_Main, '/Hillpanels+Fig4cd+Fig7')
+dir_Mult = paste0(dir_Main, '/MultiplierEval+Fig5')
 
 #Set file locations----
 f_HelpFuns = "C:\\Users\\js4yd\\OneDrive - University of Virginia\\RHESSys_ParameterSA\\SensitivityAnalysis\\SAScriptFunctions.R"
@@ -2462,7 +2462,7 @@ RanksMua05gm_b_AggCI[,c(2,3,4)] = signif(RanksMua05gm_b_AggCI[,c(2,3,4)], 3)
 RanksMuaotgm_b_AggCI[,c(2,3,4)] = signif(RanksMuaotgm_b_AggCI[,c(2,3,4)], 3)
 RanksMua95m_b_AggCI[,c(2,3,4)] = signif(RanksMua95m_b_AggCI[,c(2,3,4)], 3)
 
-#In order of parameters in Fig 1
+#In order of parameters in Fig 2 (formerly figure 1)
 Fig1Order = names(EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)][order(names(EEs05_b_mua_m[-which(names(EEs05_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)])
 RanksMua05_b_AggCI_FigOrder = RanksMua05_b_AggCI[match(table = RanksMua05_b_AggCI$Param, x = Fig1Order),] 
 RanksMuaot_b_AggCI_FigOrder = RanksMuaot_b_AggCI[match(table = RanksMuaot_b_AggCI$Param, x = Fig1Order),]
@@ -2533,7 +2533,7 @@ for (h in 1:length(uhills)){
   RanksMuaTNMed_h_AggCI[[h]][,c(2,3,4)] = signif(RanksMuaTNMed_h_AggCI[[h]][,c(2,3,4)], 3)
   RanksMuaTN95_h_AggCI[[h]][,c(2,3,4)] = signif(RanksMuaTN95_h_AggCI[[h]][,c(2,3,4)], 3)
   
-  #In order of parameters in Fig 1
+  #In order of parameters in Fig 2
   RanksMua05_h_AggCI[[h]] = RanksMua05_h_AggCI[[h]][match(table = RanksMua05_h_AggCI[[h]]$Param, x = Fig1Order),] 
   RanksMuaot_h_AggCI[[h]] = RanksMuaot_h_AggCI[[h]][match(table = RanksMuaot_h_AggCI[[h]]$Param, x = Fig1Order),]
   RanksMua95_h_AggCI[[h]] = RanksMua95_h_AggCI[[h]][match(table = RanksMua95_h_AggCI[[h]]$Param, x = Fig1Order),]
@@ -3007,7 +3007,7 @@ lines(c(10,10), c(-10,200), lty=2, col='gray')
 legend('bottomright', legend = c('95th: Hillslopes (No TN Metrics)', 'Mean: Hillslopes (No TN Metrics)', '95th: Basin', 'Mean: Basin', 'Selected Percentage'), lty = c(1,1,1,1,2), col = c('black', 'gray', 'blue', 'skyblue', 'gray'), pch = c(NA,NA,16,16,NA), pt.cex = 0.4, cex=0.8)
 dev.off()
 
-pdf(file = 'fig1.pdf', width = 5, height = 5, title = 'SAfig1')
+pdf(file = 'fig2.pdf', width = 5, height = 5, title = 'SAfig2')
 par(mar=c(4,4,0.5,0.5))
 plot(x = seq(1,100,1), y = ParamTotals_ThreshPercent_onlyhg_Agg_NoTN, type = 'l', xlab = 'Top X Percent of Parameters Selected', ylab = 'Number of Parameters Selected', ylim = c(0,105), xlim = c(0,100), col = 'gray')
 par(new=TRUE)
@@ -3019,10 +3019,10 @@ plot(x = seq(1,100,1), y = ParamTotals_bg_Agg, type = 'o', pch = 16, ylim = c(0,
 par(new=TRUE)
 plot(x = seq(1,100,1), y = ParamTotals_ThreshPercent_g_Agg, type = 'o', ylim = c(0,105), xlim = c(0,100), col = 'blue', xlab = '', ylab = '', axes = FALSE, pch = 16, cex = 0.4)
 lines(c(10,10), c(-10,200), lty=2, col='gray')
-legend('bottomright', legend = c('95th: Hillslopes (No TN Metrics)', 'Mean: Hillslopes (No TN Metrics)', '95th: Basin', 'Mean: Basin', 'Selected Percentage'), lty = c(1,1,1,1,2), col = c('black', 'gray', 'blue', 'skyblue', 'gray'), pch = c(NA,NA,16,16,NA), pt.cex = 0.4, cex=0.8)
+legend('bottomright', title = 'Bootstrapped EE Value: Scale', legend = c('95th: Hillslopes (No TN Metrics)', 'Mean: Hillslopes (No TN Metrics)', '95th: Basin', 'Mean: Basin', 'Selected Percentage'), lty = c(1,1,1,1,2), col = c('black', 'gray', 'blue', 'skyblue', 'gray'), pch = c(NA,NA,16,16,NA), pt.cex = 0.4, cex=0.8)
 dev.off()
 
-pdf(file = 'fig1m.pdf', width = 5, height = 5, title = 'SAfig1m')
+pdf(file = 'fig2m.pdf', width = 5, height = 5, title = 'SAfig2m')
 par(mar=c(4,4,0.5,0.5))
 plot(x = seq(1,100,1), y = ParamTotals_ThreshPercent_onlyhg_Agg_NoTN, type = 'l', xlab = 'Top X Percent of Parameters Selected', ylab = 'Number of Parameters Selected', ylim = c(0,105), xlim = c(0,100), col = 'gray')
 par(new=TRUE)
@@ -3034,7 +3034,7 @@ plot(x = seq(1,100,1), y = ParamTotals_bgm_Agg, type = 'o', pch = 16, ylim = c(0
 par(new=TRUE)
 plot(x = seq(1,100,1), y = ParamTotals_ThreshPercent_gm_Agg, type = 'o', ylim = c(0,105), xlim = c(0,100), col = 'blue', xlab = '', ylab = '', axes = FALSE, pch = 16, cex = 0.4)
 lines(c(10,10), c(-10,200), lty=2, col='gray')
-legend('bottomright', legend = c('95th: Hillslopes (No TN Metrics)', 'Mean: Hillslopes (No TN Metrics)', '95th: Basin', 'Mean: Basin', 'Selected Percentage'), lty = c(1,1,1,1,2), col = c('black', 'gray', 'blue', 'skyblue', 'gray'), pch = c(NA,NA,16,16,NA), pt.cex = 0.4, cex=0.8)
+legend('bottomright', title = 'Bootstrapped EE Value: Scale', legend = c('95th: Hillslopes (No TN Metrics)', 'Mean: Hillslopes (No TN Metrics)', '95th: Basin', 'Mean: Basin', 'Selected Percentage'), lty = c(1,1,1,1,2), col = c('black', 'gray', 'blue', 'skyblue', 'gray'), pch = c(NA,NA,16,16,NA), pt.cex = 0.4, cex=0.8)
 dev.off()
 
 setwd(dir_Main)
@@ -3650,8 +3650,8 @@ for (i in 1:length(tmpnames)){
        labels = as.character(which(names(EEsTN95_b_mua_95[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)][order(names(EEsTN95_b_mua_m[-which(names(EEsTN95_b_mua_m) %in% ColsAggregated)]))][c(1:13, 54:73, 14:33, 94:96, 74:93, 34:53, 97:99, 100:237)]) == tmpnames[i])))
 }
 dev.off()
-#   PDF Figure 2----
-pdf(file = 'fig2.pdf', height = 12, width = 8, title = 'SAfig2')
+#   PDF Figure 3----
+pdf(file = 'fig3.pdf', height = 12, width = 8, title = 'SAfig3')
 layout(rbind(c(1,4), c(2,5), c(3,6)))
 par(mar=c(1.1, 4.1, 4.1, 2.1))
 #Streamflow 05g
@@ -4336,8 +4336,8 @@ for (i in 1:length(tmpnames)){
 }
 dev.off()
 
-#   PDF Figure 5 ----
-pdf(file = 'fig5.pdf', height = 8, width = 8, title = 'SAfig5')
+#   PDF Figure 6 ----
+pdf(file = 'fig6.pdf', height = 8, width = 8, title = 'SAfig6')
 layout(rbind(c(1,2), c(3,4)))
 par(mar = c(2.1,4.5,4.1,2.1))
 #LNSE
@@ -4644,7 +4644,7 @@ par(xpd=FALSE)
 box(which = 'figure')
 dev.off()
 
-pdf('fig3d.pdf', height = 7, width = 7, title = 'SAfig3d')
+pdf('fig4d.pdf', height = 7, width = 7, title = 'SAfig4d')
 par(mar = c(2,12.5,2,4.5), mgp = c(1,1,0))
 for (h in 0:length(uhills)){
   #Loop over the top 10% ranks
@@ -4694,7 +4694,7 @@ dev.off()
 
 #   Compare selection with calibration metrics----
 #HillRankTop1295_All_AgghCal_paper_g
-pdf('fig6.pdf', height = 7, width = 7, title = 'SAfig6')
+pdf('fig7.pdf', height = 7, width = 7, title = 'SAfig7')
 par(mar = c(4,12.5,2,4.5), mgp = c(1,1,0))
 for (h in 0:6){
   #Loop over the top 10% ranks
@@ -5007,7 +5007,7 @@ par(xpd=FALSE)
 box(which = 'figure')
 dev.off()
 
-pdf('fig3c.pdf', height = 7, width = 7, title = 'SAfig3c')
+pdf('fig4c.pdf', height = 7, width = 7, title = 'SAfig4c')
 par(mar = c(2,12.5,2,4.5), mgp = c(1,1,0))
 for (h in 0:length(uhills)){
   #Loop over the top 10% ranks
@@ -5875,7 +5875,7 @@ for (h in 1:length(uhills)){
 }
 
 #  pdf----
-pdf(file = 'fig4.pdf', width = 9, height = 9, title = 'SAfig4')
+pdf(file = 'fig5.pdf', width = 9, height = 9, title = 'SAfig5')
 par(mar=c(5.1, 4.5, 4.1, 2.1))
 opar=par
 layout(rbind(c(1,2,3), c(4,5,6), c(7,8,9)))
