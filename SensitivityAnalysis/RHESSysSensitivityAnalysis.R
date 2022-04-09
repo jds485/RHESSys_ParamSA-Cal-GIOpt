@@ -3932,7 +3932,7 @@ lines(x = c(grep(SortNames, pattern = '^z_')[length(grep(SortNames, pattern = '^
 
 #x-axis pch
 par(new=TRUE)
-plot(x = c(0.5,1.5,3,7.5,16.5,26,31,34.5), y = rep(-0.07,8), col = colos_paper[c(1,3,3,2,2,4,4,5)], pch = c(16,16,15,16,17,16,17,16), 
+plot(x = c(0.5,1.5,3,7.5,16.5,26,31,34.5), y = rep(-0.07,8), col = colos_paper[c(1,3,3,2,2,4,4,5)], pch = c(16,18,15,16,17,16,17,16), 
      xlim = c(0,40), ylim = c(0,1), axes = FALSE, xlab = '', ylab = '')
 
 #Labels for parameters above threshold
@@ -3972,7 +3972,7 @@ lines(x = c(grep(SortNames, pattern = '^z_')[length(grep(SortNames, pattern = '^
 
 #x-axis pch
 par(new=TRUE)
-plot(x = c(0.5,1.5,3,7.5,16.5,26,31,34.5), y = rep(-0.07,8), col = colos_paper[c(1,3,3,2,2,4,4,5)], pch = c(16,16,15,16,17,16,17,16), 
+plot(x = c(0.5,1.5,3,7.5,16.5,26,31,34.5), y = rep(-0.07,8), col = colos_paper[c(1,3,3,2,2,4,4,5)], pch = c(16,18,15,16,17,16,17,16), 
      xlim = c(0,40), ylim = c(0,1), axes = FALSE, xlab = '', ylab = '')
 
 #Labels for parameters above threshold
@@ -4017,7 +4017,7 @@ lines(x = c(grep(SortNames, pattern = '^z_')[length(grep(SortNames, pattern = '^
 
 #x-axis pch
 par(new=TRUE)
-plot(x = c(0.5,1.5,3,7.5,16.5,26,31,34.5), y = rep(-0.07,8), col = colos_paper[c(1,3,3,2,2,4,4,5)], pch = c(16,16,15,16,17,16,17,16), 
+plot(x = c(0.5,1.5,3,7.5,16.5,26,31,34.5), y = rep(-0.07,8), col = colos_paper[c(1,3,3,2,2,4,4,5)], pch = c(16,18,15,16,17,16,17,16), 
      xlim = c(0,40), ylim = c(0,1), axes = FALSE, xlab = '', ylab = '')
 
 #Labels for parameters above threshold
@@ -4058,7 +4058,7 @@ lines(x = c(grep(SortNames, pattern = '^z_')[length(grep(SortNames, pattern = '^
 
 #x-axis pch
 par(new=TRUE)
-plot(x = c(0.5,1.5,3,7.5,16.5,26,31,34.5), y = rep(-0.07,8), col = colos_paper[c(1,3,3,2,2,4,4,5)], pch = c(16,16,15,16,17,16,17,16), 
+plot(x = c(0.5,1.5,3,7.5,16.5,26,31,34.5), y = rep(-0.07,8), col = colos_paper[c(1,3,3,2,2,4,4,5)], pch = c(16,18,15,16,17,16,17,16), 
      xlim = c(0,40), ylim = c(0,1), axes = FALSE, xlab = '', ylab = '')
 
 #Labels for parameters above threshold
@@ -4098,7 +4098,7 @@ lines(x = c(grep(SortNames, pattern = '^z_')[length(grep(SortNames, pattern = '^
 
 #x-axis pch
 par(new=TRUE)
-plot(x = c(0.5,1.5,3,7.5,16.5,26,31,34.5), y = rep(-0.07,8), col = colos_paper[c(1,3,3,2,2,4,4,5)], pch = c(16,16,15,16,17,16,17,16), 
+plot(x = c(0.5,1.5,3,7.5,16.5,26,31,34.5), y = rep(-0.07,8), col = colos_paper[c(1,3,3,2,2,4,4,5)], pch = c(16,18,15,16,17,16,17,16), 
      xlim = c(0,40), ylim = c(0,1), axes = FALSE, xlab = '', ylab = '')
 
 #Labels for parameters above threshold
@@ -4139,7 +4139,7 @@ lines(x = c(grep(SortNames, pattern = '^z_')[length(grep(SortNames, pattern = '^
 
 #x-axis pch
 par(new=TRUE)
-plot(x = c(0.5,1.5,3,7.5,16.5,26,31,34.5), y = rep(-0.07,8), col = colos_paper[c(1,3,3,2,2,4,4,5)], pch = c(16,16,15,16,17,16,17,16), 
+plot(x = c(0.5,1.5,3,7.5,16.5,26,31,34.5), y = rep(-0.07,8), col = colos_paper[c(1,3,3,2,2,4,4,5)], pch = c(16,18,15,16,17,16,17,16), 
      xlim = c(0,40), ylim = c(0,1), axes = FALSE, xlab = '', ylab = '')
 
 #Labels for parameters above threshold
