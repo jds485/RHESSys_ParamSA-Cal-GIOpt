@@ -5419,7 +5419,7 @@ for (h in 0:13){
 rm(h,j)
 par(new=FALSE, mgp = c(3,1,0))
 axis(side = 1, at = seq(0,12,1), labels = c('NSE, B', 'LNSE, B', 'pBias, B', 'LogL, B', 'All, B', 
-                                            'Low Flow, B', 'Other Flow, B', 'High Flow, B', 'All, B', 
+                                            'Low Flow, B', 'Other Flow, B', 'High Flow, B', 'All, B**', 
                                             'Low Flow, H', 'Other Flow, H', 'High Flow, H', 'All, H'), 
      pos = 0.5, las=2, cex.axis = 0.7, hadj = 0.9)
 axis(side = 2, at = LabelLocs_keyfig, labels = LabelNames_keyfig, las = 1)
@@ -5446,7 +5446,9 @@ text(x = -13, y = -4, '*For each metric, we selected the top 10%
 most sensitive parameters for calibration.
 We consider rank uncertainty, so the total
 selected for any metric can be greater
-than 10%.', cex=0.7, pos=4)
+than 10%.
+**Includes water quality sensitivity metrics
+that are not shown in this plot.', cex=0.7, pos=4)
 par(xpd=FALSE)
 box(which = 'figure')
 dev.off()
