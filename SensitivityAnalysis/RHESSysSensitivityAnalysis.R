@@ -5320,6 +5320,138 @@ par(xpd=FALSE)
 box(which = 'figure')
 dev.off()
 
+
+pdf('keyfig-all.pdf', height = 7, width = 7, title = 'SAfig7')
+par(mar = c(4,12.5,2,4.5), mgp = c(1,1,0))
+for (h in 0:13){
+  #Loop over the top 10% ranks
+  for (j in 1:length(SortRanksMua_hg_Agg_paper)){
+    if (h == 8){
+      #Basin - All Decision Metrics
+      plot(x = h, y = j, xlim = c(-1, 13), ylim = c(0,length(SortRanksMua_hg_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(ifelse(SortRanksMua_hg_Agg_paper[j] %in% unique(c(ParamSelect_bg_Agg, ParamSelectTN_b_Agg)), 1, 0)), axes = FALSE)
+    }else if (h == 12){
+      #Hillslopes and Basin - All Decision Metrics
+      plot(x = h, y = j, xlim = c(-1, 13), ylim = c(0,length(SortRanksMua_hg_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(ifelse(SortRanksMua_hg_Agg_paper[j] %in% unique(c(ParamSelect_bg_Agg, ParamSelect_hg_Agg, ParamSelectTN_b_Agg, ParamSelectTN_h_Agg)), 1, 0)), axes = FALSE)
+    }else if (h == 4){
+      #Basin - All Calibration Metrics
+      plot(x = h, y = j, xlim = c(-1, 13), ylim = c(0,length(SortRanksMua_hg_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(ifelse(SortRanksMua_hg_Agg_paper[j] %in% ParamSelect_b_Cal_Agg, 1, 0)), axes = FALSE)
+    }else if (h == 1){
+      #Basin - LNSE
+      plot(x = h, y = j, xlim = c(-1, 13), ylim = c(0,length(SortRanksMua_hg_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(ifelse(SortRanksMua_hg_Agg_paper[j] %in% names(EEsLNSE_b_mua_95[-which(names(EEsLNSE_b_mua_m) %in% ColsAggregated)][EEsLNSE_b_mua_95[-which(names(EEsLNSE_b_mua_m) %in% ColsAggregated)] >= RanksMuaLNSE_b_Agg$EELNSE_b[Top10LNSE_Agg]]), 1, 0)), axes = FALSE)
+    }else if (h == 0){
+      #Basin - NSE
+      if (j == 1){
+        plot(x = h, y = j, xlim = c(-1, 13), ylim = c(0,length(SortRanksMua_hg_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(ifelse(SortRanksMua_hg_Agg_paper[j] %in% names(EEsNSE_b_mua_95[-which(names(EEsNSE_b_mua_m) %in% ColsAggregated)][EEsNSE_b_mua_95[-which(names(EEsNSE_b_mua_m) %in% ColsAggregated)] >= RanksMuaNSE_b_Agg$EENSE_b[Top10NSE_Agg]]), 1, 0)), axes = FALSE, cex.lab = 1.5)
+        polygon(x = c(-0.5,-0.5,12.5,12.5), y = c(0.5,37.5,37.5,0.5), col='black')
+        par(new=TRUE)
+        plot(x = h, y = j, xlim = c(-1, 13), ylim = c(0,length(SortRanksMua_hg_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(ifelse(SortRanksMua_hg_Agg_paper[j] %in% names(EEsNSE_b_mua_95[-which(names(EEsNSE_b_mua_m) %in% ColsAggregated)][EEsNSE_b_mua_95[-which(names(EEsNSE_b_mua_m) %in% ColsAggregated)] >= RanksMuaNSE_b_Agg$EENSE_b[Top10NSE_Agg]]), 1, 0)), axes = FALSE)
+        axis(side = 1, at = 6, line = 2, labels = 'Sensitivity Metric', tick = 0, cex.axis = 1.25)
+      }else{
+        plot(x = h, y = j, xlim = c(-1, 13), ylim = c(0,length(SortRanksMua_hg_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(ifelse(SortRanksMua_hg_Agg_paper[j] %in% names(EEsNSE_b_mua_95[-which(names(EEsNSE_b_mua_m) %in% ColsAggregated)][EEsNSE_b_mua_95[-which(names(EEsNSE_b_mua_m) %in% ColsAggregated)] >= RanksMuaNSE_b_Agg$EENSE_b[Top10NSE_Agg]]), 1, 0)), axes = FALSE)
+      }
+    }else if (h == 2){
+      #Basin - pBias
+      plot(x = h, y = j, xlim = c(-1, 13), ylim = c(0,length(SortRanksMua_hg_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(ifelse(SortRanksMua_hg_Agg_paper[j] %in% names(EEspBias_b_mua_95[-which(names(EEspBias_b_mua_m) %in% ColsAggregated)][EEspBias_b_mua_95[-which(names(EEspBias_b_mua_m) %in% ColsAggregated)] >= RanksMuapBias_b_Agg$EEpBias_b[Top10pBias_Agg]]), 1, 0)), axes = FALSE)
+    }else if (h == 3){
+      #Basin - LogL
+      plot(x = h, y = j, xlim = c(-1, 13), ylim = c(0,length(SortRanksMua_hg_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(ifelse(SortRanksMua_hg_Agg_paper[j] %in% names(EEsLogL_b_mua_95[-which(names(EEsLogL_b_mua_m) %in% ColsAggregated)][EEsLogL_b_mua_95[-which(names(EEsLogL_b_mua_m) %in% ColsAggregated)] >= RanksMuaLogL_b_Agg$EELogL_b[Top10LogL_Agg]]), 1, 0)), axes = FALSE)
+    }else if (h == 5){
+      #Low flows - basin
+      plot(x = h, y = j, xlim = c(-1, 13), ylim = c(0,length(SortRanksMua_hg_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(ifelse(SortRanksMua_hg_Agg_paper[j] %in% names(EEs05g_b_mua_95[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)][EEs05g_b_mua_95[-which(names(EEs05g_b_mua_m) %in% ColsAggregated)] >= RanksMua05g_b_Agg$EE05g_b[Top1005g_Agg]]), 1, 0)), axes = FALSE)
+    }else if (h == 6){
+      #Other flows - basin
+      plot(x = h, y = j, xlim = c(-1, 13), ylim = c(0,length(SortRanksMua_hg_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(ifelse(SortRanksMua_hg_Agg_paper[j] %in% names(EEsotg_b_mua_95[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)][EEsotg_b_mua_95[-which(names(EEsotg_b_mua_m) %in% ColsAggregated)] >= RanksMuaotg_b_Agg$EEotg_b[Top10otg_Agg]]), 1, 0)), axes = FALSE)
+    }else if (h == 7){
+      #High flows - basin
+      plot(x = h, y = j, xlim = c(-1, 13), ylim = c(0,length(SortRanksMua_hg_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(ifelse(SortRanksMua_hg_Agg_paper[j] %in% names(EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)][EEs95_b_mua_95[-which(names(EEs95_b_mua_m) %in% ColsAggregated)] >= RanksMua95_b_Agg$EE95_b[Top1095_Agg]]), 1, 0)), axes = FALSE)
+    }else if (h == 9){
+      #Low flows - hillslope
+      plot(x = h, y = j, xlim = c(-1, 13), ylim = c(0,length(SortRanksMua_hg_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(ifelse(SortRanksMua_hg_Agg_paper[j] %in% unique(c(names(EEs05g_h_mua_95[1,-1][-which(names(EEs05g_b_mua_m) %in% ColsAggregated)][EEs05g_h_mua_95[1,-1][-which(names(EEs05g_b_mua_m) %in% ColsAggregated)] >= RanksMua05g_h_Agg$Hill1$EE05g_h[Top1005g_Agg]]),
+                                                                                                                                                                                         names(EEs05g_h_mua_95[2,-1][-which(names(EEs05g_b_mua_m) %in% ColsAggregated)][EEs05g_h_mua_95[2,-1][-which(names(EEs05g_b_mua_m) %in% ColsAggregated)] >= RanksMua05g_h_Agg$Hill2$EE05g_h[Top1005g_Agg]]),
+                                                                                                                                                                                         names(EEs05g_h_mua_95[3,-1][-which(names(EEs05g_b_mua_m) %in% ColsAggregated)][EEs05g_h_mua_95[3,-1][-which(names(EEs05g_b_mua_m) %in% ColsAggregated)] >= RanksMua05g_h_Agg$Hill3$EE05g_h[Top1005g_Agg]]),
+                                                                                                                                                                                         names(EEs05g_h_mua_95[4,-1][-which(names(EEs05g_b_mua_m) %in% ColsAggregated)][EEs05g_h_mua_95[4,-1][-which(names(EEs05g_b_mua_m) %in% ColsAggregated)] >= RanksMua05g_h_Agg$Hill4$EE05g_h[Top1005g_Agg]]),
+                                                                                                                                                                                         names(EEs05g_h_mua_95[5,-1][-which(names(EEs05g_b_mua_m) %in% ColsAggregated)][EEs05g_h_mua_95[5,-1][-which(names(EEs05g_b_mua_m) %in% ColsAggregated)] >= RanksMua05g_h_Agg$Hill5$EE05g_h[Top1005g_Agg]]),
+                                                                                                                                                                                         names(EEs05g_h_mua_95[6,-1][-which(names(EEs05g_b_mua_m) %in% ColsAggregated)][EEs05g_h_mua_95[6,-1][-which(names(EEs05g_b_mua_m) %in% ColsAggregated)] >= RanksMua05g_h_Agg$Hill6$EE05g_h[Top1005g_Agg]]),
+                                                                                                                                                                                         names(EEs05g_h_mua_95[7,-1][-which(names(EEs05g_b_mua_m) %in% ColsAggregated)][EEs05g_h_mua_95[7,-1][-which(names(EEs05g_b_mua_m) %in% ColsAggregated)] >= RanksMua05g_h_Agg$Hill7$EE05g_h[Top1005g_Agg]]),
+                                                                                                                                                                                         names(EEs05g_h_mua_95[8,-1][-which(names(EEs05g_b_mua_m) %in% ColsAggregated)][EEs05g_h_mua_95[8,-1][-which(names(EEs05g_b_mua_m) %in% ColsAggregated)] >= RanksMua05g_h_Agg$Hill8$EE05g_h[Top1005g_Agg]]),
+                                                                                                                                                                                         names(EEs05g_h_mua_95[9,-1][-which(names(EEs05g_b_mua_m) %in% ColsAggregated)][EEs05g_h_mua_95[9,-1][-which(names(EEs05g_b_mua_m) %in% ColsAggregated)] >= RanksMua05g_h_Agg$Hill9$EE05g_h[Top1005g_Agg]]),
+                                                                                                                                                                                         names(EEs05g_h_mua_95[10,-1][-which(names(EEs05g_b_mua_m) %in% ColsAggregated)][EEs05g_h_mua_95[10,-1][-which(names(EEs05g_b_mua_m) %in% ColsAggregated)] >= RanksMua05g_h_Agg$Hill10$EE05g_h[Top1005g_Agg]]),
+                                                                                                                                                                                         names(EEs05g_h_mua_95[11,-1][-which(names(EEs05g_b_mua_m) %in% ColsAggregated)][EEs05g_h_mua_95[11,-1][-which(names(EEs05g_b_mua_m) %in% ColsAggregated)] >= RanksMua05g_h_Agg$Hill11$EE05g_h[Top1005g_Agg]]),
+                                                                                                                                                                                         names(EEs05g_h_mua_95[12,-1][-which(names(EEs05g_b_mua_m) %in% ColsAggregated)][EEs05g_h_mua_95[12,-1][-which(names(EEs05g_b_mua_m) %in% ColsAggregated)] >= RanksMua05g_h_Agg$Hill12$EE05g_h[Top1005g_Agg]]),
+                                                                                                                                                                                         names(EEs05g_h_mua_95[13,-1][-which(names(EEs05g_b_mua_m) %in% ColsAggregated)][EEs05g_h_mua_95[13,-1][-which(names(EEs05g_b_mua_m) %in% ColsAggregated)] >= RanksMua05g_h_Agg$Hill13$EE05g_h[Top1005g_Agg]]),
+                                                                                                                                                                                         names(EEs05g_h_mua_95[14,-1][-which(names(EEs05g_b_mua_m) %in% ColsAggregated)][EEs05g_h_mua_95[14,-1][-which(names(EEs05g_b_mua_m) %in% ColsAggregated)] >= RanksMua05g_h_Agg$Hill14$EE05g_h[Top1005g_Agg]]))), 1, 0)), axes = FALSE)
+    }else if (h == 10){
+      #Other flows - hillslope
+      plot(x = h, y = j, xlim = c(-1, 13), ylim = c(0,length(SortRanksMua_hg_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(ifelse(SortRanksMua_hg_Agg_paper[j] %in% unique(c(names(EEsotg_h_mua_95[1,-1][-which(names(EEsotg_b_mua_m) %in% ColsAggregated)][EEsotg_h_mua_95[1,-1][-which(names(EEsotg_b_mua_m) %in% ColsAggregated)] >= RanksMuaotg_h_Agg$Hill1$EEotg_h[Top10otg_Agg]]),
+                                                                                                                                                                                         names(EEsotg_h_mua_95[2,-1][-which(names(EEsotg_b_mua_m) %in% ColsAggregated)][EEsotg_h_mua_95[2,-1][-which(names(EEsotg_b_mua_m) %in% ColsAggregated)] >= RanksMuaotg_h_Agg$Hill2$EEotg_h[Top10otg_Agg]]),
+                                                                                                                                                                                         names(EEsotg_h_mua_95[3,-1][-which(names(EEsotg_b_mua_m) %in% ColsAggregated)][EEsotg_h_mua_95[3,-1][-which(names(EEsotg_b_mua_m) %in% ColsAggregated)] >= RanksMuaotg_h_Agg$Hill3$EEotg_h[Top10otg_Agg]]),
+                                                                                                                                                                                         names(EEsotg_h_mua_95[4,-1][-which(names(EEsotg_b_mua_m) %in% ColsAggregated)][EEsotg_h_mua_95[4,-1][-which(names(EEsotg_b_mua_m) %in% ColsAggregated)] >= RanksMuaotg_h_Agg$Hill4$EEotg_h[Top10otg_Agg]]),
+                                                                                                                                                                                         names(EEsotg_h_mua_95[5,-1][-which(names(EEsotg_b_mua_m) %in% ColsAggregated)][EEsotg_h_mua_95[5,-1][-which(names(EEsotg_b_mua_m) %in% ColsAggregated)] >= RanksMuaotg_h_Agg$Hill5$EEotg_h[Top10otg_Agg]]),
+                                                                                                                                                                                         names(EEsotg_h_mua_95[6,-1][-which(names(EEsotg_b_mua_m) %in% ColsAggregated)][EEsotg_h_mua_95[6,-1][-which(names(EEsotg_b_mua_m) %in% ColsAggregated)] >= RanksMuaotg_h_Agg$Hill6$EEotg_h[Top10otg_Agg]]),
+                                                                                                                                                                                         names(EEsotg_h_mua_95[7,-1][-which(names(EEsotg_b_mua_m) %in% ColsAggregated)][EEsotg_h_mua_95[7,-1][-which(names(EEsotg_b_mua_m) %in% ColsAggregated)] >= RanksMuaotg_h_Agg$Hill7$EEotg_h[Top10otg_Agg]]),
+                                                                                                                                                                                         names(EEsotg_h_mua_95[8,-1][-which(names(EEsotg_b_mua_m) %in% ColsAggregated)][EEsotg_h_mua_95[8,-1][-which(names(EEsotg_b_mua_m) %in% ColsAggregated)] >= RanksMuaotg_h_Agg$Hill8$EEotg_h[Top10otg_Agg]]),
+                                                                                                                                                                                         names(EEsotg_h_mua_95[9,-1][-which(names(EEsotg_b_mua_m) %in% ColsAggregated)][EEsotg_h_mua_95[9,-1][-which(names(EEsotg_b_mua_m) %in% ColsAggregated)] >= RanksMuaotg_h_Agg$Hill9$EEotg_h[Top10otg_Agg]]),
+                                                                                                                                                                                         names(EEsotg_h_mua_95[10,-1][-which(names(EEsotg_b_mua_m) %in% ColsAggregated)][EEsotg_h_mua_95[10,-1][-which(names(EEsotg_b_mua_m) %in% ColsAggregated)] >= RanksMuaotg_h_Agg$Hill10$EEotg_h[Top10otg_Agg]]),
+                                                                                                                                                                                         names(EEsotg_h_mua_95[11,-1][-which(names(EEsotg_b_mua_m) %in% ColsAggregated)][EEsotg_h_mua_95[11,-1][-which(names(EEsotg_b_mua_m) %in% ColsAggregated)] >= RanksMuaotg_h_Agg$Hill11$EEotg_h[Top10otg_Agg]]),
+                                                                                                                                                                                         names(EEsotg_h_mua_95[12,-1][-which(names(EEsotg_b_mua_m) %in% ColsAggregated)][EEsotg_h_mua_95[12,-1][-which(names(EEsotg_b_mua_m) %in% ColsAggregated)] >= RanksMuaotg_h_Agg$Hill12$EEotg_h[Top10otg_Agg]]),
+                                                                                                                                                                                         names(EEsotg_h_mua_95[13,-1][-which(names(EEsotg_b_mua_m) %in% ColsAggregated)][EEsotg_h_mua_95[13,-1][-which(names(EEsotg_b_mua_m) %in% ColsAggregated)] >= RanksMuaotg_h_Agg$Hill13$EEotg_h[Top10otg_Agg]]),
+                                                                                                                                                                                         names(EEsotg_h_mua_95[14,-1][-which(names(EEsotg_b_mua_m) %in% ColsAggregated)][EEsotg_h_mua_95[14,-1][-which(names(EEsotg_b_mua_m) %in% ColsAggregated)] >= RanksMuaotg_h_Agg$Hill14$EEotg_h[Top10otg_Agg]]))), 1, 0)), axes = FALSE)
+    }else if (h == 11){
+      #High flows - hillslope
+      plot(x = h, y = j, xlim = c(-1, 13), ylim = c(0,length(SortRanksMua_hg_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(ifelse(SortRanksMua_hg_Agg_paper[j] %in% unique(c(names(EEs95_h_mua_95[1,-1][-which(names(EEs95_b_mua_m) %in% ColsAggregated)][EEs95_h_mua_95[1,-1][-which(names(EEs95_b_mua_m) %in% ColsAggregated)] >= RanksMua95_h_Agg$Hill1$EE95_h[Top1095_Agg]]),
+                                                                                                                                                                                         names(EEs95_h_mua_95[2,-1][-which(names(EEs95_b_mua_m) %in% ColsAggregated)][EEs95_h_mua_95[2,-1][-which(names(EEs95_b_mua_m) %in% ColsAggregated)] >= RanksMua95_h_Agg$Hill2$EE95_h[Top1095_Agg]]),
+                                                                                                                                                                                         names(EEs95_h_mua_95[3,-1][-which(names(EEs95_b_mua_m) %in% ColsAggregated)][EEs95_h_mua_95[3,-1][-which(names(EEs95_b_mua_m) %in% ColsAggregated)] >= RanksMua95_h_Agg$Hill3$EE95_h[Top1095_Agg]]),
+                                                                                                                                                                                         names(EEs95_h_mua_95[4,-1][-which(names(EEs95_b_mua_m) %in% ColsAggregated)][EEs95_h_mua_95[4,-1][-which(names(EEs95_b_mua_m) %in% ColsAggregated)] >= RanksMua95_h_Agg$Hill4$EE95_h[Top1095_Agg]]),
+                                                                                                                                                                                         names(EEs95_h_mua_95[5,-1][-which(names(EEs95_b_mua_m) %in% ColsAggregated)][EEs95_h_mua_95[5,-1][-which(names(EEs95_b_mua_m) %in% ColsAggregated)] >= RanksMua95_h_Agg$Hill5$EE95_h[Top1095_Agg]]),
+                                                                                                                                                                                         names(EEs95_h_mua_95[6,-1][-which(names(EEs95_b_mua_m) %in% ColsAggregated)][EEs95_h_mua_95[6,-1][-which(names(EEs95_b_mua_m) %in% ColsAggregated)] >= RanksMua95_h_Agg$Hill6$EE95_h[Top1095_Agg]]),
+                                                                                                                                                                                         names(EEs95_h_mua_95[7,-1][-which(names(EEs95_b_mua_m) %in% ColsAggregated)][EEs95_h_mua_95[7,-1][-which(names(EEs95_b_mua_m) %in% ColsAggregated)] >= RanksMua95_h_Agg$Hill7$EE95_h[Top1095_Agg]]),
+                                                                                                                                                                                         names(EEs95_h_mua_95[8,-1][-which(names(EEs95_b_mua_m) %in% ColsAggregated)][EEs95_h_mua_95[8,-1][-which(names(EEs95_b_mua_m) %in% ColsAggregated)] >= RanksMua95_h_Agg$Hill8$EE95_h[Top1095_Agg]]),
+                                                                                                                                                                                         names(EEs95_h_mua_95[9,-1][-which(names(EEs95_b_mua_m) %in% ColsAggregated)][EEs95_h_mua_95[9,-1][-which(names(EEs95_b_mua_m) %in% ColsAggregated)] >= RanksMua95_h_Agg$Hill9$EE95_h[Top1095_Agg]]),
+                                                                                                                                                                                         names(EEs95_h_mua_95[10,-1][-which(names(EEs95_b_mua_m) %in% ColsAggregated)][EEs95_h_mua_95[10,-1][-which(names(EEs95_b_mua_m) %in% ColsAggregated)] >= RanksMua95_h_Agg$Hill10$EE95_h[Top1095_Agg]]),
+                                                                                                                                                                                         names(EEs95_h_mua_95[11,-1][-which(names(EEs95_b_mua_m) %in% ColsAggregated)][EEs95_h_mua_95[11,-1][-which(names(EEs95_b_mua_m) %in% ColsAggregated)] >= RanksMua95_h_Agg$Hill11$EE95_h[Top1095_Agg]]),
+                                                                                                                                                                                         names(EEs95_h_mua_95[12,-1][-which(names(EEs95_b_mua_m) %in% ColsAggregated)][EEs95_h_mua_95[12,-1][-which(names(EEs95_b_mua_m) %in% ColsAggregated)] >= RanksMua95_h_Agg$Hill12$EE95_h[Top1095_Agg]]),
+                                                                                                                                                                                         names(EEs95_h_mua_95[13,-1][-which(names(EEs95_b_mua_m) %in% ColsAggregated)][EEs95_h_mua_95[13,-1][-which(names(EEs95_b_mua_m) %in% ColsAggregated)] >= RanksMua95_h_Agg$Hill13$EE95_h[Top1095_Agg]]),
+                                                                                                                                                                                         names(EEs95_h_mua_95[14,-1][-which(names(EEs95_b_mua_m) %in% ColsAggregated)][EEs95_h_mua_95[14,-1][-which(names(EEs95_b_mua_m) %in% ColsAggregated)] >= RanksMua95_h_Agg$Hill14$EE95_h[Top1095_Agg]]))), 1, 0)), axes = FALSE)
+    }
+    par(new=TRUE)
+  }
+}
+rm(h,j)
+par(new=FALSE, mgp = c(3,1,0))
+axis(side = 1, at = seq(0,12,1), labels = c('NSE, B', 'LNSE, B', 'pBias, B', 'LogL, B', 'All, B', 
+                                            'Low Flow, B', 'Other Flow, B', 'High Flow, B', 'All, B', 
+                                            'Low Flow, H', 'Other Flow, H', 'High Flow, H', 'All, H'), 
+     pos = 0.5, las=2, cex.axis = 0.7, hadj = 0.9)
+axis(side = 2, at = LabelLocs_keyfig, labels = LabelNames_keyfig, las = 1)
+legend('right', title = expression(bold('Selected to\nCalibrate?*')), legend = c('Yes', 'No'), pch = 15, col = colFun(c(1,0)), inset = -0.23, xpd = TRUE, bty = 'n')
+lines(c(-0.5,15), c(36.5,36.5), col = 'white')
+lines(c(-0.5,15), c(34.5,34.5), col = 'white')
+lines(c(-0.5,15), c(33.5,33.5), col = 'white')
+lines(c(-0.5,15), c(26.5,26.5), col = 'white')
+lines(c(-0.5,15), c(15.5,15.5), col = 'white')
+lines(c(-0.5,15), c(7.5,7.5), col = 'white')
+lines(c(-0.5,15), c(5.5,5.5), col = 'white')
+lines(c(4.5,4.5), c(0,40), col = 'white')
+#Category symbol from EE plot
+par(new=TRUE, xpd = TRUE)
+plot(x = rep(-1,8),y = c(3,6.5,11.5,21,30,34.5,36,37), col = 'white', pch = c(16,17,16,17,16,15,18,16), axes=FALSE, xlab = '', ylab = '', xlim = c(-1,15), ylim = c(0,length(SortRanksMua_hg_Agg_paper)))
+text(x = 9.5, y = 38.5, expression(bold('Decision\nRelevant')))
+text(x = 2.5, y = 38.5, expression(bold('Calibration\n  Relevant')))
+text(x = -7, y = 38.5, expression(bold('Parameters: Top 10%\nMost Sensitive for Any Metric')))
+text(x = 17, y = -2, 'B: Basin Outlet', cex = 0.7)
+text(x = 16.7, y = -3, 'H: Hillslopes', cex = 0.7)
+text(x = 16.4, y = -4, 'All: Union', cex = 0.7)
+text(x = 16.75, y = -5, 'Over Metrics', cex = 0.7)
+text(x = -13, y = -4, '*For each metric, we selected the top 10%
+most sensitive parameters for calibration.
+We consider rank uncertainty, so the total
+selected for any metric can be greater
+than 10%.', cex=0.7, pos=4)
+par(xpd=FALSE)
+box(which = 'figure')
+dev.off()
+
+
 #  Streamflow 5th %-ile----
 colPal = colorRampPalette(colors = scico(n = 4, palette = 'nuuk'))
 scaleRange = c(1, 34)
