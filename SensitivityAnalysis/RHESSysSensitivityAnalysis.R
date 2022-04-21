@@ -1,14 +1,18 @@
 #Script for calculating summary statistics of Morris EEs
 
 #Set directories----
-dir_Main = "C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR"
-dir_ParamInCutoff = paste0(dir_Main, '/SelectedParamsTotals+Fig2')
-dir_EEpanels = paste0(dir_Main, '/EEpanels+Fig3+Fig6')
-dir_HillPanels = paste0(dir_Main, '/Hillpanels+Fig4+Fig7')
-dir_Mult = paste0(dir_Main, '/MultiplierEval+Fig5')
+dir_Main = "./SAData"
+dir_ParamInCutoff = file.path(dir_Main, 'SelectedParamsTotals+Fig2')
+dir.create(dir_ParamInCutoff, showWarnings = FALSE)
+dir_EEpanels = file.path(dir_Main, 'EEpanels+Fig3+Fig6')
+dir.create(dir_EEpanels, showWarnings = FALSE)
+dir_HillPanels = file.path(dir_Main, 'Hillpanels+Fig4+Fig7')
+dir.create(dir_HillPanels, showWarnings = FALSE)
+dir_Mult = file.path(dir_Main, 'MultiplierEval+Fig5')
+dir.create(dir_Mult, showWarnings = FALSE)
 
 #Set file locations----
-f_HelpFuns = "C:\\Users\\js4yd\\OneDrive - University of Virginia\\RHESSys_ParameterSA\\SensitivityAnalysis\\SAScriptFunctions.R"
+f_HelpFuns = "../SAScriptFunctions.R"
 
 #Load libraries----
 library(sp)
@@ -31,30 +35,30 @@ rm(dir_Main1, dir_ColFuns)
 source(f_HelpFuns)
 
 #Load EE and Deltas info----
-Deltas = read.table(file = paste0(getwd(), '/Deltas_AllMetrics.txt'), sep = '\t', header = TRUE, stringsAsFactors = FALSE)
-EEs05_b = read.table(file = paste0(getwd(), '/EEs05_b_AllMetrics.txt'), sep = '\t', header = TRUE, stringsAsFactors = FALSE)
-EEs95_b = read.table(file = paste0(getwd(), '/EEs95_b_AllMetrics.txt'), sep = '\t', header = TRUE, stringsAsFactors = FALSE) 
-EEsot_b = read.table(file = paste0(getwd(), '/EEsot_b_AllMetrics.txt'), sep = '\t', header = TRUE, stringsAsFactors = FALSE)
-EEsTN05_b = read.table(file = paste0(getwd(), '/EEsTN05_b_All_Add5.txt'), sep = '\t', header = TRUE, stringsAsFactors = FALSE) 
-EEsTNMed_b = read.table(file = paste0(getwd(), '/EEsTNMed_b_All_Add5.txt'), sep = '\t', header = TRUE, stringsAsFactors = FALSE) 
-EEsTN95_b = read.table(file = paste0(getwd(), '/EEsTN95_b_All_Add5.txt'), sep = '\t', header = TRUE, stringsAsFactors = FALSE)
-EEs05g_b = read.table(file = paste0(getwd(), '/EEs05g_b_AllMetrics.txt'), sep = '\t', header = TRUE, stringsAsFactors = FALSE)
-EEsotg_b = read.table(file = paste0(getwd(), '/EEsotg_b_AllMetrics.txt'), sep = '\t', header = TRUE, stringsAsFactors = FALSE)
-EEsLogL_b = read.table(file = paste0(getwd(), '/EEsLogL_b_AllMetrics.txt'), sep = '\t', header = TRUE, stringsAsFactors = FALSE)
-EEsNSE_b = read.table(file = paste0(getwd(), '/EEsNSE_b_AllMetrics.txt'), sep = '\t', header = TRUE, stringsAsFactors = FALSE)
-EEsLNSE_b = read.table(file = paste0(getwd(), '/EEsLNSE_b_AllMetrics.txt'), sep = '\t', header = TRUE, stringsAsFactors = FALSE)
-EEspBias_b = read.table(file = paste0(getwd(), '/EEspBias_b_AllMetrics.txt'), sep = '\t', header = TRUE, stringsAsFactors = FALSE)
-EEs05_h = read.table(file = paste0(getwd(), '/EEs05_h_AllMetrics.txt'), sep = '\t', header = TRUE, stringsAsFactors = FALSE)
-EEs95_h = read.table(file = paste0(getwd(), '/EEs95_h_AllMetrics.txt'), sep = '\t', header = TRUE, stringsAsFactors = FALSE)
-EEsot_h = read.table(file = paste0(getwd(), '/EEsot_h_AllMetrics.txt'), sep = '\t', header = TRUE, stringsAsFactors = FALSE)
-EEsTN05_h = read.table(file = paste0(getwd(), '/EEsTN05_h_AllMetrics.txt'), sep = '\t', header = TRUE, stringsAsFactors = FALSE) 
-EEsTNMed_h = read.table(file = paste0(getwd(), '/EEsTNMed_h_AllMetrics.txt'), sep = '\t', header = TRUE, stringsAsFactors = FALSE) 
-EEsTN95_h = read.table(file = paste0(getwd(), '/EEsTN95_h_AllMetrics.txt'), sep = '\t', header = TRUE, stringsAsFactors = FALSE)
-EEs05g_h = read.table(file = paste0(getwd(), '/EEs05g_h_AllMetrics.txt'), sep = '\t', header = TRUE, stringsAsFactors = FALSE)
-EEsotg_h = read.table(file = paste0(getwd(), '/EEsotg_h_AllMetrics.txt'), sep = '\t', header = TRUE, stringsAsFactors = FALSE)
-EEs05gm_b = read.table(file = paste0(getwd(), '/EEs05gm_b_All.txt'), sep = '\t', header = TRUE, stringsAsFactors = FALSE)
-EEsotgm_b = read.table(file = paste0(getwd(), '/EEsotgm_b_All.txt'), sep = '\t', header = TRUE, stringsAsFactors = FALSE)
-EEs95m_b = read.table(file = paste0(getwd(), '/EEs95m_b_All.txt'), sep = '\t', header = TRUE, stringsAsFactors = FALSE) 
+Deltas = read.table(file = './Deltas_AllMetrics.txt', sep = '\t', header = TRUE, stringsAsFactors = FALSE)
+EEs05_b = read.table(file = './EEs05_b_AllMetrics.txt', sep = '\t', header = TRUE, stringsAsFactors = FALSE)
+EEs95_b = read.table(file = './EEs95_b_AllMetrics.txt', sep = '\t', header = TRUE, stringsAsFactors = FALSE) 
+EEsot_b = read.table(file = './EEsot_b_AllMetrics.txt', sep = '\t', header = TRUE, stringsAsFactors = FALSE)
+EEsTN05_b = read.table(file = './EEsTN05_b_All_Add5.txt', sep = '\t', header = TRUE, stringsAsFactors = FALSE) 
+EEsTNMed_b = read.table(file = './EEsTNMed_b_All_Add5.txt', sep = '\t', header = TRUE, stringsAsFactors = FALSE) 
+EEsTN95_b = read.table(file = './EEsTN95_b_All_Add5.txt', sep = '\t', header = TRUE, stringsAsFactors = FALSE)
+EEs05g_b = read.table(file = './EEs05g_b_AllMetrics.txt', sep = '\t', header = TRUE, stringsAsFactors = FALSE)
+EEsotg_b = read.table(file = './EEsotg_b_AllMetrics.txt', sep = '\t', header = TRUE, stringsAsFactors = FALSE)
+EEsLogL_b = read.table(file = './EEsLogL_b_AllMetrics.txt', sep = '\t', header = TRUE, stringsAsFactors = FALSE)
+EEsNSE_b = read.table(file = './EEsNSE_b_AllMetrics.txt', sep = '\t', header = TRUE, stringsAsFactors = FALSE)
+EEsLNSE_b = read.table(file = './EEsLNSE_b_AllMetrics.txt', sep = '\t', header = TRUE, stringsAsFactors = FALSE)
+EEspBias_b = read.table(file = './EEspBias_b_AllMetrics.txt', sep = '\t', header = TRUE, stringsAsFactors = FALSE)
+EEs05_h = read.table(file = './EEs05_h_AllMetrics.txt', sep = '\t', header = TRUE, stringsAsFactors = FALSE)
+EEs95_h = read.table(file = './EEs95_h_AllMetrics.txt', sep = '\t', header = TRUE, stringsAsFactors = FALSE)
+EEsot_h = read.table(file = './EEsot_h_AllMetrics.txt', sep = '\t', header = TRUE, stringsAsFactors = FALSE)
+EEsTN05_h = read.table(file = './EEsTN05_h_AllMetrics.txt', sep = '\t', header = TRUE, stringsAsFactors = FALSE) 
+EEsTNMed_h = read.table(file = './EEsTNMed_h_AllMetrics.txt', sep = '\t', header = TRUE, stringsAsFactors = FALSE) 
+EEsTN95_h = read.table(file = './EEsTN95_h_AllMetrics.txt', sep = '\t', header = TRUE, stringsAsFactors = FALSE)
+EEs05g_h = read.table(file = './EEs05g_h_AllMetrics.txt', sep = '\t', header = TRUE, stringsAsFactors = FALSE)
+EEsotg_h = read.table(file = './EEsotg_h_AllMetrics.txt', sep = '\t', header = TRUE, stringsAsFactors = FALSE)
+EEs05gm_b = read.table(file = './EEs05gm_b_All.txt', sep = '\t', header = TRUE, stringsAsFactors = FALSE)
+EEsotgm_b = read.table(file = './EEsotgm_b_All.txt', sep = '\t', header = TRUE, stringsAsFactors = FALSE)
+EEs95m_b = read.table(file = './EEs95m_b_All.txt', sep = '\t', header = TRUE, stringsAsFactors = FALSE) 
 
 #Check if EEs have NA values because of sampling scheme errors
 if (any(c(any(is.na(EEs05_b)),
@@ -2729,7 +2733,7 @@ rm(h)
 #"z_trans_coeff1", "v102_epc.day_leafon", "z_trans_coeff2", "v3_epc.gl_smax", "s9_pore_size_index", "Soil8_m", "Soil9_porosity_0"
 
 #Make a plot of the number of parameters selected versus the threshold percentage----
-dir.create(dir_ParamInCutoff, showWarnings = FALSE)
+setwd('../')
 setwd(dir_ParamInCutoff)
 x = seq(0.01,1,0.01)
 ParamTotals_ThreshPercent = ParamTotals_ThreshPercent_g = ParamTotals_ThreshPercent_gm = vector('numeric', length(x))
@@ -3037,10 +3041,8 @@ lines(c(10,10), c(-10,200), lty=2, col='gray')
 legend('bottomright', title = 'Bootstrapped EE Value: Scale', legend = c('95th: Hillslopes (No TN Metrics)', 'Mean: Hillslopes (No TN Metrics)', '95th: Basin', 'Mean: Basin', 'Selected Percentage'), lty = c(1,1,1,1,2), col = c('black', 'gray', 'blue', 'skyblue', 'gray'), pch = c(NA,NA,16,16,NA), pt.cex = 0.4, cex=0.8)
 dev.off()
 
-setwd(dir_Main)
-
 #Plot EEs by mu, sd, and mua----
-dir.create(dir_EEpanels, showWarnings = FALSE)
+setwd('../../')
 setwd(dir_EEpanels)
 
 # Color scheme for plotting EEs in categories of parameters----
@@ -4512,9 +4514,6 @@ dev.off()
 
 
 #Hillslope Plots for mua----
-dir.create(dir_HillPanels, showWarnings = FALSE)
-setwd(dir_HillPanels)
-
 #Hillslope Plots for mua with all parameters with EEs > 95% of 10% threshold----
 SortRanksMua_b_Agg = unique(c(ParamSelect_b_Agg, ParamSelectTN_b_Agg))[c(1,2,16,17,13,14,12,18,4,3,19,20,5,6,7,9,10,11,15,21,8)]
 LabelNames = c('H: GW Loss Coef.', 'Z: Wind Speed', 'Z: Avg. Temp. Coef.', 'Z: Atm. Trans. Coef.', 
@@ -4971,6 +4970,8 @@ dev.off()
 
 
 # Aggregated Rank order----
+setwd('../../')
+setwd(dir_HillPanels)
 Ranks05_Agg = Ranksot_Agg = Ranks95_Agg = RanksTN05_Agg = RanksTNMed_Agg = RanksTN95_Agg = NULL
 colPal = colorRampPalette(colors = scico(n = 4, palette = 'nuuk'))
 #  In or not in the selected parameters to calibrate aggregated over all 6 metrics----
@@ -5244,82 +5245,11 @@ box(which = 'figure')
 dev.off()
 
 
-#Key Figure----
+# Key Figure----
 #New simple parameter labels and locations
 LabelNames_keyfig = c('GW Loss Coef.', 'Percent Impervious', 'Septic Water Load', 
                       'Riparian Soil', 'Other Soil', 'Tree', 'Grass', 'Atmosphere', '')
 LabelLocs_keyfig = 38 - c(1, 2.5, 4, 8, 17, 26.5, 31.5, 35, 38)
-
-pdf('keyfig.pdf', height = 7, width = 7, title = 'SAfig7')
-par(mar = c(4,12.5,2,4.5), mgp = c(1,1,0))
-for (h in 0:6){
-  #Loop over the top 10% ranks
-  for (j in 1:length(SortRanksMua_hg_Agg_paper)){
-    if (h == 5){
-      #Basin - All Decision Metrics
-      plot(x = h, y = j, xlim = c(-1, 7), ylim = c(0,length(SortRanksMua_hg_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(ifelse(SortRanksMua_hg_Agg_paper[j] %in% unique(c(ParamSelect_bg_Agg, ParamSelectTN_b_Agg)), 1, 0)), axes = FALSE)
-    }else if (h == 6){
-      #Hillslopes and Basin - All Decision Metrics
-      plot(x = h, y = j, xlim = c(-1, 7), ylim = c(0,length(SortRanksMua_hg_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(ifelse(SortRanksMua_hg_Agg_paper[j] %in% unique(c(ParamSelect_bg_Agg, ParamSelect_hg_Agg, ParamSelectTN_b_Agg, ParamSelectTN_h_Agg)), 1, 0)), axes = FALSE)
-    }else if (h == 4){
-      #Basin - All Calibration Metrics
-      plot(x = h, y = j, xlim = c(-1, 7), ylim = c(0,length(SortRanksMua_hg_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(ifelse(SortRanksMua_hg_Agg_paper[j] %in% ParamSelect_b_Cal_Agg, 1, 0)), axes = FALSE)
-    }else if (h == 1){
-      #Basin - LNSE
-      plot(x = h, y = j, xlim = c(-1, 7), ylim = c(0,length(SortRanksMua_hg_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(ifelse(SortRanksMua_hg_Agg_paper[j] %in% names(EEsLNSE_b_mua_95[-which(names(EEsLNSE_b_mua_m) %in% ColsAggregated)][EEsLNSE_b_mua_95[-which(names(EEsLNSE_b_mua_m) %in% ColsAggregated)] >= RanksMuaLNSE_b_Agg$EELNSE_b[Top10LNSE_Agg]]), 1, 0)), axes = FALSE)
-    }else if (h == 0){
-      #Basin - NSE
-      if (j == 1){
-        plot(x = h, y = j, xlim = c(-1, 7), ylim = c(0,length(SortRanksMua_hg_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(ifelse(SortRanksMua_hg_Agg_paper[j] %in% names(EEsNSE_b_mua_95[-which(names(EEsNSE_b_mua_m) %in% ColsAggregated)][EEsNSE_b_mua_95[-which(names(EEsNSE_b_mua_m) %in% ColsAggregated)] >= RanksMuaNSE_b_Agg$EENSE_b[Top10NSE_Agg]]), 1, 0)), axes = FALSE, cex.lab = 1.5)
-        polygon(x = c(-0.5,-0.5,6.5,6.5), y = c(0.5,37.5,37.5,0.5), col='black')
-        par(new=TRUE)
-        plot(x = h, y = j, xlim = c(-1, 7), ylim = c(0,length(SortRanksMua_hg_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(ifelse(SortRanksMua_hg_Agg_paper[j] %in% names(EEsNSE_b_mua_95[-which(names(EEsNSE_b_mua_m) %in% ColsAggregated)][EEsNSE_b_mua_95[-which(names(EEsNSE_b_mua_m) %in% ColsAggregated)] >= RanksMuaNSE_b_Agg$EENSE_b[Top10NSE_Agg]]), 1, 0)), axes = FALSE)
-        axis(side = 1, at = 3, line = 2, labels = 'Sensitivity Metric', tick = 0, cex.axis = 1.5)
-      }else{
-        plot(x = h, y = j, xlim = c(-1, 7), ylim = c(0,length(SortRanksMua_hg_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(ifelse(SortRanksMua_hg_Agg_paper[j] %in% names(EEsNSE_b_mua_95[-which(names(EEsNSE_b_mua_m) %in% ColsAggregated)][EEsNSE_b_mua_95[-which(names(EEsNSE_b_mua_m) %in% ColsAggregated)] >= RanksMuaNSE_b_Agg$EENSE_b[Top10NSE_Agg]]), 1, 0)), axes = FALSE)
-      }
-    }else if (h == 2){
-      #Basin - pBias
-      plot(x = h, y = j, xlim = c(-1, 7), ylim = c(0,length(SortRanksMua_hg_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(ifelse(SortRanksMua_hg_Agg_paper[j] %in% names(EEspBias_b_mua_95[-which(names(EEspBias_b_mua_m) %in% ColsAggregated)][EEspBias_b_mua_95[-which(names(EEspBias_b_mua_m) %in% ColsAggregated)] >= RanksMuapBias_b_Agg$EEpBias_b[Top10pBias_Agg]]), 1, 0)), axes = FALSE)
-    }else if (h == 3){
-      #Basin - LogL
-      plot(x = h, y = j, xlim = c(-1, 7), ylim = c(0,length(SortRanksMua_hg_Agg_paper)), pch = 15, xlab = '', ylab = '', col = colFun(ifelse(SortRanksMua_hg_Agg_paper[j] %in% names(EEsLogL_b_mua_95[-which(names(EEsLogL_b_mua_m) %in% ColsAggregated)][EEsLogL_b_mua_95[-which(names(EEsLogL_b_mua_m) %in% ColsAggregated)] >= RanksMuaLogL_b_Agg$EELogL_b[Top10LogL_Agg]]), 1, 0)), axes = FALSE)
-    }
-    par(new=TRUE)
-  }
-}
-rm(h,j)
-par(new=FALSE, mgp = c(3,1,0))
-axis(side = 1, at = seq(0,6,1), labels = c('NSE, B', 'LNSE, B', 'pBias, B', 'LogL, B', 'All, B', 'All, B', 'All, H'), pos = 0.5, las=2)
-axis(side = 2, at = LabelLocs_keyfig, labels = LabelNames_keyfig, las = 1)
-legend('right', title = expression(bold('Selected to\nCalibrate?*')), legend = c('Yes', 'No'), pch = 15, col = colFun(c(1,0)), inset = -0.23, xpd = TRUE, bty = 'n')
-lines(c(-0.5,15), c(36.5,36.5), col = 'white')
-lines(c(-0.5,15), c(34.5,34.5), col = 'white')
-lines(c(-0.5,15), c(33.5,33.5), col = 'white')
-lines(c(-0.5,15), c(26.5,26.5), col = 'white')
-lines(c(-0.5,15), c(15.5,15.5), col = 'white')
-lines(c(-0.5,15), c(7.5,7.5), col = 'white')
-lines(c(-0.5,15), c(5.5,5.5), col = 'white')
-lines(c(4.5,4.5), c(0,40), col = 'white')
-#Category symbol from EE plot
-par(new=TRUE, xpd = TRUE)
-plot(x = rep(-1,8),y = c(3,6.5,11.5,21,30,34.5,36,37), col = 'white', pch = c(16,17,16,17,16,15,18,16), axes=FALSE, xlab = '', ylab = '', xlim = c(-1,15), ylim = c(0,length(SortRanksMua_hg_Agg_paper)))
-text(x = 12.5, y = 38.5, expression(bold('Decision-Relevant\n         Metrics')))
-text(x = 4.5, y = 38.5, expression(bold('Calibration-Relevant\n           Metrics')))
-text(x = -7, y = 38.5, expression(bold('Parameters: Top 10%\nMost Sensitive for Any Metric')))
-text(x = 17, y = -1, 'B: Basin Outlet')
-text(x = 16.55, y = -2.5, 'H: Hillslopes')
-text(x = 16, y = -4, 'All: Union')
-text(x = 16.5, y = -5.5, 'Over Metrics')
-text(x = -13, y = -4, '*For each metric, we selected the top 10%
-most sensitive parameters for calibration.
-We consider rank uncertainty, so the total
-selected for any metric can be greater
-than 10%.', cex=0.7, pos=4)
-par(xpd=FALSE)
-box(which = 'figure')
-dev.off()
-
 
 pdf('keyfig-all.pdf', height = 7, width = 7, title = 'SAfig7')
 par(mar = c(4,12.5,2,4.5), mgp = c(1,1,0))
@@ -5828,7 +5758,7 @@ box(which = 'figure')
 dev.off()
 
 #Compare the parameters affected by multipliers after aggregating constrained parameters to see if they are different in sensitivity----
-dir.create(dir_Mult, showWarnings = FALSE)
+setwd('../../')
 setwd(dir_Mult)
 # Streamflow 5%----
 #  panel----
@@ -7004,7 +6934,7 @@ arrows(seq(0.5,1.5,1),
        length=0.05, angle=90, code=3)
 dev.off()
 
-setwd(dir_Main)
+setwd('../')
 
 #Pre-2020 Diagnosis of problems with EEs----
 # for (i in 1:cols){
