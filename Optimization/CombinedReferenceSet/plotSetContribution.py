@@ -35,3 +35,17 @@ fig = sns.scatterplot(-OverallSet['FloodingSyn']*100, -OverallSet['LowFlowSyn']*
 fig.set(xlabel = 'Flood Reduction (%)', ylabel = 'Low Flow Increase (%)')
 plt.savefig('ReevalCombined.png', dpi = 600)
 plt.clf()
+
+#transparent nondominated solutions
+concatenated = pd.concat([MAPset.assign(Formulation='MAP', Dominated='T'), 
+                          MOROset.assign(Formulation='MORO', Dominated='T'),
+                          MMOset.assign(Formulation='MinMax', Dominated='T'),
+                          OverallSet.assign(Dominated='F')])
+
+fig = sns.scatterplot(-concatenated['FloodingSyn']*100, -concatenated['LowFlowSyn']*100, 
+                size=concatenated['NumTreesSyn'], hue=concatenated['Formulation'], 
+                hue_order = ['MAP', 'MORO', 'MinMax'],
+                palette=['m', 'y', 'c'], style = concatenated['Dominated'], style_order = ['F', 'T'])
+fig.set(xlabel = 'Flood Reduction (%)', ylabel = 'Low Flow Increase (%)')
+plt.savefig('ReevalCombined_Dominated.png', dpi = 600)
+plt.clf()

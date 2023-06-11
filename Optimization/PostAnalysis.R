@@ -3953,6 +3953,7 @@ box(which = 'figure', lwd = 2)
 dev.off()
 
 # paper graphic----
+setwd("C:/Users/js4yd/OneDrive - University of Virginia/BES_Data/BES_Data/RHESSysFiles/BR&POBR/SyntheticHill11+12")
 png('ParetoSyn_ColTrees_MAP+MORO+MMOsols_linesThresh_arrows.png', res = 300, units = 'in', width = 6, height = 6)
 scaleRange = c(0,18000)
 scaleBy = 3000
@@ -4261,7 +4262,7 @@ text(x = -76.698, y = 39.493, 'Compromise:')
 text(x = -76.695, y = 39.4915, 'MMO')
 dev.off()
 
-# pdf ----
+#  pdf ----
 pdf('ParetoSolDegradation_CompromiseTreeMaps.pdf', width = 6, height = 4)
 layout(rbind(c(1,1,1,2,2,2), c(3,3,4,4,5,5)))
 
