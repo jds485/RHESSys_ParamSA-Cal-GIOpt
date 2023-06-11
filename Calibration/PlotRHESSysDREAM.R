@@ -21,6 +21,8 @@ setwd("C:\\Users\\js4yd\\OneDrive - University of Virginia\\Code\\GenLikelihood_
 source('GL_maineqs.R')
 #Load matplot with dates on x-axis allowed
 source('C:\\Users\\js4yd\\OneDrive - University of Virginia\\EnGauge\\EnGauge\\matplotDates.R')
+#Load edited functions
+source('C:\\Users\\js4yd\\OneDrive - University of Virginia\\RHESSys_ParameterSA\\Calibration\\marginalPlot_trueVals.R')
 
 #Load synthetic parameter set----
 SynParams = read.csv("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\SyntheticHill11+12\\Bais910_Syn_AfterProcessing.csv")
@@ -4022,7 +4024,8 @@ png('OptSamplesMarginalPlot_atm.png', res = 300, units = 'in', width = 7, height
 marginalPlot(x = c(out_sCh10_3_s1200n$chain[,c(12,2)], out_sCh10_2_s1200n$chain[,c(12,2)], out_sCh10_1_s1200n$chain[,c(12,2)], out_sCh10_s1200n$chain[,c(12,2)]), prior = PriorSample[,c(12,2)], singlePanel = FALSE, 
              trueVals = t(apply(X = t(apply(X = CenPtClust8sp[,c(12,2)], MARGIN = 1, FUN = "*", (ParamRanges$Upper[c(12,2)] - ParamRanges$Lower[c(12,2)]))), MARGIN = 1, FUN = "+", ParamRanges$Lower[c(12,2)])),
              SynVals = SynParams[c(12,2)],
-             MAPVals = matrix(MaxLikes[32,c(15,5)], ncol = 2))
+             MAPVals = matrix(MaxLikes[32,c(15,5)], ncol = 2),
+             settings = list(col = c('gray',NA)))
 dev.off()
 
 png('OptSamplesMarginalPlot_atm_NoSamps.png', res = 300, units = 'in', width = 7, height = 7)
@@ -4056,7 +4059,8 @@ png('OptSamplesMarginalPlot_s9.png', res = 300, units = 'in', width = 7, height 
 marginalPlot(x = c(out_sCh10_3_s1200n$chain[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], out_sCh10_2_s1200n$chain[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], out_sCh10_1_s1200n$chain[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], out_sCh10_s1200n$chain[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)]), prior = PriorSample[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], singlePanel = FALSE, 
              trueVals = t(apply(X = t(apply(X = CenPtClust8sp[,c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)], MARGIN = 1, FUN = "*", (ParamRanges$Upper[c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)] - ParamRanges$Lower[c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)]))), MARGIN = 1, FUN = "+", ParamRanges$Lower[c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)])),
              SynVals = SynParams[c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)],
-             MAPVals = matrix(MaxLikes[32,(c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)+3)], ncol = 12))
+             MAPVals = matrix(MaxLikes[32,(c(3, 8, 9, 15, 4, 5, 10, 11, 6, 7, 13, 14)+3)], ncol = 12),
+             settings = list(col = c('gray',NA)))
 dev.off()
 
 png('OptSamplesMarginalPlot_s9_Sel_NoSyn.png', res = 300, units = 'in', width = 7, height = 7)
@@ -4093,8 +4097,153 @@ png('OptSamplesMarginalPlot_veg.png', res = 300, units = 'in', width = 7, height
 marginalPlot(x = c(out_sCh10_3_s1200n$chain[,c(1, 16:19)], out_sCh10_2_s1200n$chain[,c(1, 16:19)], out_sCh10_1_s1200n$chain[,c(1, 16:19)], out_sCh10_s1200n$chain[,c(1, 16:19)]), prior = PriorSample[,c(1, 16:19)], singlePanel = FALSE, 
              trueVals = t(apply(X = t(apply(X = CenPtClust8sp[,c(1, 16:19)], MARGIN = 1, FUN = "*", (ParamRanges$Upper[c(1, 16:19)] - ParamRanges$Lower[c(1, 16:19)]))), MARGIN = 1, FUN = "+", ParamRanges$Lower[c(1, 16:19)])),
              SynVals = SynParams[c(1, 16:19)],
-             MAPVals = matrix(MaxLikes[32,(c(1, 16:19)+3)], ncol = 5))
+             MAPVals = matrix(MaxLikes[32,(c(1, 16:19)+3)], ncol = 5),
+             settings = list(col = c('gray',NA)))
 dev.off()
+
+#All params on one plot----
+key_colnames = c('H: GW Loss Coef.', 'Z: Windspeed', 
+                 'Su: Ksat', 'Su: Soil Thickness', 'Su: m', 'Su: Air Entry Pres.', 'Su: Sat. to GW Coef.', 'Su: vKsat',
+                 'Sd: Ksat', 'Sd: Soil Thickness', 'Sd: m', 'Sd: Pore Size', 'Sd: Air Entry Pres.', 
+                 'Sd: Sat. to GW Coef.', 'Sd: vKsat', 
+                 'L: Septic Water Load', 'V: Tree Max. Stomatal Cond.', 'V: Tree Stomatal Fraction', 
+                 'V: Tree Rainwater Capacity', "LP", "LL", "LPr")
+
+col_order = c(16, 1, 9:11, 13:15, 12, 3:8, 2, 17:22)
+
+for (i in 1:length(out_sCh10_s1200n$chain)){
+  colnames(out_sCh10_3_s1200n$chain[[i]]) = key_colnames
+  colnames(out_sCh10_2_s1200n$chain[[i]]) = key_colnames
+  colnames(out_sCh10_1_s1200n$chain[[i]]) = key_colnames
+  colnames(out_sCh10_s1200n$chain[[i]]) = key_colnames
+  #rearrange for plotting
+  out_sCh10_3_s1200n$chain[[i]] = out_sCh10_3_s1200n$chain[[i]][,col_order]
+  out_sCh10_2_s1200n$chain[[i]] = out_sCh10_2_s1200n$chain[[i]][,col_order]
+  out_sCh10_1_s1200n$chain[[i]] = out_sCh10_1_s1200n$chain[[i]][,col_order]
+  out_sCh10_s1200n$chain[[i]] = out_sCh10_s1200n$chain[[i]][,col_order]
+}
+
+png('OptSamplesMarginalPlot_all-1.png', res = 600, units = 'in', width = 8, height = 8)
+marginalPlot(x = c(out_sCh10_3_s1200n$chain[,c(1:16)], out_sCh10_2_s1200n$chain[,c(1:16)], out_sCh10_1_s1200n$chain[,c(1:16)], out_sCh10_s1200n$chain[,c(1:16)]), prior = PriorSample[,col_order[1:16]], singlePanel = FALSE, 
+             trueVals = t(apply(X = t(apply(X = CenPtClust8sp[,col_order[1:16]], MARGIN = 1, FUN = "*", (ParamRanges$Upper[col_order[1:16]] - ParamRanges$Lower[col_order[1:16]]))), MARGIN = 1, FUN = "+", ParamRanges$Lower[col_order[1:16]])),
+             SynVals = SynParams[col_order[1:16]],
+             MAPVals = matrix(MaxLikes[32,(col_order[1:16]+3)], ncol = 16),
+             settings = list(col = c('gray',NA)))
+dev.off()
+png('OptSamplesMarginalPlot_all-2.png', res = 600, units = 'in', width = 8, height = 8)
+marginalPlot(x = c(out_sCh10_3_s1200n$chain[,c(5:19)], out_sCh10_2_s1200n$chain[,c(5:19)], out_sCh10_1_s1200n$chain[,c(5:19)], out_sCh10_s1200n$chain[,c(5:19)]), prior = PriorSample[,col_order[5:19]], singlePanel = FALSE, 
+             trueVals = t(apply(X = t(apply(X = CenPtClust8sp[,col_order[5:19]], MARGIN = 1, FUN = "*", (ParamRanges$Upper[col_order[5:19]] - ParamRanges$Lower[col_order[5:19]]))), MARGIN = 1, FUN = "+", ParamRanges$Lower[col_order[5:19]])),
+             SynVals = SynParams[col_order[5:19]],
+             MAPVals = matrix(MaxLikes[32,(col_order[5:19]+3)], ncol = 15),
+             settings = list(col = c('gray',NA)))
+dev.off()
+
+#with parameter set labels
+png('OptSamplesMarginalPlot_all-1_params.png', res = 600, units = 'in', width = 8, height = 8)
+marginalPlot(x = c(out_sCh10_3_s1200n$chain[,c(1:16)], out_sCh10_2_s1200n$chain[,c(1:16)], out_sCh10_1_s1200n$chain[,c(1:16)], out_sCh10_s1200n$chain[,c(1:16)]), prior = PriorSample[,col_order[1:16]], singlePanel = FALSE, 
+             trueVals = t(apply(X = t(apply(X = CenPtClust8sp[,col_order[1:16]], MARGIN = 1, FUN = "*", (ParamRanges$Upper[col_order[1:16]] - ParamRanges$Lower[col_order[1:16]]))), MARGIN = 1, FUN = "+", ParamRanges$Lower[col_order[1:16]])),
+             SynVals = SynParams[col_order[1:16]],
+             MAPVals = matrix(MaxLikes[32,(col_order[1:16]+3)], ncol = 16),
+             settings = list(col = c('gray',NA)),
+             paramText = TRUE)
+dev.off()
+png('OptSamplesMarginalPlot_all-2_params.png', res = 600, units = 'in', width = 8, height = 8)
+marginalPlot(x = c(out_sCh10_3_s1200n$chain[,c(17:19)], out_sCh10_2_s1200n$chain[,c(17:19)], out_sCh10_1_s1200n$chain[,c(17:19)], out_sCh10_s1200n$chain[,c(17:19)]), prior = PriorSample[,c(17:19)], singlePanel = FALSE, 
+             trueVals = t(apply(X = t(apply(X = CenPtClust8sp[,c(17:19)], MARGIN = 1, FUN = "*", (ParamRanges$Upper[c(17:19)] - ParamRanges$Lower[c(17:19)]))), MARGIN = 1, FUN = "+", ParamRanges$Lower[c(17:19)])),
+             SynVals = SynParams[c(17:19)],
+             MAPVals = matrix(MaxLikes[32,(c(17:19)+3)], ncol = 3),
+             settings = list(col = c('gray',NA)),
+             paramText = TRUE)
+dev.off()
+
+#with likelihood params----
+Likes_sCh10_400 = read.csv("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\Calibration/SynCh10/NewCR/ParamsLikes_c_s400.csv", stringsAsFactors = FALSE)
+Likes_sCh10_800 = read.csv("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\Calibration/SynCh10/NewCR/ParamsLikes_c_s800.csv", stringsAsFactors = FALSE)
+Likes_sCh10_1200 = read.csv("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\Calibration/SynCh10/NewCR/ParamsLikes_c_s1200.csv", stringsAsFactors = FALSE)
+Likes_sCh10 = rbind(Likes_sCh10_400, Likes_sCh10_800, Likes_sCh10_1200)
+
+Likes_sCh10_1_400 = read.csv("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\Calibration/SynCh10-1/NewCR/ParamsLikes_c_s400.csv", stringsAsFactors = FALSE)
+Likes_sCh10_1_800 = read.csv("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\Calibration/SynCh10-1/NewCR/ParamsLikes_c_s800.csv", stringsAsFactors = FALSE)
+Likes_sCh10_1_1200 = read.csv("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\Calibration/SynCh10-1/NewCR/ParamsLikes_c_s1200.csv", stringsAsFactors = FALSE)
+Likes_sCh10_1 = rbind(Likes_sCh10_1_400, Likes_sCh10_1_800, Likes_sCh10_1_1200)
+
+Likes_sCh10_2_400 = read.csv("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\Calibration/SynCh10-2/NewCR/ParamsLikes_c_s400.csv", stringsAsFactors = FALSE)
+Likes_sCh10_2_800 = read.csv("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\Calibration/SynCh10-2/NewCR/ParamsLikes_c_s800.csv", stringsAsFactors = FALSE)
+Likes_sCh10_2_1200 = read.csv("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\Calibration/SynCh10-2/NewCR/ParamsLikes_c_s1200.csv", stringsAsFactors = FALSE)
+Likes_sCh10_2 = rbind(Likes_sCh10_2_400, Likes_sCh10_2_800, Likes_sCh10_2_1200)
+
+Likes_sCh10_3_400 = read.csv("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\Calibration/SynCh10-3/NewCR/ParamsLikes_c_s400.csv", stringsAsFactors = FALSE)
+Likes_sCh10_3_800 = read.csv("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\Calibration/SynCh10-3/NewCR/ParamsLikes_c_s800.csv", stringsAsFactors = FALSE)
+Likes_sCh10_3_1200 = read.csv("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\Calibration/SynCh10-3/NewCR/ParamsLikes_c_s1200.csv", stringsAsFactors = FALSE)
+Likes_sCh10_3 = rbind(Likes_sCh10_3_400, Likes_sCh10_3_800, Likes_sCh10_3_1200)
+
+Likes = rbind(Likes_sCh10, Likes_sCh10_1, Likes_sCh10_2, Likes_sCh10_3)
+
+png('HistsLikeParams.png', res = 300, width = 10, height = 10, units = 'in')
+par(mar = c(2,4.1,3,1))
+layout(rbind(c(1,2), c(3,4), c(5,6)))
+hist(Likes$beta_Q, breaks = 50, freq = TRUE, main = 'Kurtosis (Beta)', xlab = '', xlim = c(-1,7), ylab = '')
+lines(x = c(0,0), y = c(0,100000), lwd = 2, lty = 3)
+axis(side = 1, at = 0, tick = TRUE, labels = NA, lwd.ticks = 2)
+for(i in 1:nrow(CenPtClust8s)){
+  lines(x = c(CenPtClust8s$beta[i],CenPtClust8s$beta[i]), y = c(0,100000), lwd = 2, lty = 3, col = 'skyblue')
+}
+lines(x = c(Likes[which(Likes$ID == 'DCh10-3_R997_C2'),]$beta,Likes[which(Likes$ID == 'DCh10-3_R997_C2'),]$beta), 
+      y = c(0,100000), lwd = 2, lty = 4, col = 'blue')
+axis(side = 1, at = 1, tick = TRUE, labels = NA, lwd.ticks = 2, col.ticks = 'blue')
+
+hist(Likes$xi_Q, breaks = 50, freq = TRUE, main = 'Skewness (Xi)', xlab = '', xlim = c(0,5), ylab = '')
+lines(x = c(1,1), y = c(0,100000), lwd = 2, lty = 3)
+axis(side = 1, at = 1, tick = TRUE, labels = NA, lwd.ticks = 2)
+for(i in 1:nrow(CenPtClust8s)){
+  lines(x = c(CenPtClust8s$xi[i],CenPtClust8s$xi[i]), y = c(0,100000), lwd = 2, lty = 3, col = 'skyblue')
+}
+lines(x = c(Likes[which(Likes$ID == 'DCh10-3_R997_C2'),]$xi,Likes[which(Likes$ID == 'DCh10-3_R997_C2'),]$xi),
+      y = c(0,100000), lwd = 2, lty = 4, col = 'blue')
+axis(side = 1, at = 1, tick = TRUE, labels = NA, lwd.ticks = 2, col.ticks = 'blue')
+
+hist(Likes$sigma_0_Q, breaks = 50, freq = TRUE, main = 'Standard Deviation when Mean = 0 (sigma_0)', xlab = '', xlim = c(0,1))
+lines(x = c(0.05,0.05), y = c(0,100000), lwd = 2, lty = 3)
+axis(side = 1, at = 0.05, tick = TRUE, labels = NA, lwd.ticks = 2)
+for(i in 1:nrow(CenPtClust8s)){
+  lines(x = c(CenPtClust8s$sigma_0[i],CenPtClust8s$sigma_0[i]), y = c(0,100000), lwd = 2, lty = 3, col = 'skyblue')
+}
+lines(x = c(Likes[which(Likes$ID == 'DCh10-3_R997_C2'),]$sigma_0,Likes[which(Likes$ID == 'DCh10-3_R997_C2'),]$sigma_0), 
+      y = c(0,100000), lwd = 2, lty = 4, col = 'blue')
+axis(side = 1, at = 1, tick = TRUE, labels = NA, lwd.ticks = 2, col.ticks = 'blue')
+
+hist(Likes$sigma_1_Q, breaks = 50, freq = TRUE, main = 'Linear Change in Std. Dev. with Mean (sigma_1)', xlab = '', xlim = c(0,1), ylab = '')
+lines(x = c(0,0), y = c(0,100000), lwd = 2, lty = 3)
+axis(side = 1, at = 0, tick = TRUE, labels = NA, lwd.ticks = 2)
+for(i in 1:nrow(CenPtClust8s)){
+  lines(x = c(CenPtClust8s$sigma_1[i],CenPtClust8s$sigma_1[i]), y = c(0,100000), lwd = 2, lty = 3, col = 'skyblue')
+}
+lines(x = c(Likes[which(Likes$ID == 'DCh10-3_R997_C2'),]$sigma_1,Likes[which(Likes$ID == 'DCh10-3_R997_C2'),]$sigma_1), 
+      y = c(0,100000), lwd = 2, lty = 4, col = 'blue')
+axis(side = 1, at = 1, tick = TRUE, labels = NA, lwd.ticks = 2, col.ticks = 'blue')
+
+hist(Likes$phi_1_Q, breaks = 50, freq = TRUE, main = 'Lag 1 Autocorrelation (phi_1)', xlab = '', xlim = c(0,1), ylab = '')
+lines(x = c(0.7,0.7), y = c(0,100000), lwd = 2, lty = 3)
+axis(side = 1, at = 0.7, tick = TRUE, labels = NA, lwd.ticks = 2)
+for(i in 1:nrow(CenPtClust8s)){
+  lines(x = c(CenPtClust8s$phi_1[i],CenPtClust8s$phi_1[i]), y = c(0,100000), lwd = 2, lty = 3, col = 'skyblue')
+}
+lines(x = c(Likes[which(Likes$ID == 'DCh10-3_R997_C2'),]$phi_1,Likes[which(Likes$ID == 'DCh10-3_R997_C2'),]$phi_1), 
+      y = c(0,100000), lwd = 2, lty = 4, col = 'blue')
+axis(side = 1, at = 1, tick = TRUE, labels = NA, lwd.ticks = 2, col.ticks = 'blue')
+
+hist(Likes$mu_h_Q, breaks = 50, freq = TRUE, main = 'Mean Bias Factor (muh)', xlab = '', xlim = c(0,1), ylab = '')
+lines(x = c(0,0), y = c(0,100000), lwd = 2, lty = 3)
+axis(side = 1, at = 0, tick = TRUE, labels = NA, lwd.ticks = 2)
+for(i in 1:nrow(CenPtClust8s)){
+  lines(x = c(CenPtClust8s$mu_h[i],CenPtClust8s$mu_h[i]), y = c(0,100000), lwd = 2, lty = 3, col = 'skyblue')
+}
+lines(x = c(Likes[which(Likes$ID == 'DCh10-3_R997_C2'),]$mu_h,Likes[which(Likes$ID == 'DCh10-3_R997_C2'),]$mu_h), 
+      y = c(0,100000), lwd = 2, lty = 4, col = 'blue')
+axis(side = 1, at = 1, tick = TRUE, labels = NA, lwd.ticks = 2, col.ticks = 'blue')
+
+dev.off()
+
 
 #Create weights for each of the selected parameters based on their likelihoods----
 CenPtClust8s$weight = CenPtClust8s$LP/sum(CenPtClust8s$LP, MaxLikes[32,23])

@@ -13,7 +13,7 @@ marginalPlot <- function(x, ...) UseMethod("marginalPlot")
 #' @example /inst/examples/marginalPlotHelp.R
 #' @author Tankred Ott
 marginalPlot <- function(x, prior = NULL, xrange = NULL, type = 'd', singlePanel = FALSE, settings = NULL,
-                         nPriorDraws = 10000, trueVals=NULL, SynVals=NULL, MAPVals=NULL, ...) {
+                         nPriorDraws = 10000, trueVals=NULL, SynVals=NULL, MAPVals=NULL, paramText=FALSE, ...) {
   
   posteriorMat <- BayesianTools::getSample(x, parametersOnly = TRUE, ...)
   
@@ -77,7 +77,7 @@ marginalPlot <- function(x, prior = NULL, xrange = NULL, type = 'd', singlePanel
   if (!is.null(priorMat)) colnames(priorMat) <- colnames(posteriorMat)
   
   # prepare arguments for sub-functions
-  .args <- c(list(posteriorMat = posteriorMat, priorMat = priorMat, xrange = xrange, singlePanel = singlePanel, trueVals = trueVals, SynVals=SynVals, MAPVals=MAPVals),
+  .args <- c(list(posteriorMat = posteriorMat, priorMat = priorMat, xrange = xrange, singlePanel = singlePanel, trueVals = trueVals, SynVals=SynVals, MAPVals=MAPVals, paramText=paramText),
              settings)
   
   if (type == 'd') do.call(marginalPlotDensity, .args)
@@ -96,7 +96,7 @@ marginalPlot <- function(x, prior = NULL, xrange = NULL, type = 'd', singlePanel
 #' @keywords internal
 # TODO: this could be simplified. It is verbose for now to be able to change stuff easily
 marginalPlotDensity <- function(posteriorMat, priorMat = NULL, xrange = NULL, col=c('#FC006299','#00BBAA88'), 
-                                singlePanel = TRUE, trueVals=NULL, SynVals=NULL, MAPVals=NULL, ...) {
+                                singlePanel = TRUE, trueVals=NULL, SynVals=NULL, MAPVals=NULL, paramText=FALSE, ...) {
   
   nPar <- ncol(posteriorMat)
   parNames <- colnames(posteriorMat)
@@ -159,16 +159,23 @@ marginalPlotDensity <- function(posteriorMat, priorMat = NULL, xrange = NULL, co
       
       if (!is.null(trueVals)){
         for (lini in 1:nrow(trueVals)){
-          lines(x = c(trueVals[lini,i],trueVals[lini,i]), y = yrange, lwd = 2, col = 'green')
+          lines(x = c(trueVals[lini,i],trueVals[lini,i]), y = c(0, postY[which(abs(trueVals[lini,i]-postX) == min(abs(trueVals[lini,i]-postX)))]), lwd = 2, col = 'skyblue')
+          if(paramText){
+            par(xpd=TRUE)
+            text(x = trueVals[lini,i], y = 0, paste0(lini+1), col = 'red')
+            par(xpd=FALSE)
+          }
         }
       }
       
       if (!is.null(SynVals)){
-        lines(x = c(SynVals[i],SynVals[i]), y = yrange, lwd = 2, col = 'black', lty = 2)
+        lines(x = c(SynVals[i],SynVals[i]), y = c(0, postY[which(abs(SynVals[i]-postX) == min(abs(SynVals[i]-postX)))]), lwd = 2, col = 'black', lty = 3)
+        axis(side = 1, at = SynVals[i], tick = TRUE, labels = NA, col.ticks = 'black', lwd.ticks = 2)
       }
       
       if (!is.null(MAPVals)){
-        lines(x = c(MAPVals[i],MAPVals[i]), y = yrange, lwd = 2, col = 'blue', lty = 4)
+        lines(x = c(MAPVals[i],MAPVals[i]), y = c(0, postY[which(abs(MAPVals[i]-postX) == min(abs(MAPVals[i]-postX)))]), lwd = 2, col = 'blue', lty = 4)
+        axis(side = 1, at = MAPVals[i], tick = TRUE, labels = NA, col.ticks = 'blue', lwd.ticks = 2)
       }
     }
     
@@ -199,14 +206,21 @@ marginalPlotDensity <- function(posteriorMat, priorMat = NULL, xrange = NULL, co
       
       if (!is.null(trueVals)){
         for (lini in 1:nrow(trueVals)){
-          lines(x = c(trueVals[lini,i],trueVals[lini,i]), y = yrange, lwd = 2, col = 'green')
+          lines(x = c(trueVals[lini,i],trueVals[lini,i]), y = c(0, postY[which(abs(trueVals[lini,i]-postX) == min(abs(trueVals[lini,i]-postX)))]), lwd = 2, col = 'skyblue')
+          if(paramText){
+            par(xpd=TRUE)
+            text(x = trueVals[lini,i], y = 0, paste0(lini+1), col = 'red')
+            par(xpd=FALSE)
+          }
         }
       }
       if (!is.null(SynVals)){
-        lines(x = c(SynVals[i],SynVals[i]), y = yrange, lwd = 2, col = 'black', lty = 2)
+        lines(x = c(as.numeric(SynVals[i]),as.numeric(SynVals[i])), y = c(0, postY[which(abs(as.numeric(SynVals[i])-postX) == min(abs(as.numeric(SynVals[i])-postX)))]), lwd = 2, col = 'black', lty = 3)
+        axis(side = 1, at = SynVals[i], tick = TRUE, labels = NA, col.ticks = 'black', lwd.ticks = 2)
       }
       if (!is.null(MAPVals)){
-        lines(x = c(MAPVals[i],MAPVals[i]), y = yrange, lwd = 2, col = 'blue', lty = 4)
+        lines(x = c(MAPVals[i],MAPVals[i]), y = c(0, postY[which(abs(MAPVals[i]-postX) == min(abs(MAPVals[i]-postX)))]), lwd = 2, col = 'blue', lty = 4)
+        axis(side = 1, at = MAPVals[i], tick = TRUE, labels = NA, col.ticks = 'blue', lwd.ticks = 2)
       }
     }
   }
@@ -216,7 +230,7 @@ marginalPlotDensity <- function(posteriorMat, priorMat = NULL, xrange = NULL, co
   plot(0, 0, type = 'n', bty = 'n', xaxt = 'n', yaxt = 'n')
   if(!is.null(SynVals)){
     legend('bottom', c('MAP', 'Samples', 'Synthetic Truth','posterior', 'prior'), xpd = TRUE, horiz = FALSE, inset = c(0, 0),
-           bty = 'n', pch = c(NA,NA,NA,15,15), col = c('blue','green','black',col), lty = c(4,1,2,NA,NA), cex = 1, ncol = 2)
+           bty = 'n', pch = c(NA,NA,NA,15,15), col = c('blue','skyblue','black',col), lty = c(4,1,3,NA,NA), cex = 1, ncol = 2)
   }else{
     legend('bottom', if (!is.null(priorX)) c('posterior', 'prior') else 'posterior', xpd = TRUE, horiz = TRUE, inset = c(0, 0),
            bty = 'n', pch = 15, col = col, cex = 1.5)
