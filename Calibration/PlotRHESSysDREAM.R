@@ -4190,7 +4190,7 @@ for(i in 1:nrow(CenPtClust8s)){
 }
 lines(x = c(Likes[which(Likes$ID == 'DCh10-3_R997_C2'),]$beta,Likes[which(Likes$ID == 'DCh10-3_R997_C2'),]$beta), 
       y = c(0,100000), lwd = 2, lty = 4, col = 'blue')
-axis(side = 1, at = 1, tick = TRUE, labels = NA, lwd.ticks = 2, col.ticks = 'blue')
+axis(side = 1, at = Likes[which(Likes$ID == 'DCh10-3_R997_C2'),]$beta, tick = TRUE, labels = NA, lwd.ticks = 2, col.ticks = 'blue')
 
 hist(Likes$xi_Q, breaks = 50, freq = TRUE, main = 'Skewness (Xi)', xlab = '', xlim = c(0,5), ylab = '')
 lines(x = c(1,1), y = c(0,100000), lwd = 2, lty = 3)
@@ -4200,7 +4200,7 @@ for(i in 1:nrow(CenPtClust8s)){
 }
 lines(x = c(Likes[which(Likes$ID == 'DCh10-3_R997_C2'),]$xi,Likes[which(Likes$ID == 'DCh10-3_R997_C2'),]$xi),
       y = c(0,100000), lwd = 2, lty = 4, col = 'blue')
-axis(side = 1, at = 1, tick = TRUE, labels = NA, lwd.ticks = 2, col.ticks = 'blue')
+axis(side = 1, at = Likes[which(Likes$ID == 'DCh10-3_R997_C2'),]$xi, tick = TRUE, labels = NA, lwd.ticks = 2, col.ticks = 'blue')
 
 hist(Likes$sigma_0_Q, breaks = 50, freq = TRUE, main = 'Standard Deviation when Mean = 0 (sigma_0)', xlab = '', xlim = c(0,1))
 lines(x = c(0.05,0.05), y = c(0,100000), lwd = 2, lty = 3)
@@ -4210,7 +4210,7 @@ for(i in 1:nrow(CenPtClust8s)){
 }
 lines(x = c(Likes[which(Likes$ID == 'DCh10-3_R997_C2'),]$sigma_0,Likes[which(Likes$ID == 'DCh10-3_R997_C2'),]$sigma_0), 
       y = c(0,100000), lwd = 2, lty = 4, col = 'blue')
-axis(side = 1, at = 1, tick = TRUE, labels = NA, lwd.ticks = 2, col.ticks = 'blue')
+axis(side = 1, at = Likes[which(Likes$ID == 'DCh10-3_R997_C2'),]$sigma_0, tick = TRUE, labels = NA, lwd.ticks = 2, col.ticks = 'blue')
 
 hist(Likes$sigma_1_Q, breaks = 50, freq = TRUE, main = 'Linear Change in Std. Dev. with Mean (sigma_1)', xlab = '', xlim = c(0,1), ylab = '')
 lines(x = c(0,0), y = c(0,100000), lwd = 2, lty = 3)
@@ -4220,7 +4220,7 @@ for(i in 1:nrow(CenPtClust8s)){
 }
 lines(x = c(Likes[which(Likes$ID == 'DCh10-3_R997_C2'),]$sigma_1,Likes[which(Likes$ID == 'DCh10-3_R997_C2'),]$sigma_1), 
       y = c(0,100000), lwd = 2, lty = 4, col = 'blue')
-axis(side = 1, at = 1, tick = TRUE, labels = NA, lwd.ticks = 2, col.ticks = 'blue')
+axis(side = 1, at = Likes[which(Likes$ID == 'DCh10-3_R997_C2'),]$sigma_1, tick = TRUE, labels = NA, lwd.ticks = 2, col.ticks = 'blue')
 
 hist(Likes$phi_1_Q, breaks = 50, freq = TRUE, main = 'Lag 1 Autocorrelation (phi_1)', xlab = '', xlim = c(0,1), ylab = '')
 lines(x = c(0.7,0.7), y = c(0,100000), lwd = 2, lty = 3)
@@ -4230,7 +4230,7 @@ for(i in 1:nrow(CenPtClust8s)){
 }
 lines(x = c(Likes[which(Likes$ID == 'DCh10-3_R997_C2'),]$phi_1,Likes[which(Likes$ID == 'DCh10-3_R997_C2'),]$phi_1), 
       y = c(0,100000), lwd = 2, lty = 4, col = 'blue')
-axis(side = 1, at = 1, tick = TRUE, labels = NA, lwd.ticks = 2, col.ticks = 'blue')
+axis(side = 1, at = Likes[which(Likes$ID == 'DCh10-3_R997_C2'),]$phi_1, tick = TRUE, labels = NA, lwd.ticks = 2, col.ticks = 'blue')
 
 hist(Likes$mu_h_Q, breaks = 50, freq = TRUE, main = 'Mean Bias Factor (muh)', xlab = '', xlim = c(0,1), ylab = '')
 lines(x = c(0,0), y = c(0,100000), lwd = 2, lty = 3)
@@ -4240,7 +4240,7 @@ for(i in 1:nrow(CenPtClust8s)){
 }
 lines(x = c(Likes[which(Likes$ID == 'DCh10-3_R997_C2'),]$mu_h,Likes[which(Likes$ID == 'DCh10-3_R997_C2'),]$mu_h), 
       y = c(0,100000), lwd = 2, lty = 4, col = 'blue')
-axis(side = 1, at = 1, tick = TRUE, labels = NA, lwd.ticks = 2, col.ticks = 'blue')
+axis(side = 1, at = Likes[which(Likes$ID == 'DCh10-3_R997_C2'),]$mu_h, tick = TRUE, labels = NA, lwd.ticks = 2, col.ticks = 'blue')
 
 dev.off()
 

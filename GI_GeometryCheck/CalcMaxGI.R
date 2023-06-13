@@ -804,9 +804,9 @@ for (h in 1:8){
 }
 for (h in 14:9){
   if(h == 9| h == 10){
-    plot(CellsWGS[CellsWGS$hillID == h,], col = 'gray20', add = TRUE, lwd=7, pch = 22)
-  }else if (h %in% seq(11,14,1)){
     plot(CellsWGS[CellsWGS$hillID == h,], col = 'gray', add = TRUE, lwd=7, pch = 22)
+  }else if (h %in% seq(11,14,1)){
+    plot(CellsWGS[CellsWGS$hillID == h,], col = 'gray20', add = TRUE, lwd=7, pch = 22)
   }
   temp = CellsWGS[CellsWGS$hillID == h,]
   plot(temp, col = 'darkgreen', add = TRUE, pch = 15, cex = 0.7)
@@ -827,7 +827,7 @@ text(x = -76.712, y = 39.467, 'WGS84')
 box(which = 'figure', lwd = 2)
 legend('topleft', pch = 15, legend = c('Impervious', 'Forested', 'Grass'), col = c('black', 'darkgreen', 'green'))
 legend('bottomright', legend = c('Suburban Hillslope Outline', 'Selected for Optimization', 'Stream'), 
-       col = c('gray', 'gray20', 'blue'), pch = c(22, 22, NA), lty = c(NA, NA, 1), lwd = 2, pt.cex = 2, pt.lwd = 5)
+       col = c('gray20', 'gray', 'blue'), pch = c(22, 22, NA), lty = c(NA, NA, 1), lwd = 2, pt.cex = 2, pt.lwd = 5)
 par(xpd = TRUE)
 text(x = -76.717, y = 39.495, 'A', cex = 2)
 par(xpd = FALSE)
@@ -837,9 +837,9 @@ plot(CellsWGS, col = 'black', pch = 15, lwd = 0)
 #plot(CellGrid[CellGrid$MaxGI > 0,], add = TRUE, col = 'black')
 for (h in 14:9){
   if(h == 9| h == 10){
-    plot(CellsWGS[CellsWGS$hillID == h,], col = 'gray20', add = TRUE, lwd=7, pch = 22)
-  }else{
     plot(CellsWGS[CellsWGS$hillID == h,], col = 'gray', add = TRUE, lwd=7, pch = 22)
+  }else{
+    plot(CellsWGS[CellsWGS$hillID == h,], col = 'gray20', add = TRUE, lwd=7, pch = 22)
   }
   plot(CellsWGS[CellsWGS$hillID == h,], col = 'black', add = TRUE, pch = 15, cex = 0.7)
   plot(CellsWGS[which((CellsWGS$hillID == h) & (CellsWGS$MaxGI > 0) & (CellsWGS$patchZ <= Downslope_h[h,2])),], col = 'purple', add = TRUE, pch = 15, cex = 0.7)
@@ -876,9 +876,9 @@ for (h in 1:8){
 }
 for (h in 14:9){
   if(h == 9| h == 10){
-    plot(CellsWGS[CellsWGS$hillID == h,], col = 'gray20', add = TRUE, lwd=7, pch = 22)
-  }else if (h %in% seq(11,14,1)){
     plot(CellsWGS[CellsWGS$hillID == h,], col = 'gray', add = TRUE, lwd=7, pch = 22)
+  }else if (h %in% seq(11,14,1)){
+    plot(CellsWGS[CellsWGS$hillID == h,], col = 'gray20', add = TRUE, lwd=7, pch = 22)
   }
   temp = CellsWGS[CellsWGS$hillID == h,]
   plot(temp, col = 'darkgreen', add = TRUE, pch = 15, cex = 0.7)
@@ -899,7 +899,7 @@ text(x = -76.712, y = 39.467, 'WGS84')
 box(which = 'figure', lwd = 2)
 legend('topleft', pch = 15, legend = c('Impervious', 'Forested', 'Grass'), col = c('black', 'darkgreen', 'green'))
 legend('bottomright', legend = c('Suburban Hillslope Outline', 'Selected for Optimization', 'Stream'), 
-       col = c('gray', 'gray20', 'blue'), pch = c(22, 22, NA), lty = c(NA, NA, 1), lwd = 2, pt.cex = 2, pt.lwd = 5)
+       col = c('gray20', 'gray', 'blue'), pch = c(22, 22, NA), lty = c(NA, NA, 1), lwd = 2, pt.cex = 2, pt.lwd = 5)
 par(xpd = TRUE)
 text(x = -76.717, y = 39.495, 'A', cex = 2)
 par(xpd = FALSE)
@@ -909,9 +909,9 @@ plot(CellsWGS, col = 'black', pch = 15, lwd = 0)
 #plot(CellGrid[CellGrid$MaxGI > 0,], add = TRUE, col = 'black')
 for (h in 14:9){
   if(h == 9| h == 10){
-    plot(CellsWGS[CellsWGS$hillID == h,], col = 'gray20', add = TRUE, lwd=7, pch = 22)
-  }else{
     plot(CellsWGS[CellsWGS$hillID == h,], col = 'gray', add = TRUE, lwd=7, pch = 22)
+  }else{
+    plot(CellsWGS[CellsWGS$hillID == h,], col = 'gray20', add = TRUE, lwd=7, pch = 22)
   }
   plot(CellsWGS[CellsWGS$hillID == h,], col = 'black', add = TRUE, pch = 15, cex = 0.7)
   plot(CellsWGS[which((CellsWGS$hillID == h) & (CellsWGS$MaxGI > 0) & (CellsWGS$patchZ <= Downslope_h[h,2])),], col = 'purple', add = TRUE, pch = 15, cex = 0.7)

@@ -1914,21 +1914,21 @@ dev.off()
 setwd("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\SyntheticHill11+12")
 colors_plt = scico(3, palette = 'hawaii')
 png('NumTreesTargetThresh.png', res = 300, units = 'in', width = 6, height = 6)
-hist(TreesThreshSyn$NumTrees, col = 'black', border = 'black', breaks = seq(3500,10500,1000), ylim = c(0,10), main='Number of Possible Compromise Solutions', xlab = 'Number of Trees', cex.lab=1.5,cex.axis=1.5)
+hist(TreesThreshSyn$NumTrees, col = 'black', border = 'black', breaks = seq(3500,10500,1000), ylim = c(0,10), ylab='Number of Compromise Solutions', xlab = 'Number of Trees', main='', cex.lab=1.5,cex.axis=1.5)
 par(lwd=3)
 hist(TreesThreshMAP$NumTrees, border = alpha.col(colors_plt[1],alpha = 0.5), breaks = seq(3500,10500,1000), add = TRUE)
 hist(TreesThreshMORO$NumTrees, border = alpha.col(colors_plt[2], alpha = 0.5), breaks = seq(3500,10500,1000), add = TRUE, lwd = 2)
 hist(TreesThreshMMO$NumTrees, border = alpha.col(colors_plt[3], alpha = 1), breaks = seq(3500,10500,1000), add = TRUE, lwd = 2)
-legend('topright', legend = c('Synthetic', 'MAP', 'MORO', 'MinMax'), col = c('black', colors_plt), pch = 15)
+legend('topright', legend = c('Synthetic', 'MAP', 'MORO', 'MinMax'), col = c('black', alpha.col(colors_plt[1:2], alpha = 0.5), colors_plt[3]), pch = 15)
 dev.off()
 
 pdf('NumTreesTargetThresh.pdf', width = 6, height = 6)
-hist(TreesThreshSyn$NumTrees, col = 'black', border = 'black', breaks = seq(3500,10500,1000), ylim = c(0,10), main='Number of Possible Compromise Solutions', xlab = 'Number of Trees', cex.lab=1.5,cex.axis=1.5)
+hist(TreesThreshSyn$NumTrees, col = 'black', border = 'black', breaks = seq(3500,10500,1000), ylim = c(0,10), ylab='Number of Compromise Solutions', xlab = 'Number of Trees', main = '', cex.lab=1.5,cex.axis=1.5)
 par(lwd=3)
 hist(TreesThreshMAP$NumTrees, border = alpha.col(colors_plt[1],alpha = 0.5), breaks = seq(3500,10500,1000), add = TRUE)
 hist(TreesThreshMORO$NumTrees, border = alpha.col(colors_plt[2], alpha = 0.5), breaks = seq(3500,10500,1000), add = TRUE, lwd = 2)
 hist(TreesThreshMMO$NumTrees, border = alpha.col(colors_plt[3], alpha = 1), breaks = seq(3500,10500,1000), add = TRUE, lwd = 2)
-legend('topright', legend = c('Synthetic', 'MAP', 'MORO', 'MinMax'), col = c('black', colors_plt), pch = 15)
+legend('topright', legend = c('Synthetic', 'MAP', 'MORO', 'MinMax'), col = c('black', alpha.col(colors_plt[1:2], alpha = 0.5), colors_plt[3]), pch = 15)
 dev.off()
 par(lwd=1)
 
@@ -2426,6 +2426,9 @@ par(new=TRUE)
 plot(x = O1_b100*100, y = O2_b100*100, pch = 17, col = colFun(O3_b100),xlim = c(0, 60), ylim=c(-120, 10), axes=FALSE, xlab = '', ylab='')
 legend('bottomleft', title = 'Num. Trees (thous.)', 
        legend = c('0 - <3', '3 - <6', '6 - <9', '9 - <12', '12 - <15', '>15', 'Max GI'), col = colFun(c(seq(0,18000,3000), O3_b100)), pch = c(rep(16,6),17), cex = 0.7)
+par(xpd=TRUE)
+text(x = -15, y = 40, 'A', cex = 2)
+par(xpd=FALSE)
 
 plot(-DVO_MAP$Flooding*100, -DVO_MAP$LowFlow*100, col = colFun(DVO_MAP$NumTrees),
      xlim = c(0, 60), ylim=c(-120, 10), xlab = 'Flooding Reduction (%)', ylab = '', cex.axis = 1.5, cex.lab = 1.5, main = 'MAP Optimization', pch = 16)
@@ -2436,6 +2439,9 @@ lines(c(20,20), c(-130,120), col = 'gray', lty = 2)
 #Add max GI point
 par(new=TRUE)
 plot(x = O1_b100*100, y = O2_b100*100, pch = 17, col = colFun(O3_b100),xlim = c(0, 60), ylim=c(-120, 10), axes=FALSE, xlab = '', ylab='')
+par(xpd=TRUE)
+text(x = -15, y = 40, 'B', cex = 2)
+par(xpd=FALSE)
 
 plot(-DVO_MORO$Flooding*100, -DVO_MORO$LowFlow*100, col = colFun(DVO_MORO$NumTrees),
      xlim = c(0, 60), ylim=c(-120, 10), xlab = 'Flooding Reduction (%)', ylab = '', cex.axis = 1.5, cex.lab = 1.5, main = 'MORO Optimization', pch = 16)
@@ -2446,6 +2452,9 @@ lines(c(20,20), c(-130,120), col = 'gray', lty = 2)
 #Add max GI point
 par(new=TRUE)
 plot(x = O1_b100*100, y = O2_b100*100, pch = 17, col = colFun(O3_b100),xlim = c(0, 60), ylim=c(-120, 10), axes=FALSE, xlab = '', ylab='')
+par(xpd=TRUE)
+text(x = -15, y = 40, 'C', cex = 2)
+par(xpd=FALSE)
 
 plot(-DVO_MMO$Flooding*100, -DVO_MMO$LowFlow*100, col = colFun(DVO_MMO$NumTrees),
      xlim = c(0, 60), ylim=c(-120, 10), xlab = 'Flooding Reduction (%)', ylab = '', cex.axis = 1.5, cex.lab = 1.5, main = 'Min-Max Optimization', pch = 16)
@@ -2456,102 +2465,63 @@ lines(c(20,20), c(-130,120), col = 'gray', lty = 2)
 #Add max GI point
 par(new=TRUE)
 plot(x = O1_b100*100, y = O2_b100*100, pch = 17, col = colFun(O3_b100),xlim = c(0, 60), ylim=c(-120, 10), axes=FALSE, xlab = '', ylab='')
+par(xpd=TRUE)
+text(x = -15, y = 40, 'D', cex = 2)
+par(xpd=FALSE)
 
+#Histogram
+hist(TreesThreshSyn$NumTrees, col = 'black', border = 'black', breaks = seq(3500,10500,1000), ylim = c(0,10), ylab='Number of Compromise Solutions', xlab = 'Number of Trees', main='', cex.lab=1.5,cex.axis=1.5)
+par(lwd=3)
+hist(TreesThreshMAP$NumTrees, border = alpha.col(colors_plt[1],alpha = 0.5), breaks = seq(3500,10500,1000), add = TRUE)
+hist(TreesThreshMORO$NumTrees, border = alpha.col(colors_plt[2], alpha = 0.5), breaks = seq(3500,10500,1000), add = TRUE, lwd = 2)
+hist(TreesThreshMMO$NumTrees, border = alpha.col(colors_plt[3], alpha = 1), breaks = seq(3500,10500,1000), add = TRUE, lwd = 2)
+legend('topright', legend = c('Synthetic', 'MAP', 'MORO', 'MinMax'), col = c('black', alpha.col(colors_plt[1:2], alpha = 0.5), colors_plt[3]), pch = 15)
+par(lwd=1)
+par(xpd=TRUE)
+text(x = 3000, y = 12.3, 'E', cex = 2)
+par(xpd=FALSE)
 
-#Average compromise decisions
-scaleRange = c(0,1)
-scaleBy = 0.2
-Pal = rev(scico(palette = 'oslo', n = (scaleRange[2] - scaleRange[1])/scaleBy))
-par(mar= c(2.5,2.5,1,1))
-plot(CellsWGS, col = 'black', pch = 15, lwd = 0, cex=1.2)
-for (h in 9:10){
-        #For hillslope boundaries
-        plot(CellsWGS[which((CellsWGS$hillID == h)),], col = 'gray', add = TRUE, lwd=7, pch = 22, cex = 1.2)
-        plot(CellsWGS[which((CellsWGS$hillID == h)),], col = 'black', add = TRUE, pch = 15, cex = 1.2)
-        for (l in 1:3){
-                plot(CellsWGS[which((CellsWGS$hillID == h) & (CellsWGS@data[,116+l] == h) & (CellsWGS$MaxGI > 0)),], col = 'black', add = TRUE, pch = 15, cex = 1.2)
-                plot(CellsWGS[which((CellsWGS$hillID == h) & (CellsWGS@data[,116+l] == h) & (CellsWGS$MaxGI > 0)),], col = colFun(colMeans(TreesThreshSyn)[l+3*(h-9)]), add = TRUE, pch = 15, cex = 1.2)
-        }
-}
-rm(h)
-legend('topleft', title = expression(bold('Mean Proportion')), legend = c(paste(seq(0,0.8,0.2), '-', seq(0.2,1,0.2))), col = c(colFun(seq(scaleRange[1],scaleRange[2],scaleBy))), pch = 15, cex = 0.7)
-degAxis(side = 1, at = seq(-77,-76,.005), labels = FALSE)
-degAxis(side = 1, at = seq(-77,-76,.01))
-degAxis(side = 3, at = seq(-77,-76,.005), labels = FALSE)
-degAxis(side = 2, at = seq(39.45, 40,.005))
-degAxis(side = 4, at = seq(39.45, 40,.005), labels = FALSE)
-north.arrow(xb = -76.694, yb = 39.481, len = .0005, lab = 'N', tcol = 'black', col='black')
-text(x = -76.695, y = 39.479, 'WGS84')
-box(which = 'figure', lwd = 2)
+#Reevaluation
+plot(-DVO_MAPSyn$FloodingSyn*100, -DVO_MAPSyn$LowFlowSyn*100, col = colFun(DVO_MAPSyn$NumTreesSyn),
+     xlim = c(0, 60), ylim=c(-120, 10), xlab = 'Flooding Reduction (%)', ylab = 'Low Flow Increase (%)', cex.axis = 1.5, cex.lab = 1.5, main = '', pch = 16)
+lines(c(-110,110), c(0,0))
+lines(c(-0,0), c(-130,120))
+lines(c(-110,110), c(-20,-20), col = 'gray', lty = 2)
+lines(c(20,20), c(-130,120), col = 'gray', lty = 2)
+#Add max GI point
+par(new=TRUE)
+plot(x = O1_b100*100, y = O2_b100*100, pch = 17, col = colFun(O3_b100),xlim = c(0, 60), ylim=c(-120, 10), axes=FALSE, xlab = '', ylab='')
+par(xpd=TRUE)
+text(x = -15, y = 40, 'F', cex = 2)
+par(xpd=FALSE)
 
+plot(-DVO_MOROSyn$FloodingSyn*100, -DVO_MOROSyn$LowFlowSyn*100, col = colFun(DVO_MOROSyn$NumTreesSyn),
+     xlim = c(0, 60), ylim=c(-120, 10), xlab = 'Flooding Reduction (%)', ylab = '', cex.axis = 1.5, cex.lab = 1.5, main = 'Synthetic Evaluation of Solutions', pch = 16)
+lines(c(-110,110), c(0,0))
+lines(c(-0,0), c(-130,120))
+lines(c(-110,110), c(-20,-20), col = 'gray', lty = 2)
+lines(c(20,20), c(-130,120), col = 'gray', lty = 2)
+#Add max GI point
+par(new=TRUE)
+plot(x = O1_b100*100, y = O2_b100*100, pch = 17, col = colFun(O3_b100),xlim = c(0, 60), ylim=c(-120, 10), axes=FALSE, xlab = '', ylab='')
+par(xpd=TRUE)
+text(x = -15, y = 40, 'G', cex = 2)
+par(xpd=FALSE)
 
-plot(CellsWGS, col = 'black', pch = 15, lwd = 0, cex=1.2)
-for (h in 9:10){
-        #For hillslope boundaries
-        plot(CellsWGS[which((CellsWGS$hillID == h)),], col = 'gray', add = TRUE, lwd=7, pch = 22, cex = 1.2)
-        plot(CellsWGS[which((CellsWGS$hillID == h)),], col = 'black', add = TRUE, pch = 15, cex = 1.2)
-        for (l in 1:3){
-                plot(CellsWGS[which((CellsWGS$hillID == h) & (CellsWGS@data[,116+l] == h) & (CellsWGS$MaxGI > 0)),], col = 'black', add = TRUE, pch = 15, cex = 1.2)
-                plot(CellsWGS[which((CellsWGS$hillID == h) & (CellsWGS@data[,116+l] == h) & (CellsWGS$MaxGI > 0)),], col = colFun(colMeans(TreesThreshMAP)[l+3*(h-9)]), add = TRUE, pch = 15, cex = 1.2)
-        }
-}
-rm(h)
-degAxis(side = 1, at = seq(-77,-76,.005), labels = FALSE)
-degAxis(side = 1, at = seq(-77,-76,.01))
-degAxis(side = 3, at = seq(-77,-76,.005), labels = FALSE)
-degAxis(side = 2, at = seq(39.45, 40,.005))
-degAxis(side = 4, at = seq(39.45, 40,.005), labels = FALSE)
-north.arrow(xb = -76.694, yb = 39.481, len = .0005, lab = 'N', tcol = 'black', col='black')
-text(x = -76.695, y = 39.479, 'WGS84')
-box(which = 'figure', lwd = 2)
-
-
-plot(CellsWGS, col = 'black', pch = 15, lwd = 0, cex=1.2)
-for (h in 9:10){
-        #For hillslope boundaries
-        plot(CellsWGS[which((CellsWGS$hillID == h)),], col = 'gray', add = TRUE, lwd=7, pch = 22, cex = 1.2)
-        plot(CellsWGS[which((CellsWGS$hillID == h)),], col = 'black', add = TRUE, pch = 15, cex = 1.2)
-        for (l in 1:3){
-                plot(CellsWGS[which((CellsWGS$hillID == h) & (CellsWGS@data[,116+l] == h) & (CellsWGS$MaxGI > 0)),], col = 'black', add = TRUE, pch = 15, cex = 1.2)
-                plot(CellsWGS[which((CellsWGS$hillID == h) & (CellsWGS@data[,116+l] == h) & (CellsWGS$MaxGI > 0)),], col = colFun(colMeans(TreesThreshMORO)[l+3*(h-9)]), add = TRUE, pch = 15, cex = 1.2)
-        }
-}
-rm(h)
-degAxis(side = 1, at = seq(-77,-76,.005), labels = FALSE)
-degAxis(side = 1, at = seq(-77,-76,.01))
-degAxis(side = 3, at = seq(-77,-76,.005), labels = FALSE)
-degAxis(side = 2, at = seq(39.45, 40,.005))
-degAxis(side = 4, at = seq(39.45, 40,.005), labels = FALSE)
-north.arrow(xb = -76.694, yb = 39.481, len = .0005, lab = 'N', tcol = 'black', col='black')
-text(x = -76.695, y = 39.479, 'WGS84')
-box(which = 'figure', lwd = 2)
-
-
-plot(CellsWGS, col = 'black', pch = 15, lwd = 0, cex=1.2)
-for (h in 9:10){
-        #For hillslope boundaries
-        plot(CellsWGS[which((CellsWGS$hillID == h)),], col = 'gray', add = TRUE, lwd=7, pch = 22, cex = 1.2)
-        plot(CellsWGS[which((CellsWGS$hillID == h)),], col = 'black', add = TRUE, pch = 15, cex = 1.2)
-        for (l in 1:3){
-                plot(CellsWGS[which((CellsWGS$hillID == h) & (CellsWGS@data[,116+l] == h) & (CellsWGS$MaxGI > 0)),], col = 'black', add = TRUE, pch = 15, cex = 1.2)
-                plot(CellsWGS[which((CellsWGS$hillID == h) & (CellsWGS@data[,116+l] == h) & (CellsWGS$MaxGI > 0)),], col = colFun(colMeans(TreesThreshMMO)[l+3*(h-9)]), add = TRUE, pch = 15, cex = 1.2)
-        }
-}
-rm(h)
-degAxis(side = 1, at = seq(-77,-76,.005), labels = FALSE)
-degAxis(side = 1, at = seq(-77,-76,.01))
-degAxis(side = 3, at = seq(-77,-76,.005), labels = FALSE)
-degAxis(side = 2, at = seq(39.45, 40,.005))
-degAxis(side = 4, at = seq(39.45, 40,.005), labels = FALSE)
-north.arrow(xb = -76.694, yb = 39.481, len = .0005, lab = 'N', tcol = 'black', col='black')
-text(x = -76.695, y = 39.479, 'WGS84')
-box(which = 'figure', lwd = 2)
+plot(-DVO_MMOSyn$FloodingSyn*100, -DVO_MMOSyn$LowFlowSyn*100, col = colFun(DVO_MMOSyn$NumTreesSyn),
+     xlim = c(0, 60), ylim=c(-120, 10), xlab = 'Flooding Reduction (%)', ylab = '', cex.axis = 1.5, cex.lab = 1.5, main = '', pch = 16)
+lines(c(-110,110), c(0,0))
+lines(c(-0,0), c(-130,130))
+lines(c(-110,110), c(-20,-20), col = 'gray', lty = 2)
+lines(c(20,20), c(-130,120), col = 'gray', lty = 2)
+#Add max GI point
+par(new=TRUE)
+plot(x = O1_b100*100, y = O2_b100*100, pch = 17, col = colFun(O3_b100),xlim = c(0, 60), ylim=c(-120, 10), axes=FALSE, xlab = '', ylab='')
+par(xpd=TRUE)
+text(x = -15, y = 40, 'H', cex = 2)
+par(xpd=FALSE)
 dev.off()
 
-# pdf----
-scaleRange = c(0,18000)
-scaleBy = 3000
-Pal = rev(scico(palette = 'batlow', n = (scaleRange[2] - scaleRange[1])/scaleBy))
 
 pdf('ParetoAll_ColTrees.pdf', width = 12, height = 6)
 layout(rbind(c(1,2,3,4), c(5,6,7,8)))
@@ -2566,6 +2536,9 @@ par(new=TRUE)
 plot(x = O1_b100*100, y = O2_b100*100, pch = 17, col = colFun(O3_b100),xlim = c(0, 60), ylim=c(-120, 10), axes=FALSE, xlab = '', ylab='')
 legend('bottomleft', title = 'Num. Trees (thous.)', 
        legend = c('0 - <3', '3 - <6', '6 - <9', '9 - <12', '12 - <15', '>15', 'Max GI'), col = colFun(c(seq(0,18000,3000), O3_b100)), pch = c(rep(16,6),17), cex = 0.7)
+par(xpd=TRUE)
+text(x = -15, y = 40, 'A', cex = 2)
+par(xpd=FALSE)
 
 plot(-DVO_MAP$Flooding*100, -DVO_MAP$LowFlow*100, col = colFun(DVO_MAP$NumTrees),
      xlim = c(0, 60), ylim=c(-120, 10), xlab = 'Flooding Reduction (%)', ylab = '', cex.axis = 1.5, cex.lab = 1.5, main = 'MAP Optimization', pch = 16)
@@ -2576,6 +2549,9 @@ lines(c(20,20), c(-130,120), col = 'gray', lty = 2)
 #Add max GI point
 par(new=TRUE)
 plot(x = O1_b100*100, y = O2_b100*100, pch = 17, col = colFun(O3_b100),xlim = c(0, 60), ylim=c(-120, 10), axes=FALSE, xlab = '', ylab='')
+par(xpd=TRUE)
+text(x = -15, y = 40, 'B', cex = 2)
+par(xpd=FALSE)
 
 plot(-DVO_MORO$Flooding*100, -DVO_MORO$LowFlow*100, col = colFun(DVO_MORO$NumTrees),
      xlim = c(0, 60), ylim=c(-120, 10), xlab = 'Flooding Reduction (%)', ylab = '', cex.axis = 1.5, cex.lab = 1.5, main = 'MORO Optimization', pch = 16)
@@ -2586,6 +2562,9 @@ lines(c(20,20), c(-130,120), col = 'gray', lty = 2)
 #Add max GI point
 par(new=TRUE)
 plot(x = O1_b100*100, y = O2_b100*100, pch = 17, col = colFun(O3_b100),xlim = c(0, 60), ylim=c(-120, 10), axes=FALSE, xlab = '', ylab='')
+par(xpd=TRUE)
+text(x = -15, y = 40, 'C', cex = 2)
+par(xpd=FALSE)
 
 plot(-DVO_MMO$Flooding*100, -DVO_MMO$LowFlow*100, col = colFun(DVO_MMO$NumTrees),
      xlim = c(0, 60), ylim=c(-120, 10), xlab = 'Flooding Reduction (%)', ylab = '', cex.axis = 1.5, cex.lab = 1.5, main = 'Min-Max Optimization', pch = 16)
@@ -2596,12 +2575,72 @@ lines(c(20,20), c(-130,120), col = 'gray', lty = 2)
 #Add max GI point
 par(new=TRUE)
 plot(x = O1_b100*100, y = O2_b100*100, pch = 17, col = colFun(O3_b100),xlim = c(0, 60), ylim=c(-120, 10), axes=FALSE, xlab = '', ylab='')
+par(xpd=TRUE)
+text(x = -15, y = 40, 'D', cex = 2)
+par(xpd=FALSE)
+
+#Histogram
+hist(TreesThreshSyn$NumTrees, col = 'black', border = 'black', breaks = seq(3500,10500,1000), ylim = c(0,10), ylab='Number of Compromise Solutions', xlab = 'Number of Trees', main='', cex.lab=1.5,cex.axis=1.5)
+par(lwd=3)
+hist(TreesThreshMAP$NumTrees, border = alpha.col(colors_plt[1],alpha = 0.5), breaks = seq(3500,10500,1000), add = TRUE)
+hist(TreesThreshMORO$NumTrees, border = alpha.col(colors_plt[2], alpha = 0.5), breaks = seq(3500,10500,1000), add = TRUE, lwd = 2)
+hist(TreesThreshMMO$NumTrees, border = alpha.col(colors_plt[3], alpha = 1), breaks = seq(3500,10500,1000), add = TRUE, lwd = 2)
+legend('topright', legend = c('Synthetic', 'MAP', 'MORO', 'MinMax'), col = c('black', alpha.col(colors_plt[1:2], alpha = 0.5), colors_plt[3]), pch = 15)
+par(lwd=1)
+par(xpd=TRUE)
+text(x = 3000, y = 12.3, 'E', cex = 2)
+par(xpd=FALSE)
+
+#Reevaluation
+plot(-DVO_MAPSyn$FloodingSyn*100, -DVO_MAPSyn$LowFlowSyn*100, col = colFun(DVO_MAPSyn$NumTreesSyn),
+     xlim = c(0, 60), ylim=c(-120, 10), xlab = 'Flooding Reduction (%)', ylab = 'Low Flow Increase (%)', cex.axis = 1.5, cex.lab = 1.5, main = '', pch = 16)
+lines(c(-110,110), c(0,0))
+lines(c(-0,0), c(-130,120))
+lines(c(-110,110), c(-20,-20), col = 'gray', lty = 2)
+lines(c(20,20), c(-130,120), col = 'gray', lty = 2)
+#Add max GI point
+par(new=TRUE)
+plot(x = O1_b100*100, y = O2_b100*100, pch = 17, col = colFun(O3_b100),xlim = c(0, 60), ylim=c(-120, 10), axes=FALSE, xlab = '', ylab='')
+par(xpd=TRUE)
+text(x = -15, y = 40, 'F', cex = 2)
+par(xpd=FALSE)
+
+plot(-DVO_MOROSyn$FloodingSyn*100, -DVO_MOROSyn$LowFlowSyn*100, col = colFun(DVO_MOROSyn$NumTreesSyn),
+     xlim = c(0, 60), ylim=c(-120, 10), xlab = 'Flooding Reduction (%)', ylab = '', cex.axis = 1.5, cex.lab = 1.5, main = 'Synthetic Evaluation of Solutions', pch = 16)
+lines(c(-110,110), c(0,0))
+lines(c(-0,0), c(-130,120))
+lines(c(-110,110), c(-20,-20), col = 'gray', lty = 2)
+lines(c(20,20), c(-130,120), col = 'gray', lty = 2)
+#Add max GI point
+par(new=TRUE)
+plot(x = O1_b100*100, y = O2_b100*100, pch = 17, col = colFun(O3_b100),xlim = c(0, 60), ylim=c(-120, 10), axes=FALSE, xlab = '', ylab='')
+par(xpd=TRUE)
+text(x = -15, y = 40, 'G', cex = 2)
+par(xpd=FALSE)
+
+plot(-DVO_MMOSyn$FloodingSyn*100, -DVO_MMOSyn$LowFlowSyn*100, col = colFun(DVO_MMOSyn$NumTreesSyn),
+     xlim = c(0, 60), ylim=c(-120, 10), xlab = 'Flooding Reduction (%)', ylab = '', cex.axis = 1.5, cex.lab = 1.5, main = '', pch = 16)
+lines(c(-110,110), c(0,0))
+lines(c(-0,0), c(-130,130))
+lines(c(-110,110), c(-20,-20), col = 'gray', lty = 2)
+lines(c(20,20), c(-130,120), col = 'gray', lty = 2)
+#Add max GI point
+par(new=TRUE)
+plot(x = O1_b100*100, y = O2_b100*100, pch = 17, col = colFun(O3_b100),xlim = c(0, 60), ylim=c(-120, 10), axes=FALSE, xlab = '', ylab='')
+par(xpd=TRUE)
+text(x = -15, y = 40, 'H', cex = 2)
+par(xpd=FALSE)
+dev.off()
+
 
 
 #Average compromise decisions
-scaleRange = c(0,1)
+png('MeanCompromiseDecisions.png', res = 600, width = 6, height = 6, units = 'in')
+layout(rbind(c(1,2), c(3,4)))
+scaleRange = c(0,0.8)
 scaleBy = 0.2
-Pal = rev(scico(palette = 'oslo', n = (scaleRange[2] - scaleRange[1])/scaleBy))
+Pal = scico(palette = 'imola', begin = 0.4, n = (scaleRange[2] - scaleRange[1])/scaleBy)
+
 par(mar= c(2.5,2.5,1,1))
 plot(CellsWGS, col = 'black', pch = 15, lwd = 0, cex=1.2)
 for (h in 9:10){
@@ -2614,7 +2653,7 @@ for (h in 9:10){
         }
 }
 rm(h)
-legend('topleft', title = expression(bold('Mean Proportion')), legend = c(paste(seq(0,0.8,0.2), '-', seq(0.2,1,0.2))), col = c(colFun(seq(scaleRange[1],scaleRange[2],scaleBy))), pch = 15, cex = 0.7)
+legend('topright', title = expression(bold('Mean Proportion')), legend = c(paste(seq(0,0.6,0.2), '-', seq(0.2,0.8,0.2))), col = c(colFun(seq(scaleRange[1],scaleRange[2],scaleBy))), pch = 15, cex = 0.6)
 degAxis(side = 1, at = seq(-77,-76,.005), labels = FALSE)
 degAxis(side = 1, at = seq(-77,-76,.01))
 degAxis(side = 3, at = seq(-77,-76,.005), labels = FALSE)
@@ -2622,8 +2661,11 @@ degAxis(side = 2, at = seq(39.45, 40,.005))
 degAxis(side = 4, at = seq(39.45, 40,.005), labels = FALSE)
 north.arrow(xb = -76.694, yb = 39.481, len = .0005, lab = 'N', tcol = 'black', col='black')
 text(x = -76.695, y = 39.479, 'WGS84')
+text(x = -76.705, y = 39.4925, 'Synthetic\nCompromise', cex = 1.2)
 box(which = 'figure', lwd = 2)
-
+par(xpd=TRUE)
+text(x = -76.716, y = 39.494, 'A', cex = 2)
+par(xpd=FALSE)
 
 plot(CellsWGS, col = 'black', pch = 15, lwd = 0, cex=1.2)
 for (h in 9:10){
@@ -2643,8 +2685,11 @@ degAxis(side = 2, at = seq(39.45, 40,.005))
 degAxis(side = 4, at = seq(39.45, 40,.005), labels = FALSE)
 north.arrow(xb = -76.694, yb = 39.481, len = .0005, lab = 'N', tcol = 'black', col='black')
 text(x = -76.695, y = 39.479, 'WGS84')
+text(x = -76.705, y = 39.4925, 'MAP\nCompromise', cex = 1.2)
 box(which = 'figure', lwd = 2)
-
+par(xpd=TRUE)
+text(x = -76.716, y = 39.494, 'B', cex = 2)
+par(xpd=FALSE)
 
 plot(CellsWGS, col = 'black', pch = 15, lwd = 0, cex=1.2)
 for (h in 9:10){
@@ -2664,8 +2709,11 @@ degAxis(side = 2, at = seq(39.45, 40,.005))
 degAxis(side = 4, at = seq(39.45, 40,.005), labels = FALSE)
 north.arrow(xb = -76.694, yb = 39.481, len = .0005, lab = 'N', tcol = 'black', col='black')
 text(x = -76.695, y = 39.479, 'WGS84')
+text(x = -76.705, y = 39.4925, 'MORO\nCompromise', cex = 1.2)
 box(which = 'figure', lwd = 2)
-
+par(xpd=TRUE)
+text(x = -76.716, y = 39.494, 'C', cex = 2)
+par(xpd=FALSE)
 
 plot(CellsWGS, col = 'black', pch = 15, lwd = 0, cex=1.2)
 for (h in 9:10){
@@ -2685,7 +2733,117 @@ degAxis(side = 2, at = seq(39.45, 40,.005))
 degAxis(side = 4, at = seq(39.45, 40,.005), labels = FALSE)
 north.arrow(xb = -76.694, yb = 39.481, len = .0005, lab = 'N', tcol = 'black', col='black')
 text(x = -76.695, y = 39.479, 'WGS84')
+text(x = -76.705, y = 39.4925, 'Min-Max\nCompromise', cex = 1.2)
 box(which = 'figure', lwd = 2)
+par(xpd=TRUE)
+text(x = -76.716, y = 39.494, 'D', cex = 2)
+par(xpd=FALSE)
+dev.off()
+
+# pdf----
+pdf('MeanCompromiseDecisions.pdf', width = 6, height = 6)
+layout(rbind(c(1,2), c(3,4)))
+scaleRange = c(0,0.8)
+scaleBy = 0.2
+Pal = scico(palette = 'imola', begin = 0.4, n = (scaleRange[2] - scaleRange[1])/scaleBy)
+
+par(mar= c(2.5,2.5,1,1))
+plot(CellsWGS, col = 'black', pch = 15, lwd = 0, cex=1.2)
+for (h in 9:10){
+        #For hillslope boundaries
+        plot(CellsWGS[which((CellsWGS$hillID == h)),], col = 'gray', add = TRUE, lwd=7, pch = 22, cex = 1.2)
+        plot(CellsWGS[which((CellsWGS$hillID == h)),], col = 'black', add = TRUE, pch = 15, cex = 1.2)
+        for (l in 1:3){
+                plot(CellsWGS[which((CellsWGS$hillID == h) & (CellsWGS@data[,116+l] == h) & (CellsWGS$MaxGI > 0)),], col = 'black', add = TRUE, pch = 15, cex = 1.2)
+                plot(CellsWGS[which((CellsWGS$hillID == h) & (CellsWGS@data[,116+l] == h) & (CellsWGS$MaxGI > 0)),], col = colFun(colMeans(TreesThreshSyn)[l+3*(h-9)]), add = TRUE, pch = 15, cex = 1.2)
+        }
+}
+rm(h)
+legend('topright', title = expression(bold('Mean Proportion')), legend = c(paste(seq(0,0.6,0.2), '-', seq(0.2,0.8,0.2))), col = c(colFun(seq(scaleRange[1],scaleRange[2],scaleBy))), pch = 15, cex = 0.6)
+degAxis(side = 1, at = seq(-77,-76,.005), labels = FALSE)
+degAxis(side = 1, at = seq(-77,-76,.01))
+degAxis(side = 3, at = seq(-77,-76,.005), labels = FALSE)
+degAxis(side = 2, at = seq(39.45, 40,.005))
+degAxis(side = 4, at = seq(39.45, 40,.005), labels = FALSE)
+north.arrow(xb = -76.694, yb = 39.481, len = .0005, lab = 'N', tcol = 'black', col='black')
+text(x = -76.695, y = 39.479, 'WGS84')
+text(x = -76.705, y = 39.4925, 'Synthetic\nCompromise', cex = 1.2)
+box(which = 'figure', lwd = 2)
+par(xpd=TRUE)
+text(x = -76.716, y = 39.494, 'A', cex = 2)
+par(xpd=FALSE)
+
+plot(CellsWGS, col = 'black', pch = 15, lwd = 0, cex=1.2)
+for (h in 9:10){
+        #For hillslope boundaries
+        plot(CellsWGS[which((CellsWGS$hillID == h)),], col = 'gray', add = TRUE, lwd=7, pch = 22, cex = 1.2)
+        plot(CellsWGS[which((CellsWGS$hillID == h)),], col = 'black', add = TRUE, pch = 15, cex = 1.2)
+        for (l in 1:3){
+                plot(CellsWGS[which((CellsWGS$hillID == h) & (CellsWGS@data[,116+l] == h) & (CellsWGS$MaxGI > 0)),], col = 'black', add = TRUE, pch = 15, cex = 1.2)
+                plot(CellsWGS[which((CellsWGS$hillID == h) & (CellsWGS@data[,116+l] == h) & (CellsWGS$MaxGI > 0)),], col = colFun(colMeans(TreesThreshMAP)[l+3*(h-9)]), add = TRUE, pch = 15, cex = 1.2)
+        }
+}
+rm(h)
+degAxis(side = 1, at = seq(-77,-76,.005), labels = FALSE)
+degAxis(side = 1, at = seq(-77,-76,.01))
+degAxis(side = 3, at = seq(-77,-76,.005), labels = FALSE)
+degAxis(side = 2, at = seq(39.45, 40,.005))
+degAxis(side = 4, at = seq(39.45, 40,.005), labels = FALSE)
+north.arrow(xb = -76.694, yb = 39.481, len = .0005, lab = 'N', tcol = 'black', col='black')
+text(x = -76.695, y = 39.479, 'WGS84')
+text(x = -76.705, y = 39.4925, 'MAP\nCompromise', cex = 1.2)
+box(which = 'figure', lwd = 2)
+par(xpd=TRUE)
+text(x = -76.716, y = 39.494, 'B', cex = 2)
+par(xpd=FALSE)
+
+plot(CellsWGS, col = 'black', pch = 15, lwd = 0, cex=1.2)
+for (h in 9:10){
+        #For hillslope boundaries
+        plot(CellsWGS[which((CellsWGS$hillID == h)),], col = 'gray', add = TRUE, lwd=7, pch = 22, cex = 1.2)
+        plot(CellsWGS[which((CellsWGS$hillID == h)),], col = 'black', add = TRUE, pch = 15, cex = 1.2)
+        for (l in 1:3){
+                plot(CellsWGS[which((CellsWGS$hillID == h) & (CellsWGS@data[,116+l] == h) & (CellsWGS$MaxGI > 0)),], col = 'black', add = TRUE, pch = 15, cex = 1.2)
+                plot(CellsWGS[which((CellsWGS$hillID == h) & (CellsWGS@data[,116+l] == h) & (CellsWGS$MaxGI > 0)),], col = colFun(colMeans(TreesThreshMORO)[l+3*(h-9)]), add = TRUE, pch = 15, cex = 1.2)
+        }
+}
+rm(h)
+degAxis(side = 1, at = seq(-77,-76,.005), labels = FALSE)
+degAxis(side = 1, at = seq(-77,-76,.01))
+degAxis(side = 3, at = seq(-77,-76,.005), labels = FALSE)
+degAxis(side = 2, at = seq(39.45, 40,.005))
+degAxis(side = 4, at = seq(39.45, 40,.005), labels = FALSE)
+north.arrow(xb = -76.694, yb = 39.481, len = .0005, lab = 'N', tcol = 'black', col='black')
+text(x = -76.695, y = 39.479, 'WGS84')
+text(x = -76.705, y = 39.4925, 'MORO\nCompromise', cex = 1.2)
+box(which = 'figure', lwd = 2)
+par(xpd=TRUE)
+text(x = -76.716, y = 39.494, 'C', cex = 2)
+par(xpd=FALSE)
+
+plot(CellsWGS, col = 'black', pch = 15, lwd = 0, cex=1.2)
+for (h in 9:10){
+        #For hillslope boundaries
+        plot(CellsWGS[which((CellsWGS$hillID == h)),], col = 'gray', add = TRUE, lwd=7, pch = 22, cex = 1.2)
+        plot(CellsWGS[which((CellsWGS$hillID == h)),], col = 'black', add = TRUE, pch = 15, cex = 1.2)
+        for (l in 1:3){
+                plot(CellsWGS[which((CellsWGS$hillID == h) & (CellsWGS@data[,116+l] == h) & (CellsWGS$MaxGI > 0)),], col = 'black', add = TRUE, pch = 15, cex = 1.2)
+                plot(CellsWGS[which((CellsWGS$hillID == h) & (CellsWGS@data[,116+l] == h) & (CellsWGS$MaxGI > 0)),], col = colFun(colMeans(TreesThreshMMO)[l+3*(h-9)]), add = TRUE, pch = 15, cex = 1.2)
+        }
+}
+rm(h)
+degAxis(side = 1, at = seq(-77,-76,.005), labels = FALSE)
+degAxis(side = 1, at = seq(-77,-76,.01))
+degAxis(side = 3, at = seq(-77,-76,.005), labels = FALSE)
+degAxis(side = 2, at = seq(39.45, 40,.005))
+degAxis(side = 4, at = seq(39.45, 40,.005), labels = FALSE)
+north.arrow(xb = -76.694, yb = 39.481, len = .0005, lab = 'N', tcol = 'black', col='black')
+text(x = -76.695, y = 39.479, 'WGS84')
+text(x = -76.705, y = 39.4925, 'Min-Max\nCompromise', cex = 1.2)
+box(which = 'figure', lwd = 2)
+par(xpd=TRUE)
+text(x = -76.716, y = 39.494, 'D', cex = 2)
+par(xpd=FALSE)
 dev.off()
 
 
