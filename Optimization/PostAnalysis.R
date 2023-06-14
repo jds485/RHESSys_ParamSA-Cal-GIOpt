@@ -2639,7 +2639,7 @@ png('MeanCompromiseDecisions.png', res = 600, width = 6, height = 6, units = 'in
 layout(rbind(c(1,2), c(3,4)))
 scaleRange = c(0,0.8)
 scaleBy = 0.2
-Pal = scico(palette = 'imola', begin = 0.4, n = (scaleRange[2] - scaleRange[1])/scaleBy)
+Pal = rev(scico(palette = 'imola', begin = 0.4, n = (scaleRange[2] - scaleRange[1])/scaleBy))
 
 par(mar= c(2.5,2.5,1,1))
 plot(CellsWGS, col = 'black', pch = 15, lwd = 0, cex=1.2)
@@ -2648,6 +2648,7 @@ for (h in 9:10){
         plot(CellsWGS[which((CellsWGS$hillID == h)),], col = 'gray', add = TRUE, lwd=7, pch = 22, cex = 1.2)
         plot(CellsWGS[which((CellsWGS$hillID == h)),], col = 'black', add = TRUE, pch = 15, cex = 1.2)
         for (l in 1:3){
+                plot(CellsWGS[which((CellsWGS$hillID == h) & (CellsWGS@data[,116+l] == h) & (CellsWGS$MaxGI > 0)),], col = 'gray', add = TRUE, lwd=7, pch = 22, cex = 1.2)
                 plot(CellsWGS[which((CellsWGS$hillID == h) & (CellsWGS@data[,116+l] == h) & (CellsWGS$MaxGI > 0)),], col = 'black', add = TRUE, pch = 15, cex = 1.2)
                 plot(CellsWGS[which((CellsWGS$hillID == h) & (CellsWGS@data[,116+l] == h) & (CellsWGS$MaxGI > 0)),], col = colFun(colMeans(TreesThreshSyn)[l+3*(h-9)]), add = TRUE, pch = 15, cex = 1.2)
         }
@@ -2673,6 +2674,7 @@ for (h in 9:10){
         plot(CellsWGS[which((CellsWGS$hillID == h)),], col = 'gray', add = TRUE, lwd=7, pch = 22, cex = 1.2)
         plot(CellsWGS[which((CellsWGS$hillID == h)),], col = 'black', add = TRUE, pch = 15, cex = 1.2)
         for (l in 1:3){
+                plot(CellsWGS[which((CellsWGS$hillID == h) & (CellsWGS@data[,116+l] == h) & (CellsWGS$MaxGI > 0)),], col = 'gray', add = TRUE, lwd=7, pch = 22, cex = 1.2)
                 plot(CellsWGS[which((CellsWGS$hillID == h) & (CellsWGS@data[,116+l] == h) & (CellsWGS$MaxGI > 0)),], col = 'black', add = TRUE, pch = 15, cex = 1.2)
                 plot(CellsWGS[which((CellsWGS$hillID == h) & (CellsWGS@data[,116+l] == h) & (CellsWGS$MaxGI > 0)),], col = colFun(colMeans(TreesThreshMAP)[l+3*(h-9)]), add = TRUE, pch = 15, cex = 1.2)
         }
@@ -2697,6 +2699,7 @@ for (h in 9:10){
         plot(CellsWGS[which((CellsWGS$hillID == h)),], col = 'gray', add = TRUE, lwd=7, pch = 22, cex = 1.2)
         plot(CellsWGS[which((CellsWGS$hillID == h)),], col = 'black', add = TRUE, pch = 15, cex = 1.2)
         for (l in 1:3){
+                plot(CellsWGS[which((CellsWGS$hillID == h) & (CellsWGS@data[,116+l] == h) & (CellsWGS$MaxGI > 0)),], col = 'gray', add = TRUE, lwd=7, pch = 22, cex = 1.2)
                 plot(CellsWGS[which((CellsWGS$hillID == h) & (CellsWGS@data[,116+l] == h) & (CellsWGS$MaxGI > 0)),], col = 'black', add = TRUE, pch = 15, cex = 1.2)
                 plot(CellsWGS[which((CellsWGS$hillID == h) & (CellsWGS@data[,116+l] == h) & (CellsWGS$MaxGI > 0)),], col = colFun(colMeans(TreesThreshMORO)[l+3*(h-9)]), add = TRUE, pch = 15, cex = 1.2)
         }
@@ -2721,6 +2724,7 @@ for (h in 9:10){
         plot(CellsWGS[which((CellsWGS$hillID == h)),], col = 'gray', add = TRUE, lwd=7, pch = 22, cex = 1.2)
         plot(CellsWGS[which((CellsWGS$hillID == h)),], col = 'black', add = TRUE, pch = 15, cex = 1.2)
         for (l in 1:3){
+                plot(CellsWGS[which((CellsWGS$hillID == h) & (CellsWGS@data[,116+l] == h) & (CellsWGS$MaxGI > 0)),], col = 'gray', add = TRUE, lwd=7, pch = 22, cex = 1.2)
                 plot(CellsWGS[which((CellsWGS$hillID == h) & (CellsWGS@data[,116+l] == h) & (CellsWGS$MaxGI > 0)),], col = 'black', add = TRUE, pch = 15, cex = 1.2)
                 plot(CellsWGS[which((CellsWGS$hillID == h) & (CellsWGS@data[,116+l] == h) & (CellsWGS$MaxGI > 0)),], col = colFun(colMeans(TreesThreshMMO)[l+3*(h-9)]), add = TRUE, pch = 15, cex = 1.2)
         }
@@ -2754,6 +2758,7 @@ for (h in 9:10){
         plot(CellsWGS[which((CellsWGS$hillID == h)),], col = 'gray', add = TRUE, lwd=7, pch = 22, cex = 1.2)
         plot(CellsWGS[which((CellsWGS$hillID == h)),], col = 'black', add = TRUE, pch = 15, cex = 1.2)
         for (l in 1:3){
+                plot(CellsWGS[which((CellsWGS$hillID == h) & (CellsWGS@data[,116+l] == h) & (CellsWGS$MaxGI > 0)),], col = 'gray', add = TRUE, lwd=7, pch = 22, cex = 1.2)
                 plot(CellsWGS[which((CellsWGS$hillID == h) & (CellsWGS@data[,116+l] == h) & (CellsWGS$MaxGI > 0)),], col = 'black', add = TRUE, pch = 15, cex = 1.2)
                 plot(CellsWGS[which((CellsWGS$hillID == h) & (CellsWGS@data[,116+l] == h) & (CellsWGS$MaxGI > 0)),], col = colFun(colMeans(TreesThreshSyn)[l+3*(h-9)]), add = TRUE, pch = 15, cex = 1.2)
         }
@@ -2779,6 +2784,7 @@ for (h in 9:10){
         plot(CellsWGS[which((CellsWGS$hillID == h)),], col = 'gray', add = TRUE, lwd=7, pch = 22, cex = 1.2)
         plot(CellsWGS[which((CellsWGS$hillID == h)),], col = 'black', add = TRUE, pch = 15, cex = 1.2)
         for (l in 1:3){
+                plot(CellsWGS[which((CellsWGS$hillID == h) & (CellsWGS@data[,116+l] == h) & (CellsWGS$MaxGI > 0)),], col = 'gray', add = TRUE, lwd=7, pch = 22, cex = 1.2)
                 plot(CellsWGS[which((CellsWGS$hillID == h) & (CellsWGS@data[,116+l] == h) & (CellsWGS$MaxGI > 0)),], col = 'black', add = TRUE, pch = 15, cex = 1.2)
                 plot(CellsWGS[which((CellsWGS$hillID == h) & (CellsWGS@data[,116+l] == h) & (CellsWGS$MaxGI > 0)),], col = colFun(colMeans(TreesThreshMAP)[l+3*(h-9)]), add = TRUE, pch = 15, cex = 1.2)
         }
@@ -2803,6 +2809,7 @@ for (h in 9:10){
         plot(CellsWGS[which((CellsWGS$hillID == h)),], col = 'gray', add = TRUE, lwd=7, pch = 22, cex = 1.2)
         plot(CellsWGS[which((CellsWGS$hillID == h)),], col = 'black', add = TRUE, pch = 15, cex = 1.2)
         for (l in 1:3){
+                plot(CellsWGS[which((CellsWGS$hillID == h) & (CellsWGS@data[,116+l] == h) & (CellsWGS$MaxGI > 0)),], col = 'gray', add = TRUE, lwd=7, pch = 22, cex = 1.2)
                 plot(CellsWGS[which((CellsWGS$hillID == h) & (CellsWGS@data[,116+l] == h) & (CellsWGS$MaxGI > 0)),], col = 'black', add = TRUE, pch = 15, cex = 1.2)
                 plot(CellsWGS[which((CellsWGS$hillID == h) & (CellsWGS@data[,116+l] == h) & (CellsWGS$MaxGI > 0)),], col = colFun(colMeans(TreesThreshMORO)[l+3*(h-9)]), add = TRUE, pch = 15, cex = 1.2)
         }
@@ -2827,6 +2834,7 @@ for (h in 9:10){
         plot(CellsWGS[which((CellsWGS$hillID == h)),], col = 'gray', add = TRUE, lwd=7, pch = 22, cex = 1.2)
         plot(CellsWGS[which((CellsWGS$hillID == h)),], col = 'black', add = TRUE, pch = 15, cex = 1.2)
         for (l in 1:3){
+                plot(CellsWGS[which((CellsWGS$hillID == h) & (CellsWGS@data[,116+l] == h) & (CellsWGS$MaxGI > 0)),], col = 'gray', add = TRUE, lwd=7, pch = 22, cex = 1.2)
                 plot(CellsWGS[which((CellsWGS$hillID == h) & (CellsWGS@data[,116+l] == h) & (CellsWGS$MaxGI > 0)),], col = 'black', add = TRUE, pch = 15, cex = 1.2)
                 plot(CellsWGS[which((CellsWGS$hillID == h) & (CellsWGS@data[,116+l] == h) & (CellsWGS$MaxGI > 0)),], col = colFun(colMeans(TreesThreshMMO)[l+3*(h-9)]), add = TRUE, pch = 15, cex = 1.2)
         }
