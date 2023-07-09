@@ -197,7 +197,8 @@ marginalPlotDensity <- function(posteriorMat, priorMat = NULL, xrange = NULL, co
       yrange <- if (is.null(priorX)) range(postY) else range(c(postY, priorY))
       
       plot(NULL, NULL, xlim = xrange[,i], ylim = yrange, main = parNames[i],
-           xlab = NA, ylab = 'density')
+           xlab = NA, ylab = 'density', xaxt = 'n')
+      axis(1, at = signif(c(min(xrange[,i]), max(xrange[,i])),2), lwd.ticks = 0)
       
       polygon(postX, postY, col = col[1], border = 1)
       if (!is.null(priorX)) polygon(priorX, priorY, col = col[2], border = 1)
