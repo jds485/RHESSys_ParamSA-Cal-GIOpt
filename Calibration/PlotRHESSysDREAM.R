@@ -15,6 +15,8 @@ library(fGarch)
 library(factoextra)
 library(NbClust)
 library(MASS)
+library (RColorBrewer)
+library(tidyverse)
 
 #Load SEP code----
 setwd("C:\\Users\\js4yd\\OneDrive - University of Virginia\\Code\\GenLikelihood_Zach")
@@ -4216,7 +4218,7 @@ plot_longer = pivot_longer(data = plot_params, cols = 1:19, names_to = 'Paramete
 param_plot = ggplot(plot_longer, mapping = aes(x = x, y = fct_inorder(Parameter))) +
   geom_point(aes(color = `Parameter Set`), size = 2) +
   scale_color_manual(aesthetics = 'color', 
-                     values = c(scico(n = 9, palette = 'hawaii', end = 0.9), 'black'),
+                     values = c(brewer.pal(n = 9, name = 'BrBG'), 'black'),
                      breaks = c('1: MAP', as.character(seq(2,9,1)), 'Syn')) + 
   theme_classic() +
   theme(axis.title = element_text(size = 14),
@@ -4228,13 +4230,14 @@ param_plot = ggplot(plot_longer, mapping = aes(x = x, y = fct_inorder(Parameter)
   scale_x_continuous(breaks = c(0,1))
 
 ggsave(param_plot, filename = 'RHESSysParamPlot.png', device = 'png')
+ggsave(param_plot, filename = 'RHESSysParamPlot.pdf', device = 'pdf')
 
 #Just parameter sets 1, 4, 7 and 9
 param_plot = ggplot(plot_longer[plot_longer$`Parameter Set` %in% c('1: MAP', '4', '7', '9', 'Syn'),], 
                     mapping = aes(x = x, y = fct_inorder(Parameter))) +
   geom_point(aes(color = `Parameter Set`), size = 2) +
   scale_color_manual(aesthetics = 'color', 
-                     values = c(scico(n = 9, palette = 'hawaii', end = 0.9)[c(1,4,7,9)], 'black'),
+                     values = c(brewer.pal(n = 9, name = 'BrBG')[c(1,4,7,9)], 'black'),
                      breaks = c('1: MAP', '4', '7', '9', 'Syn')) + 
   theme_classic() +
   theme(axis.title = element_text(size = 14),
@@ -4246,6 +4249,7 @@ param_plot = ggplot(plot_longer[plot_longer$`Parameter Set` %in% c('1: MAP', '4'
   scale_x_continuous(breaks = c(0,1))
 
 ggsave(param_plot, filename = 'RHESSysParamPlot_simple.png', device = 'png')
+ggsave(param_plot, filename = 'RHESSysParamPlot_simple.pdf', device = 'pdf')
 
 
 #with likelihood params----

@@ -2228,47 +2228,6 @@ for(i in 1:3){
         scatter.smooth(y = -DVO_MMOSyn$LowFlowSyn*100, x = rowSums(DVO_MMOSyn[,c(i, i+3)]), pch = NA, lpars = list(lwd=2, col=colors_plt[3]), 
                        xlim = c(0,2), ylim = c(-100,10), xlab = '', ylab = '', axes=FALSE, span = span)
 }
-# #NumTrees
-# for(i in 1:3){
-#         hillslope_num = strsplit(colnames(DVO)[i], split = 'd|u|m')[[1]]
-#         location = strsplit(colnames(DVO)[i], split = hillslope_num)[[1]][2]
-#         if(location == 'd'){
-#                 loc_name = 'Downslope'
-#         }else if(location == 'm'){
-#                 loc_name = 'Midslope'
-#         }else if(location == 'u'){
-#                 loc_name = 'Upslope'
-#         }
-#         if(i == 3){
-#                 xlab_i = 'Number of Trees'
-#                 par(mar = c(4, 4.1, 0.5, 0.5))
-#         }else{
-#                 xlab_i = ''
-#                 par(mar = c(2.5, 4.1, 2, 0.5))
-#                 if(i == 1){
-#                         par(mar = c(1, 4.1, 3.5, 0.5))
-#                 }
-#         }
-#         scatter.smooth(DVO$NumTrees, rowSums(DVO[,c(i, i+3)]), pch = NA, lpars = list(lwd=2), ylim = c(0,2), xlim = c(0,18000),
-#                        xlab = xlab_i, ylab = '', axes= FALSE, cex.lab = 1.5)
-#         box()
-#         axis(side = 2, at = seq(0,2,0.5), labels = NA)
-#         if (i == 3){
-#                 axis(side = 1, at = seq(0,20000,5000), labels = seq(0,20000,5000))
-#         }else{
-#                 axis(side = 1, at = seq(0,20000,5000), labels = NA)
-#         }
-#         par(new=TRUE)
-#         scatter.smooth(DVO_MAPSyn$NumTreesSyn, rowSums(DVO_MAPSyn[,c(i, i+3)]), pch = NA, lpars = list(lwd=2, col=colors_plt[1]), 
-#                        ylim = c(0,2), xlim = c(0,18000), xlab = '', ylab = '', axes=FALSE)
-#         par(new=TRUE)
-#         scatter.smooth(DVO_MOROSyn$NumTreesSyn, rowSums(DVO_MOROSyn[,c(i, i+3)]), pch = NA, lpars = list(lwd=2, col=colors_plt[2]), 
-#                        ylim = c(0,2), xlim = c(0,18000), xlab = '', ylab = '', axes=FALSE)
-#         par(new=TRUE)
-#         scatter.smooth(DVO_MMOSyn$NumTreesSyn, rowSums(DVO_MMOSyn[,c(i, i+3)]), pch = NA, lpars = list(lwd=2, col=colors_plt[3]), 
-#                        ylim = c(0,2), xlim = c(0,18000), xlab = '', ylab = '', axes=FALSE)
-#         
-# }
 dev.off()
 
 # pdf----
@@ -2400,6 +2359,92 @@ for(i in 1:3){
         scatter.smooth(DVO_MMOSyn$NumTreesSyn, rowSums(DVO_MMOSyn[,c(i, i+3)]), pch = NA, lpars = list(lwd=2, col=colors_plt[3]), 
                        ylim = c(0,2), xlim = c(0,18000), xlab = '', ylab = '', axes=FALSE)
         
+}
+dev.off()
+
+# combining H9 and H10----
+pdf('DecisionVarsVsObjectives_AllOpts_AggHillslopes_NoTrees.pdf', width = 6, height = 4)
+layout(rbind(c(1,2,3), c(4,5,6)))
+span = 0.3
+#Flooding
+for(i in 1:3){
+        #get plotting variable
+        hillslope_num = strsplit(colnames(DVO)[i], split = 'd|u|m')[[1]]
+        location = strsplit(colnames(DVO)[i], split = hillslope_num)[[1]][2]
+        if(location == 'd'){
+                loc_name = 'Downslope'
+        }else if(location == 'm'){
+                loc_name = 'Midslope'
+        }else if(location == 'u'){
+                loc_name = 'Upslope'
+        }
+        if(i == 1){
+                ylab_i = 'Flooding Reduction'
+                par(mar = c(2.5, 4.1, 0.5, 0.75))
+        }else{
+                ylab_i = ''
+                par(mar = c(2.5, 2.1, 0.5, 0.75))
+        }
+        scatter.smooth(y = -DVO$Flooding*100, x = rowSums(DVO[,c(i, i+3)]), pch = NA, lpars = list(lwd=2), xlim = c(0,2), ylim = c(0,60),
+                       ylab = ylab_i, xlab = '', axes = FALSE, cex.lab = 1.1, span = span)
+        box()
+        axis(side = 1, at = seq(0,2,0.5), labels = NA)
+        if (i == 1){
+                axis(side = 2, at = seq(0,60,10), labels = seq(0,60,10))
+        }else{
+                axis(side = 2, at = seq(0,60,10), labels = NA)
+        }
+        par(new=TRUE)
+        scatter.smooth(y = -DVO_MAPSyn$FloodingSyn*100, x = rowSums(DVO_MAPSyn[,c(i, i+3)]), pch = NA, lpars = list(lwd=2, col=colors_plt[1]), 
+                       xlim = c(0,2), ylim = c(0,60), xlab = '', ylab = '', axes=FALSE, span = span)
+        par(new=TRUE)
+        scatter.smooth(y = -DVO_MOROSyn$FloodingSyn*100, x = rowSums(DVO_MOROSyn[,c(i, i+3)]), pch = NA, lpars = list(lwd=2, col=colors_plt[2]), 
+                       xlim = c(0,2), ylim = c(0,60), xlab = '', ylab = '', axes=FALSE, span = span)
+        par(new=TRUE)
+        scatter.smooth(y = -DVO_MMOSyn$FloodingSyn*100, x = rowSums(DVO_MMOSyn[,c(i, i+3)]), pch = NA, lpars = list(lwd=2, col=colors_plt[3]), 
+                       xlim = c(0,2), ylim = c(0,60), xlab = '', ylab = '', axes=FALSE, span = span)
+        if(i==1){
+                legend('bottomright', legend = c('Synthetic', 'MAP', 'MORO', 'MinMax'), 
+                       col = c('black', colors_plt), 
+                       pch = NA, lty = 1)
+        }
+}
+#Low Flow
+for(i in 1:3){
+        hillslope_num = strsplit(colnames(DVO)[i], split = 'd|u|m')[[1]]
+        location = strsplit(colnames(DVO)[i], split = hillslope_num)[[1]][2]
+        if(location == 'd'){
+                loc_name = 'Downslope'
+        }else if(location == 'm'){
+                loc_name = 'Midslope'
+        }else if(location == 'u'){
+                loc_name = 'Upslope'
+        }
+        if(i == 1){
+                ylab_i = 'Low Flow Change'
+                par(mar = c(4, 4.1, 0.5, 0.75))
+        }else{
+                xlab_i = ''
+                par(mar = c(4, 2.1, 0.5, 0.75))
+        }
+        scatter.smooth(y = -DVO$LowFlow*100, x = rowSums(DVO[,c(i, i+3)]), pch = NA, lpars = list(lwd=2), xlim = c(0,2), ylim = c(-100,10),
+                       ylab = ylab_i, xlab = paste('Sum', loc_name, 'Proportion'), axes = FALSE, cex.lab = 1.1, span = span)
+        box()
+        axis(side = 1, at = seq(0,2,0.5), labels = seq(0,2,0.5))
+        if (i == 1){
+                axis(side = 2, at = seq(-100,0,20), labels = seq(-100,0,20))
+        }else{
+                axis(side = 2, at = seq(-100,0,20), labels = NA)
+        }
+        par(new=TRUE)
+        scatter.smooth(y = -DVO_MAPSyn$LowFlowSyn*100, x = rowSums(DVO_MAPSyn[,c(i, i+3)]), pch = NA, lpars = list(lwd=2, col=colors_plt[1]), 
+                       xlim = c(0,2), ylim = c(-100,10), xlab = '', ylab = '', axes=FALSE, span = span)
+        par(new=TRUE)
+        scatter.smooth(y = -DVO_MOROSyn$LowFlowSyn*100, x = rowSums(DVO_MOROSyn[,c(i, i+3)]), pch = NA, lpars = list(lwd=2, col=colors_plt[2]), 
+                       xlim = c(0,2), ylim = c(-100,10), xlab = '', ylab = '', axes=FALSE, span = span)
+        par(new=TRUE)
+        scatter.smooth(y = -DVO_MMOSyn$LowFlowSyn*100, x = rowSums(DVO_MMOSyn[,c(i, i+3)]), pch = NA, lpars = list(lwd=2, col=colors_plt[3]), 
+                       xlim = c(0,2), ylim = c(-100,10), xlab = '', ylab = '', axes=FALSE, span = span)
 }
 dev.off()
 
