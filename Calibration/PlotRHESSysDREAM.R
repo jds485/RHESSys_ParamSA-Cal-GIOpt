@@ -15,8 +15,9 @@ library(fGarch)
 library(factoextra)
 library(NbClust)
 library(MASS)
-library (RColorBrewer)
+library(RColorBrewer)
 library(tidyverse)
+library(scico)
 
 #Load SEP code----
 setwd("C:\\Users\\js4yd\\OneDrive - University of Virginia\\Code\\GenLikelihood_Zach")
@@ -4140,6 +4141,15 @@ marginalPlot(x = c(out_sCh10_3_s1200n$chain[,c(5:19)], out_sCh10_2_s1200n$chain[
              settings = list(col = c('gray',NA)))
 dev.off()
 
+#just septic and tree capacity
+png('OptSamplesMarginalPlot_septic_trees.png', res = 600, units = 'in', width = 8, height =5)
+marginalPlot(x = c(out_sCh10_3_s1200n$chain[,c(1,19)], out_sCh10_2_s1200n$chain[,c(1,19)], out_sCh10_1_s1200n$chain[,c(1,19)], out_sCh10_s1200n$chain[,c(1,19)]), prior = PriorSample[,col_order[c(1,19)]], singlePanel = FALSE, 
+             trueVals = t(apply(X = t(apply(X = CenPtClust8sp[,col_order[c(1,19)]], MARGIN = 1, FUN = "*", (ParamRanges$Upper[col_order[c(1,19)]] - ParamRanges$Lower[col_order[c(1,19)]]))), MARGIN = 1, FUN = "+", ParamRanges$Lower[col_order[c(1,19)]])),
+             SynVals = SynParams[col_order[c(1,19)]],
+             MAPVals = matrix(MaxLikes[32,(col_order[c(1,19)]+3)], ncol = 2),
+             settings = list(col = c('gray',NA)))
+dev.off()
+
 #with parameter set labels
 png('OptSamplesMarginalPlot_all-1_params.png', res = 600, units = 'in', width = 8, height = 8)
 marginalPlot(x = c(out_sCh10_3_s1200n$chain[,c(1:16)], out_sCh10_2_s1200n$chain[,c(1:16)], out_sCh10_1_s1200n$chain[,c(1:16)], out_sCh10_s1200n$chain[,c(1:16)]), prior = PriorSample[,col_order[1:16]], singlePanel = FALSE, 
@@ -4250,6 +4260,25 @@ param_plot = ggplot(plot_longer[plot_longer$`Parameter Set` %in% c('1: MAP', '4'
 
 ggsave(param_plot, filename = 'RHESSysParamPlot_simple.png', device = 'png')
 ggsave(param_plot, filename = 'RHESSysParamPlot_simple.pdf', device = 'pdf')
+
+plot_longer$`Parameter Set`[plot_longer$`Parameter Set` == '1: MAP'] = '1'
+plot_longer$`Parameter Set`[plot_longer$`Parameter Set` == 'Syn'] = '10'
+colnames(plot_longer)[colnames(plot_longer) == 'x'] = 'Scaled Value'
+param_plot = ggplot(plot_longer, mapping = aes(x = as.numeric(`Parameter Set`), y = fct_inorder(Parameter))) +
+  #geom_point(aes(color = x), size = 2) +
+  geom_tile(aes(fill = `Scaled Value`)) +
+  scale_color_scico(palette = 'lajolla', begin = 0.1, end = 0.9, aesthetics = 'fill') + 
+  theme_classic() +
+  theme(axis.title = element_text(size = 14),
+        axis.text.y = element_text(size = 12),
+        axis.text.x = element_text(size = 10)) +
+  xlab('Parameter Set') +
+  ylab('RHESSys Parameter') +
+  xlim(1,10) +
+  scale_x_continuous(breaks = seq(1,10,1), labels = c('MAP', seq(2,9,1), 'Syn'))
+
+ggsave(param_plot, filename = 'RHESSysParamPlot_fill.png', device = 'png')
+ggsave(param_plot, filename = 'RHESSysParamPlot_fill.pdf', device = 'pdf')
 
 
 #with likelihood params----
