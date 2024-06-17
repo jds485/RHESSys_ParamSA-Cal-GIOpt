@@ -15,6 +15,9 @@ library(fGarch)
 library(factoextra)
 library(NbClust)
 library(MASS)
+library(RColorBrewer)
+library(tidyverse)
+library(scico)
 
 #Load SEP code----
 setwd("C:\\Users\\js4yd\\OneDrive - University of Virginia\\Code\\GenLikelihood_Zach")
@@ -4138,6 +4141,15 @@ marginalPlot(x = c(out_sCh10_3_s1200n$chain[,c(5:19)], out_sCh10_2_s1200n$chain[
              settings = list(col = c('gray',NA)))
 dev.off()
 
+#just septic and tree capacity
+png('OptSamplesMarginalPlot_septic_trees.png', res = 600, units = 'in', width = 8, height =5)
+marginalPlot(x = c(out_sCh10_3_s1200n$chain[,c(1,19)], out_sCh10_2_s1200n$chain[,c(1,19)], out_sCh10_1_s1200n$chain[,c(1,19)], out_sCh10_s1200n$chain[,c(1,19)]), prior = PriorSample[,col_order[c(1,19)]], singlePanel = FALSE, 
+             trueVals = t(apply(X = t(apply(X = CenPtClust8sp[,col_order[c(1,19)]], MARGIN = 1, FUN = "*", (ParamRanges$Upper[col_order[c(1,19)]] - ParamRanges$Lower[col_order[c(1,19)]]))), MARGIN = 1, FUN = "+", ParamRanges$Lower[col_order[c(1,19)]])),
+             SynVals = SynParams[col_order[c(1,19)]],
+             MAPVals = matrix(MaxLikes[32,(col_order[c(1,19)]+3)], ncol = 2),
+             settings = list(col = c('gray',NA)))
+dev.off()
+
 #with parameter set labels
 png('OptSamplesMarginalPlot_all-1_params.png', res = 600, units = 'in', width = 8, height = 8)
 marginalPlot(x = c(out_sCh10_3_s1200n$chain[,c(1:16)], out_sCh10_2_s1200n$chain[,c(1:16)], out_sCh10_1_s1200n$chain[,c(1:16)], out_sCh10_s1200n$chain[,c(1:16)]), prior = PriorSample[,col_order[1:16]], singlePanel = FALSE, 
@@ -4155,6 +4167,119 @@ marginalPlot(x = c(out_sCh10_3_s1200n$chain[,c(17:19)], out_sCh10_2_s1200n$chain
              settings = list(col = c('gray',NA)),
              paramText = TRUE)
 dev.off()
+
+#In SA order
+SA_col_order = c(5, 7, 14, 2, 3, 12, 1, 10, 17, 16, 11, 8, 19, 4, 18, 6, 9, 13, 15)
+
+for (i in 1:length(out_sCh10_s1200n$chain)){
+  #rearrange for plotting
+  out_sCh10_3_s1200n$chain[[i]] = out_sCh10_3_s1200n$chain[[i]][,SA_col_order]
+  out_sCh10_2_s1200n$chain[[i]] = out_sCh10_2_s1200n$chain[[i]][,SA_col_order]
+  out_sCh10_1_s1200n$chain[[i]] = out_sCh10_1_s1200n$chain[[i]][,SA_col_order]
+  out_sCh10_s1200n$chain[[i]] = out_sCh10_s1200n$chain[[i]][,SA_col_order]
+}
+
+png('OptSamplesMarginalPlot_all-1SA.png', res = 600, units = 'in', width = 8, height = 8)
+marginalPlot(x = c(out_sCh10_3_s1200n$chain[,c(1:16)], out_sCh10_2_s1200n$chain[,c(1:16)], out_sCh10_1_s1200n$chain[,c(1:16)], out_sCh10_s1200n$chain[,c(1:16)]), prior = PriorSample[,col_order[SA_col_order][1:16]], singlePanel = FALSE, 
+             trueVals = t(apply(X = t(apply(X = CenPtClust8sp[,col_order[SA_col_order][1:16]], MARGIN = 1, FUN = "*", (ParamRanges$Upper[col_order[SA_col_order][1:16]] - ParamRanges$Lower[col_order[SA_col_order][1:16]]))), MARGIN = 1, FUN = "+", ParamRanges$Lower[col_order[SA_col_order][1:16]])),
+             SynVals = SynParams[col_order[SA_col_order][1:16]],
+             MAPVals = matrix(MaxLikes[32,(col_order[SA_col_order][1:16]+3)], ncol = 16),
+             settings = list(col = c('gray',NA)))
+dev.off()
+png('OptSamplesMarginalPlot_all-2SA.png', res = 600, units = 'in', width = 8, height = 8)
+marginalPlot(x = c(out_sCh10_3_s1200n$chain[,c(5:19)], out_sCh10_2_s1200n$chain[,c(5:19)], out_sCh10_1_s1200n$chain[,c(5:19)], out_sCh10_s1200n$chain[,c(5:19)]), prior = PriorSample[,col_order[SA_col_order][5:19]], singlePanel = FALSE, 
+             trueVals = t(apply(X = t(apply(X = CenPtClust8sp[,col_order[SA_col_order][5:19]], MARGIN = 1, FUN = "*", (ParamRanges$Upper[col_order[SA_col_order][5:19]] - ParamRanges$Lower[col_order[SA_col_order][5:19]]))), MARGIN = 1, FUN = "+", ParamRanges$Lower[col_order[SA_col_order][5:19]])),
+             SynVals = SynParams[col_order[SA_col_order][5:19]],
+             MAPVals = matrix(MaxLikes[32,(col_order[SA_col_order][5:19]+3)], ncol = 15),
+             settings = list(col = c('gray',NA)))
+dev.off()
+
+#with parameter set labels
+png('OptSamplesMarginalPlot_all-1SA_params.png', res = 600, units = 'in', width = 8, height = 8)
+marginalPlot(x = c(out_sCh10_3_s1200n$chain[,c(1:16)], out_sCh10_2_s1200n$chain[,c(1:16)], out_sCh10_1_s1200n$chain[,c(1:16)], out_sCh10_s1200n$chain[,c(1:16)]), prior = PriorSample[,col_order[SA_col_order][1:16]], singlePanel = FALSE, 
+             trueVals = t(apply(X = t(apply(X = CenPtClust8sp[,col_order[SA_col_order][1:16]], MARGIN = 1, FUN = "*", (ParamRanges$Upper[col_order[SA_col_order][1:16]] - ParamRanges$Lower[col_order[SA_col_order][1:16]]))), MARGIN = 1, FUN = "+", ParamRanges$Lower[col_order[SA_col_order][1:16]])),
+             SynVals = SynParams[col_order[SA_col_order][1:16]],
+             MAPVals = matrix(MaxLikes[32,(col_order[SA_col_order][1:16]+3)], ncol = 16),
+             settings = list(col = c('gray',NA)),
+             paramText = TRUE)
+dev.off()
+png('OptSamplesMarginalPlot_all-2SA_params.png', res = 600, units = 'in', width = 8, height = 8)
+marginalPlot(x = c(out_sCh10_3_s1200n$chain[,c(17:19)], out_sCh10_2_s1200n$chain[,c(17:19)], out_sCh10_1_s1200n$chain[,c(17:19)], out_sCh10_s1200n$chain[,c(17:19)]), prior = PriorSample[,col_order[SA_col_order][17:19]], singlePanel = FALSE, 
+             trueVals = t(apply(X = t(apply(X = CenPtClust8sp[,col_order[SA_col_order][17:19]], MARGIN = 1, FUN = "*", (ParamRanges$Upper[col_order[SA_col_order][17:19]] - ParamRanges$Lower[col_order[SA_col_order][17:19]]))), MARGIN = 1, FUN = "+", ParamRanges$Lower[col_order[SA_col_order][17:19]])),
+             SynVals = SynParams[col_order[SA_col_order][17:19]],
+             MAPVals = matrix(MaxLikes[32,(col_order[SA_col_order][17:19]+3)], ncol = 3),
+             settings = list(col = c('gray',NA)),
+             paramText = TRUE)
+dev.off()
+
+#Plotting the parameter ranges 
+trueVals = CenPtClust8sp[,c(1:19)]
+SynVals = t(apply(X = t(apply(X = SynParams[c(1:19)], MARGIN = 1, FUN = "-", ParamRanges$Lower[c(1:19)])), MARGIN = 1, FUN = "/", (ParamRanges$Upper[c(1:19)] - ParamRanges$Lower[c(1:19)])))
+MAPVals = t(apply(X = t(apply(X = t(MaxLikes[32,(c(1:19)+3)]), MARGIN = 1, FUN = "-", ParamRanges$Lower[c(1:19)])), MARGIN = 1, FUN = "/", (ParamRanges$Upper[c(1:19)] - ParamRanges$Lower[c(1:19)])))
+
+#make dataframe to plot
+plot_params = data.frame(rbind(MAPVals, trueVals, SynVals))
+colnames(plot_params) = key_colnames[1:19]
+plot_params = plot_params[,col_order[1:19]][,19:1]
+plot_params$`Parameter Set` = c('1: MAP', paste0(seq(2,9,1)), 'Syn')
+
+
+plot_longer = pivot_longer(data = plot_params, cols = 1:19, names_to = 'Parameter', values_to = 'x', names_repair = 'minimal')
+param_plot = ggplot(plot_longer, mapping = aes(x = x, y = fct_inorder(Parameter))) +
+  geom_point(aes(color = `Parameter Set`), size = 2) +
+  scale_color_manual(aesthetics = 'color', 
+                     values = c(brewer.pal(n = 9, name = 'BrBG'), 'black'),
+                     breaks = c('1: MAP', as.character(seq(2,9,1)), 'Syn')) + 
+  theme_classic() +
+  theme(axis.title = element_text(size = 14),
+        axis.text = element_text(size = 12)) +
+  xlab('Scaled Parameter Value') +
+  ylab('RHESSys Parameter') +
+  geom_hline(yintercept = seq(1,19,1)) +
+  xlim(0,1) +
+  scale_x_continuous(breaks = c(0,1))
+
+ggsave(param_plot, filename = 'RHESSysParamPlot.png', device = 'png')
+ggsave(param_plot, filename = 'RHESSysParamPlot.pdf', device = 'pdf')
+
+#Just parameter sets 1, 4, 7 and 9
+param_plot = ggplot(plot_longer[plot_longer$`Parameter Set` %in% c('1: MAP', '4', '7', '9', 'Syn'),], 
+                    mapping = aes(x = x, y = fct_inorder(Parameter))) +
+  geom_point(aes(color = `Parameter Set`), size = 2) +
+  scale_color_manual(aesthetics = 'color', 
+                     values = c(brewer.pal(n = 9, name = 'BrBG')[c(1,4,7,9)], 'black'),
+                     breaks = c('1: MAP', '4', '7', '9', 'Syn')) + 
+  theme_classic() +
+  theme(axis.title = element_text(size = 14),
+        axis.text = element_text(size = 12)) +
+  xlab('Scaled Parameter Value') +
+  ylab('RHESSys Parameter') +
+  geom_hline(yintercept = seq(1,19,1)) +
+  xlim(0,1) +
+  scale_x_continuous(breaks = c(0,1))
+
+ggsave(param_plot, filename = 'RHESSysParamPlot_simple.png', device = 'png')
+ggsave(param_plot, filename = 'RHESSysParamPlot_simple.pdf', device = 'pdf')
+
+plot_longer$`Parameter Set`[plot_longer$`Parameter Set` == '1: MAP'] = '1'
+plot_longer$`Parameter Set`[plot_longer$`Parameter Set` == 'Syn'] = '10'
+colnames(plot_longer)[colnames(plot_longer) == 'x'] = 'Scaled Value'
+param_plot = ggplot(plot_longer, mapping = aes(x = as.numeric(`Parameter Set`), y = fct_inorder(Parameter))) +
+  #geom_point(aes(color = x), size = 2) +
+  geom_tile(aes(fill = `Scaled Value`)) +
+  scale_color_scico(palette = 'lajolla', begin = 0.1, end = 0.9, aesthetics = 'fill') + 
+  theme_classic() +
+  theme(axis.title = element_text(size = 14),
+        axis.text.y = element_text(size = 12),
+        axis.text.x = element_text(size = 10)) +
+  xlab('Parameter Set') +
+  ylab('RHESSys Parameter') +
+  xlim(1,10) +
+  scale_x_continuous(breaks = seq(1,10,1), labels = c('MAP', seq(2,9,1), 'Syn'))
+
+ggsave(param_plot, filename = 'RHESSysParamPlot_fill.png', device = 'png')
+ggsave(param_plot, filename = 'RHESSysParamPlot_fill.pdf', device = 'pdf')
+
 
 #with likelihood params----
 Likes_sCh10_400 = read.csv("C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\Calibration/SynCh10/NewCR/ParamsLikes_c_s400.csv", stringsAsFactors = FALSE)

@@ -436,3 +436,10 @@ write.csv(ParamRanges_Cal_Likes, file = "C:\\Users\\js4yd\\OneDrive - University
 
 write.csv(ParamRanges_Cal910, file = "C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\RHESSysFiles\\BR&POBR\\RHESSysFilePreparation\\defs_Calibration/BaismanCalibrationParameterProblemFile_NewGWBounds.csv", row.names = FALSE)
 options(scipen = 0)
+
+
+#Get the order of sensitivity for MORO paper----
+#Hill 9 and 10 low and high flow sensitivity sum
+SA910_order = sort(colSums(rbind(EEs05_h_mua_m[9:10,]/max(EEs05_h_mua_m[9:10,]), EEs95_h_mua_m[9:10,]/max(EEs95_h_mua_m[9:10,]))), decreasing = TRUE)
+#Select columns in the MORO calibration only
+SA910_order = SA910_order[names(SA910_order) %in% ParamRanges_Cal910$NumberedParams]
