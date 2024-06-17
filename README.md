@@ -7,13 +7,13 @@ Contains code for a Morris sensitivity analysis of RHESSys model parameters.
 
 This code was used for the manuscript:
 
-Smith, J.D., L. Lin, J.D. Quinn, and L.E. Band. Guidance on evaluating parametric model uncertainty at decision-relevant scales. Accepted in Hydrology and Earth System Sciences. Article number hess-2021-324.
+Smith, J.D., L. Lin, J.D. Quinn, and L.E. Band. Guidance on evaluating parametric model uncertainty at decision-relevant scales. Hydrology and Earth System Sciences. https://doi.org/10.5194/hess-26-2519-2022.
 
 Credit: The WRTDS_ModifiedFunctions.R were originally from USGS functions in the [EGRET](https://github.com/USGS-R/EGRET) package. They are modified according to [GitHub issue #251](https://github.com/USGS-R/EGRET/issues/251)
 
 
 ## LikelihoodData
-Contains code for the generalized normal distribution (skew exponential power) used for the sensitiivty analysis and calibration studies. 
+Contains code for the generalized normal distribution (skew exponential power) used for the sensitiivty analysis, calibration, and optimization studies. 
 
 Credit: The likelihood.py script contains a modified version of the generalizedLikelihoodFunction function found within the [spotpy](https://github.com/thouska/spotpy) repository’s [likelihoods.py script from March 7th, 2018](https://github.com/thouska/spotpy/blob/3862cd2e6e0881c7a78d081a5b42e4094d359a45/spotpy/likelihoods.py).
 
@@ -21,9 +21,11 @@ Credit: The likelihood.py script contains a modified version of the generalizedL
 
 •	[Jared Smith](https://github.com/jds485) corrected the computation of residual errors according to closed GitHub issue #257, and added options to remove seasonality in residuals.
 
+•	[Zachary Brodeur](https://github.com/zpb4/) provided the generalized likelihood equations in R.
+
 
 ## Calibration
-Contains code for DREAMzs Bayesian calibration using the BayesianTools R package. The calibrated model is used in the robust optimization study.
+Contains code for running and interpreting DREAMzs Bayesian calibration of a RHESSys hydrological model using the [BayesianTools](https://github.com/florianhartig/BayesianTools) R package. The calibrated model is used in the robust optimization study.
 
 
 ## GI_GeometryCheck
@@ -31,4 +33,4 @@ Contains code to obtain the maximum possible amount of green infrastructure that
 
 
 ## Optimization
-Contains code for the optimization of green infrastructure using the Borg multi-objective evolutionary algorithm.
+Contains code for the multi-objective robust optimization of green infrastructure using the Borg multi-objective evolutionary algorithm.
