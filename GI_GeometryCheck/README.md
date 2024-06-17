@@ -1,4 +1,4 @@
-# Readme for the GI_Geometry Check Directory - In Progress
+# Readme for the GI_Geometry Check Directory
 This directory contains code that was used to compute the maximum possible area that green infrastructure (GI) could occupy in each of the RHESSys model grid cells (patches). Constraints like distance to power lines and roads were considered, as well as the area required to plant the selected GI. Random seed tests were used to see if the selected decision variables, proportion to reforest in each hillslope's downslope, midslope, and upslope area, would be useful.
 
 # Files
