@@ -10,6 +10,7 @@ library(sp)
 library(rgdal)
 library(GISTools)
 library(scico)
+library(vioplot)
 
 #Color functions - from JDS github repo: Geothermal_ESDA----
 dir_ColFuns = "C:\\Users\\js4yd\\OneDrive - University of Virginia\\BES_Data\\BES_Data\\Hydrology\\USGSGauges"
@@ -1956,18 +1957,18 @@ png('ReEvalObjChangePct_AllOpts.png', res=200, width = 10, height = 5, units='in
 layout(rbind(c(1,2)))
 #Flooding
 hist((-DVO_MAPSyn$Flooding - -DVO_MAPSyn$FloodingSyn)*100, breaks = seq(-0.075,0.075,0.015)*100, xlab = 'Change from Synthetic (%)', main = 'Flooding Objective', cex.lab=1.5, cex.axis=1.5, 
-     col = alpha.col(colors_plt[1],alpha = 0.5), border = 'gray', ylim = c(0,100))
+     col = 'black', border = 'gray', ylim = c(0,100))
 hist((-DVO_MOROSyn$Flooding - -DVO_MOROSyn$FloodingSyn)*100, breaks = seq(-0.075,0.075,0.015)*100, 
-     col = alpha.col(colors_plt[2], alpha = 0.5), border = 'gray', add = TRUE)
+     col = alpha.col('gray50', alpha = 0.5), border = 'gray', add = TRUE)
 hist((-DVO_MMOSyn$Flooding - -DVO_MMOSyn$FloodingSyn)*100, breaks = seq(-0.075,0.075,0.015)*100, 
-     col = alpha.col(colors_plt[3], alpha = 0.5), border = 'gray', add = TRUE)
+     col = alpha.col('white', alpha = 0.5), border = 'gray', add = TRUE)
 #Low Flow
 hist((-DVO_MAPSyn$LowFlow - -DVO_MAPSyn$LowFlowSyn)*100, breaks = seq(-0.405,0.405,0.015)*100, xlab = 'Change from Synthetic (%)', main = 'Low Flow Objective', cex.lab=1.5, cex.axis=1.5, 
-     col = alpha.col(colors_plt[1],alpha = 0.5), border = 'gray', ylim = c(0,50))
+     col = 'black', border = 'gray', ylim = c(0,50))
 hist((-DVO_MOROSyn$LowFlow - -DVO_MOROSyn$LowFlowSyn)*100, breaks = seq(-0.405,0.405,0.015)*100, 
-     col = alpha.col(colors_plt[2], alpha = 0.5), border = 'gray', add = TRUE)
+     col = alpha.col('gray50', alpha = 0.5), border = 'gray', add = TRUE)
 hist((-DVO_MMOSyn$LowFlow - -DVO_MMOSyn$LowFlowSyn)*100, breaks = seq(-0.405,0.405,0.015)*100, 
-     col = alpha.col(colors_plt[3], alpha = 0.5), border = 'gray', add = TRUE)
+     col = alpha.col('white', alpha = 0.5), border = 'gray', add = TRUE)
 legend('topright', legend = c('MAP', 'MORO', 'MinMax'), col = colors_plt, pch = 15)
 dev.off()
 
@@ -1988,6 +1989,70 @@ hist((-DVO_MOROSyn$LowFlow - -DVO_MOROSyn$LowFlowSyn)*100, breaks = seq(-0.405,0
 hist((-DVO_MMOSyn$LowFlow - -DVO_MMOSyn$LowFlowSyn)*100, breaks = seq(-0.405,0.405,0.015)*100, 
      col = alpha.col(colors_plt[3], alpha = 0.5), border = 'gray', add = TRUE)
 legend('topright', legend = c('MAP', 'MORO', 'MinMax'), col = colors_plt, pch = 15)
+dev.off()
+
+png('ReEvalObjChangePct_AllOpts_vio.png', res=200, width = 10, height = 5, units='in')
+layout(rbind(c(1,2)))
+#Flooding
+vioplot((-DVO_MAPSyn$Flooding - -DVO_MAPSyn$FloodingSyn)*100, 
+        (-DVO_MOROSyn$Flooding - -DVO_MOROSyn$FloodingSyn)*100, 
+        (-DVO_MMOSyn$Flooding - -DVO_MMOSyn$FloodingSyn)*100,
+        horizontal = TRUE, 
+        ylim = c(-8,8), h = 0.5, col = 'white', lwd = 2, 
+        names = c('MAP', 'MORO', 'MinMax'), 
+        xlab = 'Change from Synthetic Objective Value (%)', main = 'Flooding Objective', 
+        ylab = 'Solutions for:', 
+        cex.lab=1.2, cex.axis=1.2, cex.names = 1.2, cex.main = 1.2)
+lines(x = c(0,0), y= c(-1000,1000))
+par(xpd = TRUE)
+text(x = -11, y = 4, 'A', cex = 1.5)
+par(xpd = FALSE)
+#Low Flow
+vioplot((-DVO_MAPSyn$LowFlow - -DVO_MAPSyn$LowFlowSyn)*100, 
+        (-DVO_MOROSyn$LowFlow - -DVO_MOROSyn$LowFlowSyn)*100, 
+        (-DVO_MMOSyn$LowFlow - -DVO_MMOSyn$LowFlowSyn)*100,
+        horizontal = TRUE, 
+        ylim = c(-45,45), col = 'white', lwd = 2, 
+        names = c('','',''), 
+        xlab = 'Change from Synthetic Objective Value (%)', main = 'Low Flow Objective', 
+        ylab = '', 
+        cex.lab=1.2, cex.axis=1.2, cex.names = 1.2, cex.main = 1.2)
+lines(x = c(0,0), y= c(-1000,1000))
+par(xpd = TRUE)
+text(x = -60, y = 4, 'B', cex = 1.5)
+par(xpd = FALSE)
+dev.off()
+
+pdf('ReEvalObjChangePct_AllOpts_vio.pdf', width = 10, height = 5)
+layout(rbind(c(1,2)))
+#Flooding
+vioplot((-DVO_MAPSyn$Flooding - -DVO_MAPSyn$FloodingSyn)*100, 
+        (-DVO_MOROSyn$Flooding - -DVO_MOROSyn$FloodingSyn)*100, 
+        (-DVO_MMOSyn$Flooding - -DVO_MMOSyn$FloodingSyn)*100,
+        horizontal = TRUE, 
+        ylim = c(-8,8), h = 0.5, col = 'white', lwd = 2, 
+        names = c('MAP', 'MORO', 'MinMax'), 
+        xlab = 'Change from Synthetic Objective Value (%)', main = 'Flooding Objective', 
+        ylab = 'Solutions for:', 
+        cex.lab=1.2, cex.axis=1.2, cex.names = 1.2, cex.main = 1.2)
+lines(x = c(0,0), y= c(-1000,1000))
+par(xpd = TRUE)
+text(x = -11, y = 4, 'A', cex = 1.5)
+par(xpd = FALSE)
+#Low Flow
+vioplot((-DVO_MAPSyn$LowFlow - -DVO_MAPSyn$LowFlowSyn)*100, 
+        (-DVO_MOROSyn$LowFlow - -DVO_MOROSyn$LowFlowSyn)*100, 
+        (-DVO_MMOSyn$LowFlow - -DVO_MMOSyn$LowFlowSyn)*100,
+        horizontal = TRUE, 
+        ylim = c(-45,45), col = 'white', lwd = 2, 
+        names = c('','',''), 
+        xlab = 'Change from Synthetic Objective Value (%)', main = 'Low Flow Objective', 
+        ylab = '', 
+        cex.lab=1.2, cex.axis=1.2, cex.names = 1.2, cex.main = 1.2)
+lines(x = c(0,0), y= c(-1000,1000))
+par(xpd = TRUE)
+text(x = -60, y = 4, 'B', cex = 1.5)
+par(xpd = FALSE)
 dev.off()
 
 
@@ -2740,6 +2805,7 @@ text(x = -76.716, y = 39.494, 'D', cex = 2)
 par(xpd=FALSE)
 dev.off()
 
+#paper graphic
 # pdf----
 pdf('MeanCompromiseDecisions.pdf', width = 6, height = 6)
 layout(rbind(c(1,2), c(3,4)))

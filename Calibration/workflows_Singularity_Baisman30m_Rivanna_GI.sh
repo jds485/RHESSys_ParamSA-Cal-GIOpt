@@ -1,7 +1,5 @@
 #!/bin/bash
 
-#Fixme: This script should be submitted as a SLURM job
-
 # STEP 1: after login to Rivanna, you need to manually type in the following command to use the singularity image.
 # singularity shell /share/resources/containers/singularity/rhessys/rhessys_v3.img
 # STEP 2: in the singularity image, run command: sh workflows_Singularity_Baisman30m_Rivanna_GI.sh
