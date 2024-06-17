@@ -1,4 +1,4 @@
-# Readme for RHESSys_ParamSA-Cal-GIOpt
+# Readme for RHESSys_ParamSA-Cal-GIOpt[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.11894592.svg)](https://doi.org/10.5281/zenodo.11894592)
 This repository contains code that was used to run the RHESSys ecohydrological model and complete a Morris global sensitivity analysis of model parameters, Bayesian DREAMzs calibration of model parameters, and multi-objective spatial optimization of Green Infrastructure that is robust to the uncertainty in model parameter values. The repository consists of the following directories, each with their own README file:
 
 
