@@ -9,3 +9,11 @@ Scripts in this directory were used to obtain MLE estimates of the generalized n
 5. collectParams.py: Script to gather the results of the likelihood parameter estimating into one file for flow, and one file for TN. Add5 in the filename was used for the SensitivityAnalysis study for 5 replicates that originally did not run properly.
 6. Plot_logL_v_SSE.py: Script to make figures of the log likelihood versus sum of squared errors.
 7. GL_....R: R implementation of the generalized likelihood function. Used in the optimization case study.
+
+## Specific files used in optimization paper
+1. Calibration:
+- Flow_MLEfits_Cal_NoBC.py
+- likelihood.py
+2. Optimization:
+- GL_maineqs.R
+- GL_subeqs.R
